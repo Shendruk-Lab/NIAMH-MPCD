@@ -426,6 +426,11 @@ void swimmerVerlet_nonInteracting( specSwimmer SS,swimmer *s,double dt,int sprin
 	for( d=0; d<DIM; d++ ) s->H.A[d] = a[d]*SS.iheadM;
 	for( d=0; d<DIM; d++ ) s->M.A[d] = -1.0*a[d]*SS.imiddM;
 
+	//swimmer alignment potential
+		// TODO: replicate lines 424-427 (near exact!) but using 
+		//			smonoForce_AlignmentPot. You will also need to pass it the 
+		// 			parent MPCD cell as CL
+
 	//Verlet step 4
 	//Update velocity
 	for( d=0; d<DIM; d++ ) s->H.V[d] += 0.5*dt*s->H.A[d];
@@ -461,6 +466,12 @@ void swimmerVerlet_all( specSwimmer SS,swimmer swimmers[],double dt,int springTy
 		smonoForce_sameSwimmer( a,SS,(swimmers+i),springType );
 		for( d=0; d<DIM; d++ ) (swimmers+i)->H.A[d] += a[d]*SS.iheadM;
 		for( d=0; d<DIM; d++ ) (swimmers+i)->M.A[d] -= a[d]*SS.imiddM;
+
+		//swimmer alignment potential
+		// TODO: replicate lines 461-463 (near exact!) but using 
+		//			smonoForce_AlignmentPot. You will also need to pass it the 
+		// 			parent MPCD cell as CL
+
 		//All other swimmers
 		for( j=i+1; j<NS; j++ ) {
 			//Head-head
@@ -527,6 +538,27 @@ void smonoForce_sameSwimmer( double a[],specSwimmer SS,swimmer *s,int springType
 	#endif
 	//a=acceleration time mass (still a force)
 	for( d=0; d<DIM; d++ ) a[d] = f*r[d];
+}
+void smonoForce_AlignmentPot(double a[], cell *CL, specSwimmer SS, swimmer *s){
+	/*
+		Args:
+			a[] - Acceleration vector to return
+			*CL - A pointer to the PARENT cell of the swimmer
+			SS - List of species information on swimmers
+			*s - A pointer to the particular swimmer instance
+
+		Note to Tom:
+			This is where you want to implement your bending potential. You want
+			to pass all the things you need to compute it, as a paremeter, down
+			to this function. 
+			CL will contain the director of the parent cell.
+			You will have two hardcoded variables:
+				- A hardcoded switch on which potential to us
+				- Bending potential constant
+			At the end of this function, argument a MUST contain the acceleration
+			due to your alligment potential
+	*/
+	// TODO: write this
 }
 double smonoForceMag_differentSwimmers( double dr,specSwimmer SS ) {
 	//Calculate the forces between two monomers in different swimmers (no FENE)
