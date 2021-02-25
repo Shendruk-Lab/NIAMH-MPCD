@@ -14,6 +14,7 @@
 # include "../headers/mdbc.h"
 # include "../headers/mpc.h"
 # include "../headers/bc.h"
+# include "../headers/lc.h"
 
 /* ****************************************** */
 /* ****************************************** */
@@ -550,7 +551,7 @@ void smonoForce_AlignmentPot(double a[], cell ***CL, specSwimmer SS, swimmer *s,
 
 	int x = 0, y = 0, z = 0; //Position in the LC
 	const int pot = 1; //Three alignment potential options: 1 = Angular Harmonic, 2 = Cosine Harmonic, 3 = Cosine Expansion
-	const int potConst = 100; //Spring constant for bending potential
+	const int potConst = 10000; //Spring constant for bending potential
 	double bacOriLen, forceCoefs, bacOriNorm[DIM], localDir[DIM], theta, torqueMag;
 
  	smonoDist(bacOriNorm,&bacOriLen,s->H,s->M);  //Calcualtes distance between body to head
@@ -589,7 +590,8 @@ void smonoForce_AlignmentPot(double a[], cell ***CL, specSwimmer SS, swimmer *s,
 	//Calculate the backflow effects on the LC as a magnetic field.
 	torqueMag = bacOriLen*sqrt(dotprod(a,a,DIM))*sin(theta); //Calculate torque on bacteria
 	for (int i = 0; i<DIM; i++) bacOriNorm[i] *= torqueMag; //Scale bacteria orienation with the torque magnitude
-	//magTorque_CL( CL[x][y][z],SP,(double)dt,bacOriNorm);
+	
+	magTorque_CL( &CL[x][y][z],SP,(double)dt,bacOriNorm);
 
 
 	/*
