@@ -25,7 +25,7 @@ void swimmerVerlet_all( specSwimmer SS,swimmer swimmers[],double dt,int springTy
 void smonoDist( double r[],double *dr,smono m1, smono m2 );
 double smonoForceMag_sameSwimmer( double dr,specSwimmer SS,swimmer *s,int springType );
 void smonoForce_sameSwimmer( double a[],specSwimmer SS,swimmer *s,int springType );
-void smonoForce_AlignmentPot(double a[], cell ***CL, specSwimmer SS, swimmer *s);
+void smonoForce_AlignmentPot(double a[], cell ***CL, specSwimmer SS, swimmer *s, double dt);
 double smonoForceMag_differentSwimmers( double dr,specSwimmer SS );
 void smonoForce_differentSwimmers( double a[],specSwimmer SS,smono s1,smono s2 );
 void integrateSwimmers( specSwimmer SS,swimmer swimmers[],bc WALL[],int stepsMD,double timeStep,double MAG[],int springType, cell ***CL );

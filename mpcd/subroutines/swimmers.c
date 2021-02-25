@@ -426,10 +426,11 @@ void swimmerVerlet_nonInteracting( specSwimmer SS,swimmer *s,double dt,int sprin
 	for( d=0; d<DIM; d++ ) s->H.A[d] = a[d]*SS.iheadM;
 	for( d=0; d<DIM; d++ ) s->M.A[d] = -1.0*a[d]*SS.imiddM;
 
-	// //Same for the alingment potential 
-	// smonoForce_AlignmentPot(a, CL,SS,(swimmers + i));
-	// for( d=0; d<DIM; d++ ) (swimmers+i)->H.A[d] += a[d]*SS.iheadM;
-	// for( d=0; d<DIM; d++ ) (swimmers+i)->M.A[d] -= a[d]*SS.imiddM;
+	// //swimmer alignment potential, updates a[]  (CHANGED (swimmers+i) with s)
+	smonoForce_AlignmentPot(a,CL,SS,s,dt);
+	for( d=0; d<DIM; d++ ) s->H.A[d] += a[d]*SS.iheadM;
+	for( d=0; d<DIM; d++ ) s->M.A[d] -= a[d]*SS.imiddM;
+
 
 	//Verlet step 4
 	//Update velocity
@@ -467,14 +468,10 @@ void swimmerVerlet_all( specSwimmer SS,swimmer swimmers[],double dt,int springTy
 		for( d=0; d<DIM; d++ ) (swimmers+i)->H.A[d] += a[d]*SS.iheadM;
 		for( d=0; d<DIM; d++ ) (swimmers+i)->M.A[d] -= a[d]*SS.imiddM;
 
-		smonoForce_AlignmentPot(a, CL,SS,(swimmers + i));
-		// for( d=0; d<DIM; d++ ) (swimmers+i)->H.A[d] += a[d]*SS.iheadM;
-		// for( d=0; d<DIM; d++ ) (swimmers+i)->M.A[d] -= a[d]*SS.imiddM;
-
-		//swimmer alignment potential
-		// TODO: replicate lines 461-463 (near exact!) but using 
-		//			smonoForce_AlignmentPot. You will also need to pass it the 
-		// 			parent MPCD cell as CL
+		//swimmer alignment potential, updates a[]
+		smonoForce_AlignmentPot(a, CL,SS,(swimmers + i), dt);
+		for( d=0; d<DIM; d++ ) (swimmers+i)->H.A[d] += a[d]*SS.iheadM;
+		for( d=0; d<DIM; d++ ) (swimmers+i)->M.A[d] -= a[d]*SS.imiddM;
 
 		//All other swimmers
 		for( j=i+1; j<NS; j++ ) {
@@ -543,74 +540,65 @@ void smonoForce_sameSwimmer( double a[],specSwimmer SS,swimmer *s,int springType
 	//a=acceleration time mass (still a force)
 	for( d=0; d<DIM; d++ ) a[d] = f*r[d];
 }
-void smonoForce_AlignmentPot(double a[], cell ***CL, specSwimmer SS, swimmer *s){
-	// //Define the potential type
-	// // 1 = Angular Harmonic, 2 = Cosine Harmonic, 3 = Cosine Expansion
-	// int x = 0, y = 0, z = 0; //Position in the LC
-	// const int pot = 1;
-	// const int potConst = 1; //Spring relaxation constant
-	// double bacOriLen, forceCoefs, bacOriNorm[DIM], localDir[DIM], theta;
+void smonoForce_AlignmentPot(double a[], cell ***CL, specSwimmer SS, swimmer *s, double dt){
+	//Introduces an potential which faviours the alignment of bacteria orientation to the local director
+	// Args:
+	// 	a[] - Force vector to return
+	// 	*CL - A pointer to the PARENT cell of the swimmer
+	// 	SS - List of species information on swimmers
+	// 	*s - A pointer to the particular swimmer instance
 
- 	// //Calculate norm of r (bacteria body -> head vector)
-	
- 	// smonoDist(bacOriNorm,&bacOriLen,s->H,s->M);  //Calcualtes distance between body to head
- 	// swimmerOri(bacOriNorm,s); //Returns normal vector between body to head
+	int x = 0, y = 0, z = 0; //Position in the LC: 1 = Angular Harmonic, 2 = Cosine Harmonic, 3 = Cosine Expansion
+	const int pot = 1; //Three alignment potential options
+	const int potConst = 1; //Spring constant for bending potential
+	double bacOriLen, forceCoefs, bacOriNorm[DIM], localDir[DIM], theta, torqueMag;
 
-	// x = (int)s->M.Q[0];    //Assigns the bacteria body position as local LC indicies (x,y,z)
-	// if (DIM > 1) y = (int)s->M.Q[1]; //Acconts for multiple dimensions 
-	// if (DIM >2) z = (int)s->M.Q[2];
+ 	smonoDist(bacOriNorm,&bacOriLen,s->H,s->M);  //Calcualtes distance between body to head
+ 	swimmerOri(bacOriNorm,s); //Returns normal vector between body to head
 
-	// for (int i = 0; i <DIM; i++) localDir[i] = CL[x][y][z].DIR[i]; // local director at the bacteria's position (a,b,c)
+	x = (int)s->M.Q[0];    //Assigns the bacteria body position as local LC indicies (x,y,z)
+	if (DIM > 1) y = (int)s->M.Q[1]; //Acconts for multiple dimensions 
+	if (DIM >2) z = (int)s->M.Q[2];
 
-
-	// // Calculate the angle between the bacteria and the director
- 	// theta = acos(dotprod(bacOriNorm, localDir, DIM));
-
-	// //Calculate the force with according to different potentials (pot = 1,2,3)
-	// if (pot == 1){ //Angular Harmonic Force 
-	// 	forceCoefs = potConst*theta/(sin(theta)*bacOriLen); //Force coefficients independant of componant
-	// 	for (int i = 0; i <DIM; i++){
-	// 		a[i] = forceCoefs*(cos(theta)*bacOriNorm[i] - localDir[i]);
-	// 	}
-
-	// } else if (pot == 2){ //Cosine Harmonic force
-	// 	forceCoefs = -2*potConst*cos(theta)/bacOriLen; //Force coefficients 
-	// 	for (int i = 0; i <DIM; i++){
-	// 		a[i] = forceCoefs*(cos(theta)*bacOriNorm[i] - localDir[i]);
-	// 	}
-
-	// } else if (pot == 3){ //Cosine Expansion
-	// 	forceCoefs = potConst/bacOriLen; //Force coefficients
-	// 	for (int i = 0; i <DIM; i++){
-	// 		a[i] = forceCoefs*(cos(theta)*bacOriNorm[i] - localDir[i]);
-	// 	}
-	// }
+	for (int i = 0; i <DIM; i++) localDir[i] = CL[x][y][z].DIR[i]; // local director at the bacteria's position (a,b,c)
 
 
-// 	/*
-// 		Args:
-// 			a[] - Acceleration vector to return
-// 			*CL - A pointer to the PARENT cell of the swimmer
-// 			SS - List of species information on swimmers
-// 			*s - A pointer to the particular swimmer instance
+	// Calculate the angle between the bacteria and the director
+ 	theta = acos(dotprod(bacOriNorm, localDir, DIM));
 
-// 		Note to Tom:
-// 			This is where you want to implement your bending potential. You want
-// 			to pass all the things you need to compute it, as a paremeter, down
-// 			to this function. 
-// 			CL will contain the director of the parent cell.
-// 			You will have two hardcoded variables:
-// 				- A hardcoded switch on which potential to us
-// 				- Bending potential constant
-// 			At the end of this function, argument a MUST contain the acceleration
-// 			due to your aligment potential
+	//Calculate the force with according to different potentials (pot = 1,2,3)
+	if (pot == 1){ //Angular Harmonic Force 
+		forceCoefs = potConst*theta/(sin(theta)*bacOriLen); //Force coefficients independant of componant
+		for (int i = 0; i <DIM; i++){
+			a[i] = forceCoefs*(cos(theta)*bacOriNorm[i] - localDir[i]);
+		}
+
+	} else if (pot == 2){ //Cosine Harmonic force
+		forceCoefs = -2*potConst*cos(theta)/bacOriLen; //Force coefficients 
+		for (int i = 0; i <DIM; i++){
+			a[i] = forceCoefs*(cos(theta)*bacOriNorm[i] - localDir[i]);
+		}
+
+	} else if (pot == 3){ //Cosine Expansion
+		forceCoefs = potConst/bacOriLen; //Force coefficients
+		for (int i = 0; i <DIM; i++){
+			a[i] = forceCoefs*(cos(theta)*bacOriNorm[i] - localDir[i]);
+		}
+	}
+
+	//Calculate the backflow effects on the LC as a magnetic field.
+	torqueMag = bacOriLen*sqrt(dotprod(a,a,DIM))*sin(theta); //Calculate torque on bacteria
+	for (int i = 0; i<DIM; i++) bacOriNorm[i] *= torqueMag; //Scale bacteria orienation with the torque magnitude
+	//magTorque_CL( CL[x][y][z],SS,(double)dt,bacOriNorm);
 
 
-//			For the crystal: magTorque_CL( CL[x][y][z],SP,(double)dt,bacOriNorm* magnitude of the torque ); 
+	/*
+		For the crystal: magTorque_CL( CL[x][y][z],SP,(double)dt,bacOriNorm* magnitude of the torque ); 
 
-// 	*/
-// 	// TODO: write this
+	*/
 }
+
+
 double smonoForceMag_differentSwimmers( double dr,specSwimmer SS ) {
 	//Calculate the forces between two monomers in different swimmers (no FENE)
 	//Other swimmers always see the "true" size --- never the shrunk size of tumbling
