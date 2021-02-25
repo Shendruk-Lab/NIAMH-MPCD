@@ -401,7 +401,7 @@ double swimmerSpring6( double r,double k ) {
 	double r2=r*r;
 	return -k*r*r2*r2;
 }
-void swimmerVerlet_nonInteracting( specSwimmer SS,swimmer *s,double dt,int springType) {
+void swimmerVerlet_nonInteracting( specSwimmer SS,swimmer *s,double dt,int springType, cell ***CL) {
 /*
 	The leapfrog/Verlet-Velocity algorithm
 */
@@ -426,22 +426,22 @@ void swimmerVerlet_nonInteracting( specSwimmer SS,swimmer *s,double dt,int sprin
 	for( d=0; d<DIM; d++ ) s->H.A[d] = a[d]*SS.iheadM;
 	for( d=0; d<DIM; d++ ) s->M.A[d] = -1.0*a[d]*SS.imiddM;
 
-	//swimmer alignment potential
-		// TODO: replicate lines 424-427 (near exact!) but using 
-		//			smonoForce_AlignmentPot. You will also need to pass it the 
-		// 			parent MPCD cell as CL
+	// //Same for the alingment potential 
+	// smonoForce_AlignmentPot(a, CL,SS,(swimmers + i));
+	// for( d=0; d<DIM; d++ ) (swimmers+i)->H.A[d] += a[d]*SS.iheadM;
+	// for( d=0; d<DIM; d++ ) (swimmers+i)->M.A[d] -= a[d]*SS.imiddM;
 
 	//Verlet step 4
 	//Update velocity
 	for( d=0; d<DIM; d++ ) s->H.V[d] += 0.5*dt*s->H.A[d];
 	for( d=0; d<DIM; d++ ) s->M.V[d] += 0.5*dt*s->M.A[d];
 }
-void swimmerVerlet_all( specSwimmer SS,swimmer swimmers[],double dt,int springType) {
+void swimmerVerlet_all( specSwimmer SS,swimmer swimmers[],double dt,int springType, cell ***CL) {
 /*
 	The leapfrog/Verlet-Velocity algorithm
 */
 	int i,j,d;
-	double a[DIM];
+	double a[DIM]; //force
 
 	//Verlet step 1
 	//Update velocity using last time step's acceleration
@@ -466,6 +466,10 @@ void swimmerVerlet_all( specSwimmer SS,swimmer swimmers[],double dt,int springTy
 		smonoForce_sameSwimmer( a,SS,(swimmers+i),springType );
 		for( d=0; d<DIM; d++ ) (swimmers+i)->H.A[d] += a[d]*SS.iheadM;
 		for( d=0; d<DIM; d++ ) (swimmers+i)->M.A[d] -= a[d]*SS.imiddM;
+
+		smonoForce_AlignmentPot(a, CL,SS,(swimmers + i));
+		// for( d=0; d<DIM; d++ ) (swimmers+i)->H.A[d] += a[d]*SS.iheadM;
+		// for( d=0; d<DIM; d++ ) (swimmers+i)->M.A[d] -= a[d]*SS.imiddM;
 
 		//swimmer alignment potential
 		// TODO: replicate lines 461-463 (near exact!) but using 
@@ -539,26 +543,73 @@ void smonoForce_sameSwimmer( double a[],specSwimmer SS,swimmer *s,int springType
 	//a=acceleration time mass (still a force)
 	for( d=0; d<DIM; d++ ) a[d] = f*r[d];
 }
-void smonoForce_AlignmentPot(double a[], cell *CL, specSwimmer SS, swimmer *s){
-	/*
-		Args:
-			a[] - Acceleration vector to return
-			*CL - A pointer to the PARENT cell of the swimmer
-			SS - List of species information on swimmers
-			*s - A pointer to the particular swimmer instance
+void smonoForce_AlignmentPot(double a[], cell ***CL, specSwimmer SS, swimmer *s){
+	// //Define the potential type
+	// // 1 = Angular Harmonic, 2 = Cosine Harmonic, 3 = Cosine Expansion
+	// int x = 0, y = 0, z = 0; //Position in the LC
+	// const int pot = 1;
+	// const int potConst = 1; //Spring relaxation constant
+	// double bacOriLen, forceCoefs, bacOriNorm[DIM], localDir[DIM], theta;
 
-		Note to Tom:
-			This is where you want to implement your bending potential. You want
-			to pass all the things you need to compute it, as a paremeter, down
-			to this function. 
-			CL will contain the director of the parent cell.
-			You will have two hardcoded variables:
-				- A hardcoded switch on which potential to us
-				- Bending potential constant
-			At the end of this function, argument a MUST contain the acceleration
-			due to your alligment potential
-	*/
-	// TODO: write this
+ 	// //Calculate norm of r (bacteria body -> head vector)
+	
+ 	// smonoDist(bacOriNorm,&bacOriLen,s->H,s->M);  //Calcualtes distance between body to head
+ 	// swimmerOri(bacOriNorm,s); //Returns normal vector between body to head
+
+	// x = (int)s->M.Q[0];    //Assigns the bacteria body position as local LC indicies (x,y,z)
+	// if (DIM > 1) y = (int)s->M.Q[1]; //Acconts for multiple dimensions 
+	// if (DIM >2) z = (int)s->M.Q[2];
+
+	// for (int i = 0; i <DIM; i++) localDir[i] = CL[x][y][z].DIR[i]; // local director at the bacteria's position (a,b,c)
+
+
+	// // Calculate the angle between the bacteria and the director
+ 	// theta = acos(dotprod(bacOriNorm, localDir, DIM));
+
+	// //Calculate the force with according to different potentials (pot = 1,2,3)
+	// if (pot == 1){ //Angular Harmonic Force 
+	// 	forceCoefs = potConst*theta/(sin(theta)*bacOriLen); //Force coefficients independant of componant
+	// 	for (int i = 0; i <DIM; i++){
+	// 		a[i] = forceCoefs*(cos(theta)*bacOriNorm[i] - localDir[i]);
+	// 	}
+
+	// } else if (pot == 2){ //Cosine Harmonic force
+	// 	forceCoefs = -2*potConst*cos(theta)/bacOriLen; //Force coefficients 
+	// 	for (int i = 0; i <DIM; i++){
+	// 		a[i] = forceCoefs*(cos(theta)*bacOriNorm[i] - localDir[i]);
+	// 	}
+
+	// } else if (pot == 3){ //Cosine Expansion
+	// 	forceCoefs = potConst/bacOriLen; //Force coefficients
+	// 	for (int i = 0; i <DIM; i++){
+	// 		a[i] = forceCoefs*(cos(theta)*bacOriNorm[i] - localDir[i]);
+	// 	}
+	// }
+
+
+// 	/*
+// 		Args:
+// 			a[] - Acceleration vector to return
+// 			*CL - A pointer to the PARENT cell of the swimmer
+// 			SS - List of species information on swimmers
+// 			*s - A pointer to the particular swimmer instance
+
+// 		Note to Tom:
+// 			This is where you want to implement your bending potential. You want
+// 			to pass all the things you need to compute it, as a paremeter, down
+// 			to this function. 
+// 			CL will contain the director of the parent cell.
+// 			You will have two hardcoded variables:
+// 				- A hardcoded switch on which potential to us
+// 				- Bending potential constant
+// 			At the end of this function, argument a MUST contain the acceleration
+// 			due to your aligment potential
+
+
+//			For the crystal: magTorque_CL( CL[x][y][z],SP,(double)dt,bacOriNorm* magnitude of the torque ); 
+
+// 	*/
+// 	// TODO: write this
 }
 double smonoForceMag_differentSwimmers( double dr,specSwimmer SS ) {
 	//Calculate the forces between two monomers in different swimmers (no FENE)
@@ -585,7 +636,7 @@ void smonoForce_differentSwimmers( double a[],specSwimmer SS,smono s1,smono s2 )
 	for( d=0; d<DIM; d++ ) a[d] = f*r[d];
 }
 
-void integrateSwimmers( specSwimmer SS,swimmer swimmers[],bc WALL[],int stepsMD,double timeStep,double MAG[],int springType ) {
+void integrateSwimmers( specSwimmer SS,swimmer swimmers[],bc WALL[],int stepsMD,double timeStep,double MAG[],int springType, cell ***CL) {
 /*
     Integrate the motion of the swimmer
 */
@@ -630,8 +681,8 @@ void integrateSwimmers( specSwimmer SS,swimmer swimmers[],bc WALL[],int stepsMD,
 	      if( DBUG == DBGSWIMMER || DBUG == DBGSWIMMERDEETS ) printf( "\tVelocity Verlet.\n" );
 	    #endif
 			// Velocity Verlet integration
-			if(SS.TYPE==DUMBBELL_EXVOL) swimmerVerlet_all( SS,swimmers,dt,springType );
-			else for( i=0; i<NS; i++ ) swimmerVerlet_nonInteracting( SS,(swimmers+i),dt,springType );
+			if(SS.TYPE==DUMBBELL_EXVOL) swimmerVerlet_all( SS,swimmers,dt,springType, CL );
+			else for( i=0; i<NS; i++ ) swimmerVerlet_nonInteracting( SS,(swimmers+i),dt,springType, CL );
 			#ifdef DBG
 				if( DBUG == DBGSWIMMERDEETS ) for( i=0; i<NS; i++ ) {
 					printf( "\tS%d:\n",i );
@@ -1130,7 +1181,7 @@ void swimmerRotletDipole( specSwimmer SS,swimmer *sw,cell ***CL,spec SP[],double
 		}
 	}
 }
-void runTumbleDynamics( specSwimmer *SS,swimmer swimmers[],bc WALL[],int stepsMD,double MAG[],double dt,int RTOUT,FILE *fruntumble ) {
+void runTumbleDynamics( specSwimmer *SS,swimmer swimmers[],bc WALL[],int stepsMD,double MAG[],double dt,int RTOUT,FILE *fruntumble, cell ***CL) {
 /*
     Stochastically run and tumble.
     This routine checks the number of times since last run/tumble switching event.
@@ -1221,21 +1272,21 @@ void runTumbleDynamics( specSwimmer *SS,swimmer swimmers[],bc WALL[],int stepsMD
 				for( j=0; j<shrinkMDSteps; j++ ) {
 					(swimmers+i)->sig -= ds;
 					(swimmers+i)->isig=1.0/((swimmers+i)->sig);
-					integrateSwimmers( *SS,swimmers,WALL,shrinkMDSteps,dt_int,MAG,HOOKESPRING );
+					integrateSwimmers( *SS,swimmers,WALL,shrinkMDSteps,dt_int,MAG,HOOKESPRING,CL );
 				}
 				//Shrink spring
 				dr=( SS->ro - (SS->ro)*(SS->sizeShrink)) / ((double)(shrinkMDSteps * (SS->shrinkTime)));
 				for( j=0; j<shrinkMDSteps; j++ ) {
 					(swimmers+i)->ro-=dr;
 					(swimmers+i)->iro=1.0/((swimmers+i)->ro);
-					integrateSwimmers( *SS,swimmers,WALL,shrinkMDSteps,dt_int,MAG,HOOKESPRING );
+					integrateSwimmers( *SS,swimmers,WALL,shrinkMDSteps,dt_int,MAG,HOOKESPRING, CL );
 				}
 			}
 			if( fneq(SS->springShrink,1.0) ) {
 				dk=( SS->k - (SS->k)*(SS->springShrink) ) / ((double)(shrinkMDSteps * (SS->shrinkTime)));
 				for( j=0; j<shrinkMDSteps; j++ ) {
 					(swimmers+i)->k-=dk;
-					integrateSwimmers( *SS,swimmers,WALL,shrinkMDSteps,dt_int,MAG,HOOKESPRING );
+					integrateSwimmers( *SS,swimmers,WALL,shrinkMDSteps,dt_int,MAG,HOOKESPRING, CL);
 				}
 			}
 			#ifdef DBG
@@ -1278,20 +1329,20 @@ void runTumbleDynamics( specSwimmer *SS,swimmer swimmers[],bc WALL[],int stepsMD
 					for( j=0; j<shrinkMDSteps; j++ ) {
 						(swimmers+i)->ro+=dr;
 						(swimmers+i)->iro=1.0/((swimmers+i)->ro);
-						integrateSwimmers( *SS,swimmers,WALL,shrinkMDSteps,dt_int,MAG,HOOKESPRING );
+						integrateSwimmers( *SS,swimmers,WALL,shrinkMDSteps,dt_int,MAG,HOOKESPRING, CL );
 					}
 					ds=( SS->sig-(SS->sig)*(SS->sizeShrink) ) / ((double)(shrinkMDSteps * (SS->shrinkTime)));
 					for( j=0; j<shrinkMDSteps; j++ ) {
 						(swimmers+i)->sig+=ds;
 						(swimmers+i)->isig=1.0/((swimmers+i)->sig);
-						integrateSwimmers( *SS,swimmers,WALL,shrinkMDSteps,dt_int,MAG,HOOKESPRING );
+						integrateSwimmers( *SS,swimmers,WALL,shrinkMDSteps,dt_int,MAG,HOOKESPRING,CL );
 					}
 				}
 				if( fneq(SS->springShrink,1.0) ) {
 					dk=( SS->k - (SS->k)*(SS->springShrink) ) / ((double)(shrinkMDSteps * (SS->shrinkTime)));
 					for( j=0; j<shrinkMDSteps; j++ ) {
 						(swimmers+i)->k+=dk;
-						integrateSwimmers( *SS,swimmers,WALL,shrinkMDSteps,dt_int,MAG,HOOKESPRING );
+						integrateSwimmers( *SS,swimmers,WALL,shrinkMDSteps,dt_int,MAG,HOOKESPRING,CL);
 					}
 				}
 				#ifdef DBG
