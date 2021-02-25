@@ -3132,13 +3132,13 @@ void timestep( cell ***CL,particleMPC *SRDparticles,spec SP[],bc WALL[],simptr s
 			#ifdef DBG
 				if( DBUG == DBGSWIMMER || DBUG == DBGSWIMMERDEETS ) printf( "\tApply run/tumble dynamics.\n" );
 			#endif
-			runTumbleDynamics( SS,swimmers,WALL,in.stepsMD,in.MAG,in.dt,outFlags.RTOUT,outFiles.fruntumble, CL);
+			runTumbleDynamics( SS,swimmers,WALL,in.stepsMD,in.MAG,in.dt,outFlags.RTOUT,outFiles.fruntumble, CL, SP );
 		}
 		//MD integration
 		#ifdef DBG
 			if( DBUG == DBGSWIMMER || DBUG == DBGSWIMMERDEETS ) printf( "\tMD integration.\n" );
 		#endif
-		integrateSwimmers( *SS,swimmers,WALL,in.stepsMD,in.dt,in.MAG,HOOKESPRING, CL);
+		integrateSwimmers( *SS,swimmers,WALL,in.stepsMD,in.dt,in.MAG,HOOKESPRING, CL, SP);
 	}
 	// //Apply swimmer dipole (both force and torque dipoles)
 	// #ifdef DBG
