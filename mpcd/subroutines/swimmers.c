@@ -549,19 +549,36 @@ void smonoForce_AlignmentPot(double a[], cell ***CL, specSwimmer SS, swimmer *s,
 	// 	SS - List of species information on swimmers
 	// 	*s - A pointer to the particular swimmer instance
 
-	int x = 0, y = 0, z = 0; //Position in the LC
-	const int pot = 1; //Three alignment potential options: 1 = Angular Harmonic, 2 = Cosine Harmonic, 3 = Cosine Expansion
-	const int potConst = 10000; //Spring constant for bending potential
-	double bacOriLen, forceCoefs, bacOriNorm[DIM], localDir[DIM], theta, torqueMag;
+	double bacOriLen, bacOriNorm[DIM];
 
  	smonoDist(bacOriNorm,&bacOriLen,s->H,s->M);  //Calcualtes distance between body to head
  	swimmerOri(bacOriNorm,s); //Returns normal vector between body to head
 
-	x = (int)s->M.Q[0];    //Assigns the bacteria body position as local LC indicies (x,y,z)
-	if (DIM > 1) y = (int)s->M.Q[1]; //Acconts for multiple dimensions 
-	if (DIM >2) z = (int)s->M.Q[2];
+	monoForce_AlignmentPot(a, CL, SS, s->H, bacOriNorm,bacOriLen,dt, SP); //Head calc
+	monoForce_AlignmentPot(a, CL, SS, s->M, bacOriNorm,bacOriLen,dt, SP); //Body calc
 
-	for (int i = 0; i <DIM; i++) localDir[i] = CL[x][y][z].DIR[i]; // local director at the bacteria's position (a,b,c)
+}
+
+void monoForce_AlignmentPot(double a[], cell ***CL, specSwimmer SS, smono m, double bacOriNorm[], double bacOriLen  ,double dt, spec SP[]){
+	//Introduces an potential which faviours the alignment of bacteria orientation to the local director
+	// Args:
+	// 	a[] - Force vector to return
+	// 	*CL - A pointer to the PARENT cell of the swimmer
+	// 	SS - List of species information on swimmers
+	// 	*s - A pointer to the particular swimmer instance
+
+	int x = 0, y = 0, z = 0, i; //Position in the LC
+	const int pot = 2; //Three alignment potential options: 1 = Angular Harmonic, 2 = Cosine Harmonic, 3 = Cosine Expansion
+	const int potConst = 100; //Spring constant for bending potential
+	double forceCoefs, localDir[DIM], localTorquqe[DIM], theta, torqueMag;
+
+	//Body calc
+
+	x = (int)m.Q[0];    //Assigns the bacteria body position as local LC indicies (x,y,z)
+	if (DIM > 1) y = (int)m.Q[1]; //Acconts for multiple dimensions 
+	if (DIM >2) z = (int)m.Q[2];
+
+	for (i = 0; i <DIM; i++) localDir[i] = CL[x][y][z].DIR[i]; // local director at the bacteria's position (a,b,c)
 
 
 	// Calculate the angle between the bacteria and the director
@@ -570,35 +587,31 @@ void smonoForce_AlignmentPot(double a[], cell ***CL, specSwimmer SS, swimmer *s,
 	//Calculate the force with according to different potentials (pot = 1,2,3)
 	if (pot == 1){ //Angular Harmonic Force 
 		forceCoefs = potConst*theta/(sin(theta)*bacOriLen); //Force coefficients independant of componant
-		for (int i = 0; i <DIM; i++){
+		for (i = 0; i <DIM; i++){
 			a[i] = forceCoefs*(cos(theta)*bacOriNorm[i] - localDir[i]);
 		}
 
 	} else if (pot == 2){ //Cosine Harmonic force
 		forceCoefs = -2*potConst*cos(theta)/bacOriLen; //Force coefficients 
-		for (int i = 0; i <DIM; i++){
+		for (i = 0; i <DIM; i++){
 			a[i] = forceCoefs*(cos(theta)*bacOriNorm[i] - localDir[i]);
 		}
 
 	} else if (pot == 3){ //Cosine Expansion
 		forceCoefs = potConst/bacOriLen; //Force coefficients
-		for (int i = 0; i <DIM; i++){
+		for (i = 0; i <DIM; i++){
 			a[i] = forceCoefs*(cos(theta)*bacOriNorm[i] - localDir[i]);
 		}
 	}
 
 	//Calculate the backflow effects on the LC as a magnetic field.
 	torqueMag = bacOriLen*sqrt(dotprod(a,a,DIM))*sin(theta); //Calculate torque on bacteria
-	for (int i = 0; i<DIM; i++) bacOriNorm[i] *= torqueMag; //Scale bacteria orienation with the torque magnitude
+	for (i = 0; i<DIM; i++) localTorquqe[i] = bacOriNorm[i]*torqueMag; //Scale bacteria orienation with the torque magnitude
 	
-	magTorque_CL( &CL[x][y][z],SP,(double)dt,bacOriNorm);
-
-
-	/*
-		For the crystal: magTorque_CL( CL[x][y][z],SP,(double)dt,bacOriNorm* magnitude of the torque ); 
-
-	*/
+	magTorque_CL( &CL[x][y][z],SP,(double)dt,localTorquqe);
 }
+
+
 
 
 double smonoForceMag_differentSwimmers( double dr,specSwimmer SS ) {
