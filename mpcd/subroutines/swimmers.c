@@ -570,7 +570,7 @@ void monoForce_AlignmentPot(double a[], cell ***CL, specSwimmer SS, smono m, dou
 	int x = 0, y = 0, z = 0, i; //Position in the LC
 	const int pot = 2; //Three alignment potential options: 1 = Angular Harmonic, 2 = Cosine Harmonic, 3 = Cosine Expansion
 	const int potConst = 100; //Spring constant for bending potential
-	double forceCoefs, localDir[DIM], localTorquqe[DIM], theta, torqueMag;
+	double forceCoefs, localDir[DIM], localTorquqe[DIM], theta, torqueMag, dot;
 
 	//Body calc
 
@@ -582,7 +582,14 @@ void monoForce_AlignmentPot(double a[], cell ***CL, specSwimmer SS, smono m, dou
 
 
 	// Calculate the angle between the bacteria and the director
- 	theta = acos(dotprod(bacOriNorm, localDir, DIM));
+	// If the dot product is negative the director must be flipped for the force calculations later. 
+	dot = dotprod(bacOriNorm, localDir, DIM);
+	if (dot < 0){
+		for (i = 0; i < DIM; i++) localDir[i] = -1*localDir[i];
+		dot = dotprod(bacOriNorm, localDir, DIM);
+	}
+	theta = acos(dot);
+ 	
 
 	//Calculate the force with according to different potentials (pot = 1,2,3)
 	if (pot == 1){ //Angular Harmonic Force 
