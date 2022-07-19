@@ -1344,6 +1344,8 @@ void readJson( char fpath[], inputList *in, spec **SP, particleMPC **pSRD,
 			currWall->DSPLC = getJObjInt(objElem, "dsplc", 0, jsonTagList); // dspc
 			currWall->INV = getJObjInt(objElem, "inv", 0, jsonTagList); // inv
 			currWall->MASS = getJObjDou(objElem, "mass", 1, jsonTagList); // mass
+			currWall->CA = getJObjDou(objElem, "customAnch", 0, jsonTagList); // custom anchoring
+			printf("La shota es de %f cm\n", currWall->CA);
 
 			// Handle BC overrides /////////////////////////////////////////////
 			// anchoring

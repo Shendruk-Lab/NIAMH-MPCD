@@ -84,6 +84,7 @@ typedef struct bc {
 	double DVxyz[3];	//The amount a particle's velocity is shifted if it passes the bc in cartesian coordinates
 	double MVN,MVT;		//The amount a particle's velocity is multiplied by if it pass the bc
 	double MUN,MUT;		//The amount a particle's orientation is multiplied by if it pass the bc
+	double CA;
 	double MUxyz[3];	//The amount a particle's orientation is multiplied by if it pass the bc
 	double DUxyz[3];	//The amount added to a particle's orienation if it passes the bc in cartesian coordinates
 	double KBT;				//The temperature of the wall (only used if COLL_TYPE is set to thermal collisions)

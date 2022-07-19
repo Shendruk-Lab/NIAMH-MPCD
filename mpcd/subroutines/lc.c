@@ -1057,6 +1057,9 @@ void oriBC( particleMPC *pp,spec *SP,bc *WALL,double n[] ) {
 	double angleAnch;
 	double torque[_3D],r[_3D];			//Torque on MPCD particle --- Not REALLY torque ( angular impulse but time step falls out)
 	int i;
+	double nO[_3D];
+	double phi_lab, phi_rel, phi_bc;
+
 
 	//Zero
 	for( i=0; i<_3D; i++ ) {
@@ -1064,6 +1067,18 @@ void oriBC( particleMPC *pp,spec *SP,bc *WALL,double n[] ) {
 		UN[i]=0.0;
 		UT[i]=0.0;
 		r[i]=0.0;
+	}
+
+	for(i=0;i<_3D;i++){
+		nO[i]=n[i];
+	}
+
+	if( !feq(WALL->CA,0.0)) {
+		phi_lab = atan2(n[1],n[0]);
+	    phi_rel = atan2(sin(phi_lab-WALL->O[2]-pi),cos(phi_lab-WALL->O[2]-pi))+pi;
+		phi_bc = WALL->CA*phi_rel;
+		nO[0] = cos(phi_bc + WALL->O[2]);
+		nO[1] = sin(phi_bc + WALL->O[2]);
 	}
 
 	// Make sure U is a unit vector
@@ -1078,7 +1093,7 @@ void oriBC( particleMPC *pp,spec *SP,bc *WALL,double n[] ) {
 	}
 
 	//Calculate the new orientation
-	proj( pp->U,n,UN,DIM );		//Calculate normal component of the orientation
+	proj( pp->U,nO,UN,DIM );		//Calculate normal component of the orientation
 	tang( pp->U,UN,UT,DIM );	//Calculate tangential component of orientation
 	//Save the original orientation if the BC can move
 	if( WALL->DSPLC ) for( i=0; i<DIM; i++ ) {
