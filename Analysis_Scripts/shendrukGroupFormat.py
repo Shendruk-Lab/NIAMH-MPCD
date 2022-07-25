@@ -78,7 +78,8 @@ spring = lsc.from_list("", [crimson,ruby,amber,amberbrighter,white])
 autumn = lsc.from_list("", [crimson,cinnamon,amberlighter])
 
 def reverse_colourmap(cmap, name = 'my_cmap_r'):
-    return lsc(name, plt.cm.revcmap(cmap._segmentdata))
+    # return lsc(name, plt.cm.revcmap(cmap._segmentdata))
+    return cmap.reversed()
 
 plasma_r = reverse_colourmap(plasma)
 inferno_r = reverse_colourmap(inferno)

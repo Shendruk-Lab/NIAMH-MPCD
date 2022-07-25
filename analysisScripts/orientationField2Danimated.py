@@ -233,7 +233,8 @@ print( "\tAnimating ..." )
 name='2Dorientation_animation%s'%suffix
 myCommand="rm %s"%name
 call(myCommand,shell=True)
-myCommand = "ffmpeg -f image2 -r %d"%(framerate)+" -i frame%04d.png"+" -vcodec %s -b %dk -r %d %s"%(codec,bitrate,framerate,name)
+# myCommand = "ffmpeg -f image2 -r %d"%(framerate)+" -i frame%04d.png"+" -vcodec %s -b %dk -r %d %s"%(codec,bitrate,framerate,name)
+myCommand = "ffmpeg -f image2 -r %d"%(framerate)+" -i frame%04d.png"+" -vcodec %s -crf 20 -pix_fmt yuv420p -b %dk -r %d %s"%(codec,bitrate,framerate,name)
 call(myCommand,shell=True)
 if not keepFrames:
 	myCommand="rm frame*.png"
