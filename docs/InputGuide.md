@@ -63,7 +63,8 @@ Tag             | Type          | Default Value | Description
 `seed`          | int           | 0             | Seed for random number generator. 0 for pseudorandom seed. Set to -1 to load a checkpoint.
 `mdIn`          | string        | ""            | Path to the MD input file. This also acts as the switch for enabling MD --- If set to `""`, then MD is disabled, otherwise MD is enabled with the corresponding input file.
 `stepsMD`       | int           | 20            | MD time steps per MPCD time step
-`species`       | array(species)| 1 default spec  | An array of species objects. See the species table for species tags.
+`mfpLayerH`     | int           | 0             | Height above which MFP goes to 0. For simulating thin ordered films below disordered fluids. If 0, disable this functionality entirely.
+`species`       | array(species)| 1 default spec| An array of species objects. See the species table for species tags.
 ---             | ---           | ---           | ---
 `debugOut`      | int           | 3             | Debug (verbosity) level. See definitions.h for list.
 `trajOut`       | int           | 0             | Detailed species trajectories
@@ -227,6 +228,7 @@ As a reminder, if you wish to use the default value for a tag, you can leave it 
     "seed":             0,
     "mdIn":             "",
     "stepsMD":          20,
+    "mfpLayerH":        5,
     "species":
     [
         {
