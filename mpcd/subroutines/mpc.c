@@ -3178,7 +3178,7 @@ void cellVelSet( cell *CL,double vel[3] ) {
 
 void timestep( cell ***CL,particleMPC *SRDparticles,spec SP[],bc WALL[],simptr simMD,specSwimmer *SS,swimmer swimmers[],double AVNOW[_3D],double AVV[_3D],double avDIR[_3D],inputList in,double *KBTNOW, double *AVS,int runtime,int MDmode,outputFlagsList outFlags,outputFilesList outFiles ) {
 
-	int i,j,k;						//Counting variables
+	int i,j,k,l;						//Counting variables
 	double RSHIFT[_3D];		//Random vector to positively shift all components of the simulation
 	double CLQ[_3D];					//Position of the cell since calculating pressure sucks
 	int BC_FLAG;					//Flags if the BC moved in this time step
@@ -3187,7 +3187,7 @@ void timestep( cell ***CL,particleMPC *SRDparticles,spec SP[],bc WALL[],simptr s
 
 	// Active layer setup
 	double effMFPOT;		//Height dependent mean-field potential
-	double savedACT;		//Save the activity in order ot make it height dependent
+	double savedACT[NSPECI];		//Save the activity in order ot make it height dependent
 
 	#ifdef DBG
 		if ( DBUG >= DBGSTEPS ) {
@@ -3361,7 +3361,10 @@ void timestep( cell ***CL,particleMPC *SRDparticles,spec SP[],bc WALL[],simptr s
 		}
 	#endif
 	
-	savedACT = (double)(SP)->ACT;
+	
+	for (i = 0; i < NSPECI; i++) { // get activity from species an save it
+		savedACT[i] = (double)(SP+i)->ACT;
+	}
 	for( i=0; i<XYZ_P1[0]; i++ ) for( j=0; j<XYZ_P1[1]; j++ ) for( k=0; k<XYZ_P1[2]; k++ ) {
 		//MPC/SRD collision algorithm (no collision if only 1 particle in cell)
 		CLQ[0]=i+0.5;
@@ -3370,13 +3373,17 @@ void timestep( cell ***CL,particleMPC *SRDparticles,spec SP[],bc WALL[],simptr s
 
 		// handle active layer logic
 		if (in.MFPLAYERH > 0) {
-			if(in.MFPLAYERH <= 5) (SP)->ACT = savedACT;
-			else (SP)->ACT = 0.0;
+			for (l = 0; l < NSPECI; l++) { // get activity from species an save it
+				if (in.MFPLAYERH <= 5) (SP+l)->ACT = savedACT[l];
+				else (SP+l)->ACT = 0.0;
+			}
 		}
 
 		if( CL[i][j][k].POP > 1 ) MPCcollision( &CL[i][j][k],SP,*SS,in.KBT,in.RTECH,in.C,in.S,in.FRICCO,in.dt,MDmode,in.LC,in.TAU,CLQ,outPressure );
 	}
-	(SP)->ACT = savedACT; // revert activity to saved to be safe
+	for (i = 0; i < NSPECI; i++) { // get activity from species an save it
+		(SP+i)->ACT = savedACT[i];
+	}
 
 	// Brownian thermostat (no hydrodynamic interactions -scramble velocities)
 	if( in.RTECH == NOHI_ARBAXIS || in.RTECH == NOHI_MPCAT ) scramble( SRDparticles );
