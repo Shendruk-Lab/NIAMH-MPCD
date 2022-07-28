@@ -269,6 +269,7 @@ typedef struct inputList {
 	int RFRAME;						//Flags initial galilean trans to rest frame (0 No shift, 1 shift)
 	int zeroNetMom;			//If GAL=1 AND GRAV[D3] = [0,0,0] then zero every zeroNetMom steps.
 	int GALINV;					//If rshift=1 do the random shifting of mpcd particles. If zero then do not zeroNetMom steps.
+	int MFPLAYERH; 				// Height above which MFP goes to 0. For simulating thin ordered films below disordered fluids. If 0, disable this functionality.
 } inputList;
 typedef struct specSwimmer {
 	int TYPE;						//Type of swimmer 0=fix-dipole; 1=dumbbell; 2=dumbell with excluded vol; 3=dumbell with not counter-force

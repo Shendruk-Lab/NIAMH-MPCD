@@ -959,6 +959,7 @@ void readJson( char fpath[], inputList *in, spec **SP, particleMPC **pSRD,
 	} else MDmode = 1; // otherwise enable MD if input file found
 
 	in->stepsMD = getJObjInt(jObj, "stepsMD", 20, jsonTagList); // stepsMD
+	in->MFPLAYERH = getJObjInt(jObj, "mfpLayerH", 0, jsonTagList); // mfpLayerH
 
 	// 2. Species //////////////////////////////////////////////////////////////
 	// scroll up to void readin() to see better descriptions & definitions for these
