@@ -3185,9 +3185,7 @@ void timestep( cell ***CL,particleMPC *SRDparticles,spec SP[],bc WALL[],simptr s
 	int outPressure=0;		//Whether to make the pressure calculations (never used just outputted)
 	int bcCNT,reCNT,rethermCNT;					//Count if any particles had problems with the BCs
 
-	//HACKS --- for layer
-	//HACKS
-	//HACKS
+	// Active layer setup
 	double effMFPOT;		//Height dependent mean-field potential
 	double savedACT;		//Save the activity in order ot make it height dependent
 
@@ -3313,32 +3311,20 @@ void timestep( cell ***CL,particleMPC *SRDparticles,spec SP[],bc WALL[],simptr s
 			if( DBUG >= DBGTITLE ) printf( "Orientation Collision Step.\n" );
 		#endif
 		for( i=0; i<XYZ_P1[0]; i++ ) for( j=0; j<XYZ_P1[1]; j++ ) for( k=0; k<XYZ_P1[2]; k++ ) {
-			
-			
-			
-			
-			
-			
-			
-			
-			//LC collision algorithm (no collision if only 1 particle in cell)
-			// if( CL[i][j][k].POP > 1 ) LCcollision( &CL[i][j][k],SP,in.KBT,in.MFPOT,in.dt,*AVS,in.LC ); 
-
-			//HACKS --- for layer
-			//HACKS
-			//HACKS
-			//Height dependent mean-field potential
-			if(j<=5) effMFPOT = in.MFPOT;
-			else effMFPOT = 0.0;
-			if( CL[i][j][k].POP > 1 ) LCcollision( &CL[i][j][k],SP,in.KBT,effMFPOT,in.dt,*AVS,in.LC );
-
-
-
-
-
-
-			
+			// if MFPLAYERH set then perform the "active layer" hack
+			if (in.MFPLAYERH > 0) {
+				// Active layer
+				//Height dependent mean-field potential
+				if (in.MFPLAYERH <= 5) effMFPOT = in.MFPOT;
+				else effMFPOT = 0.0;
+				if( CL[i][j][k].POP > 1 ) LCcollision( &CL[i][j][k],SP,in.KBT,effMFPOT,in.dt,*AVS,in.LC );
+			} else {
+				// otherwise perform typical LC collision
+				//LC collision algorithm (no collision if only 1 particle in cell)
+				if( CL[i][j][k].POP > 1 ) LCcollision( &CL[i][j][k],SP,in.KBT,in.MFPOT,in.dt,*AVS,in.LC ); 
+			}
 		}
+
 		// Magnetic alignment is really part of the collision
 		#ifdef DBG
 			if( DBUG >= DBGTITLE && in.MAG_FLAG) printf( "Apply Magnetic Torque Operator.\n" );
@@ -3375,41 +3361,22 @@ void timestep( cell ***CL,particleMPC *SRDparticles,spec SP[],bc WALL[],simptr s
 		}
 	#endif
 	
-
-
-
-
-
-
-	
-	// for( i=0; i<XYZ_P1[0]; i++ ) for( j=0; j<XYZ_P1[1]; j++ ) for( k=0; k<XYZ_P1[2]; k++ ) {
-	// 	//MPC/SRD collision algorithm (no collision if only 1 particle in cell)
-	// 	CLQ[0]=i+0.5;
-	// 	CLQ[1]=j+0.5;
-	// 	CLQ[2]=k+0.5;
-	// 	if( CL[i][j][k].POP > 1 ) MPCcollision( &CL[i][j][k],SP,*SS,in.KBT,in.RTECH,in.C,in.S,in.FRICCO,in.dt,MDmode,in.LC,in.TAU,CLQ,outPressure );
-	// }
-
-	//HACKS --- for layer
-	//HACKS
-	//HACKS
-	//Height dependent activity
 	savedACT = (double)(SP)->ACT;
 	for( i=0; i<XYZ_P1[0]; i++ ) for( j=0; j<XYZ_P1[1]; j++ ) for( k=0; k<XYZ_P1[2]; k++ ) {
 		//MPC/SRD collision algorithm (no collision if only 1 particle in cell)
 		CLQ[0]=i+0.5;
 		CLQ[1]=j+0.5;
 		CLQ[2]=k+0.5;
-		if(j<=5) (SP)->ACT = savedACT;
-		else (SP)->ACT = 0.0;
+
+		// handle active layer logic
+		if (in.MFPLAYERH > 0) {
+			if(in.MFPLAYERH <= 5) (SP)->ACT = savedACT;
+			else (SP)->ACT = 0.0;
+		}
+
 		if( CL[i][j][k].POP > 1 ) MPCcollision( &CL[i][j][k],SP,*SS,in.KBT,in.RTECH,in.C,in.S,in.FRICCO,in.dt,MDmode,in.LC,in.TAU,CLQ,outPressure );
 	}
-	(SP)->ACT = savedACT;
-
-
-
-
-
+	(SP)->ACT = savedACT; // revert activity to saved to be safe
 
 	// Brownian thermostat (no hydrodynamic interactions -scramble velocities)
 	if( in.RTECH == NOHI_ARBAXIS || in.RTECH == NOHI_MPCAT ) scramble( SRDparticles );
