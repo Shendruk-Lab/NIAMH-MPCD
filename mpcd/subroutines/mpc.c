@@ -3315,7 +3315,7 @@ void timestep( cell ***CL,particleMPC *SRDparticles,spec SP[],bc WALL[],simptr s
 			if (in.MFPLAYERH > 0) {
 				// Active layer
 				//Height dependent mean-field potential
-				if (in.MFPLAYERH <= 5) effMFPOT = in.MFPOT;
+				if (j <= in.MFPLAYERH) effMFPOT = in.MFPOT;
 				else effMFPOT = 0.0;
 				if( CL[i][j][k].POP > 1 ) LCcollision( &CL[i][j][k],SP,in.KBT,effMFPOT,in.dt,*AVS,in.LC );
 			} else {
@@ -3374,7 +3374,7 @@ void timestep( cell ***CL,particleMPC *SRDparticles,spec SP[],bc WALL[],simptr s
 		// handle active layer logic
 		if (in.MFPLAYERH > 0) {
 			for (l = 0; l < NSPECI; l++) { // get activity from species an save it
-				if (in.MFPLAYERH <= 5) (SP+l)->ACT = savedACT[l];
+				if (j <= in.MFPLAYERH) (SP+l)->ACT = savedACT[l];
 				else (SP+l)->ACT = 0.0;
 			}
 		}
