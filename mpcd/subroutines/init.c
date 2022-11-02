@@ -135,6 +135,10 @@ void openflow( FILE **f,char dir[],char fname[],char ext[] ) {
 	openBasic( f,dir,fname,ext );
 	flowheader( *f );
 }
+void openvel( FILE **f,char dir[],char fname[],char ext[] ) {
+    openBasic( f,dir,fname,ext );
+    flowheader( *f );
+}
 void openenergy( FILE **f,char dir[],char fname[],char ext[] ) {
 	openBasic( f,dir,fname,ext );
 	energyheader( *f );
@@ -1014,6 +1018,7 @@ void initOutput( char op[],outputFlagsList *outFlag,outputFilesList *outFile,inp
 	char filedensSTD[]="densSTD";
 	char fileenstrophy[]="avEnstrophy";
 	char fileflow[]="flowfield";
+	char filevel[]="velfield";
 	char filesolids[]="solidtraj";
 	char filedefect[]="topochargefield";
 	char fileprefix[]="detailedSP";
@@ -1076,6 +1081,7 @@ void initOutput( char op[],outputFlagsList *outFlag,outputFilesList *outFile,inp
 	if( (outFlag->ENSTROPHYOUT)>=OUT ) openavenstrophy( &(outFile->fenstrophy),op,fileenstrophy,fileextension );
 	//Initialize the flow field output file
 	if( (outFlag->FLOWOUT)>=OUT ) openflow( &(outFile->fflow),op,fileflow,fileextension );
+	if( (outFlag->VELOUT)>=OUT ) openvel( &(outFile->fvel),op,filevel,fileextension );
 	//Initialize the distribution output files
 	if( (outFlag->HISTVELOUT)>=OUT ) openhistVel( &(outFile->fhistVel),op,filehistVel,fileextension );
 	if( (outFlag->HISTSPEEDOUT)>=OUT ) openhistSpeed( &(outFile->fhistSpeed),op,filehistSpeed,fileextension );

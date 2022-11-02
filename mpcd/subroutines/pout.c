@@ -1342,7 +1342,7 @@ void flowout( FILE *fout,cell ***CL,int interval ) {
 		fflush(fout);
 	#endif
 }
-void velout( FILE *fout,cell ***CL) {
+void velout( FILE *fout,cell ***CL, double t) {
 /*
     Turns sum of cells' vcm into average, prints average to
     file, zeros sums to start anew
@@ -1354,6 +1354,7 @@ void velout( FILE *fout,cell ***CL) {
     for( i=0; i<XYZ[0]; i++ ) for( j=0; j<XYZ[1]; j++ ) for( k=0; k<XYZ[2]; k++ ) {
                 // for( i=0; i<XYZ_P1[0]; i++ ) for( j=0; j<XYZ_P1[1]; j++ ) for( k=0; k<XYZ_P1[2]; k++ ) {
                 for( h=0; h<DIM; h++ ) vel[h] = CL[i][j][k].VCM[h];
+                fprintf( fout,"%12.5e\t", t); // print time
                 fprintf( fout, "%5d\t%5d\t%5d\t",i,j,k );
                 fprintf( fout, "%12.5e\t%12.5e\t%12.5e\n",vel[0],vel[1],vel[2] );
                 for( h=0; h<DIM; h++ ) CL[i][j][k].FLOW[h] = 0.0;		//Reset sum
@@ -1860,7 +1861,7 @@ void outputResults( cell ***CL,particleMPC *SRDparticles,spec SP[],bc WALL[],sim
 	#endif
 	if(outFlag.printSP>0) if( outFlag.TRAJOUT>=OUT  && runtime%outFlag.TRAJOUT==0 ) coordout( outFiles.fdetail,outFlag.printSP,time_now,SRDparticles,SP );
 	if( outFlag.FLOWOUT>=OUT && runtime%outFlag.FLOWOUT==0 && runtime!=0 ) flowout( outFiles.fflow,CL,outFlag.FLOWOUT );
-	if( outFlag.VELOUT>=OUT && runtime%outFlag.VELOUT==0 ) velout( outFiles.fvel,CL );
+	if( outFlag.VELOUT>=OUT && runtime%outFlag.VELOUT==0 ) velout( outFiles.fvel,CL, time_now );
 	if( outFlag.COAROUT>=OUT && runtime%outFlag.COAROUT==0 ) coarseout( outFiles.fcoarse,time_now,CL );
 	if(in.LC!=ISOF) if( outFlag.ORDEROUT>=OUT && runtime%outFlag.ORDEROUT==0 ) orderout( outFiles.forder,time_now,CL,in.LC );
 	if(in.LC!=ISOF) if( outFlag.QTENSOUT>=OUT && runtime%outFlag.QTENSOUT==0 ) orderQout( outFiles.forderQ,time_now,CL,in.LC );

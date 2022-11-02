@@ -55,6 +55,7 @@ void openhistDens( FILE **f,char dir[],char fname[],char ext[] );
 void openhistS( FILE **f,char dir[],char fname[],char ext[] );
 void openavenstrophy( FILE **f,char dir[],char fname[],char ext[] );
 void openflow( FILE **f,char dir[],char fname[],char ext[] );
+void openvel( FILE **f,char dir[],char fname[],char ext[] );
 void opentraj( int bc,FILE *fsolids[],char dir[],char filesolids[],char filesuffix[],char fileextension[] );
 void openplace( int i,FILE *fsolids[],char dir[],char filesolids[],char filesuffix[],char fileextension[] );
 void openenergy( FILE **f,char dir[],char fname[],char ext[] );
