@@ -70,7 +70,8 @@ Tag             | Type          | Default Value | Description
 `trajOut`       | int           | 0             | Detailed species trajectories
 `trajSpecOut`   | int           | 0             | Which number of species whose detailed trajectories to output
 `coarseOut`     | int           | 0             | Coarse grain data (densities, etc). Field.
-`flowOut`       | int           | 0             | Flow field
+`flowOut`       | int           | 0             | Flow field. This is the time averaged velocity field over this interval
+`velOut`        | int           | 0             | Instantaneous velocity field.
 `avVelOut`      | int           | 0             | Total average MPCD velocity. Scalar
 `dirSOut`       | int           | 0             | Director and scalar order parameter fields
 `qTensOut`      | int           | 0             | Q tensor field
@@ -252,6 +253,7 @@ As a reminder, if you wish to use the default value for a tag, you can leave it 
     "trajSpecOut":      0,
     "coarseOut":        0,
     "flowOut":          0,
+    "velOut":           0,
     "avVelOut":         0,
     "dirSOut":          0,
     "qTensOut":         0,

@@ -1067,6 +1067,7 @@ void readJson( char fpath[], inputList *in, spec **SP, particleMPC **pSRD,
 	out->printSP = getJObjInt(jObj, "trajSpecOut", 0, jsonTagList); // printSP
 	out->COAROUT = getJObjInt(jObj, "coarseOut", 0, jsonTagList); // coarOut
 	out->FLOWOUT = getJObjInt(jObj, "flowOut", 0, jsonTagList); // flowOut
+	out->VELOUT = getJObjInt(jObj, "velOut", 0, jsonTagList); // velout
 	out->AVVELOUT = getJObjInt(jObj, "avVelOut", 0, jsonTagList); // avVelOut
 	out->ORDEROUT = getJObjInt(jObj, "dirSOut", 0, jsonTagList); // orderOut
 	out->QTENSOUT = getJObjInt(jObj, "qTensOut", 0, jsonTagList); // qTensOut
