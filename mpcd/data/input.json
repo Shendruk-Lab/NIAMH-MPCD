@@ -19,7 +19,7 @@
     "seed":             0,
     "mdIn":             "",
     "stepsMD":          20,
-    "mfpLayerH":        5,
+    "mfpLayerH":        0,
     "species":
     [
         {

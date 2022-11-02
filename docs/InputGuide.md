@@ -228,7 +228,7 @@ As a reminder, if you wish to use the default value for a tag, you can leave it 
     "seed":             0,
     "mdIn":             "",
     "stepsMD":          20,
-    "mfpLayerH":        5,
+    "mfpLayerH":        0,
     "species":
     [
         {
