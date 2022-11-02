@@ -1344,8 +1344,7 @@ void flowout( FILE *fout,cell ***CL,int interval ) {
 }
 void velout( FILE *fout,cell ***CL, double t) {
 /*
-    Turns sum of cells' vcm into average, prints average to
-    file, zeros sums to start anew
+    Prints an instanenous vcm field of the cells
 */
     int h,i,j,k;
     double vel[_3D];
