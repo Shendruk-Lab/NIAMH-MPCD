@@ -69,6 +69,7 @@ void densSTDout( FILE *fout,double t,double stdN );
 void avenstrophyout( FILE *fout,double t,double E );
 void binderout( FILE *fout,double t,double UL );
 void flowout( FILE *fout,cell ***CL,int interval );
+void velout( FILE *fout,cell ***CL);
 void solidout( FILE *fout,bc WALL,double t );
 void topochargeout( FILE *fout,double t,cell ***CL );
 void enout( FILE *fout,particleMPC *pp,spec *pSP,bc WALL[],double t,double KBT,double wmf );

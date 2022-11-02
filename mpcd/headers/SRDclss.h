@@ -205,7 +205,7 @@ typedef struct cell {
 	struct smono *sp;					//Pointer to first swimmer monomer particle in list
 } cell;
 typedef struct outputFilesList {
-	FILE *fcoarse,*fflow,*fenergy,*fenergyfield,*fenneighbours;
+	FILE *fcoarse,*fflow,*fvel,*fenergy,*fenergyfield,*fenneighbours;
 	FILE *fsynopsis,*favvel,*forder,*forderQ,*forderQK,*favs,*fdensSTD,*fchckpnt,*fenstrophy,*fmultiphase,*fpressure;
 	FILE *fcorrVV,*fcorrNN,*fcorrWW,*fcorrDD,*fcorrSS,*fcorrPP,*fbinder;
 	FILE *fhistVel,*fhistSpeed,*fhistVort,*fhistEnstr,*fhistDir,*fhistS,*fhistDens;
@@ -220,6 +220,7 @@ typedef struct outputFlagsList {
 	int COAROUT;				//Flag for if coarse grain is outputted
 	int AVVELOUT;				//Flag for if total average velocity is outputted
 	int FLOWOUT;				//Flag for if the flow field is outputted
+    int VELOUT;                 //Flag for if the velocity field is outputted
 	int HISTVELOUT,HISTSPEEDOUT,HISTVORTOUT,HISTENSTROUT,HISTDIROUT,HISTSOUT,HISTNOUT;	//Flag for if distributions are outputted
 	int ENERGYSPECTOUT,ENSTROPHYSPECTOUT;	//Flag for if energy and enstrophy spectra are outputted
 	int DEFECTOUT;			//Flag for if defect positions are outputted
