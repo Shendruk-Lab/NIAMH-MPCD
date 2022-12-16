@@ -16,6 +16,9 @@
 # include<math.h>
 # include<stdio.h>
 # include<stdlib.h>
+#ifdef _OPENMP
+# include<omp.h>
+#endif
 
 # include "../headers/definitions.h"
 # include "../headers/globals.h"
@@ -4438,7 +4441,9 @@ void timestep( cell ***CL,particleMPC *SRDparticles,spec SP[],bc WALL[],simptr s
 			}
 		}
     #endif
-    ///TODO: OMP here
+#ifdef _OPENMP
+#pragma omp parallel for private(i,j,k) default(shared)
+#endif
 	for( i=0; i<XYZ_P1[0]; i++ ) for( j=0; j<XYZ_P1[1]; j++ ) for( k=0; k<XYZ_P1[2]; k++ ) {
 		//MPC/SRD collision algorithm (no collision if only 1 particle in cell)
 		CLQ[0]=i+0.5;

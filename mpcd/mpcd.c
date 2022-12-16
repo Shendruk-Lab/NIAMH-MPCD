@@ -33,7 +33,9 @@ By Tyler Shendruk's Research Group
 # include<stdlib.h>
 # include<time.h>
 # include<string.h>
-# include<fenv.h>
+#if defined(_OPENMP)
+#include <omp.h>
+#endif
 /* ****************************************** */
 /* ****************************************** */
 /* ****************************************** */
@@ -132,7 +134,13 @@ int main(int argc, char* argv[]) {
 	/* ****************************************** */
 	#ifdef DBG
 		if( DBUG > DBGRUN ) printf( "\nBegin SRD algorithm\n" );
-	#endif
+    #endif
+#ifdef _OPENMP
+#ifdef DBG
+    ///TODO: This should have a "debug level" check but I can't get it to cooperate
+    printf("OpenMP is enabled with %d max threads\n", omp_get_max_threads());
+#endif
+#endif
 	/* ****************************************** */
 	/* ****************************************** */
 	/* ****************************************** */
