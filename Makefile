@@ -52,8 +52,8 @@ prof:
 #----------------------------------------------------------------------------------------------------
 # phony for OMP
 .PHONY:    omp
-prof:
-	make -e lib="$(lib) -fopenmp" progName="mpcd/mpcdOMP.out"
+omp:
+	make -e cflags="$(cflags) -fopenmp" progName="mpcd/mpcdOMP.out"
 #----------------------------------------------------------------------------------------------------
 .PHONY: clean
 clean:
