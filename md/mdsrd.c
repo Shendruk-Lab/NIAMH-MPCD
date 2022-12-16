@@ -135,11 +135,12 @@ void ComputeElectrostaticForcesSRD (simptr sim,struct particleMPC *pSRD,struct s
 
 #ifdef _OPENMP
     #pragma omp parallel  for \
-		schedule  (static) \
-		default   (none) \
-		shared	(n, charge, rCutCoul2, bjerrumkT, sim) \
-		private   (i, j, p1, p2, dx, dy, dz, E, Efield, Eforce) \
-		reduction (+: coulE, potE)
+		schedule    (dynamic, OMPCHUNK) \
+		default     (none) \
+		shared	    (n, charge, rCutCoul, sim, lambda_D, CL, box, drTotMax, weight, q0) \
+		private     (i, j, p1, p2, dx, dy, dz, Efield, r, zbox, zc, pbcz2, pbcz1, ybox, yc, pbcy2, \
+                        pbcy1, xbox, xc, pbcx2, pbcx1, a, b, c) \
+		reduction   (+: coulE, potE)
 #endif
 
 	for (i=0; i<n; i++) {
@@ -438,14 +439,16 @@ void VelocityVerletStep (simptr sim,int MDmode,struct particleMPC *pSRD,struct b
 	kT = sim->kT[sim->phase];
 
 	// update positions and mid-step velocities
-	#ifdef _OPENMP
-	#pragma omp parallel for		 	 \
-			schedule (static)			 \
-			private  (n, p, dx, dy, dz)  \
-			shared   (atom, nAtom)
-	#endif
+
 	kinE = kinETherm = 0;
 	v2 = v2max = 0;
+    #ifdef _OPENMP
+    #pragma omp parallel for		 	 \
+        schedule (dynamic, OMPCHUNK) \
+        private  (p, v2)  \
+        shared   (atom, nAtom, dt) \
+        reduction (+:kinE, kinETherm, v2max)
+    #endif
 	for (i=0; i<nAtom; i++) {
 		p = atom+i;
 		// increment velocities
@@ -462,8 +465,12 @@ void VelocityVerletStep (simptr sim,int MDmode,struct particleMPC *pSRD,struct b
 		p->wz += p->vz*dt;
 		v2 = (p->vx*p->vx) + (p->vy*p->vy) + (p->vz*p->vz);
 		kinE += p->mass*v2;
-		if (v2 > v2max)
-			v2max = v2;
+		if (v2 > v2max) {
+            #ifdef _OPENMP
+            #pragma omp atomic write
+            #endif
+            v2max = v2;
+        }
 	}
 	for (i=0; i<nAtom; i++) {
 		p = atom+i;
@@ -727,10 +734,10 @@ void ComputeDispersionForces (simptr sim)
 	// compute LJ forces for STD pairs
 	#ifdef _OPENMP
 	#pragma omp parallel  for \
-		schedule  (static) \
+		schedule  (dynamic, OMPCHUNK) \
 		default   (none) \
-		shared	  (n, nebrSTD, rCut2, ljShift) \
-		private   (i, p1, p2, dx, dy, dz, E) \
+		shared	  (n, rCut2, ljShift, eta, sigma, dtSqrti, groupThermDPD, sigma_lj, sim, atom) \
+		private   (i, j, p1, p2, dx, dy, dz, E) \
 		reduction (+: ljE, potE)
 	#endif
 	for (i=0; i<n; i++) {
@@ -805,10 +812,10 @@ void ComputeDispersionForcesSRD (simptr sim,particleMPC *pSRD,spec *SP,int GPOP)
 	// compute LJ forces for STD pairs
 	#ifdef _OPENMP
 	#pragma omp parallel  for \
-		schedule  (static) \
+		schedule  (dynamic, OMPCHUNK) \
 		default   (none) \
-		shared	  (n, nebrSTD, rCut2, ljShift) \
-		private   (i, p1, p2, dx, dy, dz, E) \
+		shared	  (n, rCut2, ljShift, GPOP, SP, pSRD, eta, sigma, dtSqrti, groupThermDPD, sigma_lj, sim, atom) \
+		private   (i, j, p1, p2, dx, dy, dz, E) \
 		reduction (+: ljE, potE)
 	#endif
 
@@ -901,14 +908,15 @@ void ComputeDispersionForcesSRDCell (simptr sim,int MDmode,struct particleMPC *p
 
 	#ifdef _OPENMP
 	#pragma omp parallel  for \
-		schedule  (static) \
-		default   (none) \
-		shared	  (n, nebrSTD, rCut2, ljShift) \
-		private   (i, p1, p2, dx, dy, dz, E) \
-		reduction (+: ljE, potE)
+		schedule    (dynamic, OMPCHUNK) \
+		default     (none) \
+		shared	    (rCut2, ljShift, SP, MDmode, drTotMax, eta, sigma, dtSqrti, groupThermDPD, sigma_lj, sim, CL, box) \
+		private     (p1, p2, dx, dy, dz, E, a, b, c, zbox, zc, pbcz2, pbcz1, ybox, yc, pbcy2, pbcy1, xbox, xc, pbcx2, \
+                        pbcx1, p3,) \
+		reduction   (+: ljE, potE)
 	#endif
 
-	for( a=0; a<=box[x_]; a++ ) for( b=0; b<=box[y_]; b++ ) for( c=0; c<=box[z_]; c++ ) {
+	for( a=0; a<=(int) box[x_]; a++ ) for( b=0; b<=(int) box[y_]; b++ ) for( c=0; c<=(int) box[z_]; c++ ) {
 		// MD-MD bead interactions
 		if (CL[a][b][c].MDpp!=NULL) {
 			p1 = CL[a][b][c].MDpp;
@@ -1129,10 +1137,10 @@ void ComputeCapDispersionForces (simptr sim)
 	// compute LJ forces for STD pairs
 	#ifdef _OPENMP
 	#pragma omp parallel  for \
-		schedule  (static) \
+		schedule  (dynamic, OMPCHUNK) \
 		default   (none) \
-		shared	  (n, nebrSTD, rCut2, ljShift) \
-		private   (i, p1, p2, dx, dy, dz, E) \
+		shared	  (n, rCut2, ljShift, r2min, sigma_lj, sim, atom) \
+		private   (i, j, p1, p2, dx, dy, dz, E) \
 		reduction (+: ljE, potE)
 	#endif
 
@@ -1151,7 +1159,12 @@ void ComputeCapDispersionForces (simptr sim)
 			dy /= sigma_lj;
 			dz /= sigma_lj;
 			E = LennardJonesCap (p1, p2, dx, dy, dz, rCut2, sim) + ljShift;
-			if (E<r2min) r2min = E;
+			if (E<r2min) {
+                #ifdef _OPENMP
+                #pragma omp atomic write
+                #endif
+                r2min = E;
+            }
 			ljE  += E;
 			potE += E;
 		}
@@ -1206,11 +1219,11 @@ void ComputeElectrostaticForces (simptr sim)
 
 	#ifdef _OPENMP
 	#pragma omp parallel  for \
-		schedule  (static) \
-		default   (none) \
-		shared	(n, charge, rCutCoul2, bjerrumkT, sim) \
-		private   (i, j, p1, p2, dx, dy, dz, E, Efield, Eforce) \
-		reduction (+: coulE, potE)
+		schedule    (dynamic, OMPCHUNK) \
+		default     (none) \
+		shared	    (n, charge, rCutCoul2, bjerrumkT, sim, lambda_D) \
+		private     (i, j, p1, p2, dx, dy, dz, E, Efield, Eforce) \
+		reduction   (+: coulE, potE)
 	#endif
 
 	for (i=0; i<n; i++) {
@@ -1265,7 +1278,7 @@ void ComputeAnchorForces (simptr sim)
 
 	#ifdef _OPENMP
 	#pragma omp parallel  for \
-		schedule  (static) \
+		schedule  (dynamic, OMPCHUNK) \
 		default   (none) \
 		shared	(n, anchor) \
 		private   (i, p1, dx, dy, dz, E) \

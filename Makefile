@@ -55,6 +55,11 @@ prof:
 omp:
 	make -e cflags="$(cflags) -fopenmp" progName="mpcd/mpcdOMP.out"
 #----------------------------------------------------------------------------------------------------
+# phony for OMP
+.PHONY:    ompdebug
+ompdebug:
+	make -e cflags="$(cflags) -fopenmp" opt="$(opt) -ggdb3" progName="mpcd/mpcdOMPDebug.out"
+#----------------------------------------------------------------------------------------------------
 .PHONY: clean
 clean:
 	@echo "Removing executable and object files"
