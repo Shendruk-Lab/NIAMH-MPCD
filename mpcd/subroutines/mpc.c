@@ -599,7 +599,11 @@ void acc_P( particleMPC *p,double t,double GRAV[] ) {
 void stream_all( particleMPC *pp,double t ) {
 	int i;
 #ifdef _OPENMP
-#pragma omp parallel for private(i) default(shared)
+    #pragma omp parallel for \
+        schedule    (dynamic, OMPCHUNK) \
+        private     (i) \
+        shared      (GPOP, pp, t) \
+        default     (none)
 #endif
 	for( i=0; i<GPOP; i++ ){
 		//Update coordinates --- check if it already streamed
@@ -4403,8 +4407,12 @@ void timestep( cell ***CL,particleMPC *SRDparticles,spec SP[],bc WALL[],simptr s
 			if( DBUG >= DBGTITLE ) printf( "Orientation Collision Step.\n" );
         #endif
 #ifdef _OPENMP
-#pragma omp parallel for private(i,j,k) default(shared)
-#endif
+        #pragma omp parallel for \
+            schedule    (dynamic, OMPCHUNK) \
+            private     (i, j, k) \
+            shared      (XYZ_P1, CL, SP, in, AVS) \
+            default     (none)
+#endif // No reduction needed on AVS as it is read only here
 		for( i=0; i<XYZ_P1[0]; i++ ) for( j=0; j<XYZ_P1[1]; j++ ) for( k=0; k<XYZ_P1[2]; k++ ) {
 			//LC collision algorithm (no collision if only 1 particle in cell)
 			if( CL[i][j][k].POPSRD > 1 ) LCcollision( &CL[i][j][k],SP,in.KBT,in.MFPOT,in.dt,*AVS,in.LC );
@@ -4418,7 +4426,11 @@ void timestep( cell ***CL,particleMPC *SRDparticles,spec SP[],bc WALL[],simptr s
 			if( DBUG >= DBGTITLE ) printf( "Orientation Shear Alignment.\n" );
         #endif
 #ifdef _OPENMP
-#pragma omp parallel for private(i,j,k) default(shared)
+        #pragma omp parallel for \
+            schedule    (dynamic, OMPCHUNK) \
+            private     (i, j, k) \
+            shared      (XYZ_P1, CL, SP, in) \
+            default     (none)
 #endif
 		for( i=0; i<XYZ_P1[0]; i++ ) for( j=0; j<XYZ_P1[1]; j++ ) for( k=0; k<XYZ_P1[2]; k++ ) {
 			//Coupling shear to orientation
@@ -4448,7 +4460,11 @@ void timestep( cell ***CL,particleMPC *SRDparticles,spec SP[],bc WALL[],simptr s
 		}
     #endif
 #ifdef _OPENMP
-#pragma omp parallel for private(i,j,k) default(shared)
+    #pragma omp parallel for \
+            schedule    (dynamic, OMPCHUNK) \
+            private     (i, j, k, CLQ) \
+            shared      (XYZ_P1, CL, SP, SS, in, MDmode, outPressure) \
+            default     (none)
 #endif
 	for( i=0; i<XYZ_P1[0]; i++ ) for( j=0; j<XYZ_P1[1]; j++ ) for( k=0; k<XYZ_P1[2]; k++ ) {
 		//MPC/SRD collision algorithm (no collision if only 1 particle in cell)
@@ -4551,7 +4567,12 @@ void timestep( cell ***CL,particleMPC *SRDparticles,spec SP[],bc WALL[],simptr s
 	reCNT=0;
 	rethermCNT=0;
 #ifdef _OPENMP
-#pragma omp parallel for private(i) default(shared)
+    #pragma omp parallel for \
+        schedule    (dynamic, OMPCHUNK) \
+        private     (i) \
+        shared      (GPOP, SRDparticles, WALL, SP, in) \
+        default     (none) \
+        reduction   (+:bcCNT,reCNT,rethermCNT)
 #endif
 	for( i=0; i<GPOP; i++ ) MPC_BCcollision( SRDparticles,i,WALL,SP,in.KBT,in.dt,in.LC,&bcCNT,&reCNT,&rethermCNT,1 );
 	#ifdef DBG
@@ -4621,7 +4642,12 @@ void timestep( cell ***CL,particleMPC *SRDparticles,spec SP[],bc WALL[],simptr s
 		rethermCNT=0;
 		// Check each BC for collisions MPC particles
 #ifdef _OPENMP
-#pragma omp parallel for private(i) default(shared)
+        #pragma omp parallel for \
+            schedule    (dynamic, OMPCHUNK) \
+            private     (i) \
+            shared      (NBC, WALL, SRDparticles, SP, simMD, MDmode, in) \
+            default     (none) \
+            reduction   (+:bcCNT,reCNT,rethermCNT)
 #endif
 		for( i=0; i<NBC; i++ ) if( (WALL+i)->DSPLC ) {
 			BC_MPCcollision( WALL,i,SRDparticles,SP,in.KBT,in.GRAV,in.dt,simMD,MDmode,in.LC,&bcCNT,&reCNT,&rethermCNT );
