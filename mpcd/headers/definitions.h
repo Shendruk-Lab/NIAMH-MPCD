@@ -37,6 +37,8 @@
 # define MAXSPECI 10
 //Maximum number of allowed MPCD species
 # define MAXBC 50
+//OMP chunk size for dynamic scheduling. Smaller number will result in more overhead, but less chance of thread starvation
+# define OMPCHUNK 5
 
 /* ****************************************** */
 /* *********** UNIVERSAL CONSTANTS ********** */
