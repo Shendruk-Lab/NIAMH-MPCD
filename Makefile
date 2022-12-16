@@ -50,6 +50,11 @@ debug+:
 prof:
 	make -e opt="$(opt) -pg" progName="mpcd/mpcdProf.out"
 #----------------------------------------------------------------------------------------------------
+# phony for OMP
+.PHONY:    omp
+prof:
+	make -e lib="$(lib) -fopenmp" progName="mpcd/mpcdOMP.out"
+#----------------------------------------------------------------------------------------------------
 .PHONY: clean
 clean:
 	@echo "Removing executable and object files"
