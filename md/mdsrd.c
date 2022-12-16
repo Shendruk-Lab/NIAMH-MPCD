@@ -129,18 +129,18 @@ void ComputeElectrostaticForcesSRD (simptr sim,struct particleMPC *pSRD,struct s
 	n = sim->charge.n;
 	weight = mycalloc(n, sizeof(real));
 
-	#ifdef _OPENMP
-	#pragma omp parallel  for \
+	for (j=0; j<GPOP; j++) {
+		(pSRD+j)->q=0;
+	}
+
+#ifdef _OPENMP
+    #pragma omp parallel  for \
 		schedule  (static) \
 		default   (none) \
 		shared	(n, charge, rCutCoul2, bjerrumkT, sim) \
 		private   (i, j, p1, p2, dx, dy, dz, E, Efield, Eforce) \
 		reduction (+: coulE, potE)
-	#endif
-
-	for (j=0; j<GPOP; j++) {
-		(pSRD+j)->q=0;
-	}
+#endif
 
 	for (i=0; i<n; i++) {
 		// extract first particle pointer

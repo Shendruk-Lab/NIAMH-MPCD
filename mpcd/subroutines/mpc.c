@@ -598,7 +598,9 @@ void acc_P( particleMPC *p,double t,double GRAV[] ) {
 ///
 void stream_all( particleMPC *pp,double t ) {
 	int i;
-    ///TODO: OMP here
+#ifdef _OPENMP
+#pragma omp parallel for private(i) default(shared)
+#endif
 	for( i=0; i<GPOP; i++ ){
 		//Update coordinates --- check if it already streamed
 		if( (pp+i)->S_flag ) stream_P( (pp+i),t );
@@ -4400,7 +4402,9 @@ void timestep( cell ***CL,particleMPC *SRDparticles,spec SP[],bc WALL[],simptr s
 		#ifdef DBG
 			if( DBUG >= DBGTITLE ) printf( "Orientation Collision Step.\n" );
         #endif
-        ///TODO: OMP here
+#ifdef _OPENMP
+#pragma omp parallel for private(i,j,k) default(shared)
+#endif
 		for( i=0; i<XYZ_P1[0]; i++ ) for( j=0; j<XYZ_P1[1]; j++ ) for( k=0; k<XYZ_P1[2]; k++ ) {
 			//LC collision algorithm (no collision if only 1 particle in cell)
 			if( CL[i][j][k].POPSRD > 1 ) LCcollision( &CL[i][j][k],SP,in.KBT,in.MFPOT,in.dt,*AVS,in.LC );
@@ -4413,7 +4417,9 @@ void timestep( cell ***CL,particleMPC *SRDparticles,spec SP[],bc WALL[],simptr s
 		#ifdef DBG
 			if( DBUG >= DBGTITLE ) printf( "Orientation Shear Alignment.\n" );
         #endif
-        ///TODO: OMP here
+#ifdef _OPENMP
+#pragma omp parallel for private(i,j,k) default(shared)
+#endif
 		for( i=0; i<XYZ_P1[0]; i++ ) for( j=0; j<XYZ_P1[1]; j++ ) for( k=0; k<XYZ_P1[2]; k++ ) {
 			//Coupling shear to orientation
 			if( CL[i][j][k].POPSRD > 1 ) jefferysTorque( &CL[i][j][k],SP,in.dt );
@@ -4544,7 +4550,9 @@ void timestep( cell ***CL,particleMPC *SRDparticles,spec SP[],bc WALL[],simptr s
 	bcCNT=0;
 	reCNT=0;
 	rethermCNT=0;
-    ///TODO: OMP here
+#ifdef _OPENMP
+#pragma omp parallel for private(i) default(shared)
+#endif
 	for( i=0; i<GPOP; i++ ) MPC_BCcollision( SRDparticles,i,WALL,SP,in.KBT,in.dt,in.LC,&bcCNT,&reCNT,&rethermCNT,1 );
 	#ifdef DBG
 		if( DBUG == DBGBCCNT ) if(bcCNT>0) printf( "\t%d particles had difficulty with the BCs (%d rewind events; %d rethermalization events).\n",bcCNT,reCNT,rethermCNT );
@@ -4564,83 +4572,85 @@ void timestep( cell ***CL,particleMPC *SRDparticles,spec SP[],bc WALL[],simptr s
 			zerovec(WALL[i].dV,DIM);
 			zerovec(WALL[i].dL,_3D);
 		}
-		/* ****************************************** */
-		/* ************* TRANSLATE BCs ************** */
-		/* ****************************************** */
-		#ifdef DBG
-			if( DBUG >= DBGTITLE ) printf( "Translate BCs.\n" );
-		#endif
-		//Save the old position in case a BC-BC collision occurs
-		for( i=0; i<NBC; i++ ) if( (WALL+i)->DSPLC ) for( j=0; j<DIM; j++ ) {
-			(WALL+i)->Q_old[j] = (WALL+i)->Q[j];
-			(WALL+i)->O_old[j] = (WALL+i)->O[j];
-		}
-		//Translate each of the BCs --- using velocity from BEFORE MPC_BCcollision()
-		for( i=0; i<NBC; i++ ) if( (WALL+i)->DSPLC ) stream_BC( (WALL+i),in.dt );
-		/* ****************************************** */
-		/* *************** ROTATE BCs *************** */
-		/* ****************************************** */
-		#ifdef DBG
-			if( DBUG >= DBGTITLE ) printf( "Spin BCs.\n" );
-		#endif
-		for( i=0; i<NBC; i++ ) if( (WALL+i)->DSPLC ) spin_BC( (WALL+i),in.dt );
-		/* ****************************************** */
-		/* ***************** BC-BC ****************** */
-		/* ****************************************** */
-		#ifdef DBG
-			if( DBUG >= DBGTITLE ) printf( "Check BCs Against BCs.\n" );
-		#endif
-		//Check each BC
-		for( i=0; i<NBC; i++ ) if( (WALL+i)->DSPLC ) {
-			BC_FLAG = 0;
-			for( j=0; j<NBC; j++ ) if( j != i ) {
-				//Check BC number i for collisions other BCs
-				#ifdef DBG
-					if( DBUG == DBGBCBC ) printf( "BC%d BC%d\n",i,j );
-				#endif
-				BC_BCcollision( WALL+i,WALL+j,in.dt,&BC_FLAG );
-			}
-		}
-		/* ****************************************** */
-		/* ***************** BC-MPCD **************** */
-		/* ****************************************** */
-		// if( BC_FLAG ) {
-			#ifdef DBG
-				if( DBUG >= DBGTITLE ) printf( "Check BCs Against MPCs after BC-BC collisions.\n" );
-			#endif
-			bcCNT=0;
-			reCNT=0;
-			rethermCNT=0;
-			// Check each BC for collisions MPC particles
-			//TODO: OMP here
-			for( i=0; i<NBC; i++ ) if( (WALL+i)->DSPLC ) {
-				BC_MPCcollision( WALL,i,SRDparticles,SP,in.KBT,in.GRAV,in.dt,simMD,MDmode,in.LC,&bcCNT,&reCNT,&rethermCNT );
-			}
-			#ifdef DBG
-				if( DBUG == DBGBCCNT ) if( bcCNT>0 ) printf( "\t%d particles had difficulty with the BCs when the BCs moved (%d rewind events; %d rethermalization events).\n",bcCNT,reCNT,rethermCNT );
-			#endif
-		// }
-		/* ****************************************** */
-		/* ************* APPLY IMPULSE ************** */
-		/* ****************************************** */
-		#ifdef DBG
-			if( DBUG >= DBGTITLE ) printf( "Impulse on BCs from BC-translations.\n" );
-		#endif
-		//Apply impulse from BC_MPCcollision()
-		for( i=0; i<NBC; i++ ) if( (WALL+i)->DSPLC ) {
-			for( j=0; j<DIM; j++ ) (WALL+i)->V[j] += (WALL+i)->dV[j];
-			//THERE SHOULD BE NO dL since BC_MPCcollision() ignores ang mom
-			for( j=0; j<_3D; j++ ) (WALL+i)->L[j] += (WALL+i)->dL[j];
-		}
-		/* ****************************************** */
-		/* ************* ACCELERATE BCs ************* */
-		/* ****************************************** */
-		#ifdef DBG
-			if( DBUG >= DBGTITLE ) printf( "Accelerate BCs.\n" );
-		#endif
-		//Accelerate each of the BCs
-		if( in.GRAV_FLAG ) for( i=0; i<NBC; i++ ) if( (WALL+i)->DSPLC ) acc_BC( (WALL+i),in.dt,(WALL+i)->G );
+	/* ****************************************** */
+	/* ************* TRANSLATE BCs ************** */
+	/* ****************************************** */
+	#ifdef DBG
+		if( DBUG >= DBGTITLE ) printf( "Translate BCs.\n" );
+	#endif
+	//Save the old position in case a BC-BC collision occurs
+	for( i=0; i<NBC; i++ ) if( (WALL+i)->DSPLC ) for( j=0; j<DIM; j++ ) {
+		(WALL+i)->Q_old[j] = (WALL+i)->Q[j];
+		(WALL+i)->O_old[j] = (WALL+i)->O[j];
 	}
+	//Translate each of the BCs --- using velocity from BEFORE MPC_BCcollision()
+	for( i=0; i<NBC; i++ ) if( (WALL+i)->DSPLC ) stream_BC( (WALL+i),in.dt );
+	/* ****************************************** */
+	/* *************** ROTATE BCs *************** */
+	/* ****************************************** */
+	#ifdef DBG
+		if( DBUG >= DBGTITLE ) printf( "Spin BCs.\n" );
+	#endif
+	for( i=0; i<NBC; i++ ) if( (WALL+i)->DSPLC ) spin_BC( (WALL+i),in.dt );
+	/* ****************************************** */
+	/* ***************** BC-BC ****************** */
+	/* ****************************************** */
+	#ifdef DBG
+		if( DBUG >= DBGTITLE ) printf( "Check BCs Against BCs.\n" );
+	#endif
+	//Check each BC
+	for( i=0; i<NBC; i++ ) if( (WALL+i)->DSPLC ) {
+		BC_FLAG = 0;
+		for( j=0; j<NBC; j++ ) if( j != i ) {
+			//Check BC number i for collisions other BCs
+			#ifdef DBG
+				if( DBUG == DBGBCBC ) printf( "BC%d BC%d\n",i,j );
+			#endif
+			BC_BCcollision( WALL+i,WALL+j,in.dt,&BC_FLAG );
+		}
+	}
+	/* ****************************************** */
+	/* ***************** BC-MPCD **************** */
+	/* ****************************************** */
+	// if( BC_FLAG ) {
+		#ifdef DBG
+			if( DBUG >= DBGTITLE ) printf( "Check BCs Against MPCs after BC-BC collisions.\n" );
+		#endif
+		bcCNT=0;
+		reCNT=0;
+		rethermCNT=0;
+		// Check each BC for collisions MPC particles
+#ifdef _OPENMP
+#pragma omp parallel for private(i) default(shared)
+#endif
+		for( i=0; i<NBC; i++ ) if( (WALL+i)->DSPLC ) {
+			BC_MPCcollision( WALL,i,SRDparticles,SP,in.KBT,in.GRAV,in.dt,simMD,MDmode,in.LC,&bcCNT,&reCNT,&rethermCNT );
+		}
+		#ifdef DBG
+			if( DBUG == DBGBCCNT ) if( bcCNT>0 ) printf( "\t%d particles had difficulty with the BCs when the BCs moved (%d rewind events; %d rethermalization events).\n",bcCNT,reCNT,rethermCNT );
+		#endif
+	// }
+	/* ****************************************** */
+	/* ************* APPLY IMPULSE ************** */
+	/* ****************************************** */
+	#ifdef DBG
+		if( DBUG >= DBGTITLE ) printf( "Impulse on BCs from BC-translations.\n" );
+	#endif
+	//Apply impulse from BC_MPCcollision()
+	for( i=0; i<NBC; i++ ) if( (WALL+i)->DSPLC ) {
+		for( j=0; j<DIM; j++ ) (WALL+i)->V[j] += (WALL+i)->dV[j];
+		//THERE SHOULD BE NO dL since BC_MPCcollision() ignores ang mom
+		for( j=0; j<_3D; j++ ) (WALL+i)->L[j] += (WALL+i)->dL[j];
+	}
+	/* ****************************************** */
+	/* ************* ACCELERATE BCs ************* */
+	/* ****************************************** */
+	#ifdef DBG
+		if( DBUG >= DBGTITLE ) printf( "Accelerate BCs.\n" );
+	#endif
+	//Accelerate each of the BCs
+	if( in.GRAV_FLAG ) for( i=0; i<NBC; i++ ) if( (WALL+i)->DSPLC ) acc_BC( (WALL+i),in.dt,(WALL+i)->G );
+}
 	/* ****************************************** */
 	/* ***************** RE-BIN ***************** */
 	/* ****************************************** */
