@@ -510,6 +510,7 @@ void stream_all( particleMPC *pp,double t ) {
     positions and accelerates the velocities
 */
 	int i;
+    ///TODO: OMP here
 	for( i=0; i<GPOP; i++ ){
 		//Update coordinates --- check if it already streamed
 		if( (pp+i)->S_flag ) stream_P( (pp+i),t );
@@ -3305,7 +3306,8 @@ void timestep( cell ***CL,particleMPC *SRDparticles,spec SP[],bc WALL[],simptr s
 		if(in.LC==LCG) *AVS = avOrderParam( SRDparticles,in.LC,avDIR );
 		#ifdef DBG
 			if( DBUG >= DBGTITLE ) printf( "Orientation Collision Step.\n" );
-		#endif
+        #endif
+        ///TODO: OMP here
 		for( i=0; i<XYZ_P1[0]; i++ ) for( j=0; j<XYZ_P1[1]; j++ ) for( k=0; k<XYZ_P1[2]; k++ ) {
 			//LC collision algorithm (no collision if only 1 particle in cell)
 			if( CL[i][j][k].POP > 1 ) LCcollision( &CL[i][j][k],SP,in.KBT,in.MFPOT,in.dt,*AVS,in.LC );
@@ -3317,7 +3319,8 @@ void timestep( cell ***CL,particleMPC *SRDparticles,spec SP[],bc WALL[],simptr s
 		if( in.MAG_FLAG ) magTorque_all( SRDparticles,SP,in.dt,in.MAG );
 		#ifdef DBG
 			if( DBUG >= DBGTITLE ) printf( "Orientation Shear Alignment.\n" );
-		#endif
+        #endif
+        ///TODO: OMP here
 		for( i=0; i<XYZ_P1[0]; i++ ) for( j=0; j<XYZ_P1[1]; j++ ) for( k=0; k<XYZ_P1[2]; k++ ) {
 			//Coupling shear to orientation
 			if( CL[i][j][k].POP > 1 ) jefferysTorque( &CL[i][j][k],SP,in.dt );
@@ -3344,7 +3347,8 @@ void timestep( cell ***CL,particleMPC *SRDparticles,spec SP[],bc WALL[],simptr s
 				swcoord(swimmers[i]);
 			}
 		}
-	#endif
+    #endif
+    ///TODO: OMP here
 	for( i=0; i<XYZ_P1[0]; i++ ) for( j=0; j<XYZ_P1[1]; j++ ) for( k=0; k<XYZ_P1[2]; k++ ) {
 		//MPC/SRD collision algorithm (no collision if only 1 particle in cell)
 		CLQ[0]=i+0.5;
@@ -3437,6 +3441,7 @@ void timestep( cell ***CL,particleMPC *SRDparticles,spec SP[],bc WALL[],simptr s
 	bcCNT=0;
 	reCNT=0;
 	rethermCNT=0;
+    ///TODO: OMP here
 	for( i=0; i<GPOP; i++ ) MPC_BCcollision( SRDparticles,i,WALL,SP,in.KBT,in.dt,in.LC,&bcCNT,&reCNT,&rethermCNT,1 );
 	// XYZPBC[0]=1;
 	// XYZPBC[1]=1;
@@ -3516,6 +3521,7 @@ void timestep( cell ***CL,particleMPC *SRDparticles,spec SP[],bc WALL[],simptr s
 		reCNT=0;
 		rethermCNT=0;
 		// Check each BC for collisions MPC particles
+        ///TODO: OMP here
 		for( i=0; i<NBC; i++ ) if( (WALL+i)->DSPLC ) {
 			BC_MPCcollision( WALL,i,SRDparticles,SP,in.KBT,in.GRAV,in.dt,simMD,MDmode,in.LC,&bcCNT,&reCNT,&rethermCNT );
 		}
