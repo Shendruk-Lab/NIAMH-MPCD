@@ -109,6 +109,8 @@
 # define HOMOAXIS 3
 //GAUSS indicates that the particles' velocity follow a gaussian distribution
 # define GAUSS 4
+// FLOCK indicates that the particles` are all given the same velocity in the same direction
+# define FLOCK 5
 
 /* ****************************************** */
 /* ******************* UDIST **************** */

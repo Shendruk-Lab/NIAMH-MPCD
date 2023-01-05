@@ -589,6 +589,9 @@ void push( double V[],double KBT,int PL,double MASS,FILE *fin ) {
 		V[d] = sqrt( DIM*KBT/MASS );			//Each particleMPC has the average energy
 		V[d] *= genrand_pmOne();			//But could travel in either direction
 	}
+	else if( PL == FLOCK ) {
+		V[0] = sqrt( 2*KBT/MASS );			//Each particleMPC has the average energy
+	}
 	else if( PL == GAUSS ) for( d=0; d<DIM; d++ ) {
 		V[d] = genrand_gaussMB( KBT,MASS );	//Velocity distribution is Gaussian
 	}
@@ -868,6 +871,7 @@ void setcoord( char dir[],spec SP[],particleMPC *pp,double KBT,double AVVEL[],bc
 void checkSim( FILE *fsynopsis,int SYNOUT,inputList in,spec *SP,bc *WALL,specSwimmer SS ) {
 /*
     This subroutine just checks for odd input
+	
 */
 	int i,j;
 
@@ -933,6 +937,11 @@ void checkSim( FILE *fsynopsis,int SYNOUT,inputList in,spec *SP,bc *WALL,specSwi
 	if( DIM > _3D ) {
 		printf("Error: Hyper-dimensional solvent simulations not supported.\n");
 		if(SYNOUT == OUT) fprintf(fsynopsis,"Error: In 2D, the simulation must be in the z-plane. Set DZ=1\n");
+		exit(1);
+	}
+	if( in.RFRAME == 1 ) for( i=0; i<NSPECI; i++ ) if( SP[i].VDIST == 5 ) {
+		printf("Error: Set initialized to FLOCKing but, then subtracted all velocity to zero. Set rFrame to 0\n");
+		if(SYNOUT == OUT) fprintf(fsynopsis,"Error: Set initialized to FLOCKing but, then subtracted all velocity to zero. Set rFrame to 0\n");
 		exit(1);
 	}
 	// Initialize BC
@@ -1275,6 +1284,7 @@ void initializeSIM( cell ***CL,particleMPC *SRDparticles,spec SP[],bc WALL[],sim
 		in->RFRAME=0;
 		printf( "Simulation of 2 particles or less in the rest frame is boring\nDon't do Galilean Transformation\n" );
 	}
+	
 	#ifdef DBG
 		if( DBUG >= DBGINIT ) {
 			printf( "Inputted System Temperature (units of KB): %lf\n",in->KBT );
