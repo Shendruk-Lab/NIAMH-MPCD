@@ -868,10 +868,10 @@ void setcoord( char dir[],spec SP[],particleMPC *pp,double KBT,double AVVEL[],bc
 	//Close the input files
 	for( i=0; i<NSPECI; i++ ) if( SP[i].POP > 0 && SP[i].QDIST == READ ) fclose( fin[i] );
 }
+
 void checkSim( FILE *fsynopsis,int SYNOUT,inputList in,spec *SP,bc *WALL,specSwimmer SS ) {
 /*
     This subroutine just checks for odd input
-	
 */
 	int i,j;
 
