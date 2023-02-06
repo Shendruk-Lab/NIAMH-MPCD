@@ -940,8 +940,8 @@ void checkSim( FILE *fsynopsis,int SYNOUT,inputList in,spec *SP,bc *WALL,specSwi
 		exit(1);
 	}
 	if( in.RFRAME == 1 ) for( i=0; i<NSPECI; i++ ) if( SP[i].VDIST == 5 ) {
-		printf("Error: Set initialized to FLOCKing but, then subtracted all velocity to zero. Set rFrame to 0\n");
-		if(SYNOUT == OUT) fprintf(fsynopsis,"Error: Set initialized to FLOCKing but, then subtracted all velocity to zero. Set rFrame to 0\n");
+		printf("Error: Set initialized to FLOCKing, but then subtracted all velocity to zero. Set rFrame to 0\n");
+		if(SYNOUT == OUT) fprintf(fsynopsis,"Error: Set initialized to FLOCKing, but then subtracted all velocity to zero. Set rFrame to 0\n");
 		exit(1);
 	}
 	// Initialize BC
