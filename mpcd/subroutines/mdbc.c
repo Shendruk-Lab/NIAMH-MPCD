@@ -110,7 +110,6 @@ void MD_BCcollision( particleMD *atom,bc WALL[],double KBT,double t_step ) {
 			posBC_MD( atom,WALL[chosenBC],n );
 			rotatebackBC_MD( &WALL[chosenBC],atom );
 			shiftbackBC( shift,&WALL[chosenBC] );
-
 			//Update the time to stream for
 			time = t_step - t_delta;
 			//Let the BC stream the rest of the way
@@ -744,8 +743,13 @@ void posBC_MD( particleMD *atom,bc WALL,double n[_3D] ) {
 	}
 	//Combine normal and tangential components
 	atom->rx = PN[0] + PT[0];
-	atom->ry = PN[1] + PT[1];
-	atom->rz = PN[2] + PT[2];
+	if( DIM > _1D ){
+		atom->ry = PN[1] + PT[1];
+	}
+	if( DIM > _2D ){
+		atom->rz = PN[2] + PT[2];
+	}
+	
 }
 
 /* ****************************************** */
