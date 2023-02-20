@@ -453,7 +453,7 @@ void LCcollision( cell *CL,spec *SP,double KBT,double MFPOT,double dt,double SG,
 			printf( "WARNING: Director is zero n=" );
 			pvec( DIR,_3D );
 			printf( "\tS=%lf\n",S );
-			printf( "\tCell pop=%i\n",CL->POP );
+			printf( "\tCell pop=%i\n",CL->POPSRD );
 			tmpc = CL->pp;
 			while( tmpc!=NULL ) {
 				id = tmpc->SPID;
@@ -476,7 +476,7 @@ void LCcollision( cell *CL,spec *SP,double KBT,double MFPOT,double dt,double SG,
 	#endif
 
 	//Generate random orientations for MPC particles
-	if( CL->POP>1 ) {
+	if( CL->POPSRD>1 ) {
 		//Collision of MPC particles
 		tmpc = CL->pp;
 		while( tmpc!=NULL ) {
@@ -898,7 +898,7 @@ void magTorque_CL( cell *CL,spec *SP,double dt,double MAG[] ) {
 	for( i=0; i<_3D; i++ ) mT[i] *= nH;		//Will need to multiply chia
 
 	//Rotate each MPC particles due to the torque on the whole cell
-	if( CL->POP>1 ) {
+	if( CL->POPSRD>1 ) {
 		//Collision of MPC particles
 		tmpc = CL->pp;
 		while( tmpc!=NULL ) {
@@ -1107,7 +1107,7 @@ void tensOrderParam( cell *CL,double **S,int LC ) {
 	//Calculate the order parameter tensor
 	if( CL->pp!=NULL ) {
 		pMPC = CL->pp;
-		POPinv = 1./((double) CL->POP);
+		POPinv = 1./((double) CL->POPSRD);
 		//Calculate the order parameter tensor in this cell
 		if( LC!=ISOF ) addToTensOrderParam( pMPC,S );
 		else addToTensOrderParamVel( pMPC,S );
@@ -1150,7 +1150,7 @@ void tensOrderParamNNN( cell ***CL,double **S,int LC,int a,int b,int c ) {
 		if( ( x>=0 && y>=0 && z>=0 ) && ( x<=XYZ[0] && y<=XYZ[1] && z<=XYZ[2] ) ) {
 			if( CL[x][y][z].pp!=NULL ) {
 				pMPC = CL[x][y][z].pp;
-				POP += CL[x][y][z].POP;
+				POP += CL[x][y][z].POPSRD;
 				//Calculate the order parameter tensor in this cell
 				if( LC!=ISOF ) addToTensOrderParam( pMPC,S );
 				else addToTensOrderParamVel( pMPC,S );
@@ -1211,7 +1211,7 @@ double binderCumulant( cell ***CL,int L,int LC ) {
 			// Find the tensor order parameter for this MPCD cell
 			//Calculate the order parameter tensor
 			if( CL[i][j][k].pp!=NULL ) {
-				binPOP+=CL[i][j][k].POP;
+				binPOP+=CL[i][j][k].POPSRD;
 				pMPC = CL[i][j][k].pp;
 				//Calculate the order parameter tensor in this cell
 				if( LC!=ISOF ) addToTensOrderParam( pMPC,S );
@@ -1941,18 +1941,14 @@ void dipoleAndersenROT_LC( cell *CL,spec *SP,specSwimmer SS,double KBT,double RE
 			M = tmd->mass;
 			//Position relative to centre of mass
 			relQ[i][0] = tmd->rx - CL->CM[0];
-			relQ[i][1] = tmd->ry - CL->CM[1];
-			relQ[i][2] = tmd->rz - CL->CM[2];
-			diffV[0] = M * (tmd->vx - RV[i][0]);
-			diffV[1] = M * (tmd->vy - RV[i][1]);
-			diffV[2] = M * (tmd->vz - RV[i][2]);
-			if( DIM < _3D ) {
-				relQ[i][2] = 0.;
-				diffV[2] = 0.;
+			diffV[0] = MASS * (tmd->vx - RV[i][0]);
+			if(DIM > _1D){
+				relQ[i][1] = tmd->ry - CL->CM[1];
+				diffV[1] = MASS * (tmd->vy - RV[i][1]);
 			}
-			if( DIM < _2D ) {
-				relQ[i][1] = 0.;
-				diffV[1] = 0.;
+			if( DIM > _2D ){
+				relQ[i][2] = tmd->rz - CL->CM[2];
+				diffV[2] = MASS * (tmd->vz - RV[i][2]);
 			}
 			crossprod( relQ[i],diffV,angmom );
 			for( j=0; j<_3D; j++ ) Llm[j] += angmom[j];
@@ -2010,8 +2006,12 @@ void dipoleAndersenROT_LC( cell *CL,spec *SP,specSwimmer SS,double KBT,double RE
 	while( tmd!=NULL ) {
 		crossprod( W,relQ[i],angterm );
 		tmd->vx = VCM[0] + RV[i][0] - RS[0] + angterm[0] ;
-		tmd->vy = VCM[1] + RV[i][1] - RS[1] + angterm[1];
-		tmd->vz = VCM[2] + RV[i][2] - RS[2] + angterm[2];
+		if( DIM > _1D ){
+			tmd->vy = VCM[1] + RV[i][1] - RS[1] + angterm[1];
+		}
+		if( DIM > _2D ){
+			tmd->vz = VCM[2] + RV[i][2] - RS[2] + angterm[2];
+		}
 		//Increment link in list
 		tmd = tmd->nextSRD;
 		i++;
