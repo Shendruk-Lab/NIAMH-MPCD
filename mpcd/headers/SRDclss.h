@@ -259,6 +259,9 @@ typedef struct bc {
 ///
 typedef struct cell {
 	int POP;					///< Total population of the cell (MPCD particles, swimmers, and monomers).
+	int POPSRD;					///< Population of MPCD particles.
+	int POPSW;					///< Population of swimmers.
+	int POPMD;					///< Population of MD particles.
 	double MASS;				///< Total mass of the cell.
 	int SP[MAXSPECI];			///< Subpopulations of each MPCD species type in the cell.
 	double I[3][3];		        ///< The cell's moment of inertia about (0,0,0).
