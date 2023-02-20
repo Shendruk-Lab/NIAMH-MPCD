@@ -1013,6 +1013,9 @@ void zerocell( cell ***CL ) {
 	int i,j,k,l,m;
 	for( i=0; i<XYZ_P1[0]; i++ ) for( j=0; j<XYZ_P1[1]; j++ ) for( k=0; k<XYZ_P1[2]; k++ ) {
 		CL[i][j][k].POP = 0;
+		CL[i][j][k].POPSRD = 0;
+		CL[i][j][k].POPSW = 0;
+		CL[i][j][k].POPMD = 0;
 		CL[i][j][k].MASS = 0.0;
 		CL[i][j][k].S = 0.0;
 		for( l=0; l<_3D; l++ ) {
