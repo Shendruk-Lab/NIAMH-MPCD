@@ -69,6 +69,7 @@ void localPROP( cell ***CL,spec *SP,specSwimmer specS,int RTECH,int LC ) {
 	particleMPC *pMPC;	//Temporary pointer to MPC particles
 	particleMD *pMD;	//Temporary pointer to MD particles
 	smono *pSW;			//Temporary pointer to swimmer monomers
+	int flag = 0;
 
 	// int flag on whether to compute CM or not
 	int computeCM = (RTECH==RAT) || (LC!=ISOF) || (RTECH==DIPOLE_VCM) || (RTECH==DIPOLE_DIR_SUM) || (RTECH==DIPOLE_DIR_AV);
@@ -84,10 +85,37 @@ void localPROP( cell ***CL,spec *SP,specSwimmer specS,int RTECH,int LC ) {
 
 		//Zero everything for recounting
 		CL[a][b][c].POP = 0;
+		CL[a][b][c].POPSRD = 0;
+		CL[a][b][c].POPSW = 0;
+		CL[a][b][c].POPMD = 0;
 		CL[a][b][c].MASS = 0.0;
 		for( d=0; d<DIM; d++ ) CL[a][b][c].VCM[d] = 0.0;
 		for( d=0; d<NSPECI; d++ ) CL[a][b][c].SP[d] = 0;
 		if (computeCM) for( d=0; d<DIM; d++ ) CL[a][b][c].CM[d] = 0.0;
+
+		//**************************************************//
+		//**************************************************//
+		//TYLER + ZAHRA HACK TO SEARCH FOR NANs IN ORIENTATION
+		if( CL[a][b][c].pp!=NULL ) {
+			pMPC = CL[a][b][c].pp;
+			while(pMPC!=NULL) {
+				//Check if nan
+				d=checkNAN_vec( pMPC->U,_3D );
+				if(d!=0) {
+					printf("\n\nWARNING: cell [%i][%i][%i] contains a SRD particle with bad orientation\n",a,b,c);
+					printf("Position: ");
+					pvec(pMPC->Q,_3D);
+					printf("Velocity: ");
+					pvec(pMPC->V,_3D);
+					printf("Orientation: ");
+					pvec(pMPC->U,_3D);
+				}
+				//Increment link in list
+				pMPC = pMPC->next;
+			}
+		}
+		//**************************************************//
+		//**************************************************//
 
 		//Find local values
 		if( CL[a][b][c].pp!=NULL || ( CL[a][b][c].MDpp!=NULL && MDmode==MDinMPC ) || CL[a][b][c].sp!=NULL ) {
@@ -95,7 +123,7 @@ void localPROP( cell ***CL,spec *SP,specSwimmer specS,int RTECH,int LC ) {
 			if( CL[a][b][c].pp!=NULL ) {
 				pMPC = CL[a][b][c].pp;
 				while(pMPC!=NULL) {
-					CL[a][b][c].POP ++;
+					CL[a][b][c].POPSRD ++;
 					id = pMPC->SPID;
 					mass = (SP+id)->MASS;
 					CL[a][b][c].MASS += mass;
@@ -115,7 +143,7 @@ void localPROP( cell ***CL,spec *SP,specSwimmer specS,int RTECH,int LC ) {
 			if(MDmode==MDinMPC) if( CL[a][b][c].MDpp!=NULL) {
 				pMD = CL[a][b][c].MDpp;
 				while( pMD!=NULL ) {
-					CL[a][b][c].POP ++;
+					CL[a][b][c].POPMD ++;
 					mass = pMD->mass;
 					CL[a][b][c].MASS += mass;
 					V[0] = pMD->vx;
@@ -138,7 +166,7 @@ void localPROP( cell ***CL,spec *SP,specSwimmer specS,int RTECH,int LC ) {
 			if( CL[a][b][c].sp!=NULL) {
 				pSW = CL[a][b][c].sp;
 				while( pSW!=NULL ) {
-					CL[a][b][c].POP ++;
+					CL[a][b][c].POPSW ++;
 					if( pSW->HorM ) mass = (double) specS.middM;
 					else mass = (double) specS.headM;
 					CL[a][b][c].MASS += mass;
@@ -159,6 +187,7 @@ void localPROP( cell ***CL,spec *SP,specSwimmer specS,int RTECH,int LC ) {
 			CL[a][b][c].VCM[d] /= CL[a][b][c].MASS;
 			if (computeCM) CL[a][b][c].CM[d] /= CL[a][b][c].MASS;
 		}
+		CL[a][b][c].POP = CL[a][b][c].POPSRD + CL[a][b][c].POPSW + CL[a][b][c].POPMD;
 	}
 	//Calculate moment of inertia
 	if( RTECH==RAT || LC!=ISOF ) {
@@ -175,10 +204,14 @@ void localPROP( cell ***CL,spec *SP,specSwimmer specS,int RTECH,int LC ) {
 		for( i=0; i<DIM; i++ ) for( d=0; d<DIM; d++ ) S[i][d] = 0.0;
 		// Find the order parameter tensor, the director and the scalar order parameter for each cell
 		for( a=0; a<XYZ_P1[0]; a++ ) for( b=0; b<XYZ_P1[1]; b++ ) for( c=0; c<XYZ_P1[2]; c++ ) {
-			if( CL[a][b][c].POP > 1 ) {
+			if( CL[a][b][c].POPSRD > 1 ) {
 				// Find the tensor order parameter
 				tensOrderParam( &CL[a][b][c],S,LC );				// From the tensor order parameter find eigenvalues and vectors --- S is written over as normalized eigenvectors
-				solveEigensystem( S,DIM,eigval );
+				flag = solveEigensystem( S,DIM,eigval );
+				if (flag){
+					printf("\t Cell [%d,%d,%d]\n",a,b,c);
+					printf("\t popsrd = %d, popmd = %d, popsw= %d\n",CL[a][b][c].POPSRD,CL[a][b][c].POPMD,CL[a][b][c].POPSW);
+				}
 				//The scalar order parameter is the largest eigenvalue which is given first, ie eigval[0]
 				// But can be better approximated (cuz fluctuates about zero) by -2* either of the negative ones (or the average)
 				if(DIM==_3D) CL[a][b][c].S = -1.*(eigval[1]+eigval[2]);
@@ -279,7 +312,7 @@ void ghostPart( cell ***CL,bc WALL[],double KBT,int LC, spec *SP) {
 	int wallindex;							// Index of wall with anchoring acting on a cell
 	double shift[DIM];
 	setGhostAnch = 1; 						// a manual switch to turn on=1 or off=0 the stronger anchoring
-
+	int flag = 0;
 
 	if (setGhostAnch == 1){
 		// Allocate memory for S
@@ -414,7 +447,7 @@ void ghostPart( cell ***CL,bc WALL[],double KBT,int LC, spec *SP) {
 						}
 
 						// One particle cell (also manually set)
-						else if ( CL[a][b][c].POP == 1 ){
+						else if ( CL[a][b][c].POPSRD == 1 ){
 							CL[a][b][c].S = 1.0;
 							// Set the director as the orientation of the particle
 							for( k=0; k<DIM; k++ ) CL[a][b][c].DIR[k] = CL[a][b][c].pp->U[k];
@@ -422,11 +455,15 @@ void ghostPart( cell ***CL,bc WALL[],double KBT,int LC, spec *SP) {
 						}
 
 						// Curved wall
-						else if (CL[a][b][c].POP > 1){
+						else if (CL[a][b][c].POPSRD > 1){
 							// Calculate Q tensor
 							tensOrderParam( &CL[a][b][c], S, LC );
 							// Find S
-							solveEigensystem( S, DIM, eigval );
+							flag = solveEigensystem( S,DIM,eigval );
+							if (flag){
+								printf("\t Cell [%d,%d,%d]\n",a,b,c);
+								printf("\t popsrd = %d, popmd = %d, popsw= %d\n",CL[a][b][c].POPSRD,CL[a][b][c].POPMD,CL[a][b][c].POPSW);
+							}
 							if(DIM==_3D) CL[a][b][c].S = -1.*(eigval[1]+eigval[2]);
 							else CL[a][b][c].S = eigval[0];
 							if( CL[a][b][c].S < 1./(1.-DIM) ){
@@ -4392,7 +4429,7 @@ void timestep( cell ***CL,particleMPC *SRDparticles,spec SP[],bc WALL[],simptr s
 		#endif
 		for( i=0; i<XYZ_P1[0]; i++ ) for( j=0; j<XYZ_P1[1]; j++ ) for( k=0; k<XYZ_P1[2]; k++ ) {
 			//LC collision algorithm (no collision if only 1 particle in cell)
-			if( CL[i][j][k].POP > 1 ) LCcollision( &CL[i][j][k],SP,in.KBT,in.MFPOT,in.dt,*AVS,in.LC );
+			if( CL[i][j][k].POPSRD > 1 ) LCcollision( &CL[i][j][k],SP,in.KBT,in.MFPOT,in.dt,*AVS,in.LC );
 		}
 		// Magnetic alignment is really part of the collision
 		#ifdef DBG
@@ -4404,7 +4441,7 @@ void timestep( cell ***CL,particleMPC *SRDparticles,spec SP[],bc WALL[],simptr s
 		#endif
 		for( i=0; i<XYZ_P1[0]; i++ ) for( j=0; j<XYZ_P1[1]; j++ ) for( k=0; k<XYZ_P1[2]; k++ ) {
 			//Coupling shear to orientation
-			if( CL[i][j][k].POP > 1 ) jefferysTorque( &CL[i][j][k],SP,in.dt );
+			if( CL[i][j][k].POPSRD > 1 ) jefferysTorque( &CL[i][j][k],SP,in.dt );
 		}
 		#ifdef DBG
 			if (DBUG == DBGTHERM) {

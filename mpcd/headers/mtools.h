@@ -78,10 +78,10 @@ double non4foldSymmCalcW( bc WALL,double POS[], int dimension );
 
 // Eigenvalues and vectors
 void eigenvalues2x2( double **m,double eigval[] );
-void eigenvectors2x2( double **m,double eigval[],double eigvec[][2] );
+int eigenvectors2x2( double **m,double eigval[],double eigvec[][2] );
 void eigenvalues3x3( double **m,double eigval[] );
 void eigenvectors3x3( double **m,double eigval[],double eigvec[][3] );
-void solveEigensystem( double **m,int dimension,double eigval[] );
+int solveEigensystem( double **m,int dimension,double eigval[] );
 
 //Derivatives
 double centredDeriv( double xM1,double xP1,double dt );

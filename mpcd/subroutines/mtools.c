@@ -1242,7 +1242,8 @@ void eigenvalues2x2( double **m,double eigval[] ) {
 /// @param eigval Eigenvalues of the matrix.
 /// @param eigvec Eigenvectors of the matrix.
 ///
-void eigenvectors2x2( double **m,double eigval[],double eigvec[][_2D] ) {
+int eigenvectors2x2( double **m,double eigval[],double eigvec[][_2D] ) {
+	int flag=0;
 	if( fneq(m[1][0],0.0) ) {
 		//First eigenvalue
 		eigvec[0][0]=eigval[0]-m[1][1];
@@ -1286,8 +1287,15 @@ void eigenvectors2x2( double **m,double eigval[],double eigvec[][_2D] ) {
 			eigvec[0][0]=1.0;
 			eigvec[0][1]=0.0;
 		}
-		else printf("Warning: 2D eigensolver failed.\n");
+		else {
+			printf("Warning: 2D eigensolver failed.\n");
+			printf("eigenval[0]:%f and eigenval[1]:%f\n",eigval[0],eigval[1]);
+			printf("m00:%f , m01:%f ,m10:%f , m11:%f\n",m[0][0],m[0][1],m[1][0],m[1][1]);
+			flag = 1;
+		} 
+			
 	}
+	return flag;
 }
 
 ///
@@ -1436,13 +1444,13 @@ void eigenvectors3x3( double **m,double eigval[],double eigvec[][_3D] ) {
 /// @warning m is lost!
 /// @warning Dimension must be 1, 2, or 3.
 ///
-void solveEigensystem( double **m,int dimension,double eigval[] ) {
-	int i,j;
+int solveEigensystem( double **m,int dimension,double eigval[] ) {
+	int i,j,flag = 0;
 
 	if( dimension==_2D ) {
 		double eigvec[dimension][dimension];
 		eigenvalues2x2( m,eigval );
-		eigenvectors2x2( m,eigval,eigvec );
+		flag = eigenvectors2x2( m,eigval,eigvec );
 		for( i=0;i<dimension;i++ ) for( j=0;j<dimension;j++ ) m[i][j]=eigvec[i][j];
 	}
 	else if( dimension==_3D ) {
@@ -1461,6 +1469,7 @@ void solveEigensystem( double **m,int dimension,double eigval[] ) {
 		printf( "Error: Solving the eigensystem for dimensions greater than 3 is not coded (DIM=%d).\n",dimension );
 		exit(EXIT_FAILURE);
 	}
+	return flag;
 }
 
 ///
