@@ -16,7 +16,7 @@ headers    = $(shell ls mpcd/headers/*.h) $(shell ls md/*.h) $(shell ls dependen
 objects    = $(sources:.c=.o)
 
 # other variables
-cc         :=  gcc
+cc         :=  clang
 cflags     :=  -Wall
 lib        :=  -lm
 opt        :=  -O3
