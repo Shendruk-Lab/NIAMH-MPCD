@@ -1607,6 +1607,7 @@ void binSwimmers( cell ***CL,int shifted ) {
 			//Make sure particleMPC didn't escape
 			if( a>XYZ[0] || b>XYZ[1] || c>XYZ[2] || a<0 || b<0 || c<0 ){
 				printf( "Error:\tSwimmer monomer escaped from cell [%i,%i,%i].\n",a,b,c );
+				printf( "Swimmer position [%i,%i,%i].\n",cp->Q[0],cp->Q[1],cp->Q[2] );
  				exit( 0 );
 			}
 			//Remove from old list and add to new

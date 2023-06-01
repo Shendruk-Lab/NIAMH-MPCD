@@ -287,6 +287,7 @@ void ghostPart( cell ***CL,bc WALL[],double KBT,int LC, spec *SP) {
 	double shift[DIM];
 	setGhostAnch = 1; 						// a manual switch to turn on=1 or off=0 the stronger anchoring
 
+
 	if (setGhostAnch == 1){
 		// Allocate memory for S
 		S = malloc ( DIM * sizeof( *S ) );
@@ -432,7 +433,7 @@ void ghostPart( cell ***CL,bc WALL[],double KBT,int LC, spec *SP) {
 							// Calculate Q tensor
 							tensOrderParam( &CL[a][b][c], S, LC );
 							// Find S
-							solveEigensystem( S,DIM,eigval );
+							solveEigensystem( S, DIM, eigval );
 							if(DIM==_3D) CL[a][b][c].S = -1.*(eigval[1]+eigval[2]);
 							else CL[a][b][c].S = eigval[0];
 							if( CL[a][b][c].S < 1./(1.-DIM) ){
@@ -2761,12 +2762,383 @@ void MPCcollision( cell *CL,spec *SP,specSwimmer SS,double KBT,int RTECH,double 
 /// @param outP Flag whether or not to output the pressure.
 ///
 void multiphaseColl( cell *CL,spec *SP,specSwimmer SS,int multiphaseMode, double KBT,int MDmode,double *CLQ,int outP ) {
-/*
-    THIS IS WHERE KIRA SHOULD ADD HER NEW BIT!!!
-*/
 	if( multiphaseMode==MPHSURF ) {
-		printf("Error: Multiphase interaction not yet implemented.\nTo be implemented by Kira");
-		exit( 1 );
+		int i,j,k,d,id;
+		double timestep = 0.1; //it would be better to get this value from the input file, as it must correspond to the dt set there. 
+		smono *tsm;
+		int ncoeff; 
+		int orderApprox = (SP+1)->M[1]; 
+		//for orderApprox, it may be better to set up new input variable. Currently the second element of "interMatr" for the second species in the input file 
+		//can be set to 2 or 3 for parabolic and cubic approximations, respectively, of the order parameter field. 
+		int incompressibility = 0; //0 for no incompressibility, 1 for ideal gas, 2 for non-linear 
+		// the incompressibility method here needs revising, so the above variable should be set to zero
+		//double incompStrength = 0.0001;
+		//it is potentially better to have a dedicated input variable for setting the three free energy density pareameters below.
+		double tau = (SP)->M[0]; // this is the reduced temperature of the system ( tau = (T-Tc)/Tc ) used in the free energy density "f", and should be negative to achieve phase separation. 
+		double b = (SP)->M[1]; // the phi^4 coefficient in f. b>0 for stability.
+		double kappa = (SP+1)->M[0]; // the coefficient of (grad phi)^2 in f, associated with surface tension. 
+		double tempMag = 0.0;
+		double FbulkMultiplier = 100.0; // scales the effect of bulk forces. 
+		double FdenMultiplier = 0.0; // set to zero here as the Fden method is not yet complete.
+		double FintMultiplier = 1.0; // scales the effect of interfacial forces. 
+		double FswimMultiplier = 100000.0; //a very high value means that the chemotactic effect dominates whenever there is a finite order parameter gradient.
+		double K = 0.1; // parameterises used in the chemotactic force on swimmers. 
+		double Q[DIM]; 
+		double Vtemp[DIM], velMag=0.0;
+		double Fbulk[DIM], Fchem[DIM], Fint[DIM], Fden[DIM];
+		double N=0.0,Na=0.0,Nb=0.0; //counts number of particles in cell, that of type A, and that of type B respectively, 
+		particleMPC *tmpc;
+		tmpc = CL->pp;
+		id = tmpc->SPID;
+		if (DIM == 2) // note that parabolic approx in 2D requires a specification of 6 coefficients, while cubic requires 10 coefficients. 
+		{
+			if (orderApprox==2){
+				ncoeff = 6;
+			}
+			else if (orderApprox==3){
+				ncoeff = 10;
+			}
+		}
+		else if (DIM == 3)// note that parabolic approx in 3D requires a specification of 10 coefficients. Cubic for 3D has not yet been implemented. 
+		{
+			ncoeff = 10; 
+			if (orderApprox == 3){
+				printf("\nCubic approximation of order parameter field in 3D systems not yet implemented - switching to parabolic approximation.\n");
+			}
+		}
+		double a[CL->POP][ncoeff]; //elements of matrix A - which contains products of position data for all particles according to approximation method used. 
+		double phi[CL->POP]; //compositional order parameter values for each particle in MPCD cell.
+		double C[ncoeff][ncoeff]; //elements of cofactor matrix of A^TA.
+		double coeff[ncoeff]; //coefficients of the polynomial order parameter approximnation.
+		// the following variables are the counterparts to a, phi, C, and coeff when finding density field approximation - but this method needs fixing so the associated code has been commented out.
+		double a_rho[CL->POP+1][ncoeff];
+		double rho[CL->POP+1];  
+		double C_rho[ncoeff][ncoeff]; 
+		double coeff_rho[ncoeff];
+	
+		double det = 0.0; //determinant of matrix A^TA.
+		double chemotaxisFactor[2][DIM]; 
+		//zero all necessary values
+		for (i=0;i<DIM;i++) {
+			Q[i]=0.0;
+			Fbulk[i]=0.0;
+			Fint[i]=0.0;
+			Fden[i]=0.0;
+			Fchem[i]=0.0;
+			chemotaxisFactor[0][i] = 0.0;
+			chemotaxisFactor[1][i] = 0.0;
+		}
+		for (i=0;i<CL->POP;i++) {
+			phi[i]=0; 
+			rho[i]=1; 
+			for (j=0;j<ncoeff;j++) {
+				a[i][j]=0.0; 
+				a_rho[i][j]=0.0;
+			}
+		}
+		rho[CL->POP] = -1.0*(CL->POP); //one heavy phantom particle placed at centre of cell with "negavtive" density 
+		for (i=0;i<ncoeff;i++) {
+			coeff[i]=0.0;
+			coeff_rho[i]=0.0;
+			for (j=0;j<ncoeff;j++) {
+				C[i][j]=0.0; //elements of matrix A
+				C_rho[i][j]=0.0;
+			}
+		}
+		i=0;
+		//MPC particles
+		tmpc = CL->pp;
+		N = (double)(CL->POP);
+		while( tmpc!=NULL ) {
+			//fetch position data for this particle, relative to the geometric centre of the cell
+			for( d=0; d<DIM; d++ ) Q[d] = tmpc->Q[d] - 0.5 - (double)((int)tmpc->Q[d]);
+			if (tmpc->SPID==0) 
+			{
+				//this is type A
+				phi[i] = 1.0/(double)CL->POP; 
+				Na+=1; 
+			}
+			else if (tmpc->SPID==1)
+			{
+				//this is type B
+				phi[i] = -1.0/(double)CL->POP; 
+				Nb+=1;
+			}
+			//compute A matrix elements
+			if (DIM == 2)
+			{
+				switch(orderApprox)
+				{
+					case(2): // 2D parabolic
+						a[i][0] = Q[0]*Q[0]; //x^2
+						a[i][1] = Q[1]*Q[1]; //y^2
+						a[i][2] = Q[0]*Q[1]; //xy
+						a[i][3] = Q[0]; //x
+						a[i][4] = Q[1]; //y
+						a[i][5] = 1.0; //1
+						//the code below is intended to set up a matrix a_rho for finding the density field approximation, however this method needs revising. 
+						/* 
+						a_rho[i][0] = Q[0]*Q[0]; //x^2
+						a_rho[i][1] = Q[1]*Q[1]; //y^2
+						a_rho[i][2] = Q[0]*Q[1]; //xy
+						a_rho[i][3] = Q[0]; //x
+						a_rho[i][4] = Q[1]; //y
+						a_rho[i][5] = 1.0; //1
+						if (i==(CL->POP-1)){//this is for the "phantom" particle at cell centre.
+							double q0 = 0.0; 
+							double q1 = 0.0;
+							a_rho[CL->POP][0] = q0*q0; //x^2
+							a_rho[CL->POP][1] = q1*q1; //y^2
+							a_rho[CL->POP][2] = q0*q1; //xy
+							a_rho[CL->POP][3] = q0; //x
+							a_rho[CL->POP][4] = q1; //y
+							a_rho[CL->POP][5] = 1.0; //1
+						}
+						*/
+						break;
+					case(3): // 2D cubic  
+						a[i][0] = Q[0]*Q[0]*Q[0]; //x^3
+						a[i][1] = Q[1]*Q[1]*Q[1]; //y^3
+						a[i][2] = Q[0]*Q[0]*Q[1]; //x^2y
+						a[i][3] = Q[1]*Q[1]*Q[0]; //y^2x
+						a[i][4] = Q[0]*Q[0]; //x^2
+						a[i][5] = Q[1]*Q[1]; //y^2
+						a[i][6] = Q[0]*Q[1]; //xy
+						a[i][7] = Q[0]; //x
+						a[i][8] = Q[1]; //y
+						a[i][9] = 1.0; //1
+						// also set a_rho values here (when this method is fixed)
+						break;
+				}
+			}
+			else if (DIM == 3)
+			{
+				// 3D parabolic  
+				a[i][0] = Q[0]*Q[0]; //x^2
+				a[i][1] = Q[1]*Q[1]; //y^2
+				a[i][2] = Q[2]*Q[2]; //z^2
+				a[i][3] = Q[0]*Q[1]; //xy
+				a[i][4] = Q[1]*Q[2]; //yz
+				a[i][5] = Q[2]*Q[0]; //zx
+				a[i][6] = Q[0]; //x
+				a[i][7] = Q[1]; //y
+				a[i][8] = Q[2]; //z
+				a[i][9] = 1.0; //1
+				// also set a_rho values here (when this method is fixed)
+			}
+			tmpc = tmpc->next;
+			i++;
+		}
+		// note that if one particle population is absent, then it is not necessary (or possible) to phase separate in this cell, and swimmers should undergo usual run-tumble dynamics. 
+		if (Na != 0 && Nb != 0) 
+		{
+			// regardless whether using 2D or 3D, find the C matrix and the determinant according to the number of coefficients.
+			if (ncoeff==6){
+				cofactors6x6(a,CL->POP,C,det);
+			}
+			else if (ncoeff==10){
+				cofactors10x10(a,CL->POP,C,det);
+			}
+			//find the coefficients 
+			for (i=0;i<ncoeff;i++)
+			{
+				for (j=0;j<ncoeff;j++)
+				{
+					for (k=0;k<CL->POP;k++)
+					{
+						coeff[i]+=C[i][j]*a[k][j]*phi[k]; 
+						double cvec2[1];
+						cvec2[0] = coeff[i]; 
+						// note that for cells with five particles or fewer (likely to occur near interfaces), matrix A will be singular and the coefficients will be NAN.
+						// There is a non-zero but quickly negligible likelihood for the same to occur for higher particle numbers. 
+						// Where NAN values are returned, do not apply any phase separation force. 
+						if (checkNAN_vec(cvec2,1)!=0)
+							{
+								coeff[i]=0.0;
+								break;
+							}
+					}
+				}
+			}
+			//The code below determines the continuous approximation of the density field given an appropriate a_rho matrix, and computes the appropriate 
+			//force resulting from the equation of state (using one of two different methods). This code has been commented out here as the method for 
+			//defining a_rho above needs revising in order to determine an appropriate incompressibility force. 
+
+			/* 
+			if (incompressibility!=0) 
+			{
+				switch(ncoeff)
+				{
+					case(6):
+						cofactors6x6(a_rho,CL->POP+1,C_rho,det);
+						break;
+					case(10):
+						cofactors10x10(a_rho,CL->POP+1,C_rho,det);
+						break;
+				}
+				//find the coefficients 
+				for (i=0;i<ncoeff;i++)
+				{
+					for (j=0;j<ncoeff;j++)
+					{
+						for (k=0;k<CL->POP+1;k++)
+						{
+							coeff_rho[i]+=C_rho[i][j]*a_rho[k][j]*rho[k]; 
+							double cvec3[1];
+							cvec3[0] = coeff_rho[i];
+							if (checkNAN_vec(cvec3,1)!=0)
+								{
+									coeff_rho[i]=0.0;
+									break;
+								}
+						}
+					}
+				}
+				if (incompressibility==1)
+				{
+					//this is for ideal-gas-like pressure tensor so that f = -chi*grad(rho)
+					Fden[0]= -1.0*incompStrength*coeff_rho[3];
+					Fden[1]= -1.0*incompStrength*coeff_rho[4];
+					//also do 3d and cubic cases 
+				}
+				if (incompressibility==2)
+				{
+					//this is for non-linear state function so that f = -chi*rhp*grad(rho)
+					Fden[0]= -1.0*coeff_rho[5]*incompStrength*coeff_rho[3];
+					Fden[1]= -1.0*coeff_rho[5]*incompStrength*coeff_rho[4];
+					//also do 3d and cubic cases 
+				}
+			}
+			*/
+			//use coefficients to determine continuous approximation of phi and its derivatives 
+			if (DIM == 2)
+			{
+				switch(orderApprox)
+				{
+					case(2): // 2D parabolic 
+						Fbulk[0] = -fabs(coeff[5])*(tau+3*b*coeff[5]*coeff[5])*coeff[3];
+						Fbulk[1] = -fabs(coeff[5])*(tau+3*b*coeff[5]*coeff[5])*coeff[4];
+						Fint[0] = 0;
+						Fint[1] = 0;
+						Fchem[0]= coeff[3]; 
+						Fchem[1]= coeff[4];
+						//it is possible to insert other force components here as desired - eg Fden, when this method is corrected. 
+						break;
+					case(3): // 2D cubic
+						Fbulk[0] = -fabs(coeff[9])*(tau+3*b*coeff[9]*coeff[9])*coeff[7];
+						Fbulk[1] = -fabs(coeff[9])*(tau+3*b*coeff[9]*coeff[9])*coeff[8];
+						Fint[0] = kappa*fabs(coeff[9])*(6*coeff[0]+2*coeff[3]);
+						Fint[1] = kappa*fabs(coeff[9])*(6*coeff[1]+2*coeff[2]);
+						Fchem[0]= coeff[7];
+						Fchem[1]= coeff[8];
+						//it is possible to insert other force components here as desired - eg Fden, when this method is corrected. 
+						break;
+				}
+			}
+			else if (DIM == 3)
+			{
+				//recall that in the code above we have ensured 3D systems only execute the parabolic approximation. 
+				Fbulk[0] = -fabs(coeff[9])*(tau+3*b*coeff[9]*coeff[9])*coeff[6];
+				Fbulk[1] = -fabs(coeff[9])*(tau+3*b*coeff[9]*coeff[9])*coeff[7];
+				Fbulk[2] = -fabs(coeff[9])*(tau+3*b*coeff[9]*coeff[9])*coeff[8];
+				Fint[0] = 0;
+				Fint[1] = 0;
+				Fint[2] = 0;
+				Fchem[0]= coeff[6];
+				Fchem[1]= coeff[7];
+				Fchem[2]= coeff[8];
+			}
+			i=0;
+			// MPC particles
+			tmpc = CL->pp;
+			while( tmpc!=NULL ) {
+				id = tmpc->SPID;
+				velMag=0.0;
+				for(i=0;i<DIM;i++)
+				{
+					velMag+=tmpc->V[i]*tmpc->V[i];
+					Vtemp[i] = tmpc->V[i]; 
+				}
+				velMag=sqrt(velMag);
+				//note that we add velocity components to a temporary velocity vector, and later set the velocity to this temporary variable. 
+				if (id==0) 
+				{
+					//this is type A
+					for( j=0; j<DIM; j++ ) Vtemp[j] += (FbulkMultiplier*Fbulk[j]*(0.5*N/Na)+FintMultiplier*Fint[j]*(0.5*N/Na)+FdenMultiplier*Fden[j])*timestep;
+				}
+				else if (id==1)
+				{
+					//this is type B
+					for( j=0; j<DIM; j++ ) Vtemp[j] += (-1.0*FbulkMultiplier*Fbulk[j]*(0.5*N/Nb)-FintMultiplier*Fint[j]*(0.5*N/Nb)+FdenMultiplier*Fden[j])*timestep;
+				}
+				// now normalise the velocity and give it the original velocity magnitude, to maintain the temperature of the system. 
+				tempMag = dotprod(Vtemp,Vtemp,DIM);
+				if (tempMag!=0)
+				{
+					norm(Vtemp,DIM);
+				}
+				else
+				{
+					for(i=0;i<DIM;i++) Vtemp[i]=0.0;
+				}
+				for(i=0;i<DIM;i++) tmpc->V[i]=velMag*Vtemp[i];
+				//Increment link in list
+				tmpc = tmpc->next;
+				i++;
+			}
+			//Swimmer monomers
+			switch(orderApprox)
+			{
+				case(2):
+					chemotaxisFactor[0][0]=K/((K+0.5*(1.0+ N*coeff[5]))*(K+0.5*(1.0+ N*coeff[5])))*0.5*(N*coeff[3]);
+					chemotaxisFactor[0][1]=K/((K+0.5*(1.0+ N*coeff[5]))*(K+0.5*(1.0+ N*coeff[5])))*0.5*( N*coeff[4]);
+					chemotaxisFactor[1][0]=K/((K+0.5*(1.0- N*coeff[5]))*(K+0.5*(1.0- N*coeff[5])))*0.5*(- N*coeff[3]);
+					chemotaxisFactor[1][1]=K/((K+0.5*(1.0- N*coeff[5]))*(K+0.5*(1.0- N*coeff[5])))*0.5*(- N*coeff[4]);
+					break;
+				case(3):
+					chemotaxisFactor[0][0]=K/((K+0.5*(1.0+ N*coeff[9]))*(K+0.5*(1.0+ N*coeff[9])))*0.5*( N*coeff[7]);
+					chemotaxisFactor[0][1]=K/((K+0.5*(1.0+ N*coeff[9]))*(K+0.5*(1.0+ N*coeff[9])))*0.5*( N*coeff[8]);
+					chemotaxisFactor[1][0]=K/((K+0.5*(1.0- N*coeff[5]))*(K+0.5*(1.0- N*coeff[5])))*0.5*(- N*coeff[7]);
+					chemotaxisFactor[1][1]=K/((K+0.5*(1.0- N*coeff[5]))*(K+0.5*(1.0- N*coeff[5])))*0.5*(- N*coeff[8]);
+					break;
+			}
+			tsm = CL->sp;
+			while( tsm!=NULL ) {
+				if( tsm->HorM ) id = SS.MSPid;
+				else id = SS.HSPid;
+				velMag=0.0;
+				for(i=0;i<DIM;i++)
+				{
+					velMag+=tsm->V[i]*tsm->V[i];
+					Vtemp[i] = tsm->V[i]; 
+				}
+				velMag=sqrt(velMag);
+				if (id==0) 
+				{
+					for( j=0; j<DIM; j++ ) Vtemp[j] += FswimMultiplier*chemotaxisFactor[0][j];
+				}
+				else if (id==1)
+				{
+					for( j=0; j<DIM; j++ ) Vtemp[j] += FswimMultiplier*chemotaxisFactor[1][j];
+				}
+				tempMag = dotprod(Vtemp,Vtemp,DIM);
+				if (tempMag!=0)
+				{
+					norm(Vtemp,DIM);
+				}
+				else 
+				{
+					for(i=0;i<DIM;i++) Vtemp[i]=0.0;
+				}
+				for(i=0;i<DIM;i++) Vtemp[i]=velMag*Vtemp[i];
+				for(i=0;i<DIM;i++) tsm->V[i]=Vtemp[i];
+				//Increment link in list
+				i++;
+				//Increment link in list
+				tsm = tsm->next;
+				}
+		}
+		
 	}
 	else if( multiphaseMode==MPHPOINT ) multiphaseCollPoint( CL,SP,SS,KBT,MDmode,CLQ,outP );
 	else {
@@ -4380,7 +4752,7 @@ void timestep( cell ***CL,particleMPC *SRDparticles,spec SP[],bc WALL[],simptr s
 	#endif
 	//Calculate the local properties of each cell (VCM,KBT,POPulation,Mass)
 	//Do this AFTER acceleration so that use accelerated VCM in collision
-	localPROP( CL,SP,*SS,in.RTECH,in.LC );
+	localPROP( CL,SP,*SS,in.RTECH,in.LC ); 
 	/* ****************************************** */
 	/* *********** ADD GHOST PARTICLES ********** */
 	/* ****************************************** */
@@ -4554,82 +4926,82 @@ void timestep( cell ***CL,particleMPC *SRDparticles,spec SP[],bc WALL[],simptr s
 			zerovec(WALL[i].dV,DIM);
 			zerovec(WALL[i].dL,_3D);
 		}
-		/* ****************************************** */
-		/* ************* TRANSLATE BCs ************** */
-		/* ****************************************** */
-		#ifdef DBG
-			if( DBUG >= DBGTITLE ) printf( "Translate BCs.\n" );
-		#endif
-		//Save the old position in case a BC-BC collision occurs
-		for( i=0; i<NBC; i++ ) if( (WALL+i)->DSPLC ) for( j=0; j<DIM; j++ ) {
-			(WALL+i)->Q_old[j] = (WALL+i)->Q[j];
-			(WALL+i)->O_old[j] = (WALL+i)->O[j];
-		}
-		//Translate each of the BCs --- using velocity from BEFORE MPC_BCcollision()
-		for( i=0; i<NBC; i++ ) if( (WALL+i)->DSPLC ) stream_BC( (WALL+i),in.dt );
-		/* ****************************************** */
-		/* *************** ROTATE BCs *************** */
-		/* ****************************************** */
-		#ifdef DBG
-			if( DBUG >= DBGTITLE ) printf( "Spin BCs.\n" );
-		#endif
-		for( i=0; i<NBC; i++ ) if( (WALL+i)->DSPLC ) spin_BC( (WALL+i),in.dt );
-		/* ****************************************** */
-		/* ***************** BC-BC ****************** */
-		/* ****************************************** */
-		#ifdef DBG
-			if( DBUG >= DBGTITLE ) printf( "Check BCs Against BCs.\n" );
-		#endif
-		//Check each BC
-		for( i=0; i<NBC; i++ ) if( (WALL+i)->DSPLC ) {
-			BC_FLAG = 0;
-			for( j=0; j<NBC; j++ ) if( j != i ) {
-				//Check BC number i for collisions other BCs
-				#ifdef DBG
-					if( DBUG == DBGBCBC ) printf( "BC%d BC%d\n",i,j );
-				#endif
-				BC_BCcollision( WALL+i,WALL+j,in.dt,&BC_FLAG );
-			}
-		}
-		/* ****************************************** */
-		/* ***************** BC-MPCD **************** */
-		/* ****************************************** */
-		// if( BC_FLAG ) {
-			#ifdef DBG
-				if( DBUG >= DBGTITLE ) printf( "Check BCs Against MPCs after BC-BC collisions.\n" );
-			#endif
-			bcCNT=0;
-			reCNT=0;
-			rethermCNT=0;
-			// Check each BC for collisions MPC particles
-			for( i=0; i<NBC; i++ ) if( (WALL+i)->DSPLC ) {
-				BC_MPCcollision( WALL,i,SRDparticles,SP,in.KBT,in.GRAV,in.dt,simMD,MDmode,in.LC,&bcCNT,&reCNT,&rethermCNT );
-			}
-			#ifdef DBG
-				if( DBUG == DBGBCCNT ) if( bcCNT>0 ) printf( "\t%d particles had difficulty with the BCs when the BCs moved (%d rewind events; %d rethermalization events).\n",bcCNT,reCNT,rethermCNT );
-			#endif
-		// }
-		/* ****************************************** */
-		/* ************* APPLY IMPULSE ************** */
-		/* ****************************************** */
-		#ifdef DBG
-			if( DBUG >= DBGTITLE ) printf( "Impulse on BCs from BC-translations.\n" );
-		#endif
-		//Apply impulse from BC_MPCcollision()
-		for( i=0; i<NBC; i++ ) if( (WALL+i)->DSPLC ) {
-			for( j=0; j<DIM; j++ ) (WALL+i)->V[j] += (WALL+i)->dV[j];
-			//THERE SHOULD BE NO dL since BC_MPCcollision() ignores ang mom
-			for( j=0; j<_3D; j++ ) (WALL+i)->L[j] += (WALL+i)->dL[j];
-		}
-		/* ****************************************** */
-		/* ************* ACCELERATE BCs ************* */
-		/* ****************************************** */
-		#ifdef DBG
-			if( DBUG >= DBGTITLE ) printf( "Accelerate BCs.\n" );
-		#endif
-		//Accelerate each of the BCs
-		if( in.GRAV_FLAG ) for( i=0; i<NBC; i++ ) if( (WALL+i)->DSPLC ) acc_BC( (WALL+i),in.dt,(WALL+i)->G );
+	/* ****************************************** */
+	/* ************* TRANSLATE BCs ************** */
+	/* ****************************************** */
+	#ifdef DBG
+		if( DBUG >= DBGTITLE ) printf( "Translate BCs.\n" );
+	#endif
+	//Save the old position in case a BC-BC collision occurs
+	for( i=0; i<NBC; i++ ) if( (WALL+i)->DSPLC ) for( j=0; j<DIM; j++ ) {
+		(WALL+i)->Q_old[j] = (WALL+i)->Q[j];
+		(WALL+i)->O_old[j] = (WALL+i)->O[j];
 	}
+	//Translate each of the BCs --- using velocity from BEFORE MPC_BCcollision()
+	for( i=0; i<NBC; i++ ) if( (WALL+i)->DSPLC ) stream_BC( (WALL+i),in.dt );
+	/* ****************************************** */
+	/* *************** ROTATE BCs *************** */
+	/* ****************************************** */
+	#ifdef DBG
+		if( DBUG >= DBGTITLE ) printf( "Spin BCs.\n" );
+	#endif
+	for( i=0; i<NBC; i++ ) if( (WALL+i)->DSPLC ) spin_BC( (WALL+i),in.dt );
+	/* ****************************************** */
+	/* ***************** BC-BC ****************** */
+	/* ****************************************** */
+	#ifdef DBG
+		if( DBUG >= DBGTITLE ) printf( "Check BCs Against BCs.\n" );
+	#endif
+	//Check each BC
+	for( i=0; i<NBC; i++ ) if( (WALL+i)->DSPLC ) {
+		BC_FLAG = 0;
+		for( j=0; j<NBC; j++ ) if( j != i ) {
+			//Check BC number i for collisions other BCs
+			#ifdef DBG
+				if( DBUG == DBGBCBC ) printf( "BC%d BC%d\n",i,j );
+			#endif
+			BC_BCcollision( WALL+i,WALL+j,in.dt,&BC_FLAG );
+		}
+	}
+	/* ****************************************** */
+	/* ***************** BC-MPCD **************** */
+	/* ****************************************** */
+	// if( BC_FLAG ) {
+		#ifdef DBG
+			if( DBUG >= DBGTITLE ) printf( "Check BCs Against MPCs after BC-BC collisions.\n" );
+		#endif
+		bcCNT=0;
+		reCNT=0;
+		rethermCNT=0;
+		// Check each BC for collisions MPC particles
+		for( i=0; i<NBC; i++ ) if( (WALL+i)->DSPLC ) {
+			BC_MPCcollision( WALL,i,SRDparticles,SP,in.KBT,in.GRAV,in.dt,simMD,MDmode,in.LC,&bcCNT,&reCNT,&rethermCNT );
+		}
+		#ifdef DBG
+			if( DBUG == DBGBCCNT ) if( bcCNT>0 ) printf( "\t%d particles had difficulty with the BCs when the BCs moved (%d rewind events; %d rethermalization events).\n",bcCNT,reCNT,rethermCNT );
+		#endif
+	// }
+	/* ****************************************** */
+	/* ************* APPLY IMPULSE ************** */
+	/* ****************************************** */
+	#ifdef DBG
+		if( DBUG >= DBGTITLE ) printf( "Impulse on BCs from BC-translations.\n" );
+	#endif
+	//Apply impulse from BC_MPCcollision()
+	for( i=0; i<NBC; i++ ) if( (WALL+i)->DSPLC ) {
+		for( j=0; j<DIM; j++ ) (WALL+i)->V[j] += (WALL+i)->dV[j];
+		//THERE SHOULD BE NO dL since BC_MPCcollision() ignores ang mom
+		for( j=0; j<_3D; j++ ) (WALL+i)->L[j] += (WALL+i)->dL[j];
+	}
+	/* ****************************************** */
+	/* ************* ACCELERATE BCs ************* */
+	/* ****************************************** */
+	#ifdef DBG
+		if( DBUG >= DBGTITLE ) printf( "Accelerate BCs.\n" );
+	#endif
+	//Accelerate each of the BCs
+	if( in.GRAV_FLAG ) for( i=0; i<NBC; i++ ) if( (WALL+i)->DSPLC ) acc_BC( (WALL+i),in.dt,(WALL+i)->G );
+}
 	/* ****************************************** */
 	/* ***************** RE-BIN ***************** */
 	/* ****************************************** */
@@ -4637,6 +5009,7 @@ void timestep( cell ***CL,particleMPC *SRDparticles,spec SP[],bc WALL[],simptr s
 		if( DBUG >= DBGTITLE ) printf( "Re-bin Particles.\n" );
 	#endif
 	// Bin SRD particles
+	
 	bin( CL,SP,WALL,in.KBT,in.LC,0 );
 	// Bin swimmer monomers
 	binSwimmers( CL,0 );

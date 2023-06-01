@@ -1127,7 +1127,7 @@ void readJson( char fpath[], inputList *in, spec **SP, particleMPC **pSRD,
 
 			//Read the binary fluid interaction matrix for this species with all other species
 			cJSON *arrBFM = NULL;
-			getCJsonArray(jObj, &arrBFM, "interMatr", jsonTagList, arrayList, 0);
+			getCJsonArray(objElem, &arrBFM, "interMatr", jsonTagList, arrayList, 0);
 			if (arrBFM != NULL) { // if grav has been found then....
 				if (cJSON_GetArraySize(arrBFM) != NSPECI) { // check dimensionality is valid
 					printf("Error: Interaction matrices must have columns of length equal to the number of species.\n");
@@ -1140,6 +1140,7 @@ void readJson( char fpath[], inputList *in, spec **SP, particleMPC **pSRD,
 			} else {
 				for (j = 0; j < NSPECI; j++) { // get the value
 					(*SP+i)->M[j] = 0;
+					
 				}
 			}
 
