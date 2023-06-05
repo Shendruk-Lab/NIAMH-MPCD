@@ -424,12 +424,12 @@ void genrand_maierSaupeMetropolis_2D( double DIR[],double rotAx[],double rotAngl
 /// @param LC Variable to define if Nematic LC using an isotropic fluid (0), the local nematic order  value (1) or global nematic order value (2).
 ///
 void LCcollision( cell *CL,spec *SP,double KBT,double MFPOT,double dt,double SG,int LC ) {
-	int i,id;
+	int i=0,id=0;
 	double DIR[_3D]={0.0},dU[_3D]={0.0};	//The director, the difference in orientation
 	double rotAx[_3D],xaxis[_3D]={0.0},rotAngle;
-	double rfc;			//Rotational friction coefficient
-	double S;			//Local scalar order parameter
-	double MFPOT_scaled=MFPOT*0.5*(double)DIM;
+	double rfc=0.0;			//Rotational friction coefficient
+	double S=0.0;			//Local scalar order parameter
+	double MFPOT_scaled=MFPOT*0.5*(double)DIM; // Replace MFPot w weighted average of MF for every specy in cell
 	particleMPC *tmpc;		//Temporary particleMPC
 
 	if( LC==LCL ) S=CL->S;		//Use the local scalar order parameter in collision
