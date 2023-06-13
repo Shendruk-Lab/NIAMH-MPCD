@@ -2766,10 +2766,20 @@ void multiphaseColl( cell *CL,spec *SP,specSwimmer SS,int multiphaseMode, double
 		int i,j,k,d,id;
 		double timestep = 0.1; //it would be better to get this value from the input file, as it must correspond to the dt set there. 
 		smono *tsm;
-		int ncoeff; 
-		int orderApprox = (SP+1)->M[1]; 
-		//for orderApprox, it may be better to set up new input variable. Currently the second element of "interMatr" for the second species in the input file 
-		//can be set to 2 or 3 for parabolic and cubic approximations, respectively, of the order parameter field. 
+		int ncoeff;
+
+        int orderApprox = 0; // init, will get changed depending on...
+        if (DIM == _2D) {
+            orderApprox = 3;
+        } else if (DIM == _3D) {
+            orderApprox = 2;
+        }
+        /* orderApprox determines whether a parabolic (orderApprox=2) or a cubic (orderApprox=3) continuous
+         * approximation of the discrete field is used.
+         * Note that the cubic approximation is the only one that can give surface tension. This means that surface
+         * tension cannot be used in 3D currently (due to the need to inverse a ~15x15 matrix which is horrifically
+         * computationally expensive). */
+
 		int incompressibility = 0; //0 for no incompressibility, 1 for ideal gas, 2 for non-linear 
 		// the incompressibility method here needs revising, so the above variable should be set to zero
 		//double incompStrength = 0.0001;
