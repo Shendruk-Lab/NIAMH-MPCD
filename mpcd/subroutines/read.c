@@ -729,7 +729,7 @@ void readchckpnt( char fpath[],inputList *in,spec **SP,particleMPC **pSRD,cell *
 	for( i=0; i<NSPECI; i++ ) {
 		if(fscanf( finput,"%lf %i %i %i %i %lf %lf %lf %lf %lf %lf %lf %lf %lf",&((*SP+i)->MASS), &((*SP+i)->POP), &((*SP+i)->QDIST), &((*SP+i)->VDIST), &((*SP+i)->ODIST), &((*SP+i)->RFC), &((*SP+i)->LEN), &((*SP+i)->TUMBLE), &((*SP+i)->CHIHI), &((*SP+i)->CHIA), &((*SP+i)->ACT), &((*SP+i)->SIGWIDTH), &((*SP+i)->SIGPOS), &((*SP+i)->DAMP) ));	//Read the species' mass
 		else printf("Warning: Failed to read species %i.\n",i);
-		for( j=0; j<NSPECI; j++ ) for (k=0; k<_3D; k++){
+		for( j=0; j<NSPECI; j++ ) for (k=0; k<3; k++){
 			//Read the species' interaction matrix with other species
 			if(fscanf( finput,"%lf ",&((*SP+i)->M[j][k]) ));	//Read the species' interactions
 			else printf("Warning: Failed to read species %d interaction with %d, element %d.\n",i,j,k);
@@ -1141,13 +1141,13 @@ void readJson( char fpath[], inputList *in, spec **SP, particleMPC **pSRD,
                         printf("Error: Interaction matrices must have rows of length equal to 3.\n");
                         exit(EXIT_FAILURE);
                     }
-                    for (k = 0; k < _3D; k++) { // fetch the values
+                    for (k = 0; k < 3; k++) { // fetch the values
                         (*SP+i)->M[j][k] = cJSON_GetArrayItem(arrBFMSub, k)->valuedouble;
                     }
 				}
 			} else {
 				for (j = 0; j < NSPECI; j++) { // get the value
-                    for (k = 0; k < _3D; k++) (*SP+i)->M[j][k] = 0;
+                    for (k = 0; k < 3; k++) (*SP+i)->M[j][k] = 0;
 				}
 			}
 
@@ -1182,7 +1182,7 @@ void readJson( char fpath[], inputList *in, spec **SP, particleMPC **pSRD,
 			(*SP+i)->VDIST = 0; // vDist
 			(*SP+i)->ODIST = 2; // oDist
 			for (j = 0; j < NSPECI; j++) { // interaction matrix
-                for (k = 0; k < _3D; k++) (*SP+i)->M[j][k] = 0;
+                for (k = 0; k < 3; k++) (*SP+i)->M[j][k] = 0;
 			}
 			(*SP+i)->RFC = 0.01; // rfCoef
 			(*SP+i)->LEN = 0.007; // len

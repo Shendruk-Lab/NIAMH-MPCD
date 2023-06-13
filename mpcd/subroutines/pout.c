@@ -2608,7 +2608,7 @@ void checkpoint( FILE *fout,inputList in,spec *SP,particleMPC *pSRD,int MDmode,b
 	for( i=0; i<NSPECI; i++ ) {
 		fprintf( fout,"%lf %i %i %i %i ",(SP+i)->MASS,(SP+i)->POP,(SP+i)->QDIST,(SP+i)->VDIST,(SP+i)->ODIST );
 		fprintf( fout,"%lf %lf %lf %lf %lf %lf %lf %lf %lf\n",(SP+i)->RFC, (SP+i)->LEN, (SP+i)->TUMBLE, (SP+i)->CHIHI, (SP+i)->CHIA, (SP+i)->ACT, (SP+i)->SIGWIDTH, (SP+i)->SIGPOS, (SP+i)->DAMP );
-		for( j=0; j<NSPECI; j++ ) for (k=0; k<_3D; k++) fprintf( fout,"%lf ",(SP+i)->M[j][k] );			//Binary fluid control parameters
+		for( j=0; j<NSPECI; j++ ) for (k=0; k<3; k++) fprintf( fout,"%lf ",(SP+i)->M[j][k] );			//Binary fluid control parameters
 		fprintf( fout,"\n" );
 	}
 	//BCs
