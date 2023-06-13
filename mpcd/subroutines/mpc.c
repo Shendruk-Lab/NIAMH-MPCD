@@ -2783,10 +2783,13 @@ void multiphaseColl( cell *CL,spec *SP,specSwimmer SS,int multiphaseMode, double
 		int incompressibility = 0; //0 for no incompressibility, 1 for ideal gas, 2 for non-linear 
 		// the incompressibility method here needs revising, so the above variable should be set to zero
 		//double incompStrength = 0.0001;
-		//it is potentially better to have a dedicated input variable for setting the three free energy density pareameters below.
-		double tau = (SP)->M[0]; // this is the reduced temperature of the system ( tau = (T-Tc)/Tc ) used in the free energy density "f", and should be negative to achieve phase separation. 
-		double b = (SP)->M[1]; // the phi^4 coefficient in f. b>0 for stability.
-		double kappa = (SP+1)->M[0]; // the coefficient of (grad phi)^2 in f, associated with surface tension. 
+
+        //KIRA: THESE HAVE BEEN RESET TO 0 FOR NOW DUE TO STRUCTURE CHANGES. ADJUST AS NECESSARY
+        //      - Tim
+        double tau = 0;
+        double b = 0;
+        double kappa = 0;
+
 		double tempMag = 0.0;
 		double FbulkMultiplier = 100.0; // scales the effect of bulk forces. 
 		double FdenMultiplier = 0.0; // set to zero here as the Fden method is not yet complete.
@@ -3150,218 +3153,9 @@ void multiphaseColl( cell *CL,spec *SP,specSwimmer SS,int multiphaseMode, double
 		}
 		
 	}
-	else if( multiphaseMode==MPHPOINT ) multiphaseCollPoint( CL,SP,SS,KBT,MDmode,CLQ,outP );
 	else {
 		printf( "Error: Multiphase interaction  technique unacceptable.\n" );
 		exit( 1 );
-	}
-}
-
-/// 
-/// @brief Collision operation for phase separating fluids that estimates gradients by a point-particle method. 
-/// 
-/// This routine supplements to the collision operator to allow different species of particles to interact. 
-/// This can produce multiphase fluids to phase separate. 
-/// This version uses the point particle positions to approximate the phase gradient. 
-/// @param CL An MPCD cell (including the linked list of particles in each cell). 
-/// @param SP The species-wide information about MPCD particles.
-/// @param SS The species-wide information about swimmers.
-/// @param KBT The thermal energy. 
-/// @param MDmode The MD coupling mode. Can be off (noMD), MD particles included in the MPCD collisions (MDinMPC), or MPCD particles included in MD pair interactions (MPCinMD).
-/// @param CLQ The geometric centre of `CL`, the MPCD cell.
-/// @param outP Flag whether or not to output the pressure.
-///
-void multiphaseCollPoint( cell *CL,spec *SP,specSwimmer SS, double KBT,int MDmode,double *CLQ,int outP ) {
-	int i,j,k,id;
-	int mixedCell=0;
-	double N,NSP[NSPECI];			//Number of each type
-	particleMPC *tmpc;              //Temporary particleMPC
-	particleMD *tmd;                //Temporary particleMD
-	smono *tsm;                     //Temporary swimmer monomer
-	double relQ[DIM];               //Relative position
-	double VMUtot[DIM];             //Velocity due to chemical potential
-	double gradSP[NSPECI][DIM];     //Directional gradient of each species
-	double thisGrad;				//A temporary gradient contribution component
-	double VMU[CL->POP][DIM];       //Grad. chemical potential  velocity of type A (B is negative this)
-
-	// Zero arrays
-	for( i=0; i<DIM; i++ ) {
-		relQ[i] = 0.0;
-		for( j=0; j<NSPECI; j++ ) gradSP[j][i] = 0.0;
-	}
-	for( i=0;i<CL->POP;i++ ) for( j=0;j<DIM;j++ ) {
-		VMU[i][j] = 0.0;
-		VMUtot[j] = 0.;
-	}
-	for( j=0; j<NSPECI; j++ ) NSP[j]=0.0;
-
-	//Calculate the number of each type
-	//MPCD particles
-	tmpc = CL->pp;
-	while( tmpc!=NULL ) {
-		id = tmpc->SPID;
-		NSP[id] += 1.0;
-		//Increment link in list
-		tmpc = tmpc->next;
-	}
-	//Swimmer monomers
-	tsm = CL->sp;
-	while( tsm!=NULL ) {
-		if( tsm->HorM ) id = SS.MSPid;
-		else id = SS.HSPid;
-		NSP[id] += 1.0;
-		//Increment link in list
-		tsm = tsm->next;
-	}
-	//MD particles --- ALWAYS type 0
-	id=0;
-	tmd = CL->MDpp;
-	while( tmd!=NULL ) {
-		NSP[id] += 1.0;
-		//Increment link in list
-		tmd = tmd->nextSRD;
-	}
-	N=0.0;
-	for( j=0; j<NSPECI; j++ ) N += NSP[j];
-
-	//Generate separation velocities
-	mixedCell=0;
-	for( j=0; j<NSPECI; j++ ) if( NSP[j]>0.0 ) mixedCell+=1;
-	if( mixedCell>1 ) {
-		// Calculate the gradient of the different species
-		// MPC particles
-		tmpc = CL->pp;
-		while( tmpc!=NULL ) {
-			id = tmpc->SPID;
-			//Particle-based gradient of this species
-			for( j=0; j<DIM; j++ ) relQ[j] = tmpc->Q[j] - CLQ[j];
-			for( j=0; j<DIM; j++ ) {
-				thisGrad = 8.0*relQ[j]*relQ[j]-3.0;
-				for( k=0; k<DIM; k++ ) thisGrad += 6.0*relQ[k]*relQ[k];
-				thisGrad *= 30.0*relQ[j];
-				gradSP[id][j] += thisGrad;
-			}
-			//Increment link in list
-			tmpc = tmpc->next;
-		}
-		//Swimmer monomers
-		tsm = CL->sp;
-		while( tsm!=NULL ) {
-			if( tsm->HorM ) id = SS.MSPid;
-			else id = SS.HSPid;
-			//Particle-based gradient of this species
-			for( j=0; j<DIM; j++ ) relQ[j] = tsm->Q[j] - CLQ[j];
-			for( j=0; j<DIM; j++ ) {
-				thisGrad = 8.0*relQ[j]*relQ[j]-3.0;
-				for( k=0; k<DIM; k++ ) thisGrad += 6.0*relQ[k]*relQ[k];
-				thisGrad *= 30.0*relQ[j];
-				gradSP[id][j] += thisGrad;
-			}
-			//Increment link in list
-			tsm = tsm->next;
-		}
-		//MD particles --- ALWAYS type 0
-		id=0;
-		tmd = CL->MDpp;
-		while( tmd!=NULL ) {
-			if( DIM>=_1D ) relQ[0] = tmd->rx - CLQ[0];
-			if( DIM>=_2D ) relQ[1] = tmd->ry - CLQ[1];
-			if( DIM>=_3D ) relQ[2] = tmd->rz - CLQ[2];
-			for( j=0; j<DIM; j++ ) {
-				thisGrad = 8.0*relQ[j]*relQ[j]-3.0;
-				for( k=0; k<DIM; k++ ) thisGrad += 6.0*relQ[k]*relQ[k];
-				thisGrad *= 30.0*relQ[j];
-				gradSP[id][j] += thisGrad;
-			}
-			//Increment link in list
-			tmd = tmd->nextSRD;
-		}
-
-		//Calculate the velocities due to the cell's chemical potential
-		i=0;
-		//MPCD particles
-		tmpc = CL->pp;
-		while( tmpc!=NULL ) {
-			id = tmpc->SPID;
-			for( j=0; j<DIM; j++ ) {
-				for( k=0; k<NSPECI; k++ ) VMU[i][j] += gradSP[k][j]*((SP+id)->M[k]) / NSP[id];
-				VMUtot[j] += VMU[i][j];
-			}
-			//Increment link in list
-			tmpc = tmpc->next;
-			i++;
-		}
-		//Swimmer monomers
-		tsm = CL->sp;
-		while( tsm!=NULL ) {
-			if( tsm->HorM ) id = SS.MSPid;
-			else id = SS.HSPid;
-			for( j=0; j<DIM; j++ ) {
-				for( k=0; k<NSPECI; k++ ) VMU[i][j] += gradSP[k][j]*((SP+id)->M[k]) / NSP[id];
-				VMUtot[j] += VMU[i][j];
-			}
-			//Increment link in list
-			tsm = tsm->next;
-			i++;
-		}
-	}
-	//MD particles --- ALWAYS type 0
-	id=0;
-	tmd = CL->MDpp;
-	while( tmd!=NULL ) {
-		for( j=0; j<DIM; j++ ) {
-			for( k=0; k<NSPECI; k++ ) VMU[i][j] += gradSP[k][j]*((SP+id)->M[k]) / NSP[id];
-			VMUtot[j] += VMU[i][j];
-		}
-		//Increment link in list
-		tmd = tmd->nextSRD;
-		i++;
-	}
-	//Turn sums into averages
-	for( j=0; j<DIM; j++ ) VMUtot[j] /= N;
-
-	/* ****************************************** */
-	/* *************** Collision **************** */
-	/* ****************************************** */
-	i=0;
-	// MPC particles
-	tmpc = CL->pp;
-	while( tmpc!=NULL ) {
-		id = tmpc->SPID;
-		for( j=0; j<DIM; j++ ) tmpc->V[j] += VMU[i][j] - VMUtot[j];
-		//Increment link in list
-		tmpc = tmpc->next;
-		i++;
-	}
-	// Swimmer monomers
-	tsm = CL->sp;
-	while( tsm!=NULL ) {
-		if( tsm->HorM ) id = SS.MSPid;
-		else id = SS.HSPid;
-		for( j=0; j<DIM; j++ ) tsm->V[j] += VMU[i][j] - VMUtot[j];
-		//Increment link in list
-		tsm = tsm->next;
-		i++;
-	}
-	//MD particles --- ALWAYS type 0
-	id=0;
-	tmd = CL->MDpp;
-	while( tmd!=NULL ) {
-		if( DIM>=_1D ) {
-			j=0;
-			tmd->vx += VMU[i][j] - VMUtot[j];
-		}
-		if( DIM>=_2D ) {
-			j=1;
-			tmd->vy += VMU[i][j] - VMUtot[j];
-		}
-		if( DIM>=_3D ) {
-			j=2;
-			tmd->vz += VMU[i][j] - VMUtot[j];
-		}
-		//Increment link in list
-		tmd = tmd->nextSRD;
-		i++;
 	}
 }
 

@@ -218,8 +218,6 @@
 # define MPHOFF 0
 /// @brief Multiphase interaction settings. Kira Koch's Surface fitter-version of multiphase interactions.
 # define MPHSURF 1
-/// @brief Multiphase interaction settings. Point gradient-version of multiphase interactions.
-# define MPHPOINT 2
 
 /* ****************************************** */
 /* *************** THERMOSTAT *************** */

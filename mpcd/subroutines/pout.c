@@ -2578,7 +2578,7 @@ void spectout( FILE *fout,double spect[],double t ) {
 /// @param sw This is a pointer to the list of swimmers.
 ///
 void checkpoint( FILE *fout,inputList in,spec *SP,particleMPC *pSRD,int MDmode,bc *WALL,outputFlagsList outFlag,int runtime,int warmtime,double AVVEL,double AVS,double avDIR[_3D],double S4,double stdN,double KBTNOW,double AVV[_3D],double AVNOW[_3D],kinTheory theory,specSwimmer specS,swimmer *sw ) {
-	int i,j;
+	int i,j,k;
 
 	fprintf( fout,"%d\n",in.simSteps );		//total time (or number of iterations)
 	fprintf( fout,"%d %lf\n",in.warmupSteps,in.dt );		//Warmup time iterations, and time step
@@ -2608,7 +2608,7 @@ void checkpoint( FILE *fout,inputList in,spec *SP,particleMPC *pSRD,int MDmode,b
 	for( i=0; i<NSPECI; i++ ) {
 		fprintf( fout,"%lf %i %i %i %i ",(SP+i)->MASS,(SP+i)->POP,(SP+i)->QDIST,(SP+i)->VDIST,(SP+i)->ODIST );
 		fprintf( fout,"%lf %lf %lf %lf %lf %lf %lf %lf %lf\n",(SP+i)->RFC, (SP+i)->LEN, (SP+i)->TUMBLE, (SP+i)->CHIHI, (SP+i)->CHIA, (SP+i)->ACT, (SP+i)->SIGWIDTH, (SP+i)->SIGPOS, (SP+i)->DAMP );
-		for( j=0; j<NSPECI; j++ ) fprintf( fout,"%lf ",(SP+i)->M[j] );			//Binary fluid control parameters
+		for( j=0; j<NSPECI; j++ ) for (k=0; k<_3D; k++) fprintf( fout,"%lf ",(SP+i)->M[j][k] );			//Binary fluid control parameters
 		fprintf( fout,"\n" );
 	}
 	//BCs

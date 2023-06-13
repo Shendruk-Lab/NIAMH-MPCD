@@ -170,7 +170,7 @@ void readin( char fpath[],inputList *in,spec **SP,particleMPC **pSRD,cell ****CL
 			//Read the species' interaction matrix with other species
 			read=fscanf( finput,"%lf %s",&MF,STR );
 			checkRead( read,"interaction matrix",inSTR);
-			(*SP+i)->M[j] = MF;
+//			(*SP+i)->M[j] = MF; NUKED BC LEGACY
 		}
 		//Read the species' rotational friction coefficient
 		read=fscanf( finput,"%lf %s",&MF,STR );
@@ -668,7 +668,7 @@ void readbc( char fpath[],bc **WALL ) {
 ///
 void readchckpnt( char fpath[],inputList *in,spec **SP,particleMPC **pSRD,cell ****CL,int *MDmode,bc **WALL,outputFlagsList *out,int *runtime,int *warmtime,kinTheory *theory,double *AVVEL, double *AVS,double avDIR[_3D],double *S4,double *stdN,double *KBTNOW,double AVV[_3D],double AVNOW[_3D],specSwimmer *specS,swimmer **sw ) {
 	FILE *finput;
-	int i,j;
+	int i,j,k;
 	char STR[100];
 
 	strcpy( STR,fpath );
@@ -729,10 +729,10 @@ void readchckpnt( char fpath[],inputList *in,spec **SP,particleMPC **pSRD,cell *
 	for( i=0; i<NSPECI; i++ ) {
 		if(fscanf( finput,"%lf %i %i %i %i %lf %lf %lf %lf %lf %lf %lf %lf %lf",&((*SP+i)->MASS), &((*SP+i)->POP), &((*SP+i)->QDIST), &((*SP+i)->VDIST), &((*SP+i)->ODIST), &((*SP+i)->RFC), &((*SP+i)->LEN), &((*SP+i)->TUMBLE), &((*SP+i)->CHIHI), &((*SP+i)->CHIA), &((*SP+i)->ACT), &((*SP+i)->SIGWIDTH), &((*SP+i)->SIGPOS), &((*SP+i)->DAMP) ));	//Read the species' mass
 		else printf("Warning: Failed to read species %i.\n",i);
-		for( j=0; j<NSPECI; j++ ) {
+		for( j=0; j<NSPECI; j++ ) for (k=0; k<_3D; k++){
 			//Read the species' interaction matrix with other species
-			if(fscanf( finput,"%lf ",&((*SP+i)->M[j]) ));	//Read the species' interactions
-			else printf("Warning: Failed to read species %d interaction with %d.\n",i,j);
+			if(fscanf( finput,"%lf ",&((*SP+i)->M[j][k]) ));	//Read the species' interactions
+			else printf("Warning: Failed to read species %d interaction with %d, element %d.\n",i,j,k);
 		}
 	}
 	//Check total number of particleMPCs
@@ -951,7 +951,7 @@ int checkBC(cJSON *bc){
 void readJson( char fpath[], inputList *in, spec **SP, particleMPC **pSRD,
    cell ****CL, int *MDMode, outputFlagsList *out, bc **WALL,
    specSwimmer *specS, swimmer **sw){
-	int i, j; // counting variables
+	int i, j, k; // counting variables
 
 	char* fileStr = NULL;
 	if(getFileStr(fpath, &fileStr) != 0){ // read, return on error
@@ -1134,13 +1134,20 @@ void readJson( char fpath[], inputList *in, spec **SP, particleMPC **pSRD,
 					exit(EXIT_FAILURE);
 				}
 
-				for (j = 0; j < NSPECI; j++) { // get the value
-					(*SP+i)->M[j] = cJSON_GetArrayItem(arrBFM, j)->valuedouble;
+				for (j = 0; j < NSPECI; j++) { // loop through each column
+                    // now need to get 3 size subarray
+                    cJSON *arrBFMSub = cJSON_GetArrayItem(arrBFM, j);
+                    if (cJSON_GetArraySize(arrBFMSub) != _3D) { // check dimensionality is valid
+                        printf("Error: Interaction matrices must have rows of length equal to 3.\n");
+                        exit(EXIT_FAILURE);
+                    }
+                    for (k = 0; k < _3D; k++) { // fetch the values
+                        (*SP+i)->M[j][k] = cJSON_GetArrayItem(arrBFMSub, k)->valuedouble;
+                    }
 				}
 			} else {
 				for (j = 0; j < NSPECI; j++) { // get the value
-					(*SP+i)->M[j] = 0;
-					
+                    for (k = 0; k < _3D; k++) (*SP+i)->M[j][k] = 0;
 				}
 			}
 
@@ -1175,7 +1182,7 @@ void readJson( char fpath[], inputList *in, spec **SP, particleMPC **pSRD,
 			(*SP+i)->VDIST = 0; // vDist
 			(*SP+i)->ODIST = 2; // oDist
 			for (j = 0; j < NSPECI; j++) { // interaction matrix
-				(*SP+i)->M[j] = 0;
+                for (k = 0; k < _3D; k++) (*SP+i)->M[j][k] = 0;
 			}
 			(*SP+i)->RFC = 0.01; // rfCoef
 			(*SP+i)->LEN = 0.007; // len

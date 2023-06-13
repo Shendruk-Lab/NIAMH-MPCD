@@ -1668,7 +1668,7 @@ void checkSim( FILE *fsynopsis,int SYNOUT,inputList in,spec *SP,bc *WALL,specSwi
 		printf( "Error: Unrecognized value of inCOMP=%d.\n",in.inCOMP );
 		exit( 1 );
 	}
-	if( !( in.MULTIPHASE==MPHOFF || in.MULTIPHASE==MPHPOINT || in.MULTIPHASE==MPHSURF ) ){
+	if( !( in.MULTIPHASE==MPHOFF || in.MULTIPHASE==MPHSURF ) ){
 		printf( "Error: Unrecognized value of MULTIPHASE=%d.\n",in.MULTIPHASE );
 		exit( 1 );
 	}

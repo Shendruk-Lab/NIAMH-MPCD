@@ -65,7 +65,7 @@ typedef struct spec {
 	double LEN;				///< Effective rod length to couple torque on  MPCD into force on BC (smaller=>stronger; bigger=>weaker) --- json `'len'`.
 	double ACT;				///< The activity of the particles --- json `'act'`.
 	double DAMP;			///< A damping/friction coefficient to go from wet to dry (to kill hydrodynamics) [0,1] --- json `'damp'`.
-	double M[MAXSPECI];	    ///< Interaction matrix for multiphase fluids. Each species has a different interaction with all others --- json `'interMatr'`.
+	double M[MAXSPECI][3];  ///< Interaction matrix for multiphase fluids. Pairwise [tau, b, kappa] for every other species --- json `'interMatr'`.
 	double SIGWIDTH;		///< The width of the sigmoid for active dipole sigmoid (`DIPOLE_DIR_SIG` in definitions.h). 
 	double SIGPOS;			///< The position of the sigmoid for active dipole sigmoid (`DIPOLE_DIR_SIG` in definitions.h).
 	double MINACTRATIO;		///< Minimum proportion of particles in the cell for activity to be applied. 
