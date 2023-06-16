@@ -1161,7 +1161,7 @@ void place( double Q[],int PL,FILE *fin, int specID, double concentration ) {
         // Note: there is probably a much nicer analytical way to do this, but initialisation is "free" so who cares if
         //      this takes forever
         double lowerBound = ((2.0*M_PI) / (double)NSPECI) * (double)specID; // angle measured from vertical (for l/r split)
-        double upperBound = ((2.0*M_PI) / (double)NSPECI) * (double)(specID + genrand_real());
+        double upperBound = ((2.0*M_PI) / (double)NSPECI) * (double)(specID + 1.0);
 
         int flag = 1;
         while (flag) { // repeatedly try to find a point in the sector
@@ -1171,7 +1171,7 @@ void place( double Q[],int PL,FILE *fin, int specID, double concentration ) {
             // check if the point is in the sector
             double x_offset = Q[0] - (XYZ[0] / 2.0);
             double y_offset = Q[1] - (XYZ[1] / 2.0);
-            double theta = atan2(x_offset, y_offset); // again, measuring theta from vertical
+            double theta = atan2(x_offset, y_offset) + M_PI; // again, measuring theta from vertical
             if (theta >= lowerBound && theta < upperBound) flag = 0;
         }
         // z axis is easy, just pick a random number between 0 and the domain size
