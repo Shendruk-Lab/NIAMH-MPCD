@@ -1155,7 +1155,27 @@ void place( double Q[],int PL,FILE *fin, int specID, double concentration ) {
 		if(fscanf( fin, "%lf",&Q[d] ));
 		else printf("Warning: Failed to read place input file.\n");
 	} else if (PL == QDIST_SPLIT) {
-        //TODO
+        // idea here is to distribute particles about the z axis from the center of the domain, split into sectors every
+        //      2*M_PI/NSPECI radians
+
+        // Note: there is probably a much nicer analytical way to do this, but initialisation is "free" so who cares if
+        //      this takes forever
+        double lowerBound = ((2.0*M_PI) / (double)NSPECI) * (double)specID; // angle measured from vertical (for l/r split)
+        double upperBound = ((2.0*M_PI) / (double)NSPECI) * (double)(specID + genrand_real());
+
+        int flag = 1;
+        while (flag) { // repeatedly try to find a point in the sector
+            Q[0] = genrand_real() * XYZ[0];
+            Q[1] = genrand_real() * XYZ[1];
+
+            // check if the point is in the sector
+            double x_offset = Q[0] - (XYZ[0] / 2.0);
+            double y_offset = Q[1] - (XYZ[1] / 2.0);
+            double theta = atan2(x_offset, y_offset); // again, measuring theta from vertical
+            if (theta >= lowerBound && theta < upperBound) flag = 0;
+        }
+        // z axis is easy, just pick a random number between 0 and the domain size
+        Q[2] = genrand_real() * XYZ[2];
     } else if (PL == QDIST_SPHERICAL) {
         // initial error checking
         if (NSPECI != 2) {
@@ -1174,7 +1194,9 @@ void place( double Q[],int PL,FILE *fin, int specID, double concentration ) {
 
         // use polar coordinates to distribute particles
         double theta = genrand_real() * 2.0 * M_PI;
-        double x_off, y_off, z_off = 0.0; // x,y,z offsets from center
+        double x_off = 0.0; // x,y,z offsets
+        double y_off = 0.0;
+        double z_off = 0.0;
         if (DIM == _2D) {
             x_off = radius * cos(theta);
             y_off = radius * sin(theta);
@@ -1404,7 +1426,7 @@ int checkplaceMPC( int i,particleMPC *pp,spec SP[],bc WALL[] ) {
 		shiftbackBC( shift,&WALL[j] );
 		//If W<=0 then the particleMPC is inside an obstacle and must be replaced
 		if( WALL[j].W <= TOL ) {
-			replace( (pp+i) );
+			replace( (pp+i) ); //FIXME: this will cause issues for nonstandard QDISTs
 			//push( (pp+i)->V,KBT,SP[(pp+i)->SPID].VDIST, SP[(pp+i)->SPID].M,NULL );
 			i--;
 			return i;
