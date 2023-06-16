@@ -1185,32 +1185,36 @@ void place( double Q[],int PL,FILE *fin, int specID, double concentration ) {
 
         // compute radius of sphere/ circle
         int vol = XYZ[0]*XYZ[1]*XYZ[2];
-        double radius = 0.0;
+        double radMax = 0.0;
         if (DIM == _2D) {
-            radius = sqrt((concentration*vol) / M_PI);
+            radMax = sqrt((concentration*vol) / M_PI);
         } else if (DIM == _3D) {
-            radius = cbrt((3.0*concentration*vol) / (4.0*M_PI));
+            radMax = cbrt((3.0*concentration*vol) / (4.0*M_PI));
         }
 
-        // use polar coordinates to distribute particles
-        double theta = genrand_real() * 2.0 * M_PI;
-        double x_off = 0.0; // x,y,z offsets
-        double y_off = 0.0;
-        double z_off = 0.0;
-        if (DIM == _2D) {
-            x_off = radius * cos(theta);
-            y_off = radius * sin(theta);
-        } else if (DIM == _3D) {
-            double phi = genrand_real() * M_PI;
-            x_off = radius * cos(theta) * sin(phi);
-            y_off = radius * sin(theta) * sin(phi);
-            z_off = radius * cos(phi);
-        }
+        // again, doing this a dumb way because initialisation is "free"
+        int flag = 1;
+        while (flag) {
+            Q[0] = genrand_real() * XYZ[0];
+            Q[1] = genrand_real() * XYZ[1];
+            if (DIM == _3D) Q[2] = genrand_real() * XYZ[2];
 
-        // apply offsets
-        Q[0] = (double)XYZ[0]/2.0 + x_off;
-        Q[1] = (double)XYZ[1]/2.0 + y_off;
-        Q[2] = (double)XYZ[2]/2.0 + z_off;
+            // check if the point is in the sphere/ circle
+            double x_offset = Q[0] - (XYZ[0] / 2.0);
+            double y_offset = Q[1] - (XYZ[1] / 2.0);
+            double radius = 0.0;
+            if (DIM == _2D) {
+                radius = sqrt(x_offset*x_offset + y_offset*y_offset);
+            } else if (DIM == _3D) {
+                double z_offset = Q[2] - (XYZ[2] / 2.0);
+                radius = sqrt(x_offset*x_offset + y_offset*y_offset + z_offset*z_offset);
+            }
+            if ((specID == 0) && (radius < radMax)){
+                flag = 0;
+            } else if ((specID == 1) && (radius >= radMax)) {
+                flag = 0;
+            }
+        }
     } else {
 		printf( "Error: Particle placement distribution unacceptable.\n" );
 		exit( 1 );
