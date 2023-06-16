@@ -133,6 +133,10 @@
 #define READ 1
 /// @brief Particle position distribution. CENTRED places a swimmer at the centre of the control volume.
 #define CENTRED 2
+/// @brief Particle position distribution. SPLIT equally splits the control volume into NSPECIES parts about the center, placing particles only in their own region. For multiphase testing
+#define QDIST_SPLIT 3
+/// @brief Particle position distribution. SPHERICAL places particles in species 0 into a circular shell (volume proportional to concentration), and species 1 outside. Only works for two species. For multiphase testing
+#define QDIST_SPHERICAL 4
 
 /* ****************************************** */
 /* ******************* VDIST **************** */

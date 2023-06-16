@@ -1142,18 +1142,54 @@ void initvar( unsigned long *seed,time_t *to,clock_t *co,int *runtime,int *warmt
 /// or reading it from a file.
 ///
 /// @param Q Return pointer to the position of the MPCD particle.
-/// @param PL Integer that is 0 if position is determined randomly, 1 if read from a file.
+/// @param PL Particle placement distribution (QDIST).
 /// @param fin File from which to read the particle position.
+/// @param specID Species ID corresponding to the particle.
+/// @param concentration Global concentration of the species corresponding to the particle.
 ///
-void place( double Q[],int PL,FILE *fin ) {
+void place( double Q[],int PL,FILE *fin, int specID, double concentration ) {
 	int d;
 
 	if( PL == PRF ) for( d=0; d<DIM; d++ ) Q[d] = genrand_real( ) * XYZ[d];
 	else if( PL == READ ) for( d=0; d<DIM; d++ ) {
 		if(fscanf( fin, "%lf",&Q[d] ));
 		else printf("Warning: Failed to read place input file.\n");
-	}
-	else{
+	} else if (PL == QDIST_SPLIT) {
+        //TODO
+    } else if (PL == QDIST_SPHERICAL) {
+        // initial error checking
+        if (NSPECI != 2) {
+            printf("Error: Spherical Q distribution only works for two species.\n");
+            exit(1);
+        }
+
+        // compute radius of sphere/ circle
+        int vol = XYZ[0]*XYZ[1]*XYZ[2];
+        double radius = 0.0;
+        if (DIM == _2D) {
+            radius = sqrt((concentration*vol) / M_PI);
+        } else if (DIM == _3D) {
+            radius = cbrt((3.0*concentration*vol) / (4.0*M_PI));
+        }
+
+        // use polar coordinates to distribute particles
+        double theta = genrand_real() * 2.0 * M_PI;
+        double x_off, y_off, z_off = 0.0; // x,y,z offsets from center
+        if (DIM == _2D) {
+            x_off = radius * cos(theta);
+            y_off = radius * sin(theta);
+        } else if (DIM == _3D) {
+            double phi = genrand_real() * M_PI;
+            x_off = radius * cos(theta) * sin(phi);
+            y_off = radius * sin(theta) * sin(phi);
+            z_off = radius * cos(phi);
+        }
+
+        // apply offsets
+        Q[0] = (double)XYZ[0]/2.0 + x_off;
+        Q[1] = (double)XYZ[1]/2.0 + y_off;
+        Q[2] = (double)XYZ[2]/2.0 + z_off;
+    } else {
 		printf( "Error: Particle placement distribution unacceptable.\n" );
 		exit( 1 );
 	}
@@ -1514,7 +1550,7 @@ void setcoord( char dir[],spec SP[],particleMPC *pp,double KBT,double AVVEL[],bc
 			(pp+i)->U[j] = 0.0;
 		}
 		//Set particleMPC position, velocity and orientation
-		place( (pp+i)->Q,SP[(pp+i)->SPID].QDIST, fin[(pp+i)->SPID] );
+		place( (pp+i)->Q,SP[(pp+i)->SPID].QDIST, fin[(pp+i)->SPID], (pp+i)->SPID, ((double)SP[(pp+i)->SPID].POP / (double)GPOP));
 
 		push( (pp+i)->V,KBT,SP[(pp+i)->SPID].VDIST, SP[(pp+i)->SPID].MASS,fin[(pp+i)->SPID] );
 		//Shift first mode of the velocity dist by the average velocity (push() centres about zero)

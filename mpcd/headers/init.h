@@ -23,7 +23,7 @@ void zeroparticles( particleMPC *pp );
 void zeroPressureColl( cell *CL );
 
 void initvar( unsigned long *seed,time_t *to,clock_t *co,int *runtime,int *warmtime,double *sumM,double AV[_3D],double avDIR[_3D],spec SP[],double *C,double *S,double RA,double *AVVEL,double KBT,bc WALL[],double MAG[_3D],cell ***CL,particleMPC *pp );
-void place( double Q[],int PL,FILE *fin );
+void place( double Q[],int PL,FILE *fin, int specID, double concentration  );
 void replace( particleMPC *p );
 void push( double V[],double KBT,int PL,double MASS,FILE *fin );
 void orient( double U[],double Q[],int PL );
