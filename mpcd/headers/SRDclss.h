@@ -334,6 +334,7 @@ typedef struct outputFlagsList {
 	int QTENSOUT;               ///< Flag for if the order parameter tensor is outputted --- json `'qTensOut'`.
     int QKOUT;			        ///< Flag for if the reciprocal space Q is outputted --- json `'qkTensOut'`.
 	int AVSOUT;					///< Flag for if total average scalar order parameter is outputted --- json `'avSOut'`.
+	int AVCoMOUT;				///< Flag for if average CoM of each species is outputted --- json `'avCoMOut'`.
 	int DENSOUT;				///< Flag for density standard deviation is outputted --- json `'densSDOut'`.
 	int ENSTROPHYOUT;			///< Flag for if total average enstrophy is outputted --- json `'enstrophyOut'`.
 	int CHCKPNT;				///< Flag for checkpointing --- json `'checkpointOut'`.

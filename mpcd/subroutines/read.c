@@ -287,6 +287,9 @@ void readpc( char fpath[],outputFlagsList *out ) {
 	//Read how often the total average scalar order parameter is outputted
 	read=fscanf( finput,"%d %s",&(out->AVSOUT),STR );
 	checkRead( read,"average scalar order parameter",inSTR);
+	//Read whether the average centre of mass of each species is outputted
+	read=fscanf( finput,"%d %s",&(out->AVCoMOUT),STR );
+	checkRead( read,"average CoM of each species",inSTR);
 	//Read how often the standard deviation of the number per cell is outputted
 	read=fscanf( finput,"%d %s",&(out->DENSOUT),STR );
 	checkRead( read,"standard deviation of the number per cell",inSTR);
@@ -717,7 +720,7 @@ void readchckpnt( char fpath[],inputList *in,spec **SP,particleMPC **pSRD,cell *
 	else printf("Warning: Failed to read average velocities.\n");
 
 	//Read output
-	if(fscanf( finput,"%d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d",&DBUG, &(out->TRAJOUT), &(out->printSP), &(out->COAROUT), &(out->FLOWOUT), &(out->VELOUT), &(out->AVVELOUT), &(out->ORDEROUT), &(out->QTENSOUT), &(out->QKOUT), &(out->AVSOUT), &(out->SOLOUT), &(out->ENOUT), &(out->ENFIELDOUT), &(out->ENNEIGHBOURS), &(out->ENSTROPHYOUT), &(out->DENSOUT), &(out->CVVOUT), &(out->CNNOUT), &(out->CWWOUT), &(out->CDDOUT), &(out->CSSOUT), &(out->CPPOUT), &(out->BINDER), &(out->BINDERBIN), &(out->SYNOUT), &(out->CHCKPNT), &(out->CHCKPNTrcvr) ));
+	if(fscanf( finput,"%d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d",&DBUG, &(out->TRAJOUT), &(out->printSP), &(out->COAROUT), &(out->FLOWOUT), &(out->VELOUT), &(out->AVVELOUT), &(out->ORDEROUT), &(out->QTENSOUT), &(out->QKOUT), &(out->AVSOUT), &(out->AVCoMOUT),&(out->SOLOUT), &(out->ENOUT), &(out->ENFIELDOUT), &(out->ENNEIGHBOURS), &(out->ENSTROPHYOUT), &(out->DENSOUT), &(out->CVVOUT), &(out->CNNOUT), &(out->CWWOUT), &(out->CDDOUT), &(out->CSSOUT), &(out->CPPOUT), &(out->BINDER), &(out->BINDERBIN), &(out->SYNOUT), &(out->CHCKPNT), &(out->CHCKPNTrcvr) ));
 	else printf("Warning: Failed to read output.\n");
 	if(fscanf( finput,"%d %d",&(out->SPOUT), &(out->PRESOUT) ));
 	else printf("Warning: Failed to read output.\n");
@@ -1116,7 +1119,7 @@ void readJson( char fpath[], inputList *in, spec **SP, particleMPC **pSRD,
 
 			// now get first set of primitives
 			(*SP+i)->MASS = getJObjDou(objElem, "mass", 1.0, jsonTagList); // mass
-			(*SP+i)->sMFPOT = getJObjDou(objElem, "sMFPOT", 10.0, jsonTagList); // specy-specific mean field potential
+			(*SP+i)->sMFPOT = getJObjDou(objElem, "sMFPOT", in->MFPOT, jsonTagList); // specy-specific mean field potential
 
 
 			// handle population related overrides
@@ -1232,6 +1235,7 @@ void readJson( char fpath[], inputList *in, spec **SP, particleMPC **pSRD,
 	out->PRESOUT = getJObjInt(jObj, "pressureOut", 0, jsonTagList); // presOut
 	out->ENNEIGHBOURS = getJObjInt(jObj, "neighbourEnOut", 0, jsonTagList); // enNeighbours
 	out->AVSOUT = getJObjInt(jObj, "avSOut", 0, jsonTagList); // avSOut
+	out->AVCoMOUT = getJObjInt(jObj, "avCoMOut", 0, jsonTagList); // avCoMOut
 	out->DENSOUT = getJObjInt(jObj, "densSDOut", 0, jsonTagList); // densOut
 	out->ENSTROPHYOUT = getJObjInt(jObj, "enstrophyOut", 0, jsonTagList); // enStrophOut
 	out->HISTVELOUT = getJObjInt(jObj, "histVelOut", 0, jsonTagList); // histVelOut
