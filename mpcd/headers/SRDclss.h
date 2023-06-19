@@ -69,6 +69,7 @@ typedef struct spec {
 	double SIGWIDTH;		///< The width of the sigmoid for active dipole sigmoid (`DIPOLE_DIR_SIG` in definitions.h). 
 	double SIGPOS;			///< The position of the sigmoid for active dipole sigmoid (`DIPOLE_DIR_SIG` in definitions.h).
 	double MINACTRATIO;		///< Minimum proportion of particles in the cell for activity to be applied. 
+	double sMFPOT;			///< A specy-specific Mean Field Potential. --- json `'sMFPOT'`
 } spec;
 
 ///

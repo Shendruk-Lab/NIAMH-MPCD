@@ -196,6 +196,10 @@ void readin( char fpath[],inputList *in,spec **SP,particleMPC **pSRD,cell ****CL
 		read=fscanf( finput,"%lf %s",&MF,STR );
 		checkRead( read,"activity",inSTR);
 		(*SP+i)->ACT = MF;
+		//Read the species' liquid crystal mean-field potential
+		read=fscanf( finput,"%lf %s",&MF,STR );
+		checkRead( read,"LC mean-field potential",inSTR);
+		(*SP+i)->sMFPOT = MF;
 		//Read the species' damping friction coefficient
 		read=fscanf( finput,"%lf %s",&MF,STR );
 		checkRead( read,"damping friction",inSTR);
@@ -727,7 +731,7 @@ void readchckpnt( char fpath[],inputList *in,spec **SP,particleMPC **pSRD,cell *
 	//Allocate the needed amount of memory for the species SP
 	(*SP) = (spec*) malloc( NSPECI * sizeof( spec ) );
 	for( i=0; i<NSPECI; i++ ) {
-		if(fscanf( finput,"%lf %i %i %i %i %lf %lf %lf %lf %lf %lf %lf %lf %lf",&((*SP+i)->MASS), &((*SP+i)->POP), &((*SP+i)->QDIST), &((*SP+i)->VDIST), &((*SP+i)->ODIST), &((*SP+i)->RFC), &((*SP+i)->LEN), &((*SP+i)->TUMBLE), &((*SP+i)->CHIHI), &((*SP+i)->CHIA), &((*SP+i)->ACT), &((*SP+i)->SIGWIDTH), &((*SP+i)->SIGPOS), &((*SP+i)->DAMP) ));	//Read the species' mass
+		if(fscanf( finput,"%lf %lf %i %i %i %i %lf %lf %lf %lf %lf %lf %lf %lf %lf",&((*SP+i)->MASS), &((*SP+i)->sMFPOT), &((*SP+i)->POP), &((*SP+i)->QDIST), &((*SP+i)->VDIST), &((*SP+i)->ODIST), &((*SP+i)->RFC), &((*SP+i)->LEN), &((*SP+i)->TUMBLE), &((*SP+i)->CHIHI), &((*SP+i)->CHIA), &((*SP+i)->ACT), &((*SP+i)->SIGWIDTH), &((*SP+i)->SIGPOS), &((*SP+i)->DAMP) ));	//Read the species' mass
 		else printf("Warning: Failed to read species %i.\n",i);
 		for( j=0; j<NSPECI; j++ ) {
 			//Read the species' interaction matrix with other species
@@ -1043,7 +1047,7 @@ void readJson( char fpath[], inputList *in, spec **SP, particleMPC **pSRD,
 	in->TAU = getJObjDou(jObj, "tau", 0.5, jsonTagList); // TAU
 	in->RA = getJObjDou(jObj, "rotAng", 1.570796, jsonTagList); // rotAng
 	in->FRICCO = getJObjDou(jObj, "fricCoef", 1.0, jsonTagList); // fricCo
-	in->MFPOT = getJObjDou(jObj, "mfpot", 10.0, jsonTagList); // mfpPot
+	in->MFPOT = getJObjDou(jObj, "mfpot", 10.0, jsonTagList); // mfPot
 	in->tolD = getJObjDou(jObj, "tolD", 0.01, jsonTagList); //defect tolerance
 	in->noHI = getJObjInt(jObj, "noHI", 0, jsonTagList); // noHI
 	in->inCOMP = getJObjInt(jObj, "incomp", 0, jsonTagList); // inCOMP
@@ -1112,6 +1116,8 @@ void readJson( char fpath[], inputList *in, spec **SP, particleMPC **pSRD,
 
 			// now get first set of primitives
 			(*SP+i)->MASS = getJObjDou(objElem, "mass", 1.0, jsonTagList); // mass
+			(*SP+i)->sMFPOT = getJObjDou(objElem, "sMFPOT", 10.0, jsonTagList); // specy-specific mean field potential
+
 
 			// handle population related overrides
 			double cellDens = getJObjDou(objElem, "dens", -1, jsonTagList);
@@ -1222,6 +1228,7 @@ void readJson( char fpath[], inputList *in, spec **SP, particleMPC **pSRD,
 	out->QKOUT = getJObjInt(jObj, "qkTensOut", 0, jsonTagList); // qKOut
 	out->ENFIELDOUT = getJObjInt(jObj, "oriEnOut", 0, jsonTagList); // enFieldOut
 	out->SPOUT = getJObjInt(jObj, "colourOut", 0, jsonTagList); // spOut
+	out->SPOUT = getJObjInt(jObj, "mpDensOut", 0, jsonTagList); // spOut
 	out->PRESOUT = getJObjInt(jObj, "pressureOut", 0, jsonTagList); // presOut
 	out->ENNEIGHBOURS = getJObjInt(jObj, "neighbourEnOut", 0, jsonTagList); // enNeighbours
 	out->AVSOUT = getJObjInt(jObj, "avSOut", 0, jsonTagList); // avSOut
