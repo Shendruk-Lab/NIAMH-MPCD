@@ -428,6 +428,7 @@ void LCcollision( cell *CL,spec *SP,double KBT,double MFPOT,double dt,double SG,
 	double DIR[_3D]={0.0},dU[_3D]={0.0};	//The director, the difference in orientation
 	double rotAx[_3D],xaxis[_3D]={0.0},rotAngle;
 	double rfc=0.0;			//Rotational friction coefficient
+	double smfpot=0.0,smfpot_scaled=0.0;      //Specy-specific mean field potential
 	double S=0.0;			//Local scalar order parameter
 	double MFPOT_scaled=MFPOT*0.5*(double)DIM; // Replace MFPot w weighted average of MF for every specy in cell
 	particleMPC *tmpc;		//Temporary particleMPC
@@ -482,6 +483,8 @@ void LCcollision( cell *CL,spec *SP,double KBT,double MFPOT,double dt,double SG,
 		while( tmpc!=NULL ) {
 			id = tmpc->SPID;
 			rfc=(SP+id)->RFC;
+			smfpot=(SP+id)->sMFPOT;
+			smfpot_scaled=smfpot*0.5*(double)DIM;
 			//Zero torque
 			for( i=0; i<_3D; i++ ) tmpc->T[i] = 0.;
 			//Save old orientation
@@ -494,7 +497,7 @@ void LCcollision( cell *CL,spec *SP,double KBT,double MFPOT,double dt,double SG,
 					pvec( tmpc->U,DIM );
 				}
 			#endif
-			genrand_maierSaupe( DIR,rotAx,rotAngle,tmpc->U,KBT,S,MFPOT_scaled );
+			genrand_maierSaupe( DIR,rotAx,rotAngle,tmpc->U,KBT,S,smfpot_scaled );
 			#ifdef DBG
 				if( DBUG==DBGLCCOL || DBUG==DBGESCAPE ) {
 					printf( "New orientation: " );
