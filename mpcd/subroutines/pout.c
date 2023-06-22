@@ -2810,9 +2810,9 @@ void outputResults( cell ***CL,particleMPC *SRDparticles,spec SP[],bc WALL[],sim
 	/* *********** AVERAGES and OUTPUT ********** */
 	/* ****************************************** */
 	//Calculate the CoM of each species
-	if( outFlag.AVCoMOUT>=OUT && runtime%outFlag.AVSOUT==0 ) {
+	// NEEDS MORE WORK
+	if( outFlag.AVCoMOUT>=OUT && runtime%outFlag.AVSOUT==0 )
 		*AVS = avOrderParam( SRDparticles,in.LC,avDIR );
-		*S4 = avS4( SRDparticles,in.LC,avDIR );
 		avsout( outFiles.favs,time_now,*AVS,*S4,avDIR );
 	}
 	//Calculate the average scalar order parameter
