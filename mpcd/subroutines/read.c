@@ -281,6 +281,9 @@ void readpc( char fpath[],outputFlagsList *out ) {
 	//Read how often the pressure field is outputted
 	read=fscanf( finput,"%d %s",&(out->PRESOUT),STR );
 	checkRead( read,"pressure field",inSTR);
+	//Read how often the specific pressure is outputted (in the case of a multiphase fluid)
+	read=fscanf( finput,"%d %s",&(out->spPRESOUT),STR );
+	checkRead( read,"pressure field",inSTR);
 	//Read how often the orientational energy from neighbours is outputted
 	read=fscanf( finput,"%d %s",&(out->ENNEIGHBOURS),STR );
 	checkRead( read,"orientational energy from neighbours",inSTR);
@@ -723,6 +726,8 @@ void readchckpnt( char fpath[],inputList *in,spec **SP,particleMPC **pSRD,cell *
 	if(fscanf( finput,"%d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d",&DBUG, &(out->TRAJOUT), &(out->printSP), &(out->COAROUT), &(out->FLOWOUT), &(out->VELOUT), &(out->AVVELOUT), &(out->ORDEROUT), &(out->QTENSOUT), &(out->QKOUT), &(out->AVSOUT), &(out->AVCoMOUT),&(out->SOLOUT), &(out->ENOUT), &(out->ENFIELDOUT), &(out->ENNEIGHBOURS), &(out->ENSTROPHYOUT), &(out->DENSOUT), &(out->CVVOUT), &(out->CNNOUT), &(out->CWWOUT), &(out->CDDOUT), &(out->CSSOUT), &(out->CPPOUT), &(out->BINDER), &(out->BINDERBIN), &(out->SYNOUT), &(out->CHCKPNT), &(out->CHCKPNTrcvr) ));
 	else printf("Warning: Failed to read output.\n");
 	if(fscanf( finput,"%d %d",&(out->SPOUT), &(out->PRESOUT) ));
+	else printf("Warning: Failed to read output.\n");
+	if(fscanf( finput,"%d",&(out->spPRESOUT) ));
 	else printf("Warning: Failed to read output.\n");
 	if(fscanf( finput,"%d %d %d %d %d %d %d",&(out->HISTVELOUT), &(out->HISTSPEEDOUT), &(out->HISTVORTOUT), &(out->HISTENSTROUT), &(out->HISTDIROUT), &(out->HISTSOUT), &(out->HISTNOUT) ));
 	else printf("Warning: Failed to read histogram output.\n");
@@ -1233,6 +1238,7 @@ void readJson( char fpath[], inputList *in, spec **SP, particleMPC **pSRD,
 	out->SPOUT = getJObjInt(jObj, "colourOut", 0, jsonTagList); // spOut
 	out->SPOUT = getJObjInt(jObj, "mpDensOut", 0, jsonTagList); // spOut
 	out->PRESOUT = getJObjInt(jObj, "pressureOut", 0, jsonTagList); // presOut
+	out->spPRESOUT = getJObjInt(jObj, "spPressureOut", 0, jsonTagList); // spPresOut
 	out->ENNEIGHBOURS = getJObjInt(jObj, "neighbourEnOut", 0, jsonTagList); // enNeighbours
 	out->AVSOUT = getJObjInt(jObj, "avSOut", 0, jsonTagList); // avSOut
 	out->AVCoMOUT = getJObjInt(jObj, "avCoMOut", 0, jsonTagList); // avCoMOut

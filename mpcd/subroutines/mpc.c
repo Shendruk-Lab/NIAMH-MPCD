@@ -4656,7 +4656,7 @@ void timestep( cell ***CL,particleMPC *SRDparticles,spec SP[],bc WALL[],simptr s
 		}
 	#endif
 	//Zero counters
-	if( outFlags.PRESOUT>=OUT && runtime%outFlags.PRESOUT==0 ) outPressure=1;
+	if(( outFlags.PRESOUT>=OUT && runtime%outFlags.PRESOUT==0 ) || (outFlags.spPRESOUT>=OUT && runtime%outFlags.spPRESOUT==0 )) outPressure=1;
 	zerocnt( KBTNOW,AVNOW,AVS );
 	// Zero impulse on BCs
 	// NOTE: Louise thinks this should be fine being here (and did check),

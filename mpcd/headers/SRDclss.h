@@ -287,7 +287,7 @@ typedef struct cell {
 ///
 typedef struct outputFilesList {
 	FILE *fcoarse,*fflow,*fvel,*fenergy,*fenergyfield,*fenneighbours;
-	FILE *fsynopsis,*favvel,*forder,*forderQ,*forderQK,*favs,*fdensSTD,*fchckpnt,*fenstrophy,*fmultiphase,*fpressure;
+	FILE *fsynopsis,*favvel,*forder,*forderQ,*forderQK,*favs,*fdensSTD,*fchckpnt,*fenstrophy,*fmultiphase,*fpressure,*fmpcom;
 	FILE *fcorrVV,*fcorrNN,*fcorrWW,*fcorrDD,*fcorrSS,*fcorrPP,*fbinder;
 	FILE *fhistVel,*fhistSpeed,*fhistVort,*fhistEnstr,*fhistDir,*fhistS,*fhistDens;
 	FILE *fenergyspect,*fenstrophyspect;
@@ -327,8 +327,9 @@ typedef struct outputFlagsList {
 	int ENOUT;					///< Flag for if system energy is outputted --- json `'energyOut'`.
 	int ENFIELDOUT;             ///< Flag for if orientational energy field is outputted --- json `'oriEnOut'`.
     int ENNEIGHBOURS;	        ///< Flag for if orientational energy as a function of neighbours is outputted --- json `'neighbourEnOut'`.
-	int SPOUT;					///< Flag for if the colour/phi/species-type field is outputted --- json `'colourOut'`.
+	int SPOUT;					///< Flag for if the colour/phi/species-type field is outputted --- json `'colourOut'` or `'mpDensOut'`.
 	int PRESOUT;				///< Flag for if the pressure field is outputted --- json `'pressureOut'`.
+	int spPRESOUT;				///< Flag for if the pressure field is outputted --- json `'spPressureOut'`.
 	int SYNOUT;					///< Flag for if system synopsis is outputted --- json `'synopsisOut'`.
 	int ORDEROUT;				///< Flag for if the order parameter are outputted --- json `'dirSOut'`.
 	int QTENSOUT;               ///< Flag for if the order parameter tensor is outputted --- json `'qTensOut'`.

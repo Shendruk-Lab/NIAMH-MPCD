@@ -1523,6 +1523,7 @@ void stateinput( inputList in,spec SP[],bc WALL[],specSwimmer SS,outputFlagsList
 		fprintf( fsynopsis,"Print tensor order parameter data: %i\n",out.QTENSOUT );
 		fprintf( fsynopsis,"Print reciprocal space order parameter data: %i\n",out.QKOUT );
 		fprintf( fsynopsis,"Print averaged order parameter data: %i\n",out.AVSOUT );
+		fprintf( fsynopsis,"Print averaged center of mass of multiphase species: %i\n",out.AVCoMOUT );
 		fprintf( fsynopsis,"Print standard deviation of density data: %i\n",out.DENSOUT );
 		fprintf( fsynopsis,"Print averaged enstrophy data: %i\n",out.ENSTROPHYOUT );
 		fprintf( fsynopsis,"Velocity-velocity correlation:\t\t%d\n",out.CVVOUT);
@@ -1926,6 +1927,23 @@ void avveloutWithGradVel( FILE *fout,double t,double vel[_3D],double KBT,double 
 ///
 void avsout( FILE *fout,double t,double S,double S4,double DIR[] ) {
 	fprintf( fout, "%12.5e\t%12.5e\t%12.5e\t%12.5e\t%12.5e\t%12.5e\n",t,S,S4,DIR[0],DIR[1],DIR[2] );
+	#ifdef FFLSH
+		fflush(fout);
+	#endif
+}
+
+///
+/// @brief Outputs centres of masses of multiphase fluid to file.
+///
+/// This function simply prints the centres of masses of multiphase fluid to file..
+///
+/// @param fout This is a pointer to the output .dat file name to be produced.
+/// @param t This is time.
+/// @param CoM This is a pointer to the center of mass of a species from a multiphase fluid.
+/// @see outputResults()
+///
+void avcomout( FILE *fout,double t,double CoM[_3D]) {
+	fprintf( fout, "%12.5e\t%12.5e\t%12.5e\t%12.5e\n",t,CoM[0],CoM[1],CoM[2] );
 	#ifdef FFLSH
 		fflush(fout);
 	#endif
@@ -2346,6 +2364,45 @@ void pressureout( FILE *fout,double t,cell ***CL ) {
 }
 
 ///
+/// @brief Outputs species-specific pressure field data to file.
+///
+/// This function simply prints species-specific pressure field data to an output data file.
+/// The streaming pressure `Ps` and collisional pressure `Pc` are the contributing factors computed.
+/// The species that is the most present has its pressure ouputted.
+///
+/// @param fout This is a pointer to the output .dat file name to be produced.
+/// @param t This is the time step.
+/// @param CL This is a pointer to the co-ordinates and cell of each particle.
+/// @see outputResults()
+///
+void sppressureout( FILE *fout,double t,cell ***CL ) {
+	int i,j,k;
+	double ratio=0.0;
+
+	for( i=0; i<XYZ[0]; i++ ) for( j=0; j<XYZ[1]; j++ ) for( k=0; k<XYZ[2]; k++ ) {
+		//Output
+		fprintf( fout,"%.2f\t",t );
+		fprintf( fout,"%5d\t%5d\t%5d\t",i,j,k );
+		// for( l=0; l<DIM; l++ ) for( m=0; m<DIM; m++ ) printf( "%lf\n",CL[i][j][k].Ps[l][m] );
+
+		// Calculate the predominant species
+		// ratio= ...
+
+		// output pressure weighed by dominant species, or fancier way?
+		if( CL[i][j][k].POP == 0 ) fprintf( fout, "%12.5e\t%12.5e\t%12.5e\t%12.5e\t%12.5e\t%12.5e\t%12.5e\t%12.5e\t%12.5e\n",0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0 );
+		else {
+			//Print the pressure
+			fprintf( fout, "%12.5e\t%12.5e\t%12.5e\t",CL[i][j][k].Ps[0][0]+CL[i][j][k].Pc[0][0],CL[i][j][k].Ps[0][1]+CL[i][j][k].Pc[0][1],CL[i][j][k].Ps[0][2]+CL[i][j][k].Pc[0][2] );
+			fprintf( fout, "%12.5e\t%12.5e\t%12.5e\t",CL[i][j][k].Ps[1][0]+CL[i][j][k].Pc[1][0],CL[i][j][k].Ps[1][1]+CL[i][j][k].Pc[1][1],CL[i][j][k].Ps[1][2]+CL[i][j][k].Pc[1][2] );
+			fprintf( fout, "%12.5e\t%12.5e\t%12.5e\n",CL[i][j][k].Ps[2][0]+CL[i][j][k].Pc[2][0],CL[i][j][k].Ps[2][1]+CL[i][j][k].Pc[2][1],CL[i][j][k].Ps[2][2]+CL[i][j][k].Pc[2][2] );
+		}
+	}
+	#ifdef FFLSH
+		fflush(fout);
+	#endif
+}
+
+///
 /// @brief Outputs tensor order parameter `Q` data to file.
 ///
 /// This function obtains the tensor order parameter from `tensOrderParam`.
@@ -2598,7 +2655,7 @@ void checkpoint( FILE *fout,inputList in,spec *SP,particleMPC *pSRD,int MDmode,b
 	fprintf( fout,"%lf %lf %lf %lf %lf %lf\n",AVV[0], AVV[1], AVV[2], AVNOW[0], AVNOW[1], AVNOW[2] );
 
 	//Output variables
-	fprintf( fout,"%d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d\n",DBUG,outFlag.TRAJOUT,outFlag.printSP,outFlag.COAROUT,outFlag.FLOWOUT,outFlag.VELOUT,outFlag.AVVELOUT,outFlag.ORDEROUT,outFlag.QTENSOUT,outFlag.QKOUT,outFlag.AVSOUT,outFlag.SOLOUT,outFlag.ENOUT,outFlag.ENFIELDOUT,outFlag.ENNEIGHBOURS,outFlag.ENSTROPHYOUT,outFlag.DENSOUT,outFlag.CVVOUT,outFlag.CNNOUT,outFlag.CWWOUT,outFlag.CDDOUT,outFlag.CSSOUT,outFlag.CPPOUT,outFlag.BINDER,outFlag.BINDERBIN,outFlag.SYNOUT,outFlag.CHCKPNT,outFlag.CHCKPNTrcvr );
+	fprintf( fout,"%d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d\n",DBUG,outFlag.TRAJOUT,outFlag.printSP,outFlag.COAROUT,outFlag.FLOWOUT,outFlag.VELOUT,outFlag.AVVELOUT,outFlag.ORDEROUT,outFlag.QTENSOUT,outFlag.QKOUT,outFlag.AVSOUT,outFlag.SOLOUT,outFlag.ENOUT,outFlag.ENFIELDOUT,outFlag.ENNEIGHBOURS,outFlag.ENSTROPHYOUT,outFlag.DENSOUT,outFlag.AVCoMOUT,outFlag.CVVOUT,outFlag.CNNOUT,outFlag.CWWOUT,outFlag.CDDOUT,outFlag.CSSOUT,outFlag.CPPOUT,outFlag.BINDER,outFlag.BINDERBIN,outFlag.SYNOUT,outFlag.CHCKPNT,outFlag.CHCKPNTrcvr );
 	fprintf( fout,"%d %d\n",outFlag.SPOUT,outFlag.PRESOUT );
 	fprintf( fout,"%d %d %d %d %d %d %d\n",outFlag.HISTVELOUT,outFlag.HISTSPEEDOUT,outFlag.HISTVORTOUT,outFlag.HISTENSTROUT,outFlag.HISTDIROUT,outFlag.HISTSOUT,outFlag.HISTNOUT );
 	fprintf( fout,"%d %d %d %d %d\n",outFlag.ENERGYSPECTOUT,outFlag.ENSTROPHYSPECTOUT,outFlag.TOPOOUT,outFlag.DEFECTOUT,outFlag.DISCLINOUT );
@@ -2606,7 +2663,7 @@ void checkpoint( FILE *fout,inputList in,spec *SP,particleMPC *pSRD,int MDmode,b
 
 	//Species of MPCD particles
 	for( i=0; i<NSPECI; i++ ) {
-		fprintf( fout,"%lf %lf %i %i %i %i ",(SP+i)->MASS,(SP+i)->sMFPOT,(SP+i)->POP,(SP+i)->QDIST,(SP+i)->VDIST,(SP+i)->ODIST );
+		fprintf( fout,"%lf %i %i %i %i ",(SP+i)->MASS,(SP+i)->POP,(SP+i)->QDIST,(SP+i)->VDIST,(SP+i)->ODIST );
 		fprintf( fout,"%lf %lf %lf %lf %lf %lf %lf %lf %lf\n",(SP+i)->RFC, (SP+i)->LEN, (SP+i)->TUMBLE, (SP+i)->CHIHI, (SP+i)->CHIA, (SP+i)->ACT, (SP+i)->SIGWIDTH, (SP+i)->SIGPOS, (SP+i)->DAMP );
 		for( j=0; j<NSPECI; j++ ) fprintf( fout,"%lf ",(SP+i)->M[j] );			//Binary fluid control parameters
 		fprintf( fout,"\n" );
@@ -2761,7 +2818,7 @@ void runCheckpoint(char op[500],time_t *lastCheckpoint,FILE *fout,inputList in,s
 /// @see pressureout()
 /// @see orderQKout()
 ///
-void outputResults( cell ***CL,particleMPC *SRDparticles,spec SP[],bc WALL[],simptr simMD,specSwimmer SS, swimmer swimmers[],double AVNOW[_3D],double AVV[_3D],double avDIR[_3D], int runtime, inputList in, double AVVEL, double KBTNOW,double *AVS,double *S4,double *stdN,int MDmode,outputFlagsList outFlag,outputFilesList outFiles ) {
+void outputResults( cell ***CL,particleMPC *SRDparticles,spec SP[],bc WALL[],simptr simMD,specSwimmer SS, swimmer swimmers[],double AVNOW[_3D],double AVV[_3D],double avDIR[_3D], int runtime, inputList in, double AVVEL, double KBTNOW,double *AVS,double *S4,double *stdN,double *CoM[_3D],int MDmode,outputFlagsList outFlag,outputFilesList outFiles ) {
 	int a,b,c,i,j;
 	double time_now = runtime*in.dt;					//Simulation time
 	double wmf;
@@ -2809,12 +2866,6 @@ void outputResults( cell ***CL,particleMPC *SRDparticles,spec SP[],bc WALL[],sim
 	/* ****************************************** */
 	/* *********** AVERAGES and OUTPUT ********** */
 	/* ****************************************** */
-	//Calculate the CoM of each species
-	// NEEDS MORE WORK
-	if( outFlag.AVCoMOUT>=OUT && runtime%outFlag.AVSOUT==0 )
-		*AVS = avOrderParam( SRDparticles,in.LC,avDIR );
-		avsout( outFiles.favs,time_now,*AVS,*S4,avDIR );
-	}
 	//Calculate the average scalar order parameter
 	if( outFlag.AVSOUT>=OUT && runtime%outFlag.AVSOUT==0 ) {
 		*AVS = avOrderParam( SRDparticles,in.LC,avDIR );
@@ -2825,6 +2876,14 @@ void outputResults( cell ***CL,particleMPC *SRDparticles,spec SP[],bc WALL[],sim
 	if( outFlag.DENSOUT>=OUT && runtime%outFlag.DENSOUT==0 ) {
 		*stdN = stdNum( CL,GPOP,XYZ,XYZ_P1 );
 		densSTDout( outFiles.fdensSTD,time_now,*stdN );
+	}
+	//Calculate centers of masses of multiphase fluids
+	if( outFlag.AVCoMOUT>=OUT && runtime%outFlag.AVCoMOUT==0 ) {
+		
+		for (i=0;i<NS;i++){
+			*CoM = ; // Look at LCcollision for advice
+			avcomout( outFiles.fmpcom,time_now,*CoM);
+		}
 	}
 	//Calculate binder cumulants
 	if( outFlag.BINDER>=OUT && runtime%outFlag.BINDER==0 ) {
@@ -2855,7 +2914,7 @@ void outputResults( cell ***CL,particleMPC *SRDparticles,spec SP[],bc WALL[],sim
 		enout( outFiles.fenergy,SRDparticles,SP,WALL,time_now,KBTNOW,wmf );
 	}
 	if( outFlag.ENFIELDOUT>=OUT && runtime%outFlag.ENFIELDOUT==0 ) enfieldout( outFiles.fenergyfield,CL,SP,in.MFPOT,in.LC );
-	if( outFlag.ENNEIGHBOURS>=OUT && runtime%outFlag.ENNEIGHBOURS==0 ) enneighboursout( outFiles.fenneighbours,time_now,CL,in.MFPOT,in.LC ); // NEED TO COPY THIS WITH SPECY-SPECIFIC MFPOT
+	if( outFlag.ENNEIGHBOURS>=OUT && runtime%outFlag.ENNEIGHBOURS==0 ) enneighboursout( outFiles.fenneighbours,time_now,CL,in.MFPOT,in.LC );
 	/* ****************************************** */
 	/* ***** SWIMMERS' POSITONS/ORIENTATIONS **** */
 	/* ****************************************** */
