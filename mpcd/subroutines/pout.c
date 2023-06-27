@@ -1942,8 +1942,12 @@ void avsout( FILE *fout,double t,double S,double S4,double DIR[] ) {
 /// @param CoM This is a pointer to the center of mass of a species from a multiphase fluid.
 /// @see outputResults()
 ///
-void avcomout( FILE *fout,double t,double CoM[_3D]) {
-	fprintf( fout, "%12.5e\t%12.5e\t%12.5e\t%12.5e\n",t,CoM[0],CoM[1],CoM[2] );
+void avcomout( FILE *fout,double t,double CoM[NSPECI][_3D]) {
+	int i;
+
+	fprintf( fout, "%12.5e",t );
+	for (i=0;i<NSPECI;i++) fprintf( fout, "\t%12.5e\t%12.5e\t%12.5e\t%12.5e",CoM[i][0],CoM[i][1],CoM[i][2] );
+	fprintf( fout, "\n" );
 	#ifdef FFLSH
 		fflush(fout);
 	#endif
@@ -2388,7 +2392,7 @@ void sppressureout( FILE *fout,double t,cell ***CL ) {
 		// Calculate the predominant species
 		// ratio= ...
 
-		// output pressure weighed by dominant species, or fancier way?
+		// output pressure weighed by 
 		if( CL[i][j][k].POP == 0 ) fprintf( fout, "%12.5e\t%12.5e\t%12.5e\t%12.5e\t%12.5e\t%12.5e\t%12.5e\t%12.5e\t%12.5e\n",0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0 );
 		else {
 			//Print the pressure
@@ -2825,6 +2829,7 @@ void outputResults( cell ***CL,particleMPC *SRDparticles,spec SP[],bc WALL[],sim
 	double corr[maxXYZ],spect[maxXYZ];				//Correlation functions and energy spectra
 	double UL;																//Binder cumulant
 	double avGradVel[_3D][_3D];								//Velocity gradient
+	double com[NSPECI][_3D];					//Center of mass vector for each species
 
 	/* ****************************************** */
 	/* ************** BC trajectory ************* */
@@ -2879,11 +2884,13 @@ void outputResults( cell ***CL,particleMPC *SRDparticles,spec SP[],bc WALL[],sim
 	}
 	//Calculate centers of masses of multiphase fluids
 	if( outFlag.AVCoMOUT>=OUT && runtime%outFlag.AVCoMOUT==0 ) {
-		
-		for (i=0;i<NS;i++){
-			*CoM = ; // Look at LCcollision for advice
-			avcomout( outFiles.fmpcom,time_now,*CoM);
+		for (i=0;i<NSPECI;i++) for (j=0;j<_3D;j++) com[i][j]=0.0;
+		for (i=0;i<GPOP;i++){
+			a=SRDparticles[i].SPID;
+			for (j=0;j<DIM;j++) com[a][j]+=SRDparticles[i].Q[j];
 		}
+		for (i=0;i<NSPECI;i++) if(SP[i].POP>0) for (j=0;j<_3D;j++) com[i][j] /= (float) SP[i].POP;
+		avcomout( outFiles.fmpcom,time_now,com);
 	}
 	//Calculate binder cumulants
 	if( outFlag.BINDER>=OUT && runtime%outFlag.BINDER==0 ) {
