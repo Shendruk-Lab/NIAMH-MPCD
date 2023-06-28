@@ -1976,7 +1976,7 @@ void avcomout( FILE *fout,double t,double CoM[NSPECI][_3D]) {
 	int i;
 
 	fprintf( fout, "%12.5e",t );
-	for (i=0;i<NSPECI;i++) fprintf( fout, "\t%12.5e\t%12.5e\t%12.5e\t%12.5e",CoM[i][0],CoM[i][1],CoM[i][2] );
+	for (i=0;i<NSPECI;i++) fprintf( fout, "\t%12.5e\t%12.5e\t%12.5e",CoM[i][0],CoM[i][1],CoM[i][2] );
 	fprintf( fout, "\n" );
 	#ifdef FFLSH
 		fflush(fout);
@@ -2411,7 +2411,7 @@ void pressureout( FILE *fout,double t,cell ***CL ) {
 ///
 void sppressureout( FILE *fout,double t,cell ***CL ) {
 	int i,j,k,pop,maxp,maxid;
-	double avP[NSPECI],stdP[NSPECI],cnt[NSPECI],cutoff=0.7,P;
+	double avP[NSPECI],stdP[NSPECI],cnt[NSPECI],cutoff=0.51,P;
 
 
 	fprintf( fout,"%.2f",t );
@@ -2443,7 +2443,7 @@ void sppressureout( FILE *fout,double t,cell ***CL ) {
 	for (i=0;i<NSPECI;i++){
 		avP[i]/=cnt[i];
 		stdP[i]/=cnt[i];
-		stdP[i]=sqrt(stdP[i]-avP[i]*avP[i]);
+		stdP[i]=sqrt(abs(stdP[i]-avP[i]*avP[i]));
 		fprintf( fout,"\t%12.5e\t%12.5e",avP[i],stdP[i]);
 	}
 	fprintf( fout,"\n");
@@ -2706,6 +2706,7 @@ void checkpoint( FILE *fout,inputList in,spec *SP,particleMPC *pSRD,int MDmode,b
 
 	//Output variables
 	fprintf( fout,"%d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d\n",DBUG,outFlag.TRAJOUT,outFlag.printSP,outFlag.COAROUT,outFlag.FLOWOUT,outFlag.VELOUT,outFlag.AVVELOUT,outFlag.ORDEROUT,outFlag.QTENSOUT,outFlag.QKOUT,outFlag.AVSOUT,outFlag.SOLOUT,outFlag.ENOUT,outFlag.ENFIELDOUT,outFlag.ENNEIGHBOURS,outFlag.ENSTROPHYOUT,outFlag.DENSOUT,outFlag.AVCoMOUT,outFlag.CVVOUT,outFlag.CNNOUT,outFlag.CWWOUT,outFlag.CDDOUT,outFlag.CSSOUT,outFlag.CPPOUT,outFlag.BINDER,outFlag.BINDERBIN,outFlag.SYNOUT,outFlag.CHCKPNT,outFlag.CHCKPNTrcvr );
+	// fprintf( fout,"%d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d\n",DBUG,outFlag.TRAJOUT,outFlag.printSP,outFlag.COAROUT,outFlag.FLOWOUT,outFlag.VELOUT,outFlag.AVVELOUT,outFlag.ORDEROUT,outFlag.QTENSOUT,outFlag.QKOUT,outFlag.AVSOUT,outFlag.SOLOUT,outFlag.ENOUT,outFlag.ENFIELDOUT,outFlag.ENNEIGHBOURS,outFlag.ENSTROPHYOUT,outFlag.DENSOUT,outFlag.CVVOUT,outFlag.CNNOUT,outFlag.CWWOUT,outFlag.CDDOUT,outFlag.CSSOUT,outFlag.CPPOUT,outFlag.BINDER,outFlag.BINDERBIN,outFlag.SYNOUT,outFlag.CHCKPNT,outFlag.CHCKPNTrcvr );
 	fprintf( fout,"%d %d\n",outFlag.SPOUT,outFlag.PRESOUT );
 	fprintf( fout,"%d %d %d %d %d %d %d\n",outFlag.HISTVELOUT,outFlag.HISTSPEEDOUT,outFlag.HISTVORTOUT,outFlag.HISTENSTROUT,outFlag.HISTDIROUT,outFlag.HISTSOUT,outFlag.HISTNOUT );
 	fprintf( fout,"%d %d %d %d %d\n",outFlag.ENERGYSPECTOUT,outFlag.ENSTROPHYSPECTOUT,outFlag.TOPOOUT,outFlag.DEFECTOUT,outFlag.DISCLINOUT );
@@ -2869,6 +2870,8 @@ void runCheckpoint(char op[500],time_t *lastCheckpoint,FILE *fout,inputList in,s
 /// @see orderQKout()
 ///
 void outputResults( cell ***CL,particleMPC *SRDparticles,spec SP[],bc WALL[],simptr simMD,specSwimmer SS, swimmer swimmers[],double AVNOW[_3D],double AVV[_3D],double avDIR[_3D], int runtime, inputList in, double AVVEL, double KBTNOW,double *AVS,double *S4,double *stdN,double *CoM[_3D],int MDmode,outputFlagsList outFlag,outputFilesList outFiles ) {
+// void outputResults( cell ***CL,particleMPC *SRDparticles,spec SP[],bc WALL[],simptr simMD,specSwimmer SS, swimmer swimmers[],double AVNOW[_3D],double AVV[_3D],double avDIR[_3D], int runtime, inputList in, double AVVEL, double KBTNOW,double *AVS,double *S4,double *stdN,int MDmode,outputFlagsList outFlag,outputFilesList outFiles ) {
+
 	int a,b,c,i,j;
 	double time_now = runtime*in.dt;					//Simulation time
 	double wmf;
@@ -3282,9 +3285,11 @@ void closeOutputFiles( spec *SP,bc WALL[],outputFlagsList outFlag,outputFilesLis
 	if( outFlag.DISCLINOUT>=OUT ) fclose( outFiles.fdisclination );
 	if( outFlag.SPOUT>=OUT ) fclose( outFiles.fmultiphase );
 	if( outFlag.PRESOUT>=OUT ) fclose( outFiles.fpressure );
+	if( outFlag.spPRESOUT>=OUT ) fclose( outFiles.fsppressure );
 	if( outFlag.SWOUT>=OUT ) fclose( outFiles.fswimmers );
 	if( outFlag.SWORIOUT>=OUT ) fclose( outFiles.fswimmersOri );
 	if( outFlag.RTOUT>=OUT ) fclose( outFiles.fruntumble );
+	if( outFlag.AVCoMOUT>=OUT ) fclose( outFiles.fmpcom );
 	if( outFlag.SOLOUT>=OUT ) for( i=0; i<NBC; i++ ) if( WALL[i].DSPLC ) fclose( outFiles.fsolids[i] );
 }
 

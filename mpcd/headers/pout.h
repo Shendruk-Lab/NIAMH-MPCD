@@ -74,7 +74,7 @@ void densSTDout( FILE *fout,double t,double stdN );
 void avenstrophyout( FILE *fout,double t,double E );
 void binderout( FILE *fout,double t,double UL );
 void flowout( FILE *fout,cell ***CL,int interval );
-void avcomout( FILE *fout,double t,double CoM[10][_3D]);
+void avcomout( FILE *fout,double t,double CoM[5][_3D]);
 void velout( FILE *fout,cell ***CL, double t );
 void solidout( FILE *fout,bc WALL,double t );
 void topoChargeAndDefectsOut( FILE *ftopo,int TOPOOUT,FILE *fdefect,int DEFECTOUT,double t,cell ***CL,double tolD );
@@ -110,7 +110,7 @@ void stateinput( inputList in,spec SP[],bc WALL[],specSwimmer SS,outputFlagsList
 void listinput( inputList in,double AVVEL,spec SP[],kinTheory theory );
 
 // Larger output-control routines
-void outputResults( cell ***CL,particleMPC *SRDparticles,spec SP[],bc WALL[],simptr simMD,specSwimmer SS, swimmer swimmers[],double AVNOW[_3D],double AVV[_3D],double avDIR[_3D], int runtime, inputList in, double AVVEL, double KBTNOW,double *AVS,double *S4,double *stdN,int MDmode,outputFlagsList outFlag,outputFilesList outFiles );
+void outputResults( cell ***CL,particleMPC *SRDparticles,spec SP[],bc WALL[],simptr simMD,specSwimmer SS, swimmer swimmers[],double AVNOW[_3D],double AVV[_3D],double avDIR[_3D], int runtime, inputList in, double AVVEL, double KBTNOW,double *AVS,double *S4,double *stdN,double *CoM[_3D],int MDmode,outputFlagsList outFlag,outputFilesList outFiles );
 void outputHist( cell ***CL,int runtime, inputList in,outputFlagsList outFlag,outputFilesList outFiles );
 void closeOutputFiles( spec *SP,bc WALL[],outputFlagsList outFlag,outputFilesList outFiles );
 int writeOutput( int t,outputFlagsList f,int GAL,int zeroNetMom );

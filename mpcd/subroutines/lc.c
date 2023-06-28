@@ -498,6 +498,8 @@ void LCcollision( cell *CL,spec *SP,double KBT,double MFPOT,double dt,double SG,
 				}
 			#endif
 			genrand_maierSaupe( DIR,rotAx,rotAngle,tmpc->U,KBT,S,smfpot_scaled );
+			// genrand_maierSaupe( DIR,rotAx,rotAngle,tmpc->U,KBT,S,MFPOT_scaled );
+
 			#ifdef DBG
 				if( DBUG==DBGLCCOL || DBUG==DBGESCAPE ) {
 					printf( "New orientation: " );
