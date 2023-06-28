@@ -710,6 +710,21 @@ void pressureheader( FILE *fout ) {
 }
 
 ///
+/// @brief Prints column headers for multiphase pressure data output files.
+///
+/// Column headers are produced.
+/// Time, t, is the first column header.
+/// The next column denote each species whose pressure will be outputted below.
+///
+/// @param fout This is a pointer to the output .dat file name to be produced.
+///
+void sppressureheader( FILE *fout ) {
+	fprintf( fout,"t\t" );
+	for (int q=0;q<NSPECI;q++) fprintf( fout,"\tSpecies %f",q);
+	fprintf( fout,"\n");
+}
+
+///
 /// @brief Prints column headers for binning data output files for histogram use.
 ///
 /// Column headers are produced for histogram bins in .dat files in order to display raw data in a table format.
@@ -954,6 +969,21 @@ void swimmerheader( FILE *fout ) {
 ///
 void swimmeroriheader( FILE *fout ) {
 	fprintf( fout,"t\t\tnX\tnY\tnZ\tRTphase\n" );
+}
+
+///
+/// @brief Prints column headers for centre of masses of multiphase fluids.
+///
+/// Column headers are produced.
+/// Time, t, is the first column header.
+/// X, Y, and Z are the centres of masses' Cartesian co-ordinates.
+///
+/// @param fout This is a pointer to the output .dat file name to be produced.
+///
+void comheader( FILE *fout ) {
+	fprintf( fout,"t\t\t" );
+	for (int k=0;k<NSPECI;k++) fprintf( fout,"X\tY\tZ\t" );
+	fprintf( fout,"\n" );
 }
 
 ///
@@ -2380,27 +2410,43 @@ void pressureout( FILE *fout,double t,cell ***CL ) {
 /// @see outputResults()
 ///
 void sppressureout( FILE *fout,double t,cell ***CL ) {
-	int i,j,k;
-	double ratio=0.0;
+	int i,j,k,pop,maxp,maxid;
+	double avP[NSPECI],stdP[NSPECI],cnt[NSPECI],cutoff=0.7,P;
 
+
+	fprintf( fout,"%.2f",t );
 	for( i=0; i<XYZ[0]; i++ ) for( j=0; j<XYZ[1]; j++ ) for( k=0; k<XYZ[2]; k++ ) {
-		//Output
-		fprintf( fout,"%.2f\t",t );
-		fprintf( fout,"%5d\t%5d\t%5d\t",i,j,k );
-		// for( l=0; l<DIM; l++ ) for( m=0; m<DIM; m++ ) printf( "%lf\n",CL[i][j][k].Ps[l][m] );
 
-		// Calculate the predominant species
-		// ratio= ...
-
-		// output pressure weighed by 
-		if( CL[i][j][k].POP == 0 ) fprintf( fout, "%12.5e\t%12.5e\t%12.5e\t%12.5e\t%12.5e\t%12.5e\t%12.5e\t%12.5e\t%12.5e\n",0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0 );
+		if( CL[i][j][k].POP == 0 ) printf("Lonely in here.");
 		else {
-			//Print the pressure
-			fprintf( fout, "%12.5e\t%12.5e\t%12.5e\t",CL[i][j][k].Ps[0][0]+CL[i][j][k].Pc[0][0],CL[i][j][k].Ps[0][1]+CL[i][j][k].Pc[0][1],CL[i][j][k].Ps[0][2]+CL[i][j][k].Pc[0][2] );
-			fprintf( fout, "%12.5e\t%12.5e\t%12.5e\t",CL[i][j][k].Ps[1][0]+CL[i][j][k].Pc[1][0],CL[i][j][k].Ps[1][1]+CL[i][j][k].Pc[1][1],CL[i][j][k].Ps[1][2]+CL[i][j][k].Pc[1][2] );
-			fprintf( fout, "%12.5e\t%12.5e\t%12.5e\n",CL[i][j][k].Ps[2][0]+CL[i][j][k].Pc[2][0],CL[i][j][k].Ps[2][1]+CL[i][j][k].Pc[2][1],CL[i][j][k].Ps[2][2]+CL[i][j][k].Pc[2][2] );
+			pop=CL[i][j][k].POP;
+			maxp=0;
+
+			for (int q=0;q<NSPECI;q++) {
+				if (CL[i][j][k].SP[q]>maxp){
+					maxp=CL[i][j][k].SP[q];
+					maxid=q;
+				}
+			}	
+
+			if (cutoff<=(float)maxp/(float)pop){
+				P=0;
+				cnt[maxid]++;
+				for (int q=0;q<DIM;q++) P+=CL[i][j][k].Ps[q][q]+CL[i][j][k].Pc[q][q];
+				P/=(float)DIM;
+				avP[maxid]+=P;
+				stdP[maxid]+=P*P;
+			}
 		}
 	}
+
+	for (i=0;i<NSPECI;i++){
+		avP[i]/=cnt[i];
+		stdP[i]/=cnt[i];
+		stdP[i]=sqrt(stdP[i]-avP[i]*avP[i]);
+		fprintf( fout,"\t%12.5e\t%12.5e",avP[i],stdP[i]);
+	}
+	fprintf( fout,"\n");
 	#ifdef FFLSH
 		fflush(fout);
 	#endif
@@ -3005,6 +3051,7 @@ void outputResults( cell ***CL,particleMPC *SRDparticles,spec SP[],bc WALL[],sim
 	if(in.LC!=ISOF) if( outFlag.DISCLINOUT>=OUT && runtime%outFlag.DISCLINOUT==0 ) disclinationTensorOut( outFiles.fdisclination,time_now,CL,in.LC );
 	if( outFlag.SPOUT>=OUT && runtime%outFlag.SPOUT==0 ) multiphaseout( outFiles.fmultiphase,time_now,CL );
 	if( outFlag.PRESOUT>=OUT && runtime%outFlag.PRESOUT==0 ) pressureout( outFiles.fpressure,time_now,CL );
+	if( outFlag.spPRESOUT>=OUT && runtime%outFlag.spPRESOUT==0 ) sppressureout( outFiles.fsppressure,time_now,CL );
 	if(in.LC!=ISOF) if( outFlag.QKOUT>=OUT && runtime%outFlag.QKOUT==0 ) {
 		#ifdef DBG
 			if( DBUG >= DBGTITLE ) printf( "Calculate Q-tensor in reciprocal space.\n" );

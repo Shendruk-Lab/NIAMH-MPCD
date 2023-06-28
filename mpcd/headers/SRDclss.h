@@ -287,7 +287,7 @@ typedef struct cell {
 ///
 typedef struct outputFilesList {
 	FILE *fcoarse,*fflow,*fvel,*fenergy,*fenergyfield,*fenneighbours;
-	FILE *fsynopsis,*favvel,*forder,*forderQ,*forderQK,*favs,*fdensSTD,*fchckpnt,*fenstrophy,*fmultiphase,*fpressure,*fmpcom;
+	FILE *fsynopsis,*favvel,*forder,*forderQ,*forderQK,*favs,*fdensSTD,*fchckpnt,*fenstrophy,*fmultiphase,*fpressure,*fsppressure,*fmpcom;
 	FILE *fcorrVV,*fcorrNN,*fcorrWW,*fcorrDD,*fcorrSS,*fcorrPP,*fbinder;
 	FILE *fhistVel,*fhistSpeed,*fhistVort,*fhistEnstr,*fhistDir,*fhistS,*fhistDens;
 	FILE *fenergyspect,*fenstrophyspect;

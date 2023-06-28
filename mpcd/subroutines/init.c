@@ -653,6 +653,22 @@ void openpressure( FILE **f,char dir[],char fname[],char ext[] ) {
 }
 
 ///
+/// @brief Function that initializes the pressure field output file.
+///
+/// This function initializes the multiphase pressure output file.
+/// It opens it up for writing and reading while formatting it with its header.
+///
+/// @param f Return pointer to the pressure field output file being opened.
+/// @param dir Path to the directory of the pressure field output file.
+/// @param fname Name of the pressure field output file.
+/// @param ext Extension of the pressure field output file.
+///
+void opensppressure( FILE **f,char dir[],char fname[],char ext[] ) {
+	openBasic( f,dir,fname,ext );
+	sppressureheader( *f );
+}
+
+///
 /// @brief Function that initializes the Binder cumulant output file.
 ///
 /// This function initializes the Binder cumulant output file.
@@ -699,6 +715,22 @@ void openswimmer( FILE **f,char dir[],char fname[],char ext[] ) {
 void openswimmerOri( FILE **f,char dir[],char fname[],char ext[] ) {
 	openBasic( f,dir,fname,ext );
 	swimmeroriheader( *f );
+}
+
+///
+/// @brief Function that initializes the centres of masses of a multiphase fluid output file.
+///
+/// This function initializes the centres of masses of a multiphase fluid  output file.
+/// It opens it up for writing and reading while formatting it with its header.
+///
+/// @param f Return pointer to the centres of masses of a multiphase fluid  output file being opened.
+/// @param dir Path to the directory of the centres of masses of a multiphase fluid output file.
+/// @param fname Name of the centres of masses of a multiphase fluid output file.
+/// @param ext Extension of the centres of masses of a multiphase fluid output file.
+///
+void opencom( FILE **f,char dir[],char fname[],char ext[] ) {
+	openBasic( f,dir,fname,ext );
+	comheader( *f );
 }
 
 ///
@@ -1852,8 +1884,10 @@ void initOutput( char op[],outputFlagsList *outFlag,outputFilesList *outFile,inp
 	char fileswimmer[]="swimmers";
 	char fileswimmerori[]="swimmersOri";
 	char fileruntumble[]="runtumble";
+	char filecom[]="com";
 	char filemultiphase[]="multiphase";
 	char filepressure[]="pressure";
+	char filesppressure[]="sppressure";
 
 	char filesuffix[]="0000";
 	char fileextension[]=".dat";
@@ -1922,6 +1956,8 @@ void initOutput( char op[],outputFlagsList *outFlag,outputFilesList *outFile,inp
 	if( (outFlag->SWORIOUT)>=OUT ) openswimmerOri( &(outFile->fswimmersOri),op,fileswimmerori,fileextension );
 	//Initialize swimmer run/tumble output files
 	if( (outFlag->RTOUT)>=OUT ) openruntumble( &(outFile->fruntumble),op,fileruntumble,fileextension );
+	//Initialize centre of masses of multiphase fluid output files
+	if( (outFlag->AVCoMOUT)>=OUT ) opencom( &(outFile->fmpcom),op,filecom,fileextension );
 	//Initialize the synopsis output files
 	if( (outFlag->SYNOUT)>=OUT ) opensynopsis( &(outFile->fsynopsis),op,1 );
 	//Initialize the solids' trajectories (or BC motion) output files
@@ -1936,6 +1972,8 @@ void initOutput( char op[],outputFlagsList *outFlag,outputFilesList *outFile,inp
 	if( (outFlag->SPOUT)>=OUT ) openmultiphase( &(outFile->fmultiphase),op,filemultiphase,fileextension );
 	//Initialize the pressure field output file
 	if( (outFlag->PRESOUT)>=OUT ) openpressure( &(outFile->fpressure),op,filepressure,fileextension );
+	//Initialize the pressure field output file
+	if( (outFlag->spPRESOUT)>=OUT ) opensppressure( &(outFile->fsppressure),op,filesppressure,fileextension );
 
 	if( (outFlag->SYNOUT)==OUT) {
 		fprintf(outFile->fsynopsis,"Output:\n" );

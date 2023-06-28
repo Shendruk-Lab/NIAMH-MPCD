@@ -70,10 +70,12 @@ void opendefect( FILE **f,char dir[],char fname[],char ext[] );
 void opendisclin( FILE **f,char dir[],char fname[],char ext[] );
 void openmultiphase( FILE **f,char dir[],char fname[],char ext[] );
 void openpressure( FILE **f,char dir[],char fname[],char ext[] );
+void opensppressure( FILE **f,char dir[],char fname[],char ext[] );
 void openbinder( FILE **f,char dir[],char fname[],char ext[],int binSize );
 void openswimmer( FILE **f,char dir[],char fname[],char ext[] );
 void openswimmerOri( FILE **f,char dir[],char fname[],char ext[] );
 void openruntumble( FILE **f,char dir[],char fname[],char ext[] );
+void opencom( FILE **f,char dir[],char fname[],char ext[] );
 
 void checkSim( FILE *fsynopsis,int SYNOUT,inputList in,spec *SP,bc *WALL,specSwimmer SS );
 
