@@ -720,7 +720,10 @@ void pressureheader( FILE *fout ) {
 ///
 void sppressureheader( FILE *fout ) {
 	fprintf( fout,"t\t" );
-	for (int q=0;q<NSPECI;q++) fprintf( fout,"\tSpecies %f",q);
+	for (int q=0;q<NSPECI;q++) {
+		fprintf( fout,"\tAverage pressure in cells dominated by species %d",q);
+		fprintf( fout,"\tStandatd deviation in cells dominated by species %d",q);
+	}
 	fprintf( fout,"\n");
 }
 
@@ -982,7 +985,7 @@ void swimmeroriheader( FILE *fout ) {
 ///
 void comheader( FILE *fout ) {
 	fprintf( fout,"t\t\t" );
-	for (int k=0;k<NSPECI;k++) fprintf( fout,"X\tY\tZ\t" );
+	for (int k=0;k<NSPECI;k++) fprintf( fout,"X%d \tY%d\tZ%d\t",k,k,k );
 	fprintf( fout,"\n" );
 }
 
@@ -2411,7 +2414,7 @@ void pressureout( FILE *fout,double t,cell ***CL ) {
 ///
 void sppressureout( FILE *fout,double t,cell ***CL ) {
 	int i,j,k,pop,maxp,maxid;
-	double avP[NSPECI],stdP[NSPECI],cnt[NSPECI],cutoff=0.51,P;
+	double avP[NSPECI],stdP[NSPECI],cnt[NSPECI],cutoff=0.7,P;
 
 
 	fprintf( fout,"%.2f",t );
@@ -2443,7 +2446,8 @@ void sppressureout( FILE *fout,double t,cell ***CL ) {
 	for (i=0;i<NSPECI;i++){
 		avP[i]/=cnt[i];
 		stdP[i]/=cnt[i];
-		stdP[i]=sqrt(abs(stdP[i]-avP[i]*avP[i]));
+		avP[i]=fabs(avP[i]);
+		stdP[i]=sqrt(fabs(stdP[i]-avP[i]*avP[i]));
 		fprintf( fout,"\t%12.5e\t%12.5e",avP[i],stdP[i]);
 	}
 	fprintf( fout,"\n");

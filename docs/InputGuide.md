@@ -79,6 +79,7 @@ Tag             | Type          | Default Value | Description
 `trajSpecOut`   | int           | 0             | Which number of species whose detailed trajectories to output
 `coarseOut`     | int           | 0             | Coarse grain data (cell velocity, densities, density of each species) field
 `flowOut`       | int           | 0             | Flow field averaged between output times
+`avCoMOut`      | int           | 0             | Centre of masses of multiphase fluid averaged between output times
 `velOut`        | int           | 0             | Instantaneous velocity field.
 `avVelOut`      | int           | 0             | Total average MPCD velocity. System-averaged single value
 `dirSOut`       | int           | 0             | Director and scalar order parameter fields
@@ -87,6 +88,7 @@ Tag             | Type          | Default Value | Description
 `oriEnOut`      | int           | 0             | Orientational energy field
 `colourOut`     | int           | 0             | Colour/ phi/ species-type field
 `pressureOut`   | int           | 0             | Pressure field
+`spPressureOut` | int           | 0             | Specific pressures due to each phase of a multiphase fluid
 `neighbourEnOut`| int           | 0             | Orientational energy from neighbours. System-averaged single value
 `avSOut`        | int           | 0             | Total average scalar order parameter. System-averaged single value
 `densSDOut`     | int           | 0             | SD of the number per cell. System-averaged single value
@@ -274,12 +276,14 @@ As a reminder, if you wish to use the default value for a tag, you can leave it 
     "flowOut":          0,
     "velOut":           0,
     "avVelOut":         0,
+    "avCoMOut":         0,
     "dirSOut":          0,
     "qTensOut":         0,
     "qkTensOut":        0,
     "oriEnOut":         0,
     "colourOut":        0,
     "pressureOut":      0,
+    "spPressureOut":    0,
     "neighbourEnOut":   0,
     "avSOut":           0,
     "densSDOut":        0,
