@@ -1556,7 +1556,7 @@ void stateinput( inputList in,spec SP[],bc WALL[],specSwimmer SS,outputFlagsList
 		fprintf( fsynopsis,"Print tensor order parameter data: %i\n",out.QTENSOUT );
 		fprintf( fsynopsis,"Print reciprocal space order parameter data: %i\n",out.QKOUT );
 		fprintf( fsynopsis,"Print averaged order parameter data: %i\n",out.AVSOUT );
-		fprintf( fsynopsis,"Print averaged center of mass of multiphase species: %i\n",out.AVCoMOUT );
+		fprintf( fsynopsis,"Print averaged center of mass of multiphase species: %i\n",out.AVCOMOUT );
 		fprintf( fsynopsis,"Print standard deviation of density data: %i\n",out.DENSOUT );
 		fprintf( fsynopsis,"Print averaged enstrophy data: %i\n",out.ENSTROPHYOUT );
 		fprintf( fsynopsis,"Velocity-velocity correlation:\t\t%d\n",out.CVVOUT);
@@ -2709,7 +2709,7 @@ void checkpoint( FILE *fout,inputList in,spec *SP,particleMPC *pSRD,int MDmode,b
 	fprintf( fout,"%lf %lf %lf %lf %lf %lf\n",AVV[0], AVV[1], AVV[2], AVNOW[0], AVNOW[1], AVNOW[2] );
 
 	//Output variables
-	fprintf( fout,"%d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d\n",DBUG,outFlag.TRAJOUT,outFlag.printSP,outFlag.COAROUT,outFlag.FLOWOUT,outFlag.VELOUT,outFlag.AVVELOUT,outFlag.ORDEROUT,outFlag.QTENSOUT,outFlag.QKOUT,outFlag.AVSOUT,outFlag.SOLOUT,outFlag.ENOUT,outFlag.ENFIELDOUT,outFlag.ENNEIGHBOURS,outFlag.ENSTROPHYOUT,outFlag.DENSOUT,outFlag.AVCoMOUT,outFlag.CVVOUT,outFlag.CNNOUT,outFlag.CWWOUT,outFlag.CDDOUT,outFlag.CSSOUT,outFlag.CPPOUT,outFlag.BINDER,outFlag.BINDERBIN,outFlag.SYNOUT,outFlag.CHCKPNT,outFlag.CHCKPNTrcvr );
+	fprintf( fout,"%d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d\n",DBUG,outFlag.TRAJOUT,outFlag.printSP,outFlag.COAROUT,outFlag.FLOWOUT,outFlag.VELOUT,outFlag.AVVELOUT,outFlag.ORDEROUT,outFlag.QTENSOUT,outFlag.QKOUT,outFlag.AVSOUT,outFlag.SOLOUT,outFlag.ENOUT,outFlag.ENFIELDOUT,outFlag.ENNEIGHBOURS,outFlag.ENSTROPHYOUT,outFlag.DENSOUT,outFlag.AVCOMOUT,outFlag.CVVOUT,outFlag.CNNOUT,outFlag.CWWOUT,outFlag.CDDOUT,outFlag.CSSOUT,outFlag.CPPOUT,outFlag.BINDER,outFlag.BINDERBIN,outFlag.SYNOUT,outFlag.CHCKPNT,outFlag.CHCKPNTrcvr );
 	// fprintf( fout,"%d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d\n",DBUG,outFlag.TRAJOUT,outFlag.printSP,outFlag.COAROUT,outFlag.FLOWOUT,outFlag.VELOUT,outFlag.AVVELOUT,outFlag.ORDEROUT,outFlag.QTENSOUT,outFlag.QKOUT,outFlag.AVSOUT,outFlag.SOLOUT,outFlag.ENOUT,outFlag.ENFIELDOUT,outFlag.ENNEIGHBOURS,outFlag.ENSTROPHYOUT,outFlag.DENSOUT,outFlag.CVVOUT,outFlag.CNNOUT,outFlag.CWWOUT,outFlag.CDDOUT,outFlag.CSSOUT,outFlag.CPPOUT,outFlag.BINDER,outFlag.BINDERBIN,outFlag.SYNOUT,outFlag.CHCKPNT,outFlag.CHCKPNTrcvr );
 	fprintf( fout,"%d %d\n",outFlag.SPOUT,outFlag.PRESOUT );
 	fprintf( fout,"%d %d %d %d %d %d %d\n",outFlag.HISTVELOUT,outFlag.HISTSPEEDOUT,outFlag.HISTVORTOUT,outFlag.HISTENSTROUT,outFlag.HISTDIROUT,outFlag.HISTSOUT,outFlag.HISTNOUT );
@@ -2936,7 +2936,7 @@ void outputResults( cell ***CL,particleMPC *SRDparticles,spec SP[],bc WALL[],sim
 		densSTDout( outFiles.fdensSTD,time_now,*stdN );
 	}
 	//Calculate centers of masses of multiphase fluids
-	if( outFlag.AVCoMOUT>=OUT && runtime%outFlag.AVCoMOUT==0 ) {
+	if( outFlag.AVCOMOUT>=OUT && runtime%outFlag.AVCOMOUT==0 ) {
 		for (i=0;i<NSPECI;i++) for (j=0;j<_3D;j++) com[i][j]=0.0;
 		for (i=0;i<GPOP;i++){
 			a=SRDparticles[i].SPID;
@@ -3293,7 +3293,7 @@ void closeOutputFiles( spec *SP,bc WALL[],outputFlagsList outFlag,outputFilesLis
 	if( outFlag.SWOUT>=OUT ) fclose( outFiles.fswimmers );
 	if( outFlag.SWORIOUT>=OUT ) fclose( outFiles.fswimmersOri );
 	if( outFlag.RTOUT>=OUT ) fclose( outFiles.fruntumble );
-	if( outFlag.AVCoMOUT>=OUT ) fclose( outFiles.fmpcom );
+	if( outFlag.AVCOMOUT>=OUT ) fclose( outFiles.fmpcom );
 	if( outFlag.SOLOUT>=OUT ) for( i=0; i<NBC; i++ ) if( WALL[i].DSPLC ) fclose( outFiles.fsolids[i] );
 }
 

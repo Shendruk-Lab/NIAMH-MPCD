@@ -1957,7 +1957,7 @@ void initOutput( char op[],outputFlagsList *outFlag,outputFilesList *outFile,inp
 	//Initialize swimmer run/tumble output files
 	if( (outFlag->RTOUT)>=OUT ) openruntumble( &(outFile->fruntumble),op,fileruntumble,fileextension );
 	//Initialize centre of masses of multiphase fluid output files
-	if( (outFlag->AVCoMOUT)>=OUT ) opencom( &(outFile->fmpcom),op,filecom,fileextension );
+	if( (outFlag->AVCOMOUT)>=OUT ) opencom( &(outFile->fmpcom),op,filecom,fileextension );
 	//Initialize the synopsis output files
 	if( (outFlag->SYNOUT)>=OUT ) opensynopsis( &(outFile->fsynopsis),op,1 );
 	//Initialize the solids' trajectories (or BC motion) output files
