@@ -721,8 +721,8 @@ void pressureheader( FILE *fout ) {
 void sppressureheader( FILE *fout ) {
 	fprintf( fout,"t\t" );
 	for (int q=0;q<NSPECI;q++) {
-		fprintf( fout,"\tAverage pressure in cells dominated by species %d",q);
-		fprintf( fout,"\tStandatd deviation in cells dominated by species %d",q);
+		fprintf( fout,"\tavP%d",q);
+		fprintf( fout,"\tstdP%d",q);
 	}
 	fprintf( fout,"\n");
 }
@@ -1975,7 +1975,7 @@ void avsout( FILE *fout,double t,double S,double S4,double DIR[] ) {
 /// @param CoM This is a pointer to the center of mass of a species from a multiphase fluid.
 /// @see outputResults()
 ///
-void avcomout( FILE *fout,double t,double CoM[NSPECI][_3D]) {
+void avcomout( FILE *fout,double t,double CoM[MAXSPECI][_3D]) {
 	int i;
 
 	fprintf( fout, "%12.5e",t );
@@ -2420,8 +2420,7 @@ void sppressureout( FILE *fout,double t,cell ***CL ) {
 	fprintf( fout,"%.2f",t );
 	for( i=0; i<XYZ[0]; i++ ) for( j=0; j<XYZ[1]; j++ ) for( k=0; k<XYZ[2]; k++ ) {
 
-		if( CL[i][j][k].POP == 0 ) printf("Lonely in here.");
-		else {
+		if( CL[i][j][k].POP > 0 ){
 			pop=CL[i][j][k].POP;
 			maxp=0;
 
@@ -2710,7 +2709,6 @@ void checkpoint( FILE *fout,inputList in,spec *SP,particleMPC *pSRD,int MDmode,b
 
 	//Output variables
 	fprintf( fout,"%d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d\n",DBUG,outFlag.TRAJOUT,outFlag.printSP,outFlag.COAROUT,outFlag.FLOWOUT,outFlag.VELOUT,outFlag.AVVELOUT,outFlag.ORDEROUT,outFlag.QTENSOUT,outFlag.QKOUT,outFlag.AVSOUT,outFlag.SOLOUT,outFlag.ENOUT,outFlag.ENFIELDOUT,outFlag.ENNEIGHBOURS,outFlag.ENSTROPHYOUT,outFlag.DENSOUT,outFlag.AVCOMOUT,outFlag.CVVOUT,outFlag.CNNOUT,outFlag.CWWOUT,outFlag.CDDOUT,outFlag.CSSOUT,outFlag.CPPOUT,outFlag.BINDER,outFlag.BINDERBIN,outFlag.SYNOUT,outFlag.CHCKPNT,outFlag.CHCKPNTrcvr );
-	// fprintf( fout,"%d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d\n",DBUG,outFlag.TRAJOUT,outFlag.printSP,outFlag.COAROUT,outFlag.FLOWOUT,outFlag.VELOUT,outFlag.AVVELOUT,outFlag.ORDEROUT,outFlag.QTENSOUT,outFlag.QKOUT,outFlag.AVSOUT,outFlag.SOLOUT,outFlag.ENOUT,outFlag.ENFIELDOUT,outFlag.ENNEIGHBOURS,outFlag.ENSTROPHYOUT,outFlag.DENSOUT,outFlag.CVVOUT,outFlag.CNNOUT,outFlag.CWWOUT,outFlag.CDDOUT,outFlag.CSSOUT,outFlag.CPPOUT,outFlag.BINDER,outFlag.BINDERBIN,outFlag.SYNOUT,outFlag.CHCKPNT,outFlag.CHCKPNTrcvr );
 	fprintf( fout,"%d %d\n",outFlag.SPOUT,outFlag.PRESOUT );
 	fprintf( fout,"%d %d %d %d %d %d %d\n",outFlag.HISTVELOUT,outFlag.HISTSPEEDOUT,outFlag.HISTVORTOUT,outFlag.HISTENSTROUT,outFlag.HISTDIROUT,outFlag.HISTSOUT,outFlag.HISTNOUT );
 	fprintf( fout,"%d %d %d %d %d\n",outFlag.ENERGYSPECTOUT,outFlag.ENSTROPHYSPECTOUT,outFlag.TOPOOUT,outFlag.DEFECTOUT,outFlag.DISCLINOUT );
@@ -2830,6 +2828,7 @@ void runCheckpoint(char op[500],time_t *lastCheckpoint,FILE *fout,inputList in,s
 /// @param AVS This is is a pointer to the average scalar order parameter.
 /// @param S4 This is a pointer to the fourth moment of the scalar order parameter.
 /// @param stdN This is the standard deviation of the density.
+/// @param CoM These are the coordinates of the centres of masses of each species.
 /// @param MDmode This is a flag to determine if MD mode is on.
 /// @param outFlag This is a flag for .dat files to be output.
 /// @param outFiles This is the list of output files.
@@ -2873,8 +2872,7 @@ void runCheckpoint(char op[500],time_t *lastCheckpoint,FILE *fout,inputList in,s
 /// @see pressureout()
 /// @see orderQKout()
 ///
-void outputResults( cell ***CL,particleMPC *SRDparticles,spec SP[],bc WALL[],simptr simMD,specSwimmer SS, swimmer swimmers[],double AVNOW[_3D],double AVV[_3D],double avDIR[_3D], int runtime, inputList in, double AVVEL, double KBTNOW,double *AVS,double *S4,double *stdN,double *CoM[_3D],int MDmode,outputFlagsList outFlag,outputFilesList outFiles ) {
-// void outputResults( cell ***CL,particleMPC *SRDparticles,spec SP[],bc WALL[],simptr simMD,specSwimmer SS, swimmer swimmers[],double AVNOW[_3D],double AVV[_3D],double avDIR[_3D], int runtime, inputList in, double AVVEL, double KBTNOW,double *AVS,double *S4,double *stdN,int MDmode,outputFlagsList outFlag,outputFilesList outFiles ) {
+void outputResults( cell ***CL,particleMPC *SRDparticles,spec SP[],bc WALL[],simptr simMD,specSwimmer SS, swimmer swimmers[],double AVNOW[_3D],double AVV[_3D],double avDIR[_3D], int runtime, inputList in, double AVVEL, double KBTNOW,double *AVS,double *S4,double *stdN,double *CoM[MAXSPECI][_3D],int MDmode,outputFlagsList outFlag,outputFilesList outFiles ) {
 
 	int a,b,c,i,j;
 	double time_now = runtime*in.dt;					//Simulation time
@@ -2882,7 +2880,7 @@ void outputResults( cell ***CL,particleMPC *SRDparticles,spec SP[],bc WALL[],sim
 	double corr[maxXYZ],spect[maxXYZ];				//Correlation functions and energy spectra
 	double UL;																//Binder cumulant
 	double avGradVel[_3D][_3D];								//Velocity gradient
-	double com[NSPECI][_3D];					//Center of mass vector for each species
+	double com[MAXSPECI][_3D];					//Center of mass vector for each species
 
 	/* ****************************************** */
 	/* ************** BC trajectory ************* */

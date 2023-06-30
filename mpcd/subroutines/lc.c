@@ -414,6 +414,7 @@ void genrand_maierSaupeMetropolis_2D( double DIR[],double rotAx[],double rotAngl
 ///
 /// Does the multi-particle orientation collision in a single cell.
 /// Collision has randomly sampled orientations (which obey the Maier-Saupe distribution) around the local director.
+/// In multiphase fluids, species-specific Mean Field Potentials can be defined (jSON 'sMFPOT').
 ///
 /// @param CL Class containing cell data (pointed to local cell considered).
 /// @param SP List of species.
@@ -430,7 +431,6 @@ void LCcollision( cell *CL,spec *SP,double KBT,double MFPOT,double dt,double SG,
 	double rfc=0.0;			//Rotational friction coefficient
 	double smfpot=0.0,smfpot_scaled=0.0;      //Specy-specific mean field potential
 	double S=0.0;			//Local scalar order parameter
-	double MFPOT_scaled=MFPOT*0.5*(double)DIM; // Replace MFPot w weighted average of MF for every specy in cell
 	particleMPC *tmpc;		//Temporary particleMPC
 
 	if( LC==LCL ) S=CL->S;		//Use the local scalar order parameter in collision
@@ -498,7 +498,6 @@ void LCcollision( cell *CL,spec *SP,double KBT,double MFPOT,double dt,double SG,
 				}
 			#endif
 			genrand_maierSaupe( DIR,rotAx,rotAngle,tmpc->U,KBT,S,smfpot_scaled );
-			// genrand_maierSaupe( DIR,rotAx,rotAngle,tmpc->U,KBT,S,MFPOT_scaled );
 
 			#ifdef DBG
 				if( DBUG==DBGLCCOL || DBUG==DBGESCAPE ) {

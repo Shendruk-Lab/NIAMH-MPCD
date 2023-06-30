@@ -196,10 +196,6 @@ void readin( char fpath[],inputList *in,spec **SP,particleMPC **pSRD,cell ****CL
 		read=fscanf( finput,"%lf %s",&MF,STR );
 		checkRead( read,"activity",inSTR);
 		(*SP+i)->ACT = MF;
-		//Read the species' liquid crystal mean-field potential
-		read=fscanf( finput,"%lf %s",&MF,STR );
-		checkRead( read,"LC mean-field potential",inSTR);
-		(*SP+i)->sMFPOT = MF;
 		//Read the species' damping friction coefficient
 		read=fscanf( finput,"%lf %s",&MF,STR );
 		checkRead( read,"damping friction",inSTR);
@@ -281,18 +277,12 @@ void readpc( char fpath[],outputFlagsList *out ) {
 	//Read how often the pressure field is outputted
 	read=fscanf( finput,"%d %s",&(out->PRESOUT),STR );
 	checkRead( read,"pressure field",inSTR);
-	//Read how often the specific pressure is outputted (in the case of a multiphase fluid)
-	read=fscanf( finput,"%d %s",&(out->spPRESOUT),STR );
-	checkRead( read,"pressure field",inSTR);
 	//Read how often the orientational energy from neighbours is outputted
 	read=fscanf( finput,"%d %s",&(out->ENNEIGHBOURS),STR );
 	checkRead( read,"orientational energy from neighbours",inSTR);
 	//Read how often the total average scalar order parameter is outputted
 	read=fscanf( finput,"%d %s",&(out->AVSOUT),STR );
 	checkRead( read,"average scalar order parameter",inSTR);
-	//Read whether the average centre of mass of each species is outputted
-	read=fscanf( finput,"%d %s",&(out->AVCOMOUT),STR );
-	checkRead( read,"average CoM of each species",inSTR);
 	//Read how often the standard deviation of the number per cell is outputted
 	read=fscanf( finput,"%d %s",&(out->DENSOUT),STR );
 	checkRead( read,"standard deviation of the number per cell",inSTR);

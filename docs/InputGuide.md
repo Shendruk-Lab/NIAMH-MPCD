@@ -156,7 +156,7 @@ Override Tag    | Type  | Override param | Description
 Tag             | Type          | Default Value | Description
 ---             | ---           | ---           | ---
 `mass`          | double        | 1             | Mass of this species of particles. Should **always** be 1 for at least one species since sets mass scale 
-`sMFPOT`        | double        | 10            | Liquid crystal mean-field potential for this specis
+`sMFPOT`        | double        | 10            | Liquid crystal mean-field potential for this species
 `pop`           | int           | 18000         | Number of particles of this species
 `qDist`         | int           | 0             | Initial positional distribution function for the species. See definitions.h for a list
 `vDist`         | int           | 0             | Initial velocity distribution function for the species. See definitions.h for a list
