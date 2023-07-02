@@ -148,7 +148,8 @@ print( '\tRead data ...' )
 i=0 # line counter (within timestep)
 currTStep=0
 n=-1
-tStepMaxPop = 0
+maxTOTPOP = 1.0
+maxPOP1 = 0
 while infile:
 	i=i+1
 	line = infile.readline()
@@ -191,12 +192,15 @@ while infile:
 			renderTOTPOP = sliceTOTPOP
 			if normalise:
 				renderTOTPOP = renderTOTPOP/sliceMax
+			else:
+				# Update max
+				maxTOTPOP=max(maxTOTPOP,sliceMax)
 
 			#handle single species render first
-			imshow(renderTOTPOP,cmap=myMap,vmin=0, aspect=myAspect)
+			imshow(renderTOTPOP,cmap=myMap,vmin=0,vmax=maxTOTPOP,aspect=myAspect)
 
 			#Create the colorbar
-			CS3 = imshow(renderTOTPOP.T,vmin=0,cmap=myMap,aspect=myAspect)			#pcolor() sucks this is way better
+			CS3 = imshow(renderTOTPOP.T,vmin=0,vmax=maxTOTPOP,cmap=myMap,aspect=myAspect)			#pcolor() sucks this is way better
 			cb=colorbar(CS3)
 			if normalise:
 				cb.ax.set_ylabel(r'$N_C / N_C^\mathrm{max}$', fontsize = FS)
