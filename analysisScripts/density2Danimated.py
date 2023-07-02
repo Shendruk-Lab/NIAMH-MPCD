@@ -31,8 +31,9 @@ sliceIndex = int(sys.argv[8])	# Plane to be sliced
 myAspect=sys.argv[9]			#'auto' - reshapes into square graph or 'equal' keeps whatever aspect ratio the true values
 keepFrames=int(sys.argv[10])	#0=don't keep (delete) frames; 1=keep frames
 normalise=int(sys.argv[11])		#normalise the population (for the cbar) or no
-species=int(sys.argv[12])		#1 = do total pop only; 2 = two species
-savePDF=int(sys.argv[13])		# 1 for saving transparent pdfs (for papers), 0 for none
+runningCB=int(sys.argv[12])		#1 = have the colourbar continuously update the maximum; 0 = use the instantaneous maximum
+species=int(sys.argv[13])		#1 = do total pop only; 2 = two species
+savePDF=int(sys.argv[14])		# 1 for saving transparent pdfs (for papers), 0 for none
 
 ###########################################################
 ### Format and style
@@ -194,7 +195,10 @@ while infile:
 				renderTOTPOP = renderTOTPOP/sliceMax
 			else:
 				# Update max
-				maxTOTPOP=max(maxTOTPOP,sliceMax)
+				if runningCB:
+					maxTOTPOP=max(maxTOTPOP,sliceMax)
+				else:
+					maxTOTPOP=sliceMax
 
 			#handle single species render first
 			imshow(renderTOTPOP,cmap=myMap,vmin=0,vmax=maxTOTPOP,aspect=myAspect)
