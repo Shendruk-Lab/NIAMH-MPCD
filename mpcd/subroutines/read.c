@@ -1225,8 +1225,8 @@ void readJson( char fpath[], inputList *in, spec **SP, particleMPC **pSRD,
 	out->QTENSOUT = getJObjInt(jObj, "qTensOut", 0, jsonTagList); // qTensOut
 	out->QKOUT = getJObjInt(jObj, "qkTensOut", 0, jsonTagList); // qKOut
 	out->ENFIELDOUT = getJObjInt(jObj, "oriEnOut", 0, jsonTagList); // enFieldOut
-	out->SPOUT = getJObjInt(jObj, "colourOut", 0, jsonTagList); // spOut
-	out->SPOUT = getJObjInt(jObj, "mpDensOut", 0, jsonTagList); // spOut
+    const char* multiphaseOutTags[2] = {"colourOut", "mpDensOut"}; // possible tags for multiphase out SPOUT
+    out->SPOUT = getJObjIntMultiple(jObj, multiphaseOutTags, 2, 0, jsonTagList); // RTECH
 	out->PRESOUT = getJObjInt(jObj, "pressureOut", 0, jsonTagList); // presOut
 	out->spPRESOUT = getJObjInt(jObj, "spPressureOut", 0, jsonTagList); // spPresOut
 	out->ENNEIGHBOURS = getJObjInt(jObj, "neighbourEnOut", 0, jsonTagList); // enNeighbours
