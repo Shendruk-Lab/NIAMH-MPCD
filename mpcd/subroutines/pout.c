@@ -985,7 +985,7 @@ void swimmeroriheader( FILE *fout ) {
 ///
 void comheader( FILE *fout ) {
 	fprintf( fout,"t\t\t" );
-	for (int k=0;k<NSPECI;k++) fprintf( fout,"X%d \tY%d\tZ%d\t",k,k,k );
+	for (int k=0;k<NSPECI;k++) fprintf( fout,"X%d\tY%d\tZ%d\tstdXX%d\tstdXY%d\tstdXZ%d\tstdYX%d\tstdYY%d\tstdYZ%d\tstdZX%d\tstdZY%d\tstdZZ%d\t",k,k,k,k,k,k,k,k,k,k,k,k );
 	fprintf( fout,"\n" );
 }
 
@@ -1973,13 +1973,14 @@ void avsout( FILE *fout,double t,double S,double S4,double DIR[] ) {
 /// @param fout This is a pointer to the output .dat file name to be produced.
 /// @param t This is time.
 /// @param CoM This is a pointer to the center of mass of a species from a multiphase fluid.
+/// @param stdCoM This is a pointer to the std tensor of the center of mass for a given species from a multiphase fluid.
 /// @see outputResults()
 ///
-void avcomout( FILE *fout,double t,double CoM[MAXSPECI][_3D]) {
+void avcomout( FILE *fout,double t,double CoM[MAXSPECI][_3D],double stdCoM[MAXSPECI][_3D][_3D]) {
 	int i;
 
 	fprintf( fout, "%12.5e",t );
-	for (i=0;i<NSPECI;i++) fprintf( fout, "\t%12.5e\t%12.5e\t%12.5e",CoM[i][0],CoM[i][1],CoM[i][2] );
+	for (i=0;i<NSPECI;i++) fprintf( fout, "\t%12.5e\t%12.5e\t%12.5e\t%12.5e\t%12.5e\t%12.5e\t%12.5e\t%12.5e\t%12.5e\t%12.5e\t%12.5e\t%12.5e",CoM[i][0],CoM[i][1],CoM[i][2],stdCoM[i][0][0],stdCoM[i][0][1],stdCoM[i][0][2],stdCoM[i][1][0],stdCoM[i][1][1],stdCoM[i][1][2],stdCoM[i][2][0],stdCoM[i][2][1],stdCoM[i][2][2] );
 	fprintf( fout, "\n" );
 	#ifdef FFLSH
 		fflush(fout);
@@ -2874,13 +2875,14 @@ void runCheckpoint(char op[500],time_t *lastCheckpoint,FILE *fout,inputList in,s
 ///
 void outputResults( cell ***CL,particleMPC *SRDparticles,spec SP[],bc WALL[],simptr simMD,specSwimmer SS, swimmer swimmers[],double AVNOW[_3D],double AVV[_3D],double avDIR[_3D], int runtime, inputList in, double AVVEL, double KBTNOW,double *AVS,double *S4,double *stdN,double *CoM[MAXSPECI][_3D],int MDmode,outputFlagsList outFlag,outputFilesList outFiles ) {
 
-	int a,b,c,i,j;
+	int a,b,c,i,j,k;
 	double time_now = runtime*in.dt;					//Simulation time
 	double wmf;
 	double corr[maxXYZ],spect[maxXYZ];				//Correlation functions and energy spectra
 	double UL;																//Binder cumulant
 	double avGradVel[_3D][_3D];								//Velocity gradient
 	double com[MAXSPECI][_3D];					//Center of mass vector for each species
+	double sigcom[MAXSPECI][_3D][_3D];	        // Center of mass std tensor for each species
 
 	/* ****************************************** */
 	/* ************** BC trajectory ************* */
@@ -2935,13 +2937,22 @@ void outputResults( cell ***CL,particleMPC *SRDparticles,spec SP[],bc WALL[],sim
 	}
 	//Calculate centers of masses of multiphase fluids
 	if( outFlag.AVCOMOUT>=OUT && runtime%outFlag.AVCOMOUT==0 ) {
-		for (i=0;i<NSPECI;i++) for (j=0;j<_3D;j++) com[i][j]=0.0;
+		for (i=0;i<NSPECI;i++) for (j=0;j<_3D;j++) {
+		com[i][j]=0.0;
+		for (k=0;k<_3D;k++) sigcom[i][j][k]=0.0;
+		}
 		for (i=0;i<GPOP;i++){
 			a=SRDparticles[i].SPID;
 			for (j=0;j<DIM;j++) com[a][j]+=SRDparticles[i].Q[j];
 		}
 		for (i=0;i<NSPECI;i++) if(SP[i].POP>0) for (j=0;j<_3D;j++) com[i][j] /= (float) SP[i].POP;
-		avcomout( outFiles.fmpcom,time_now,com);
+		for (i=0;i<GPOP;i++){
+			a=SRDparticles[i].SPID;
+			//for (j=0;j<DIM;j++) for (k=0;k<DIM;k++) sigcom[a][j][k]=sigcom[a][j][k]+SRDparticles[i].Q[j]*SRDparticles[i].Q[k]-SRDparticles[i].Q[j]*com[i][k]-SRDparticles[i].Q[k]*com[i][j]+com[i][j]*com[i][k];
+			for (j=0;j<DIM;j++) for (k=0;k<DIM;k++) sigcom[a][j][k]+=(com[a][j]-SRDparticles[i].Q[k])*(com[a][k]-SRDparticles[i].Q[j]);
+		}
+		for (i=0;i<NSPECI;i++) if(SP[i].POP>0) for (j=0;j<_3D;j++) for (k=0;k<_3D;k++) sigcom[i][j][k] /= (float) SP[i].POP;
+		avcomout( outFiles.fmpcom,time_now,com,sigcom);
 	}
 	//Calculate binder cumulants
 	if( outFlag.BINDER>=OUT && runtime%outFlag.BINDER==0 ) {
