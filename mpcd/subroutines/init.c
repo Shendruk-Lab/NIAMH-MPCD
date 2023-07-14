@@ -1608,8 +1608,9 @@ void setcoord( char dir[],spec SP[],particleMPC *pp,double KBT,double AVVEL[],bc
 			(pp+i)->U[j] = 0.0;
 		}
 		//Set particleMPC position, velocity and orientation
-		place( (pp+i)->Q,SP[(pp+i)->SPID].QDIST, fin[(pp+i)->SPID], (pp+i)->SPID, ((double)SP[(pp+i)->SPID].POP / (double)GPOP));
-
+		place( (pp+i)->Q,SP[(pp+i)->SPID].QDIST, fin[(pp+i)->SPID], (pp+i)->SPID, ((double)SP[0].POP / (double)GPOP));
+		// want the concentration of species 0 only for the spherical qdist only 
+		
 		push( (pp+i)->V,KBT,SP[(pp+i)->SPID].VDIST, SP[(pp+i)->SPID].MASS,fin[(pp+i)->SPID] );
 		//Shift first mode of the velocity dist by the average velocity (push() centres about zero)
 		for( j=0; j<DIM; j++ ) AVVEL[j] += (pp+i)->V[j];
