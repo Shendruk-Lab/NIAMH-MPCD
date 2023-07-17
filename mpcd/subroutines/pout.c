@@ -2948,8 +2948,7 @@ void outputResults( cell ***CL,particleMPC *SRDparticles,spec SP[],bc WALL[],sim
 		for (i=0;i<NSPECI;i++) if(SP[i].POP>0) for (j=0;j<_3D;j++) com[i][j] /= (float) SP[i].POP;
 		for (i=0;i<GPOP;i++){
 			a=SRDparticles[i].SPID;
-			//for (j=0;j<DIM;j++) for (k=0;k<DIM;k++) sigcom[a][j][k]=sigcom[a][j][k]+SRDparticles[i].Q[j]*SRDparticles[i].Q[k]-SRDparticles[i].Q[j]*com[i][k]-SRDparticles[i].Q[k]*com[i][j]+com[i][j]*com[i][k];
-			for (j=0;j<DIM;j++) for (k=0;k<DIM;k++) sigcom[a][j][k]+=(com[a][j]-SRDparticles[i].Q[k])*(com[a][k]-SRDparticles[i].Q[j]);
+			for (j=0;j<DIM;j++) for (k=0;k<DIM;k++) sigcom[a][j][k]+=(com[a][j]-SRDparticles[i].Q[j])*(com[a][k]-SRDparticles[i].Q[k]);
 		}
 		for (i=0;i<NSPECI;i++) if(SP[i].POP>0) for (j=0;j<_3D;j++) for (k=0;k<_3D;k++) sigcom[i][j][k] /= (float) SP[i].POP;
 		avcomout( outFiles.fmpcom,time_now,com,sigcom);
