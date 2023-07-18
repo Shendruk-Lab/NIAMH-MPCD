@@ -985,7 +985,7 @@ void swimmeroriheader( FILE *fout ) {
 ///
 void comheader( FILE *fout ) {
 	fprintf( fout,"t\t\t" );
-	for (int k=0;k<NSPECI;k++) fprintf( fout,"X%d\tY%d\tZ%d\tstdXX%d\tstdXY%d\tstdXZ%d\tstdYX%d\tstdYY%d\tstdYZ%d\tstdZX%d\tstdZY%d\tstdZZ%d\t",k,k,k,k,k,k,k,k,k,k,k,k );
+	for (int k=0;k<NSPECI;k++) fprintf( fout,"X%d\tY%d\tZ%d\tvarXX%d\tvarXY%d\tvarXZ%d\tvarYX%d\tvarYY%d\tvarYZ%d\tvarZX%d\tvarZY%d\tvarZZ%d\t",k,k,k,k,k,k,k,k,k,k,k,k );
 	fprintf( fout,"\n" );
 }
 
@@ -3316,11 +3316,11 @@ void closeOutputFiles( spec *SP,bc WALL[],outputFlagsList outFlag,outputFilesLis
 /// @param zeroNetMom This is momentum correction term to reset to the rest frame.
 ///
 int writeOutput( int t,outputFlagsList f,int RFRAME,int zeroNetMom ) {
-	if( ( RFRAME && t%zeroNetMom==0 ) || ( f.ENOUT>=OUT && t%f.ENOUT==0 ) || ( f.TRAJOUT>=OUT  && t%f.TRAJOUT==0 ) || ( f.AVVELOUT>=OUT && t%f.AVVELOUT==0 ) || ( f.QKOUT && t%f.QKOUT==0 ) || ( f.AVSOUT>=OUT && t%f.AVSOUT==0 ) || ( f.ENNEIGHBOURS>=OUT && t%f.ENNEIGHBOURS==0 ) || ( f.SOLOUT>=OUT && t%f.SOLOUT==0 ) || ( f.BINDER && t%f.BINDER==0 ) || ( f.SWOUT && t%f.SWOUT==0 ) || ( f.SWORIOUT && t%f.SWORIOUT==0 ) ) {
+	if( ( RFRAME && t%zeroNetMom==0 ) || ( f.ENOUT>=OUT && t%f.ENOUT==0 ) || ( f.TRAJOUT>=OUT  && t%f.TRAJOUT==0 ) || ( f.AVVELOUT>=OUT && t%f.AVVELOUT==0 ) || ( f.QKOUT && t%f.QKOUT==0 ) || ( f.AVSOUT>=OUT && t%f.AVSOUT==0 ) || ( f.ENNEIGHBOURS>=OUT && t%f.ENNEIGHBOURS==0 ) || ( f.SOLOUT>=OUT && t%f.SOLOUT==0 ) || ( f.BINDER && t%f.BINDER==0 ) || ( f.SWOUT && t%f.SWOUT==0 ) || ( f.SWORIOUT && t%f.SWORIOUT==0 ) || ( f.spPRESOUT && t%f.spPRESOUT==0 ) || ( f.AVCOMOUT && t%f.AVCOMOUT==0 ) ) {
 		return 1;
 	}
 	//Fields
-	else if( ( f.FLOWOUT>=OUT && t%f.FLOWOUT==0 ) || ( f.VELOUT>=OUT && t%f.VELOUT==0 ) || ( f.COAROUT>=OUT && t%f.COAROUT==0 ) || ( f.ENFIELDOUT>=OUT && t%f.ENFIELDOUT==0 ) || ( f.ORDEROUT && t%f.ORDEROUT==0 ) || ( f.QTENSOUT && t%f.QTENSOUT==0 ) || ( f.TOPOOUT && t%f.TOPOOUT==0 ) || ( f.DEFECTOUT && t%f.DEFECTOUT==0 ) || ( f.DISCLINOUT && t%f.DISCLINOUT==0 ) || ( f.SPOUT && t%f.SPOUT==0 ) || ( f.PRESOUT && t%f.PRESOUT==0 ) || ( f.spPRESOUT && t%f.spPRESOUT==0 )) {
+	else if( ( f.FLOWOUT>=OUT && t%f.FLOWOUT==0 ) || ( f.VELOUT>=OUT && t%f.VELOUT==0 ) || ( f.COAROUT>=OUT && t%f.COAROUT==0 ) || ( f.ENFIELDOUT>=OUT && t%f.ENFIELDOUT==0 ) || ( f.ORDEROUT && t%f.ORDEROUT==0 ) || ( f.QTENSOUT && t%f.QTENSOUT==0 ) || ( f.TOPOOUT && t%f.TOPOOUT==0 ) || ( f.DEFECTOUT && t%f.DEFECTOUT==0 ) || ( f.DISCLINOUT && t%f.DISCLINOUT==0 ) || ( f.SPOUT && t%f.SPOUT==0 ) || ( f.PRESOUT && t%f.PRESOUT==0 ) ) {
 		return 1;
 	}
 	//Correlation functions

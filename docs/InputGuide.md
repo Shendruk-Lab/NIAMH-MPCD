@@ -137,7 +137,7 @@ Tag             | Type          | Default Value | Description
 `sizeShrinkSwim`| double        | 0.1                | How much do LJ sigma ro shrink when tumbling
 `springShrinkSwim`| double        | 0.1                | How much the spring constant is shrunk when tumbling
 `kSwim`         | double        | 30                 | Spring constant
-`roSwim`        | double        | 4                  | Spring seperation
+`roSwim`        | double        | 4                  | Spring separation
 `sigSwim`       | double        | 4                  | Diameter approx sigma
 `epsSwim`       | double        | 1                  | Interaction energy
 `runTSwim`      | double        | 0                  | Average run time in units of MPCD timesteps dt (iterations, not MPCD time units)
