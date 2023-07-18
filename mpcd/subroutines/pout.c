@@ -3320,7 +3320,7 @@ int writeOutput( int t,outputFlagsList f,int RFRAME,int zeroNetMom ) {
 		return 1;
 	}
 	//Fields
-	else if( ( f.FLOWOUT>=OUT && t%f.FLOWOUT==0 ) || ( f.VELOUT>=OUT && t%f.VELOUT==0 ) || ( f.COAROUT>=OUT && t%f.COAROUT==0 ) || ( f.ENFIELDOUT>=OUT && t%f.ENFIELDOUT==0 ) || ( f.ORDEROUT && t%f.ORDEROUT==0 ) || ( f.QTENSOUT && t%f.QTENSOUT==0 ) || ( f.TOPOOUT && t%f.TOPOOUT==0 ) || ( f.DEFECTOUT && t%f.DEFECTOUT==0 ) || ( f.DISCLINOUT && t%f.DISCLINOUT==0 ) || ( f.SPOUT && t%f.SPOUT==0 ) || ( f.PRESOUT && t%f.PRESOUT==0 ) ) {
+	else if( ( f.FLOWOUT>=OUT && t%f.FLOWOUT==0 ) || ( f.VELOUT>=OUT && t%f.VELOUT==0 ) || ( f.COAROUT>=OUT && t%f.COAROUT==0 ) || ( f.ENFIELDOUT>=OUT && t%f.ENFIELDOUT==0 ) || ( f.ORDEROUT && t%f.ORDEROUT==0 ) || ( f.QTENSOUT && t%f.QTENSOUT==0 ) || ( f.TOPOOUT && t%f.TOPOOUT==0 ) || ( f.DEFECTOUT && t%f.DEFECTOUT==0 ) || ( f.DISCLINOUT && t%f.DISCLINOUT==0 ) || ( f.SPOUT && t%f.SPOUT==0 ) || ( f.PRESOUT && t%f.PRESOUT==0 ) || ( f.spPRESOUT && t%f.spPRESOUT==0 )) {
 		return 1;
 	}
 	//Correlation functions
