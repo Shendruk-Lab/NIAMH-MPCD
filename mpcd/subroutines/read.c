@@ -1357,6 +1357,14 @@ void readJson( char fpath[], inputList *in, spec **SP, particleMPC **pSRD,
 					currWall->B[j] = 0.0;
 			}
 
+            // Janus
+            currWall->JANDELTA = getJObjDou(objElem, "janDelta", -1.0, jsonTagList); // janDelta
+            if (fneq(-1.0, currWall->JANDELTA)) { // janDelta of -1.0 means no janus, so set accordingly
+                currWall->ENABLEJANUS = 1;
+            } else {
+                currWall->ENABLEJANUS = 0;
+            }
+
 			// Handle BC overrides /////////////////////////////////////////////
 			// anchoring
 			if (getJObjInt(objElem, "homeotropic", 0, jsonTagList) == 1) { // homeotropic anchoring

@@ -169,6 +169,10 @@ typedef struct bc {
 	double MASS;			///< The BC's mass (only relevant if it moves) --- json `'mass'`.
 	double VOL;				///< Body's volume.
 	double I[3][3];		    ///< The body's moment of inertia.
+
+    // Janus related properties
+    int ENABLEJANUS;        ///< Flags whether the BC is a Janus particle or not (0-no; 1-yes).
+    double JANDELTA;        ///< The Janus parameter transition zone (delta in Loewe et al. 2022). --- json `'janDelta'`.
 /*
    Examples
 
