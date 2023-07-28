@@ -1864,10 +1864,54 @@ float getPolarAngleFromSurface( particleMPC *pp, bc *WALL) {
 /// "tail" is planar.
 ///
 /// @param pp The particle colliding with the wall
-/// @param WALL The wall that the particle is colliding withl
-/// @param UN The final orientation of the particle normal to the surface
-/// @param UT The final orientation of the particle tangential to the surface
+/// @param WALL The wall that the particle is colliding with
+/// @param UN The normal to the surface of the wall
+/// @param UT The tangent to the surface of the wall
 ///
 void applyJanusAnchoring( particleMPC *pp, bc *WALL, double UN[_3D], double UT[_3D]) {
+    int i = 0;
+    double theta, transitionFactor = 0.0;
+    double thetaH1 = pi/2.0 - WALL->JANDELTA; // limit of when transition from homeo begins to occur
+    double thetaP1 = pi/2.0 + WALL->JANDELTA; // limit of when transition from homeo ends and planar begins
+    double thetaP2 = 3.0*pi/2.0 - WALL->JANDELTA; // limit of when transition from planar begins to occur
+    double thetaH2 = 3.0*pi/2.0 + WALL->JANDELTA; // limit of when transition from planar ends and homeo begins
 
+    theta = getPolarAngleFromSurface(pp, WALL); // get angle between wall and particle
+
+    // Compute necessary orientation vectors UN and UT depending on the angle
+    if (theta < thetaH1) {
+        // homeotropic
+        for (i = 0; i < DIM; i++) {
+            UN[i] *= 1.0;
+            UT[i] *= 0.0;
+        }
+    } else if (theta < thetaP1) {
+        // transition from homeo to planar
+        transitionFactor = (theta - thetaH1) / (thetaP1 - thetaH1); // 0 for homeo, 1 for planar
+        for (i = 0; i < DIM; i++) {
+            UN[i] *= 1.0 - transitionFactor;
+            UT[i] *= transitionFactor;
+        }
+    } else if (theta < thetaP2) {
+        // planar
+        for (i = 0; i < DIM; i++) {
+            UN[i] *= 0.0;
+            UT[i] *= 1.0;
+        }
+    } else if (theta < thetaH2) {
+        // transition from planar to homeo
+        transitionFactor = (theta - thetaP2) / (thetaH2 - thetaP2); // 0 for planar, 1 for homeo
+        for (i = 0; i < DIM; i++) {
+            UN[i] *= transitionFactor;
+            UT[i] *= 1.0 - transitionFactor;
+        }
+    } else {
+        // homeotropic
+        for (i = 0; i < DIM; i++) {
+            UN[i] *= 1.0;
+            UT[i] *= 0.0;
+        }
+    }
+
+    for (i = 0; i < DIM; i++) pp->U[i] = UN[i]; // apply boundary condition to the particle at the end
 }
