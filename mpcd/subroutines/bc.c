@@ -1847,7 +1847,12 @@ float getPolarAngleFromSurface( particleMPC *pp, bc *WALL) {
 
     // compute direction vector from wall CoM to particle
     for (i = 0; i < _3D; i++) collisionVec[i] = pp->Q[i] - WALL->Q[i];
-    theta = absAngle(collisionVec, WALL->O, _3D); // and get angle
+    if (fneq(length(WALL->O, _3D), 0.0)) { // to avoid FPEs
+        theta = absAngle(collisionVec, WALL->O, _3D); // and get angle
+    } else {
+        printf("WARNING: Attempted to find angle of BC with no orientation! Was the BC's O set?\nQuitting for safety...\n");
+        exit(EXIT_FAILURE);
+    }
 
     // check to ensure that the angle spans all of [0, 2\pi]
     crossprod(collisionVec, WALL->O, crossVec); // note: this below method is a hack I found online
@@ -1913,5 +1918,5 @@ void applyJanusAnchoring( particleMPC *pp, bc *WALL, double UN[_3D], double UT[_
         }
     }
 
-    for (i = 0; i < DIM; i++) pp->U[i] = UN[i]; // apply boundary condition to the particle at the end
+    for (i = 0; i < DIM; i++) pp->U[i] = UN[i] + UT[i]; // apply boundary condition to the particle at the end
 }
