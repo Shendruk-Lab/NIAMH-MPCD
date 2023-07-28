@@ -1828,3 +1828,31 @@ void rudimentaryChannel_z( particleMPC *pp ) {
 	rudimentaryPBC( pp,0 );
 	rudimentaryPBC( pp,1 );
 }
+
+///
+/// @brief Computes the angle that a particle makes with respect to a wall's normal vector from the center of mass.
+///
+/// Computes the angle that a particle makes with respect to a wall. This is done with respect to the wall's normal
+/// vector from the center of mass, and is used to implement Janus colloids.
+///
+/// @param pp Pointer to the MPCD particle on the surface of WALL
+/// @param WALL Pointer to the bc object representing the wall
+/// @return The angle that the particle makes with respect to the wall's normal vector from the center of mass [0, 2\pi]
+///
+float getPolarAngleFromSurface( particleMPC *pp, bc *WALL) {
+    //TODO: assign all variables needed here
+    int i = 0;
+    float theta = 0.0;
+    double collisionVec[_3D] = {0.0};
+    double crossVec[_3D] = {0.0};
+
+    // compute direction vector from wall CoM to particle
+    for (i = 0; i < _3D; i++) collisionVec[i] = pp->Q[i] - WALL->Q[i];
+    theta = absAngle(collisionVec, WALL->O, _3D); // and get angle
+
+    // check to ensure that the angle spans all of [0, 2\pi]
+    crossprod(collisionVec, WALL->O, crossVec); // note: this below method is a hack I found online
+    if (dotprod(crossVec, WALL->O, _3D) < 0.0) theta = 2.0*M_PI - theta;
+
+    return theta;
+}
