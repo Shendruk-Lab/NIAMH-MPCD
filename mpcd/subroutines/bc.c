@@ -1840,7 +1840,6 @@ void rudimentaryChannel_z( particleMPC *pp ) {
 /// @return The angle that the particle makes with respect to the wall's normal vector from the center of mass [0, 2\pi]
 ///
 float getPolarAngleFromSurface( particleMPC *pp, bc *WALL) {
-    //TODO: assign all variables needed here
     int i = 0;
     float theta = 0.0;
     double collisionVec[_3D] = {0.0};
@@ -1855,4 +1854,20 @@ float getPolarAngleFromSurface( particleMPC *pp, bc *WALL) {
     if (dotprod(crossVec, WALL->O, _3D) < 0.0) theta = 2.0*M_PI - theta;
 
     return theta;
+}
+
+///
+/// @brief Applies a Janus anchoring condition to a particle.
+///
+/// Applies Janus-like anchoring to a particle colliding with a boundary. This will always assume that the "head" (ie,
+/// the side of the wall pointing in the direction of it's orientation) has homeotropic boundary conditions, and the
+/// "tail" is planar.
+///
+/// @param pp The particle colliding with the wall
+/// @param WALL The wall that the particle is colliding withl
+/// @param UN The final orientation of the particle normal to the surface
+/// @param UT The final orientation of the particle tangential to the surface
+///
+void applyJanusAnchoring( particleMPC *pp, bc *WALL, double UN[_3D], double UT[_3D]) {
+
 }

@@ -1294,23 +1294,27 @@ void oriBC( particleMPC *pp,spec *SP,bc *WALL,double n[] ) {
 	}
 
 	//Transform the orientation
-	if( feq(WALL->MUN,0.0) && feq(WALL->MUT,0.0) ) {
-		//Addition in cartesian coordinates
-		for( i=0; i<DIM; i++ ) pp->U[i] = WALL->DUxyz[i];
-	}
-	else {
-		//Multiplication wrt surface normal
-		for( i=0; i<DIM; i++ ) {
-			UN[i] *= WALL->MUN;
-			UT[i] *= WALL->MUT;
-		}
-		//Combine normal and tangential components
-		for( i=0; i<DIM; i++ ) pp->U[i] = UN[i] + UT[i];
-		//For measuring K_bend in a pure bend geometry, we want to surpress the z-hat orientation
-		pp->U[0] *= WALL->MUxyz[0];
-		if( DIM>=_2D ) pp->U[1] *= WALL->MUxyz[1];
-		if( DIM>=_3D ) pp->U[2] *= WALL->MUxyz[2];
-	}
+    if (WALL->ENABLEJANUS) { // Janus boundaries override the default anchoring controls
+        applyJanusAnchoring(pp, WALL, UN, UT);
+    } else {
+        // if not Janus, do typical orientation changes
+        if (feq(WALL->MUN, 0.0) && feq(WALL->MUT, 0.0)) {
+            //Addition in cartesian coordinates
+            for (i = 0; i < DIM; i++) pp->U[i] = WALL->DUxyz[i];
+        } else {
+            //Multiplication wrt surface normal
+            for (i = 0; i < DIM; i++) {
+                UN[i] *= WALL->MUN;
+                UT[i] *= WALL->MUT;
+            }
+            //Combine normal and tangential components
+            for (i = 0; i < DIM; i++) pp->U[i] = UN[i] + UT[i];
+            //For measuring K_bend in a pure bend geometry, we want to surpress the z-hat orientation
+            pp->U[0] *= WALL->MUxyz[0];
+            if (DIM >= _2D) pp->U[1] *= WALL->MUxyz[1];
+            if (DIM >= _3D) pp->U[2] *= WALL->MUxyz[2];
+        }
+    }
 
 	// Make sure U0 and U are unit vectors
 	norm(U0, _3D);

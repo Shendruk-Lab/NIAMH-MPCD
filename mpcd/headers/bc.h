@@ -56,4 +56,7 @@ void rudimentaryChannel_x( particleMPC *pp );
 void rudimentaryChannel_y( particleMPC *pp );
 void rudimentaryChannel_z( particleMPC *pp );
 
+float getPolarAngleFromSurface( particleMPC *pp, bc *WALL);
+void applyJanusAnchoring( particleMPC *pp, bc *WALL, double UN[_3D], double UT[_3D]);
+
 #endif
