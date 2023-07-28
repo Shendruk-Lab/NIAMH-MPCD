@@ -182,7 +182,7 @@ Unlike the previous tags, if you declare a new BC object then there are some tag
 These are noted as NECESSARY in the default value column.
 
 Tag             | Type          | Default Value | Description
----             | ---           | ---           | ---
+---             | ---           |---------------| ---
 `colType`       | int           | 1             | Which BC type do you want to use. See definitions.h for a list
 `phantom`       | int           | 0             | Use phantom particles if 1, 0 otherwise
 `E`             | double        | -1            | Coefficient of restitution
@@ -212,6 +212,7 @@ Tag             | Type          | Default Value | Description
 `inv`           | int           | 0             | Whether to invert the bc (ie, multiply the A's by -1). 0 = no, 1 = yes
 `mass`          | double        | 1             | Mass of the wall in MPCD units. Should be the same density as the fluid if its displaceable
 `wavy`          | array(double) | [0,0,0]       | Generalized amplitudes and frequencies for wavy-walls. **Must** be 3D
+`janDelta`      | double        | -1.0          | Janus delta parameter. If -1, then Janus BC is not used. Otherwise, this follows the \delta defined in Loewe et al., 2022.
 
 #### BC Overrides           {#bc-overrides}
 Override Tag    | Type          | Override param| Description
