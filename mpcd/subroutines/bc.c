@@ -1856,7 +1856,7 @@ float getPolarAngleFromSurface( particleMPC *pp, bc *WALL) {
 
     // check to ensure that the angle spans all of [0, 2\pi]
     crossprod(collisionVec, WALL->O, crossVec); // note: this below method is a hack I found online
-    if (dotprod(crossVec, WALL->O, _3D) < 0.0) theta = 2.0*M_PI - theta;
+    if (crossVec[2] < 0.0) theta = 2.0*M_PI - theta;
 
     return theta;
 }
@@ -1875,7 +1875,8 @@ float getPolarAngleFromSurface( particleMPC *pp, bc *WALL) {
 ///
 void applyJanusAnchoring( particleMPC *pp, bc *WALL, double UN[_3D], double UT[_3D]) {
     int i = 0;
-    double theta, transitionFactor = 0.0;
+    double theta, interpolationFactor = 0.0; // interpolation factor: 0 = homeotropic, 1 = planar
+
     double thetaH1 = pi/2.0 - WALL->JANDELTA; // limit of when transition from homeo begins to occur
     double thetaP1 = pi/2.0 + WALL->JANDELTA; // limit of when transition from homeo ends and planar begins
     double thetaP2 = 3.0*pi/2.0 - WALL->JANDELTA; // limit of when transition from planar begins to occur
@@ -1883,40 +1884,24 @@ void applyJanusAnchoring( particleMPC *pp, bc *WALL, double UN[_3D], double UT[_
 
     theta = getPolarAngleFromSurface(pp, WALL); // get angle between wall and particle
 
-    // Compute necessary orientation vectors UN and UT depending on the angle
+    // Compute necessary interpolation factor depending on angle
     if (theta < thetaH1) {
         // homeotropic
-        for (i = 0; i < DIM; i++) {
-            UN[i] *= 1.0;
-            UT[i] *= 0.0;
-        }
+        interpolationFactor = 0.0;
     } else if (theta < thetaP1) {
         // transition from homeo to planar
-        transitionFactor = (theta - thetaH1) / (thetaP1 - thetaH1); // 0 for homeo, 1 for planar
-        for (i = 0; i < DIM; i++) {
-            UN[i] *= 1.0 - transitionFactor;
-            UT[i] *= transitionFactor;
-        }
+        interpolationFactor = (theta - thetaH1) / (thetaP1 - thetaH1); // 0 for homeo, 1 for planar
     } else if (theta < thetaP2) {
         // planar
-        for (i = 0; i < DIM; i++) {
-            UN[i] *= 0.0;
-            UT[i] *= 1.0;
-        }
+        interpolationFactor = 1.0;
     } else if (theta < thetaH2) {
         // transition from planar to homeo
-        transitionFactor = (theta - thetaP2) / (thetaH2 - thetaP2); // 0 for planar, 1 for homeo
-        for (i = 0; i < DIM; i++) {
-            UN[i] *= transitionFactor;
-            UT[i] *= 1.0 - transitionFactor;
-        }
+        interpolationFactor = 1 - (theta - thetaP2) / (thetaH2 - thetaP2);
     } else {
         // homeotropic
-        for (i = 0; i < DIM; i++) {
-            UN[i] *= 1.0;
-            UT[i] *= 0.0;
-        }
+        interpolationFactor = 0.0;
     }
 
-    for (i = 0; i < DIM; i++) pp->U[i] = UN[i] + UT[i]; // apply boundary condition to the particle at the end
+    // apply boundary condition to the particle at the end
+    for (i = 0; i < DIM; i++) pp->U[i] = (1 - interpolationFactor) * UN[i] + interpolationFactor * UT[i];
 }
