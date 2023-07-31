@@ -4,6 +4,7 @@
 *.o
 *.out
 *.pyc
+build/
 
 #ignore MCPD output files (keeping input files for sample data)
 *.dat
