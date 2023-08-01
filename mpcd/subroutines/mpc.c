@@ -251,7 +251,7 @@ void sumFLOW( cell ***CL ) {
 /// Then this routine operates (to fill cell up with ghost particles, or apply strong anchoring). 
 /// In order to ensure no-slip boundary conditions, ghost particles must be added to all cells that partially overlap with impermeable boundaries. 
 /// This is because the MPCD viscosity depends on the particle number density and so cells with partial excluded volume have systematically lower viscosity. 
-// To determine if a boundary cuts a cell, a temporary particle assigned to each corner and the routine checks if the corner is inside a boundary. 
+/// To determine if a boundary cuts a cell, a temporary particle assigned to each corner and the routine checks if the corner is inside a boundary.
 /// This is an approximation --- boundaries with sharp corners may be missed. This is done every time step because boundary walls may be mobile. 
 /// To ensure no-slip, the centre of mass velocity of the cell is weighted towards zero by the Boltzmann distribution (Gaussian components). 
 /// To achieve strong anchoring conditions, the orientation of all the MPCD particles is set equal to the wall normal at that particle's location. 
