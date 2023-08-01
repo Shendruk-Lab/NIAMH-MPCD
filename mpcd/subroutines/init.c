@@ -1989,10 +1989,10 @@ void initializeSIM(cell ***CL, particleMPC *SRDparticles, spec SP[], bc WALL[], 
 		(WALL+i)->REORIENT = 1;
 		// If the colloid cannot move and doesn't have an initial non-zero orientation, then never bother with rotations
 		if( (WALL+i)->DSPLC==0 && feq((WALL+i)->O[0],0.0) && feq((WALL+i)->O[1],0.0) && feq((WALL+i)->O[2],0.0) ) (WALL+i)->REORIENT = 0;
-		// If the colloid has circular symmetry, then never bother with rotations
-		else if( DIM==_2D && feq((WALL+i)->P[0],2.0) && feq((WALL+i)->P[1],2.0) && feq((WALL+i)->A[0],(WALL+i)->A[1]) ) (WALL+i)->REORIENT = 0;
-		// If the colloid has spherical symmetry, then never bother with rotations
-		else if( feq((WALL+i)->P[0],2.0) && feq((WALL+i)->P[1],2.0) && feq((WALL+i)->P[2],2.0) && feq((WALL+i)->A[0],(WALL+i)->A[1]) && feq((WALL+i)->A[1],(WALL+i)->A[2]) ) (WALL+i)->REORIENT = 0;
+		// If the colloid has circular symmetry, then never bother with rotations (except if Janus enabled)
+		else if( DIM==_2D && feq((WALL+i)->P[0],2.0) && feq((WALL+i)->P[1],2.0) && feq((WALL+i)->A[0],(WALL+i)->A[1]) && !(WALL+i)->ENABLEJANUS) (WALL+i)->REORIENT = 0;
+		// If the colloid has spherical symmetry, then never bother with rotations (except if Janus enabled)
+		else if( feq((WALL+i)->P[0],2.0) && feq((WALL+i)->P[1],2.0) && feq((WALL+i)->P[2],2.0) && feq((WALL+i)->A[0],(WALL+i)->A[1]) && feq((WALL+i)->A[1],(WALL+i)->A[2]) && !(WALL+i)->ENABLEJANUS) (WALL+i)->REORIENT = 0;
 	}
 	in->MAG_FLAG = 0;
 	if( fneq(in->MAG[0],0.0) || fneq(in->MAG[1],0.0) || fneq(in->MAG[2],0.0) ) in->MAG_FLAG = 1;
