@@ -1842,20 +1842,21 @@ void rudimentaryChannel_z( particleMPC *pp ) {
 float getPolarAngleFromSurface( particleMPC *pp, bc *WALL) {
     int i = 0;
     float theta = 0.0;
+    double wallOri[_3D] = {0.0}; // orientation vector of the boundary [x, y, z]
     double collisionVec[_3D] = {0.0};
     double crossVec[_3D] = {0.0};
 
+    // get orientation vector of wall, using the angles of the wall O about the x,y,z axes
+    wallOri[0] = cos(WALL->O[0]);
+    wallOri[1] = cos(WALL->O[1])*sin(WALL->O[0]);
+    wallOri[2] = sin(WALL->O[1])*sin(WALL->O[0]);
+
     // compute direction vector from wall CoM to particle
     for (i = 0; i < _3D; i++) collisionVec[i] = pp->Q[i] - WALL->Q[i];
-    if (fneq(length(WALL->O, _3D), 0.0)) { // to avoid FPEs
-        theta = absAngle(collisionVec, WALL->O, _3D); // and get angle
-    } else {
-        printf("WARNING: Attempted to find angle of BC with no orientation! Was the BC's O set?\nQuitting for safety...\n");
-        exit(EXIT_FAILURE);
-    }
+    theta = absAngle(collisionVec, wallOri, _3D); // and get angle
 
     // check to ensure that the angle spans all of [0, 2\pi]
-    crossprod(collisionVec, WALL->O, crossVec); // note: this below method is a hack I found online
+    crossprod(collisionVec, wallOri, crossVec); // note: this below method is a hack I found online
     if (crossVec[2] < 0.0) theta = 2.0*M_PI - theta;
 
     return theta;
