@@ -1298,6 +1298,7 @@ void chooseBC( bc WALL[],int currentP,particleMPC *pp,double *t_minColl,double *
 		//Non-planar BCs
 		else {
 			//Shift BC due to periodic BCs
+            particleMPC origP = *(pp+currentP);
 			shiftBC( shift,&WALL[i],(pp+currentP) );
 			rotateBC( &WALL[i],(pp+currentP),0 );
 			tempW=calcW( WALL[i],*(pp+currentP) );
@@ -1318,6 +1319,11 @@ void chooseBC( bc WALL[],int currentP,particleMPC *pp,double *t_minColl,double *
 				tc = chooseT( t_left,t1,t2,currentP,&flag );
 				if( flag ) {
 					printf( "Error: Cross time unacceptable: %lf.\n",tc );
+                    printf( "\tWall angles: (x,y,z) = (%lf,%lf,%lf)\n",WALL[i].O[0],WALL[i].O[1],WALL[i].O[2] );
+                    printf("\tOriginal particle Q=(%lf,%lf,%lf,%lf)\n",origP.Q[0],origP.Q[1],origP.Q[2],origP.Q[3]);
+                    printf("\tOriginal particle V=(%lf,%lf,%lf)\n",origP.V[0],origP.V[1],origP.V[2]);
+                    printf("\tNew particle Q=(%lf,%lf,%lf)\n",(pp+currentP)->Q[0],(pp+currentP)->Q[1],(pp+currentP)->Q[2]);
+                    printf("\tNew particle V=(%lf,%lf,%lf)\n",(pp+currentP)->V[0],(pp+currentP)->V[1],(pp+currentP)->V[2]);
 					//exit( 1 );
 				}
 				if( tc < *t_minColl ) {
