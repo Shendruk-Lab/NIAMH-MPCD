@@ -1847,9 +1847,9 @@ float getPolarAngleFromSurface( particleMPC *pp, bc *WALL) {
     double crossVec[_3D] = {0.0};
 
     // get orientation vector of wall, using the angles of the wall O about the x,y,z axes
-    wallOri[0] = cos(WALL->O[0]);
-    wallOri[1] = cos(WALL->O[1])*sin(WALL->O[0]);
-    wallOri[2] = sin(WALL->O[1])*sin(WALL->O[0]);
+    wallOri[0] = sin(WALL->O[0]);
+    wallOri[1] = cos(WALL->O[1])*cos(WALL->O[0]);
+    wallOri[2] = sin(WALL->O[1])*cos(WALL->O[0]);
 
     // compute direction vector from wall CoM to particle
     for (i = 0; i < _3D; i++) collisionVec[i] = pp->Q[i] - WALL->Q[i];
