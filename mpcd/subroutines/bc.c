@@ -1318,9 +1318,13 @@ void chooseBC( bc WALL[],int currentP,particleMPC *pp,double *t_minColl,double *
 				// #endif
 				tc = chooseT( t_left,t1,t2,currentP,&flag );
 				if( flag ) {
-					printf( "Error: Cross time unacceptable: %lf.\n",tc );
+					printf( "Error: Cross time unacceptable: %e.\n",tc );
+					printf( "\t W=%e\n",tempW );
                     printf( "\tWall angles: (x,y,z) = (%lf,%lf,%lf)\n",WALL[i].O[0],WALL[i].O[1],WALL[i].O[2] );
-                    printf("\tOriginal particle Q=(%lf,%lf,%lf,%lf)\n",origP.Q[0],origP.Q[1],origP.Q[2],origP.Q[3]);
+					printf( "\tWall pos = (%lf,%lf,%lf)\n",WALL[i].Q[0],WALL[i].Q[1],WALL[i].Q[2] );
+					printf( "\tWall vel = (%lf,%lf,%lf)\n",WALL[i].V[0],WALL[i].V[1],WALL[i].V[2] );
+                    // printf("\tOriginal particle Q=(%lf,%lf,%lf,%lf)\n",origP.Q[0],origP.Q[1],origP.Q[2],origP.Q[3]);	//What is the 4th coordinate? double Q[3];
+					printf("\tOriginal particle Q=(%lf,%lf,%lf)\n",origP.Q[0],origP.Q[1],origP.Q[2]);
                     printf("\tOriginal particle V=(%lf,%lf,%lf)\n",origP.V[0],origP.V[1],origP.V[2]);
                     printf("\tNew particle Q=(%lf,%lf,%lf)\n",(pp+currentP)->Q[0],(pp+currentP)->Q[1],(pp+currentP)->Q[2]);
                     printf("\tNew particle V=(%lf,%lf,%lf)\n",(pp+currentP)->V[0],(pp+currentP)->V[1],(pp+currentP)->V[2]);
