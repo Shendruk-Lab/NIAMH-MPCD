@@ -227,7 +227,6 @@ while infile:
               currentMEAN[0][x][y]=currentMEAN[0][x][y]+VEL[0][x][y][z]
               currentMEAN[1][x][y]=currentMEAN[1][x][y]+VEL[1][x][y][z]
               currentMEAN[2][x][y]=currentMEAN[2][x][y]+VEL[2][x][y][z]
-              print(VEL[2][x][y][z])
         for x in range(xyzSize[0]):
           for y in range(xyzSize[1]):
             for i in range(3):
@@ -284,8 +283,6 @@ while infile:
       #Velocity image
       plt.subplot(1,1,1)
       plt.cla()
-      # print(currentMAG)
-      print(currentMEAN[2])
       quiv = quiver( XY[0][::qx, ::qy], XY[1][::qx, ::qy], currentMEAN[d1][::qx, ::qy], currentMEAN[d2][::qx, ::qy] )
       velImage = imshow(currentMAG.T,cmap=myMap,origin='lower',aspect=myAspect,vmin=minV,vmax=maxV)
       velCB = colorbar()
