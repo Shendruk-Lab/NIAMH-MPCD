@@ -9,6 +9,8 @@
 from pylab import *
 from subprocess import call
 import sys
+import os
+import json
 
 from defectHandler import getDefectData
 
@@ -20,43 +22,24 @@ from defectHandler import getDefectData
 ###########################################################
 ### Read arguments
 ###########################################################
-FS =25
-TLS = 20		# Tick label size
-xyzSize=zeros( 3,dtype=int )
 print( "Arguments:" )
 for arg in sys.argv:
 	print( "\t" + arg )
-
-
 dataName = sys.argv[1]		# Name of the data
-xyzSize[0] = int(sys.argv[2])	# System size
-xyzSize[1] = int(sys.argv[3])	# System size
-xyzSize[2] = int(sys.argv[4])	# System size
-start = int(sys.argv[5])		# Average after this number
-finish = int(sys.argv[6])		# Average before this number
-qx = int(sys.argv[7])		# Only show every qx arrow in x
-qy = int(sys.argv[8])		# Only show every qy arrow in y
-avdim = sys.argv[9]			# Dimension to average over
-c = float(sys.argv[10])		#Length of director lines approx 0.5
-myAspect=sys.argv[11]		#'auto' - reshapes into square graph or 'equal' keeps whatever aspect ratio the true values
-keepFrames=int(sys.argv[12])	#0=don't keep (delete) frames; 1=keep frames
+inputName = sys.argv[2]			# Input json file to read inputs
+start = int(sys.argv[3])		# Average after this number
+finish = int(sys.argv[4])		# Average before this number
+qx = int(sys.argv[5])		# Only show every qx arrow in x
+qy = int(sys.argv[6])		# Only show every qy arrow in y
+avdim = sys.argv[7]			# Dimension to average over
+c = float(sys.argv[8])		#Length of director lines approx 0.5
+myAspect=sys.argv[9]		#'auto' - reshapes into square graph or 'equal' keeps whatever aspect ratio the true values
+keepFrames=int(sys.argv[10])	#0=don't keep (delete) frames; 1=keep frames
 defectData = ""
 try:
-	defectData = sys.argv[13]		# Name of the defect data ("" if no defect data)
+	defectData = sys.argv[11]		# Name of the defect data ("" if no defect data)
 except:
 	print("No defect data found")
-
-# defect handling if needed
-LOADDEFECTS = False
-defects = []
-if defectData != "":
-	print("Loading defects for rendering")
-	LOADDEFECTS = True
-
-	defContainer = getDefectData(defectData, np.array([xyzSize[0], xyzSize[1], xyzSize[2]]))
-	for defList in defContainer:
-		defects.append(defList.defectList)
-	print("Finished loading defects")
 
 ###########################################################
 ### Format and style
@@ -73,12 +56,12 @@ myMap=ed.plasma
 myLW=1.0
 # adjust line length
 c *= (qx+qy)/2
-
 #Animation stuff
 bitrate=5000
 framerate=12		#Number of frames per second in the output video
 codec='libx264'		#Other options include mpeg4
 suffix='.mp4'
+FS=25
 
 ###########################################################
 ### Initialize
@@ -99,6 +82,29 @@ else:
 	print( "avdim must be 'x', 'y' or 'z' - not %s"%avdim )
 	exit()
 
+###########################################################
+### Read json
+###########################################################
+if not os.path.isfile(inputName):
+	print("%s not found."%inputName)
+	exit()
+with open(inputName, 'r') as f:
+  input = json.load(f)
+xyzSize=array([30,30,1])
+dim=2
+if "domain" in input:
+	xyzSize[0]=input['domain'][0]
+	dim=1
+	if(len(input['domain'])>1):
+		xyzSize[1]=input['domain'][1]
+		dim=2
+	else:
+		xyzSize[1]=1
+	if(len(input['domain'])>2):
+		xyzSize[2]=input['domain'][2]
+		dim=3
+	else:
+		xyzSize[2]=1
 # Data
 XYZ = zeros(shape=(3,xyzSize[0],xyzSize[1],xyzSize[2]),dtype=float)
 DIR = zeros(shape=(3,xyzSize[0],xyzSize[1],xyzSize[2]),dtype=float)
@@ -108,18 +114,13 @@ XY = zeros(shape=(2,xyzSize[d1],xyzSize[d2]),dtype=float)
 S = zeros(shape=(xyzSize[0],xyzSize[1],xyzSize[2]),dtype=float)
 AVS = zeros(shape=(xyzSize[d1],xyzSize[d2]),dtype=float)
 
+### Setup the animation
 # Figure
 fig1 = plt.figure(1)
 #Create the colorbar
 CS3 = imshow(AVS.T,cmap=myMap,vmin=0, vmax=1,aspect=myAspect)			#pcolor() sucks this is way better
 cb=colorbar(CS3,shrink=float(xyzSize[d2])/float(xyzSize[d1]))
-cb.ax.set_ylabel(r'$S$', fontsize = FS)
-
-###########################################################
-### Read the data for animation
-###########################################################
-
-### Setup the animation
+cb.ax.set_ylabel(r'Scalar order, $S$', fontsize = FS)
 # Make labels
 if avdim=='x':
 	labX='y'
@@ -131,9 +132,28 @@ elif avdim=='z':
 	labX='x'
 	labY='y'
 
+###########################################################
+### defect handling if needed
+###########################################################
+LOADDEFECTS = False
+defects = []
+if defectData != "":
+	print("Loading defects for rendering")
+	LOADDEFECTS = True
+
+	defContainer = getDefectData(defectData, np.array([xyzSize[0], xyzSize[1], xyzSize[2]]))
+	for defList in defContainer:
+		defects.append(defList.defectList)
+	print("Finished loading defects")
+
+###########################################################
+### Read the data for animation
+###########################################################
 print( 'Read file for figures ...' )
-file = dataName
-infile = open(file,"r")
+if not os.path.isfile(dataName):
+	print("%s not found."%dataName)
+	exit()
+infile = open(dataName,"r")
 print( '\tToss header ...' )
 for i in range(13):
 	#toss header

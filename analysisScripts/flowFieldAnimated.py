@@ -21,8 +21,6 @@ from defectHandler import getDefectData
 ###########################################################
 ### Read arguments
 ###########################################################
-FS =25
-TLS = 20		# Tick label size
 print( "Arguments:" )
 for arg in sys.argv:
     print( "\t" + arg )
@@ -36,23 +34,11 @@ avdim = sys.argv[7]			# Dimension to average over
 myAspect=sys.argv[8]		#'auto' - reshapes into square graph or 'equal' keeps whatever aspect ratio the true values
 keepFrames=int(sys.argv[9])	#0=don't keep (delete) frames; 1=keep frames
 savePDF=int(sys.argv[10]) # 1 for saving transparent pdfs (for papers), 0 for none
-defectData = ""
+defectData = ""         # If you are simulating a nematic and have defect positions, you can plot them over the field
 try:
 	defectData = sys.argv[11]		# Name of the defect data ("" if no defect data)
 except:
-	print("No defect data found")
-
-# defect handling if needed
-LOADDEFECTS = False
-defects = []
-if defectData != "":
-	print("Loading defects for rendering")
-	LOADDEFECTS = True
-
-	defContainer = getDefectData(defectData, np.array([xyzSize[0], xyzSize[1], xyzSize[2]]))
-	for defList in defContainer:
-		defects.append(defList.defectList)
-	print("Finished loading defects")
+	print("\tNo defect data found")
 
 ###########################################################
 ### Format and style
@@ -63,12 +49,13 @@ plt.style.use('shendrukGroupStyle')
 import shendrukGroupFormat as ed
 # Colour map to use
 myMap=ed.deepsea
-
 #Animation stuff
 bitrate=5000
 framerate=12		#Number of frames per second in the output video
 codec='libx264'		#Other options include mpeg4
 suffix='.mp4'
+FS = 25
+TLS = 20		# Tick label size
 
 ###########################################################
 ### Initialize
@@ -122,9 +109,26 @@ currentMAG = zeros(shape=(xyzSize[d1],xyzSize[d2]),dtype=float)
 XY = zeros(shape=(2,xyzSize[d1],xyzSize[d2]),dtype=float)
 
 ###########################################################
+### defect handling if needed
+###########################################################
+LOADDEFECTS = False
+defects = []
+if defectData != "":
+	print("Loading defects for rendering")
+	LOADDEFECTS = True
+
+	defContainer = getDefectData(defectData, np.array([xyzSize[0], xyzSize[1], xyzSize[2]]))
+	for defList in defContainer:
+		defects.append(defList.defectList)
+	print("Finished loading defects")
+
+###########################################################
 ### Read the data for min/max
 ###########################################################
 print( 'Read file for min/max ...' )
+if not os.path.isfile(dataName):
+	print("%s not found."%dataName)
+	exit()
 file = dataName
 infile = open(file,"r")
 minV=99999999999999.0
@@ -133,7 +137,6 @@ maxV=0.0
 ###########################################################
 ### Read the data for animation
 ###########################################################
-
 ### Setup the animation
 # Make labels
 if avdim=='x':

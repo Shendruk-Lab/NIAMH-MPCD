@@ -7,46 +7,25 @@
 ###########################################################
 from pylab import *
 from subprocess import call
+import os
+import json
 
 ###########################################################
 ### Read arguments
 ###########################################################
-FS =25
-TLS = 20		# Tick label size
-xyzSize=zeros( 3,dtype=int )
 print( "Arguments:" )
 for arg in sys.argv:
   print( "\t" + arg )
 dataPath = sys.argv[1]		# Name of the data
-numSw = int(sys.argv[2])	# Number of swimmers
-xyzSize[0] = int(sys.argv[3])	# System size
-xyzSize[1] = int(sys.argv[4])	# System size
-xyzSize[2] = int(sys.argv[5])	# System size
-avdim = sys.argv[6]			# Dimension to average over
-dipole = float(sys.argv[7])	# Dipole size
-start = int(sys.argv[8])		# Average after this number
-finish = int(sys.argv[9])		# Average before this number
-qx = int(sys.argv[10])		# Only show every qx arrow in x
-qy = int(sys.argv[11])		# Only show every qy arrow in y
-fieldType = sys.argv[12]		# fieldType can be "vel", "vort" or "nem" for velocity, vorticity or director field, respectively
-myAspect=sys.argv[13]		#'auto' - reshapes into square graph or 'equal' keeps whatever aspect ratio the true values
-keepFrames=int(sys.argv[14])	#0=don't keep (delete) frames; 1=keep frames
-
-###########################################################
-### Set arguments
-###########################################################
-tailFreq=1.0/3.5
-tailWaveLength=(4.0/10.0)*2.0*(1.0+dipole)
-hidgeonLength=1.0
-tailRad=1.0
-
-fieldType=fieldType.lower()
-if(fieldType=="v" or fieldType=="vel" or fieldType=="velocity"):
-  fieldType="vel"
-elif(fieldType=="w" or fieldType=="vor" or fieldType=="vort" or fieldType=="vorticity"):
-  fieldType="vor"
-elif(fieldType=="n" or fieldType=="nem" or fieldType=="nematic" or fieldType=="dir" or fieldType=="director"):
-  fieldType="nem"
+inputName = sys.argv[2]			# Input json file to read inputs
+start = int(sys.argv[3])		# Average after this number
+finish = int(sys.argv[4])		# Average before this number
+qx = int(sys.argv[5])		# Only show every qx arrow in x
+qy = int(sys.argv[6])		# Only show every qy arrow in y
+avdim = sys.argv[7]			# Dimension to average over
+fieldType = sys.argv[8]		# fieldType can be "vel", "vort" or "nem" for velocity, vorticity or director field, respectively
+myAspect=sys.argv[9]		#'auto' - reshapes into square graph or 'equal' keeps whatever aspect ratio the true values
+keepFrames=int(sys.argv[10])	#0=don't keep (delete) frames; 1=keep frames
 
 ###########################################################
 ### Style/formating stuff
@@ -67,6 +46,52 @@ bitrate=5000
 framerate=20		#Number of frames per second in the output video
 codec='libx264'		#Other options include mpeg4
 suffix='.mp4'
+FS=25
+
+###########################################################
+### Read json
+###########################################################
+if not os.path.isfile(inputName):
+	print("%s not found."%inputName)
+	exit()
+with open(inputName, 'r') as f:
+  input = json.load(f)
+xyzSize=array([30,30,1])
+dim=2
+if "domain" in input:
+	xyzSize[0]=input['domain'][0]
+	dim=1
+	if(len(input['domain'])>1):
+		xyzSize[1]=input['domain'][1]
+		dim=2
+	else:
+		xyzSize[1]=1
+	if(len(input['domain'])>2):
+		xyzSize[2]=input['domain'][2]
+		dim=3
+	else:
+		xyzSize[2]=1
+numSw=0
+if "nSwim" in input:
+    numSw=input['nSwim']
+dipole=1
+if "dsSwim" in input:
+    dipole=input['dsSwim']
+
+###########################################################
+### Set arguments
+###########################################################
+tailFreq=1.0/3.5
+tailWaveLength=(4.0/10.0)*2.0*(1.0+dipole)
+hidgeonLength=1.0
+tailRad=1.0
+fieldType=fieldType.lower()
+if(fieldType=="v" or fieldType=="vel" or fieldType=="velocity"):
+  fieldType="vel"
+elif(fieldType=="w" or fieldType=="vor" or fieldType=="vort" or fieldType=="vorticity"):
+  fieldType="vor"
+elif(fieldType=="n" or fieldType=="nem" or fieldType=="nematic" or fieldType=="dir" or fieldType=="director"):
+  fieldType="nem"
 
 ###########################################################
 ### Initialize
@@ -116,13 +141,22 @@ fig1, axes = plt.subplots(nrows=1, ncols=1)
 ### Read the data for min/max
 ###########################################################
 print( 'Read file for min/max ...' )
+if not os.path.isfile(swimmerName):
+	print("%s not found."%swimmerName)
+	exit()
 swimFile = open(swimmerName,"r")
+if not os.path.isfile(velFieldName):
+	print("%s not found."%velFieldName)
+	exit()
 velFile = open(velFieldName,"r")
 minV=99999999999999.0
 maxV=0.0
 minW=0.0
 maxW=0.0
 if(fieldType=="nem"):
+  if not os.path.isfile(dirFieldName):
+    print("%s not found."%dirFieldName)
+    exit()
   nemFile = open(dirFieldName,"r")
 
 ###########################################################
