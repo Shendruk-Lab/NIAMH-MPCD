@@ -9,6 +9,8 @@
 from pylab import *
 from subprocess import call
 import sys
+import os
+import json
 
 from defectHandler import getDefectData
 
@@ -21,25 +23,22 @@ from defectHandler import getDefectData
 ###########################################################
 FS =25
 TLS = 20		# Tick label size
-xyzSize=zeros( 3,dtype=int )
 print( "Arguments:" )
 for arg in sys.argv:
     print( "\t" + arg )
 dataName = sys.argv[1]		# path to the data (flowfield.dat)
-xyzSize[0] = int(sys.argv[2])	# System size
-xyzSize[1] = int(sys.argv[3])	# System size
-xyzSize[2] = int(sys.argv[4])	# System size
-start = int(sys.argv[5])		# Average after this number
-finish = int(sys.argv[6])		# Average before this number
-qx = int(sys.argv[7])		# Only show every qx arrow in x
-qy = int(sys.argv[8])		# Only show every qy arrow in y
-avdim = sys.argv[9]			# Dimension to average over
-myAspect=sys.argv[10]		#'auto' - reshapes into square graph or 'equal' keeps whatever aspect ratio the true values
-keepFrames=int(sys.argv[11])	#0=don't keep (delete) frames; 1=keep frames
-savePDF=int(sys.argv[12]) # 1 for saving transparent pdfs (for papers), 0 for none
+inputName = sys.argv[2]			# Input json file to read inputs
+start = int(sys.argv[3])		# Average after this number
+finish = int(sys.argv[4])		# Average before this number
+qx = int(sys.argv[5])		# Only show every qx arrow in x
+qy = int(sys.argv[6])		# Only show every qy arrow in y
+avdim = sys.argv[7]			# Dimension to average over
+myAspect=sys.argv[8]		#'auto' - reshapes into square graph or 'equal' keeps whatever aspect ratio the true values
+keepFrames=int(sys.argv[9])	#0=don't keep (delete) frames; 1=keep frames
+savePDF=int(sys.argv[10]) # 1 for saving transparent pdfs (for papers), 0 for none
 defectData = ""
 try:
-	defectData = sys.argv[13]		# Name of the defect data ("" if no defect data)
+	defectData = sys.argv[11]		# Name of the defect data ("" if no defect data)
 except:
 	print("No defect data found")
 
@@ -90,6 +89,29 @@ else:
   print( "avdim must be 'x', 'y' or 'z' - not %s"%avdim )
   exit()
 
+###########################################################
+### Read json
+###########################################################
+if not os.path.isfile(inputName):
+	print("%s not found."%inputName)
+	exit()
+with open(inputName, 'r') as f:
+  input = json.load(f)
+xyzSize=array([30,30,1])
+dim=2
+if "domain" in input:
+	xyzSize[0]=input['domain'][0]
+	dim=1
+	if(len(input['domain'])>1):
+		xyzSize[1]=input['domain'][1]
+		dim=2
+	else:
+		xyzSize[1]=1
+	if(len(input['domain'])>2):
+		xyzSize[2]=input['domain'][2]
+		dim=3
+	else:
+		xyzSize[2]=1
 # Data
 XYZ = zeros(shape=(3,xyzSize[0],xyzSize[1],xyzSize[2]),dtype=float)
 VEL = zeros(shape=(3,xyzSize[0],xyzSize[1],xyzSize[2]),dtype=float)
@@ -205,13 +227,14 @@ while infile:
               currentMEAN[0][x][y]=currentMEAN[0][x][y]+VEL[0][x][y][z]
               currentMEAN[1][x][y]=currentMEAN[1][x][y]+VEL[1][x][y][z]
               currentMEAN[2][x][y]=currentMEAN[2][x][y]+VEL[2][x][y][z]
+              print(VEL[2][x][y][z])
         for x in range(xyzSize[0]):
           for y in range(xyzSize[1]):
             for i in range(3):
               currentMEAN[i][x][y]/=xyzSize[2]
-        for x in range(xyzSize[d1]):
-          for y in range(xyzSize[d2]):
-            currentMAG[x][y]=sqrt( currentMEAN[0][x][y]**2+currentMEAN[1][x][y]**2+currentMEAN[2][x][y]**2 )
+      for x in range(xyzSize[d1]):
+        for y in range(xyzSize[d2]):
+          currentMAG[x][y]=sqrt( currentMEAN[0][x][y]**2+currentMEAN[1][x][y]**2+currentMEAN[2][x][y]**2 )
 
         for x in range(xyzSize[d1]):
           for y in range(xyzSize[d2]):
@@ -261,6 +284,8 @@ while infile:
       #Velocity image
       plt.subplot(1,1,1)
       plt.cla()
+      # print(currentMAG)
+      print(currentMEAN[2])
       quiv = quiver( XY[0][::qx, ::qy], XY[1][::qx, ::qy], currentMEAN[d1][::qx, ::qy], currentMEAN[d2][::qx, ::qy] )
       velImage = imshow(currentMAG.T,cmap=myMap,origin='lower',aspect=myAspect,vmin=minV,vmax=maxV)
       velCB = colorbar()
