@@ -16,21 +16,21 @@ import json
 print( "Arguments:" )
 for arg in sys.argv:
   print( "\t" + arg )
-dataPath = sys.argv[1]		# Name of the data
+dataPath = sys.argv[1]		  # Name of the data
 inputName = sys.argv[2]			# Input json file to read inputs
 start = int(sys.argv[3])		# Average after this number
 finish = int(sys.argv[4])		# Average before this number
-qx = int(sys.argv[5])		# Only show every qx arrow in x
-qy = int(sys.argv[6])		# Only show every qy arrow in y
-avdim = sys.argv[7]			# Dimension to average over
-fieldType = sys.argv[8]		# fieldType can be "vel", "vort" or "nem" for velocity, vorticity or director field, respectively
-myAspect=sys.argv[9]		#'auto' - reshapes into square graph or 'equal' keeps whatever aspect ratio the true values
+qx = int(sys.argv[5])   		# Only show every qx arrow in x
+qy = int(sys.argv[6])		    # Only show every qy arrow in y
+avdim = sys.argv[7]			    # Dimension to average over
+fieldType = sys.argv[8]		  # fieldType can be "vel", "vort" or "nem" for velocity, vorticity or director field, respectively
+myAspect=sys.argv[9]    		#'auto' - reshapes into square graph or 'equal' keeps whatever aspect ratio the true values
 keepFrames=int(sys.argv[10])	#0=don't keep (delete) frames; 1=keep frames
 
 ###########################################################
 ### Style/formating stuff
 ###########################################################
-# Style
+# Use our custom style and colours
 plt.style.use('shendrukGroupStyle')
 import shendrukGroupFormat as ed
 # Colours
@@ -39,14 +39,16 @@ if(fieldType=="vel"):
   fieldMap = ed.truncate_colormap(ed.viridis, minval=0.1, maxval=0.7)
 elif(fieldType=="vor"):
   fieldMap = ed.bombpops
-else:
+elif(fieldType=="nem"):
   fieldMap = ed.plasma
+else:
+  print("Field type %s not known."%(fieldType))
+  exit()
 #Animation
 bitrate=5000
 framerate=20		#Number of frames per second in the output video
 codec='libx264'		#Other options include mpeg4
 suffix='.mp4'
-FS=25
 
 ###########################################################
 ### Read json
@@ -99,7 +101,6 @@ elif(fieldType=="n" or fieldType=="nem" or fieldType=="nematic" or fieldType=="d
 velFieldName="%s/flowfield.dat"%dataPath
 dirFieldName="%s/directorfield.dat"%dataPath
 swimmerName="%s/swimmers.dat"%dataPath
-
 if avdim=='x':
   dim=0
   d1=1
@@ -140,7 +141,7 @@ fig1, axes = plt.subplots(nrows=1, ncols=1)
 ###########################################################
 ### Read the data for min/max
 ###########################################################
-print( 'Read file for min/max ...' )
+print( 'Reading data ...' )
 if not os.path.isfile(swimmerName):
 	print("%s not found."%swimmerName)
 	exit()
@@ -177,8 +178,7 @@ xyzF=zeros( 3,dtype=float )
 for i in range(3):
   xyzF[i]=float(xyzSize[i])
 
-print( 'Read files for animation ...' )
-print( '\tToss headers ...' )
+# Toss headers
 for i in range(13):
   line = velFile.readline()
 for i in range(13):
@@ -186,8 +186,7 @@ for i in range(13):
 if(fieldType=="nem"):
   for i in range(13):
     line = nemFile.readline()
-
-print( '\tRead data ...' )
+# Read data
 i=0
 j=0
 n=-1
@@ -215,7 +214,6 @@ while( velFile ):
   ### Read the velocity
   ###########################################################
   line = velFile.readline()
-  # if( len(line)!= 57):
   if( len(line)!= 70):
     break
   else:
@@ -235,7 +233,7 @@ while( velFile ):
     if j>finish:
       break
     if j<start or j>finish:
-      print( 'Toss %d'%j )
+      pass
     else:
       ###########################################################
       ### Order
@@ -453,11 +451,11 @@ while( velFile ):
     if(fieldType=="vel"):
       image = imshow(currentMAG.T,cmap=fieldMap,origin='lower',aspect=myAspect,vmin=minV,vmax=maxV)
       CB = colorbar()
-      CB.ax.set_ylabel(r'Velocity, $\left|\vec{v}\right|$', fontsize = FS)
+      CB.ax.set_ylabel(r'Velocity, $\left|\vec{v}\right|$')
     elif(fieldType=="vor"):
       image = imshow(VORTZ.T,cmap=fieldMap,origin='lower',aspect=myAspect,vmin=minW,vmax=maxW)
       CB = colorbar()
-      CB.ax.set_ylabel(r'Vorticity, $\omega_{%s}$'%(avdim), fontsize = FS)
+      CB.ax.set_ylabel(r'Vorticity, $\omega_{%s}$'%(avdim))
     elif(fieldType=="nem"):
       for x in range(xyzSize[d1]):
         for y in range(xyzSize[d2]):
@@ -472,15 +470,14 @@ while( velFile ):
       waveLength=(4.0/5.0)*2.0*(1.0+dipole)
       theta=arctan2(H[ns][d2]-B[ns][d2],H[ns][d1]-B[ns][d1])
       X=linspace(0,2.0*(1.0+dipole),20)
-      # Y=sin(2.0*pi*X/waveLength)*sin(0.5*pi + float(n)*tailFreq)
       Y=tailRad*(1.0-exp(-pow(X/hidgeonLength,2)))*sin(2.0*pi*X/tailWaveLength + float(n)*tailFreq)
       tailX=cos(theta)*X - sin(theta)*Y
       tailY=sin(theta)*X + cos(theta)*Y
       plot( B[ns][d1]-tailX,B[ns][d2]-tailY,'-',color=swimmerMap(B[ns][dim]/xyzF[dim]),linewidth=2 )
       plot( H[ns][d1],H[ns][d2],'o',color='k',fillstyle='full' )
       plot( B[ns][d1],B[ns][d2],'h',color=swimmerMap(B[ns][dim]/xyzF[dim]),fillstyle='full' )
-    xlabel(r'$%s$'%labX, fontsize = FS)
-    ylabel(r'$%s$'%labY, fontsize = FS)
+    xlabel(r'$%s$'%labX)
+    ylabel(r'$%s$'%labY)
     plt.axis(xmax=xyzSize[0], xmin=0, ymax=xyzSize[1], ymin=0)
     name='frame%04d.png'%(n)
     savefig( name )
@@ -499,7 +496,7 @@ if(fieldType=="nem"):
   nemFile.close()
 
 # Animate
-print( "\tAnimating ..." )
+print( "Animating ..." )
 if(fieldType=="vel"):
   name='%s/swimmerVelField_animation%s'%(dataPath,suffix)
 elif(fieldType=="vor"):
@@ -511,5 +508,5 @@ call(myCommand,shell=True)
 myCommand = "ffmpeg -f image2 -r %d"%(framerate)+" -i frame%04d.png"+" -vcodec %s -b %dk -r %d %s"%(codec,bitrate,framerate,name)
 call(myCommand,shell=True)
 if not keepFrames:
-  myCommand="rm *.png"
+  myCommand="rm frame*.png"
   call(myCommand,shell=True)

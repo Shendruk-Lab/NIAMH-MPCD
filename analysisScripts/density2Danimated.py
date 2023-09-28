@@ -25,27 +25,24 @@ dataName = sys.argv[1]			# Name of the data (should be coarsegrain.dat)
 inputName = sys.argv[2]			# Input json file to read inputs
 start = int(sys.argv[3])		# Average after this number
 finish = int(sys.argv[4])		# Average before this number
-sliceDim = sys.argv[5]				# Dimension to average over
+sliceDim = sys.argv[5]			# Dimension to average over
 sliceIndex = int(sys.argv[6])	# Plane to be sliced
 myAspect=sys.argv[7]			#'auto' - reshapes into square graph or 'equal' keeps whatever aspect ratio the true values
-keepFrames=int(sys.argv[8])	#0=don't keep (delete) frames; 1=keep frames
+keepFrames=int(sys.argv[8])		#0=don't keep (delete) frames; 1=keep frames
 normalise=int(sys.argv[9])		#normalise the population (for the cbar) or no
 savePDF=int(sys.argv[10])		# 1 for saving transparent pdfs (for papers), 0 for none
-defectData = ""         # If you are simulating a nematic and have defect positions, you can plot them over the field
+defectData = ""         		# If you are simulating a nematic and have defect positions, you can plot them over the field
 try:
-	defectData = sys.argv[11]		# Name of the defect data ("" if no defect data)
+	defectData = sys.argv[11]	# Name of the defect data ("" if no defect data)
 except:
 	print("\tNo defect data found")
 
 ###########################################################
 ### Format and style
 ###########################################################
-# Use our custom style
+# Use our custom style and colours
 plt.style.use('shendrukGroupStyle')
-# Use our custom colours
 import shendrukGroupFormat as ed
-
-FS=25
 # Colour map to use # TODO: adjust this!
 myMap=ed.plasma # colour map used when species=1
 pop0Col = np.array([0, 1, 0]) # colour to show when ONLY pop0 is present (RGB)
@@ -72,7 +69,7 @@ def getRGBAColField(totalPop, maxTotalPop, popProp):
 #Animation stuff
 bitrate=5000
 framerate=12		#Number of frames per second in the output video
-	# Note that the ideal for this is _very_ variable so play around with it
+# Note that the ideal for this is _very_ variable so play around with it
 codec='libx264'		#Other options include mpeg4
 suffix='.mp4'
 
@@ -175,18 +172,14 @@ elif sliceDim=='z':
 	labX='x'
 	labY='y'
 
-print( 'Read file for figures ...' )
+print( 'Reading data ...' )
 if not os.path.isfile(dataName):
 	print("%s not found."%dataName)
 	exit()
 infile = open(dataName,"r")
-print( '\tToss header ...' )
+# Toss header
 for i in range(13):
-	#toss header
 	line = infile.readline()
-	#print line
-
-print( '\tRead data ...' )
 i=0 # line counter (within timestep)
 currTStep=0
 n=-1
@@ -211,11 +204,8 @@ while infile:
 		if currTStep>finish:
 			break
 		if currTStep<start or currTStep>finish:
-      #print( 'Toss %d'%currTStep )
 			aaa=0
 		else:
-			print( 'Work %d'%currTStep )
-
 			# compute the information for the slice we want to render
 			##NOTE: for now, assuming sliceDim=z and z=0 for simplicity
 			sliceTOTPOP = TOTPOP[:,:,sliceIndex]
@@ -223,7 +213,6 @@ while infile:
 			if species == 2: # for multispecies
 				slicePop0 = POP0[:,:,sliceIndex]
 				slicePop0prop = slicePop0/sliceTOTPOP
-
 			# now can render!
 			n = n + 1
 			fig1 = plt.figure(1)
@@ -238,17 +227,16 @@ while infile:
 			imshow(renderTOTPOP,cmap=myMap,vmin=0, aspect=myAspect)
 
 			#Create the colorbar
-			CS3 = imshow(renderTOTPOP.T,vmin=0,cmap=myMap,aspect=myAspect)			#pcolor() sucks this is way better
+			CS3 = imshow(renderTOTPOP.T,vmin=0,cmap=myMap,aspect=myAspect)
 			cb=colorbar(CS3)
 			if normalise:
-				cb.ax.set_ylabel(r'Number, $N_C / N_C^\mathrm{max}$', fontsize = FS)
+				cb.ax.set_ylabel(r'Number, $N_C / N_C^\mathrm{max}$')
 			else:
-				cb.ax.set_ylabel(r'Number, $N_C$', fontsize = FS)
+				cb.ax.set_ylabel(r'Number, $N_C$')
 
 			# perform matplotlib bits and save
-			# title(r'Slice %s=%d'%(sliceDim,sliceIndex), fontsize = FS)
-			xlabel(r'$%s$'%labX, fontsize = FS)
-			ylabel(r'$%s$'%labY, fontsize = FS)
+			xlabel(r'$%s$'%labX)
+			ylabel(r'$%s$'%labY)
 			plt.axis(xmax=xyzSize[d1], xmin=0, ymax=xyzSize[d2], ymin=0)
 
 			name='s=1frame%04d.png'%(n)
@@ -260,8 +248,6 @@ while infile:
 			savefig(name, bbox_inches='tight')
 			# save trans pdf
 			if savePDF: savefig(namepdf, transparent=True, bbox_inches='tight')
-
-			# savefig( name )
 				
 			# also handle multispecies render if necessary
 			if species == 2: # for multispecies
@@ -269,19 +255,16 @@ while infile:
 				sliceRGBA = getRGBAColField(sliceTOTPOP, sliceMax, slicePop0prop)
 				imshow(sliceRGBA, aspect=myAspect)
 				# perform matplotlib bits and save
-				# title(r'Slice %s=%d'%(sliceDim,sliceIndex), fontsize = FS)
-				xlabel(r'$%s$'%labX, fontsize = FS)
-				ylabel(r'$%s$'%labY, fontsize = FS)
+				xlabel(r'$%s$'%labX)
+				ylabel(r'$%s$'%labY)
 				plt.axis(xmax=xyzSize[d1], xmin=0, ymax=xyzSize[d2], ymin=0)
 				name='s=2frame%04d.png'%(n)
 				savefig( name )
-			
-
 			i=0 # reset tStep line counter
 infile.close()
 
 #Animate
-print( "\tAnimating ..." )
+print( "Animating ..." )
 # single species
 name='2Ddens_%s%d%s'%(sliceDim,sliceIndex,suffix)
 myCommand="rm %s"%name

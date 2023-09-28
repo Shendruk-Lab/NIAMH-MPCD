@@ -31,7 +31,7 @@ if(len(sys.argv) % 2) != 0:
 #### main plotting function ###################################
 def plotData(dir: str, lbl: str):
     #load data file
-    print("Reading file "+dir+" for data.")
+    print("Reading file "+dir+" for data ...")
     data = np.loadtxt(dir, delimiter="\t", skiprows=13)
     tData = data[:,0]
     sData = data[:,7]
@@ -65,7 +65,6 @@ def plotData(dir: str, lbl: str):
 ###############################################################
 
 N = int((len(sys.argv) / 2) - 1) #number of pairs
-print(N)
 for i in range(N):
     dataName = sys.argv[i+2]
     dataLabel = sys.argv[i+3]
@@ -76,4 +75,5 @@ plt.ylabel(r"Local Order, $\left\langle S \right\rangle$")
 plt.title("Average Local Order Parameter")
 plt.legend()
 plt.savefig( 'avLovalS.pdf' )
-plt.show()
+
+# plt.show()

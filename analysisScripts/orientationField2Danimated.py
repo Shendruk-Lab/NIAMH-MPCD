@@ -25,33 +25,30 @@ from defectHandler import getDefectData
 print( "Arguments:" )
 for arg in sys.argv:
 	print( "\t" + arg )
-dataName = sys.argv[1]		# Name of the data
+dataName = sys.argv[1]			# Name of the data
 inputName = sys.argv[2]			# Input json file to read inputs
 start = int(sys.argv[3])		# Average after this number
 finish = int(sys.argv[4])		# Average before this number
-qx = int(sys.argv[5])		# Only show every qx arrow in x
-qy = int(sys.argv[6])		# Only show every qy arrow in y
-avdim = sys.argv[7]			# Dimension to average over
-c = float(sys.argv[8])		#Length of director lines approx 0.5
-myAspect=sys.argv[9]		#'auto' - reshapes into square graph or 'equal' keeps whatever aspect ratio the true values
+qx = int(sys.argv[5])			# Only show every qx arrow in x
+qy = int(sys.argv[6])			# Only show every qy arrow in y
+avdim = sys.argv[7]				# Dimension to average over
+c = float(sys.argv[8])			#Length of director lines approx 0.5
+myAspect=sys.argv[9]			#'auto' - reshapes into square graph or 'equal' keeps whatever aspect ratio the true values
 keepFrames=int(sys.argv[10])	#0=don't keep (delete) frames; 1=keep frames
 defectData = ""
 try:
-	defectData = sys.argv[11]		# Name of the defect data ("" if no defect data)
+	defectData = sys.argv[11]	# Name of the defect data ("" if no defect data)
 except:
 	print("No defect data found")
 
 ###########################################################
 ### Format and style
 ###########################################################
-# Use our custom style
+# Use our custom style and colours
 plt.style.use('shendrukGroupStyle')
-# Use our custom colours
 import shendrukGroupFormat as ed
 # Colour map to use
 myMap=ed.plasma
-# cool = lsc.from_list("", [capri,ruby])
-# deepsea = lsc.from_list("", [purple,ceruleandarker,limegreen])
 # Adjust line width
 myLW=1.0
 # adjust line length
@@ -61,7 +58,6 @@ bitrate=5000
 framerate=12		#Number of frames per second in the output video
 codec='libx264'		#Other options include mpeg4
 suffix='.mp4'
-FS=25
 
 ###########################################################
 ### Initialize
@@ -118,9 +114,9 @@ AVS = zeros(shape=(xyzSize[d1],xyzSize[d2]),dtype=float)
 # Figure
 fig1 = plt.figure(1)
 #Create the colorbar
-CS3 = imshow(AVS.T,cmap=myMap,vmin=0, vmax=1,aspect=myAspect)			#pcolor() sucks this is way better
+CS3 = imshow(AVS.T,cmap=myMap,vmin=0, vmax=1,aspect=myAspect)
 cb=colorbar(CS3,shrink=float(xyzSize[d2])/float(xyzSize[d1]))
-cb.ax.set_ylabel(r'Scalar order, $S$', fontsize = FS)
+cb.ax.set_ylabel(r'Scalar order, $S$')
 # Make labels
 if avdim=='x':
 	labX='y'
@@ -138,7 +134,7 @@ elif avdim=='z':
 LOADDEFECTS = False
 defects = []
 if defectData != "":
-	print("Loading defects for rendering")
+	print("Loading defects for rendering ...")
 	LOADDEFECTS = True
 
 	defContainer = getDefectData(defectData, np.array([xyzSize[0], xyzSize[1], xyzSize[2]]))
@@ -149,18 +145,14 @@ if defectData != "":
 ###########################################################
 ### Read the data for animation
 ###########################################################
-print( 'Read file for figures ...' )
+print( 'Reading data ...' )
 if not os.path.isfile(dataName):
 	print("%s not found."%dataName)
 	exit()
 infile = open(dataName,"r")
-print( '\tToss header ...' )
+# Toss header
 for i in range(13):
-	#toss header
 	line = infile.readline()
-	#print line
-
-print( '\tRead data ...' )
 i=0
 j=0
 n=-1
@@ -179,16 +171,13 @@ while infile:
 			DIR[1][int(Qx)][int(Qy)][int(Qz)] = float(Vy)
 			DIR[2][int(Qx)][int(Qy)][int(Qz)] = float(Vz)
 			S[int(Qx)][int(Qy)][int(Qz)] = float(s)
-
 	if i==xyzSize[0]*xyzSize[1]*xyzSize[2]:
 		j=j+1
 		if j>finish:
 			break
 		if j<start or j>finish:
-			print( 'Toss %d'%j )
-			aaa=0
+			pass
 		else:
-			print( 'Work %d'%j )
 			#Sum
 			if avdim=='x':
 				for x in range(xyzSize[0]):
@@ -250,45 +239,29 @@ while infile:
 					for y in range(xyzSize[1]):
 						XY[0][x][y]=XYZ[d1][x][y][0]
 						XY[1][x][y]=XYZ[d2][x][y][0]
-
 			# Save frame
 			n=n+1
 			fig1 = plt.figure(1)
 			plt.cla()
-
 			quiver( XY[0][::qx, ::qy], XY[1][::qx, ::qy], 
 					c*MEAN[0][::qx, ::qy], c*MEAN[1][::qx, ::qy], 
 					AVS[::qx, ::qy], cmap=myMap, clim=(0, 1), scale=50/c,
 					width=0.005*myLW, headlength=0, headwidth=0, 
 					headaxislength=0, pivot='middle')
-					# linewidth=myLW, headaxislength=1)
-
-			# old method - draw a bunch of individual lines. slow and painful
-			# for x in range(xyzSize[d1]):
-			# 	for y in range(xyzSize[d2]):
-			# 		if( x%qx==0 and y%qy==0 ):
-			# 			plot( [ XY[0][x][y]-c*MEAN[d1][x][y],XY[0][x][y]+c*MEAN[d1][x][y] ],[ XY[1][x][y]-c*MEAN[d2][x][y],XY[1][x][y]+c*MEAN[d2][x][y] ],color=myMap(AVS[x][y],1),linewidth=myLW )
-
 			# load defects and draw them as necessary
 			# FIXME: only works for 2d for now, doesnt take into account d1 or d2
 			if LOADDEFECTS and (j < len(defects)):
-				print(f"\tDrawing defects {j}/{len(defects)-1}")
 				for defect in defects[j-1]: # j is not 0 indexed reeeeee
 					defect.drawDefect(c*2, myLW*2)
-
-			xlabel(r'$%s$'%labX, fontsize = FS)
-			ylabel(r'$%s$'%labY, fontsize = FS)
+			xlabel(r'$%s$'%labX)
+			ylabel(r'$%s$'%labY)
 			plt.axis(xmax=xyzSize[d1], xmin=0, ymax=xyzSize[d2], ymin=0)
 			name='frame%04d.png'%(n)
-			# savefig( name )
-
 			# uncomment below for snapshots
 			plt.axis('off') 
 			plt.subplots_adjust(left=0, right=1, top=1, bottom=0)
-
 			savefig( name,bbox_inches='tight',pad_inches=0 )
-
-			#Zero matrix
+		#Zero matrix
 		DIR= zeros( (3,xyzSize[0],xyzSize[1],xyzSize[2]),dtype=float )
 		MEAN = zeros(shape=(3,xyzSize[d1],xyzSize[d2]),dtype=float)
 		AVS = zeros(shape=(xyzSize[d1],xyzSize[d2]),dtype=float)
@@ -296,12 +269,9 @@ while infile:
 infile.close()
 
 ###########################################################
-### Plot data
+### Visualize data
 ###########################################################
-print( "Plot data ..." )
-
-#Animate
-print( "\tAnimating ..." )
+print( "Animating ..." )
 name='2Dorientation_animation%s'%suffix
 myCommand="rm %s"%name
 call(myCommand,shell=True)
