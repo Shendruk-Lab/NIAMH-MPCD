@@ -117,6 +117,7 @@ All outputs are written to `.dat` files, which are uncompressed text files.
 |                    |                          |                                                                                          | Enstrophy                      | `Omega`                                                           |
 
 ### Histograms          {#histograms}
+Non-normalized. Time given in MPCD units. Bin value is value at *start* of bin. The range is set by the instantaneous minimum and maximum and so varies. 
 
 | Input tag      | Output file         | Description                                                             | Outputs                    | Column Headers  |
 |----------------|---------------------|-------------------------------------------------------------------------|----------------------------|-----------------|
