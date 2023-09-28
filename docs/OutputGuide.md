@@ -46,6 +46,8 @@ All outputs are written to `.dat` files, which are uncompressed text files.
 |                  |                      |                                                                         | Binder cumulant               | `BinderCumulant` |
 
 ### Trajectory Outputs          {#trajectory-outputs}
+Time `t` given in MPCD units. Coordinates `QX`,`QY`,`QZ` given in MPCD units relative to corner origin. 
+
 | Input tag          | Output file              | Description                                                                              | Outputs                        | Column Headers                                                    |
 |--------------------|--------------------------|------------------------------------------------------------------------------------------|--------------------------------|-------------------------------------------------------------------|
 | `trajOut`          | `detailedSP0.dat`        | Detailed particle trajectories for every particle of species type given by `trajSpecOut` | Time                           | `t`                                                               |
@@ -55,6 +57,7 @@ All outputs are written to `.dat` files, which are uncompressed text files.
 |                    |                          |                                                                                          | Species velocities             | `UX`,`UY`,`UZ`                                                    |
 
 ### Field Outputs           {#field-outputs}
+Time `t` given in MPCD units. Coordinates `QX`,`QY`,`QZ` given in MPCD index (edge of the MPCD cell; not centre) relative to corner origin. 
 
 | Input tag          | Output file              | Description                                                                              | Outputs                        | Column Headers                                                    |
 |--------------------|--------------------------|------------------------------------------------------------------------------------------|--------------------------------|-------------------------------------------------------------------|
@@ -117,33 +120,34 @@ All outputs are written to `.dat` files, which are uncompressed text files.
 |                    |                          |                                                                                          | Enstrophy                      | `Omega`                                                           |
 
 ### Histograms          {#histograms}
-Non-normalized. Time given in MPCD units. Bin value is value at *start* of bin. The range is set by the instantaneous minimum and maximum and so varies. 
+Non-normalized (not a probability distribution). Time `t` given in MPCD units. Bin value is value at *start* of bin. The range is set by the instantaneous minimum and maximum and so varies. 
 
 | Input tag      | Output file         | Description                                                             | Outputs                    | Column Headers  |
 |----------------|---------------------|-------------------------------------------------------------------------|----------------------------|-----------------|
-| `histVelOut`   | `histVel.dat`       | Velocity probability distribution in x, y, and z directions             | Time                       | `t`             |
+| `histVelOut`   | `histVel.dat`       | Velocity histogram in x, y, and z directions             | Time                       | `t`             |
 |                |                     |                                                                         | Bin velocity               | `V`             |
-|                |                     |                                                                         | Bin probability            | `PX`,`PY`,`PZ`  |
-| `histSpeedOut` | `distSpeed.dat`     | Speed probability distribution                                          | Time                       | `t`             |
+|                |                     |                                                                         | Bin count            | `PX`,`PY`,`PZ`  |
+| `histSpeedOut` | `distSpeed.dat`     | Speed histogram                                          | Time                       | `t`             |
 |                |                     |                                                                         | Bin speeds                 | \|`V`\| |
-|                |                     |                                                                         | Bin probability            | `P`             |
-| `histVortOut`  | `distVort.dat`      | Vorticity probability distribution in x, y, and z directions            | Time                       | `t`             |
+|                |                     |                                                                         | Bin count            | `P`             |
+| `histVortOut`  | `distVort.dat`      | Vorticity histogram in x, y, and z directions            | Time                       | `t`             |
 |                |                     |                                                                         | Bin vorticity              | `W`             |
-|                |                     |                                                                         | Bin probability            | `PX`,`PY`,`PZ`  |
-| `histEnsOut`   | `distEnstrophy.dat` | Enstrophy probability distribution                                      | Time                       | `t`             |
+|                |                     |                                                                         | Bin count            | `PX`,`PY`,`PZ`  |
+| `histEnsOut`   | `distEnstrophy.dat` | Enstrophy histogram                                      | Time                       | `t`             |
 |                |                     |                                                                         | Bin enstrophy              | \|`w`\| |
-|                |                     |                                                                         | Bin probability            | `P`             |
-| `histDirOut`   | `distDir.dat`       | Director orientation probability distribution in x, y, and z directions | Time                       | `t`             |
+|                |                     |                                                                         | Bin count            | `P`             |
+| `histDirOut`   | `distDir.dat`       | Director orientation histogram in x, y, and z directions | Time                       | `t`             |
 |                |                     |                                                                         | Bin orientation            | `n`             |
-|                |                     |                                                                         | Bin probability            | `PX`,`PY`,`PZ`  |
-| `histSOut`     | `distS.dat`         | Scalar order parameter probability distribution                         | Time                       | `t`             |
+|                |                     |                                                                         | Bin count            | `PX`,`PY`,`PZ`  |
+| `histSOut`     | `distS.dat`         | Scalar order parameter histogram                         | Time                       | `t`             |
 |                |                     |                                                                         | Bin scalar order parameter | `S`             |
-|                |                     |                                                                         | Bin probability            | `P`             |
-| `histNOut`     | `distN.dat`         | Number per cell probability distribution                                | Time                       | `t`             |
+|                |                     |                                                                         | Bin count            | `P`             |
+| `histNOut`     | `distN.dat`         | Number per cell histogram                                | Time                       | `t`             |
 |                |                     |                                                                         | Bin density                | `stdN`          |
-|                |                     |                                                                         | Bin probability            | `P`             |
+|                |                     |                                                                         | Bin count            | `P`             |
 
 ### Correlation Functions           {#correlation-functions}
+Time `t` given in MPCD units. Separation `dr` given in MPCD units. 
 
 | Input tag      | Output file          | Description                                              | Outputs           | Column Headers |
 |----------------|----------------------|----------------------------------------------------------|-------------------|----------------|
@@ -164,6 +168,7 @@ Non-normalized. Time given in MPCD units. Bin value is value at *start* of bin. 
 |                |                      |                                                          | Correlation value | `C`            |
 
 ### Swimmers            {#swimmers}
+For each time step, get a list of data for all swimmers. Time `t` given in MPCD units. Separation `dr` given in MPCD units. Coordinates given in MPCD units relative to corner origin. 
 
 | Input tag                 | Output file       | Description                                                               | Outputs                    | Column Headers    |
 |---------------------------|-------------------|---------------------------------------------------------------------------|----------------------------|-------------------|
