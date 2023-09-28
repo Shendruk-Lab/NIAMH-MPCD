@@ -31,6 +31,7 @@ All outputs are written to `.dat` files, which are uncompressed text files.
 | `checkpointOut` | `checkpoint.dat` | Simulation checkpointing. Provides data for re-populating the system and restarting another simulation from this point. Can be set to be on a physical timer, rather than based on time-step, using an override. |
 
 ### Scalar Outputs          {#scalar-outputs}
+Time `t` given in MPCD units. 
 
 | Input tag        | Output file          | Description                                                             | Outputs                       | Column Headers   |
 |------------------|----------------------|-------------------------------------------------------------------------|-------------------------------|------------------|
