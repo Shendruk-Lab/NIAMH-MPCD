@@ -2002,13 +2002,15 @@ void flowout( FILE *fout,cell ***CL,int interval, double t) {
 	// for( i=0; i<_3D; i++ ) av[i] = 0.0;
 	double dint = (double)interval;
 
+	for( i=0; i<_3D; i++ ) av[i] = 0.0;			//In some compilers, this routine might write nonsense in the z-component in 2D otherwise
 	for( i=0; i<XYZ[0]; i++ ) for( j=0; j<XYZ[1]; j++ ) for( k=0; k<XYZ[2]; k++ ) {
 	// for( i=0; i<XYZ_P1[0]; i++ ) for( j=0; j<XYZ_P1[1]; j++ ) for( k=0; k<XYZ_P1[2]; k++ ) {
 		for( h=0; h<DIM; h++ ) av[h] = CL[i][j][k].FLOW[h]/dint;		//Normalize the sum to get the average
 		fprintf( fout,"%12.5e\t", t); // print time
 		fprintf( fout, "%5d\t%5d\t%5d\t",i,j,k );
 		fprintf( fout, "%12.5e\t%12.5e\t%12.5e\n",av[0],av[1],av[2] );
-		for( h=0; h<DIM; h++ ) CL[i][j][k].FLOW[h] = 0.0;		//Reset sum
+		// for( h=0; h<DIM; h++ ) CL[i][j][k].FLOW[h] = 0.0;		//Reset sum
+		for( h=0; h<_3D; h++ ) CL[i][j][k].FLOW[h] = 0.0;		//Reset sum; no harm in doing it in 3D. Might store nonsense in the z-component in 2D otherwise
 	}
 	#ifdef FFLSH
 		fflush(fout);
@@ -2034,6 +2036,7 @@ void velout( FILE *fout,cell ***CL, double t) {
     int h,i,j,k;
     double vel[_3D];
 
+	for( i=0; i<_3D; i++ ) vel[i] = 0.0;			//In some compilers, this routine might write nonsense in the z-component in 2D otherwise
     for( i=0; i<XYZ[0]; i++ ) for( j=0; j<XYZ[1]; j++ ) for( k=0; k<XYZ[2]; k++ ) {
         for( h=0; h<DIM; h++ ) vel[h] = CL[i][j][k].VCM[h];
         fprintf( fout,"%12.5e\t", t); // print time

@@ -9,6 +9,8 @@
 from pylab import *
 from subprocess import call
 import sys
+import os
+import json
 
 from defectHandler import getDefectData
 
@@ -19,52 +21,33 @@ from defectHandler import getDefectData
 ###########################################################
 ### Read arguments
 ###########################################################
-FS =25
-TLS = 20		# Tick label size
-xyzSize=zeros( 3,dtype=int )
 print( "Arguments:" )
 for arg in sys.argv:
     print( "\t" + arg )
-dataName = sys.argv[1]		# path to the data (flowfield.dat)
-xyzSize[0] = int(sys.argv[2])	# System size
-xyzSize[1] = int(sys.argv[3])	# System size
-xyzSize[2] = int(sys.argv[4])	# System size
-start = int(sys.argv[5])		# Average after this number
-finish = int(sys.argv[6])		# Average before this number
-qx = int(sys.argv[7])		# Only show every qx arrow in x
-qy = int(sys.argv[8])		# Only show every qy arrow in y
-avdim = sys.argv[9]			# Dimension to average over
-myAspect=sys.argv[10]		#'auto' - reshapes into square graph or 'equal' keeps whatever aspect ratio the true values
-keepFrames=int(sys.argv[11])	#0=don't keep (delete) frames; 1=keep frames
-savePDF=int(sys.argv[12]) # 1 for saving transparent pdfs (for papers), 0 for none
-defectData = ""
+dataName = sys.argv[1]		  # path to the data (flowfield.dat)
+inputName = sys.argv[2]			# Input json file to read inputs
+start = int(sys.argv[3])		# Average after this number
+finish = int(sys.argv[4])		# Average before this number
+qx = int(sys.argv[5])		    # Only show every qx arrow in x
+qy = int(sys.argv[6])		    # Only show every qy arrow in y
+avdim = sys.argv[7]			    # Dimension to average over
+myAspect=sys.argv[8]		    # 'auto' - reshapes into square graph or 'equal' keeps whatever aspect ratio the true values
+keepFrames=int(sys.argv[9])	# 0=don't keep (delete) frames; 1=keep frames
+savePDF=int(sys.argv[10])   # 1 for saving transparent pdfs (for papers), 0 for none
+defectData = ""             # If you are simulating a nematic and have defect positions, you can plot them over the field
 try:
-	defectData = sys.argv[13]		# Name of the defect data ("" if no defect data)
+	defectData = sys.argv[11]	# Name of the defect data ("" if no defect data)
 except:
-	print("No defect data found")
-
-# defect handling if needed
-LOADDEFECTS = False
-defects = []
-if defectData != "":
-	print("Loading defects for rendering")
-	LOADDEFECTS = True
-
-	defContainer = getDefectData(defectData, np.array([xyzSize[0], xyzSize[1], xyzSize[2]]))
-	for defList in defContainer:
-		defects.append(defList.defectList)
-	print("Finished loading defects")
+	print("\tNo defect data found")
 
 ###########################################################
 ### Format and style
 ###########################################################
-# Use our custom style
+# Use our custom style and colours
 plt.style.use('shendrukGroupStyle')
-# Use our custom colours
 import shendrukGroupFormat as ed
 # Colour map to use
 myMap=ed.deepsea
-
 #Animation stuff
 bitrate=5000
 framerate=12		#Number of frames per second in the output video
@@ -90,6 +73,29 @@ else:
   print( "avdim must be 'x', 'y' or 'z' - not %s"%avdim )
   exit()
 
+###########################################################
+### Read json
+###########################################################
+if not os.path.isfile(inputName):
+	print("%s not found."%inputName)
+	exit()
+with open(inputName, 'r') as f:
+  input = json.load(f)
+xyzSize=array([30,30,1])
+dim=2
+if "domain" in input:
+	xyzSize[0]=input['domain'][0]
+	dim=1
+	if(len(input['domain'])>1):
+		xyzSize[1]=input['domain'][1]
+		dim=2
+	else:
+		xyzSize[1]=1
+	if(len(input['domain'])>2):
+		xyzSize[2]=input['domain'][2]
+		dim=3
+	else:
+		xyzSize[2]=1
 # Data
 XYZ = zeros(shape=(3,xyzSize[0],xyzSize[1],xyzSize[2]),dtype=float)
 VEL = zeros(shape=(3,xyzSize[0],xyzSize[1],xyzSize[2]),dtype=float)
@@ -100,9 +106,26 @@ currentMAG = zeros(shape=(xyzSize[d1],xyzSize[d2]),dtype=float)
 XY = zeros(shape=(2,xyzSize[d1],xyzSize[d2]),dtype=float)
 
 ###########################################################
+### defect handling if needed
+###########################################################
+LOADDEFECTS = False
+defects = []
+if defectData != "":
+	print("Loading defects for rendering")
+	LOADDEFECTS = True
+
+	defContainer = getDefectData(defectData, np.array([xyzSize[0], xyzSize[1], xyzSize[2]]))
+	for defList in defContainer:
+		defects.append(defList.defectList)
+	print("Finished loading defects")
+
+###########################################################
 ### Read the data for min/max
 ###########################################################
-print( 'Read file for min/max ...' )
+print( 'Reading file for min/max ...' )
+if not os.path.isfile(dataName):
+	print("%s not found."%dataName)
+	exit()
 file = dataName
 infile = open(file,"r")
 minV=99999999999999.0
@@ -111,7 +134,6 @@ maxV=0.0
 ###########################################################
 ### Read the data for animation
 ###########################################################
-
 ### Setup the animation
 # Make labels
 if avdim=='x':
@@ -123,16 +145,11 @@ elif avdim=='y':
 elif avdim=='z':
     labX='x'
     labY='y'
-
-print( 'Read file for figures ...' )
 infile = open(file,"r")
-print( '\tToss header ...' )
+# Toss header
 for i in range(13):
-  #toss header
   line = infile.readline()
-  #print line
 
-print( '\tRead data ...' )
 i=0
 j=0
 n=-1
@@ -158,14 +175,11 @@ while infile:
 
   if i==xyzSize[0]*xyzSize[1]*xyzSize[2]:
     j=j+1
-    print( 'Work %d'%j )
-
     if j>finish:
       break
     if j<start or j>finish:
-      print( 'Toss %d'%j )
+      pass
     else:
-      #print( 'Work %d'%j )
       #Sum
       if avdim=='x':
         for x in range(xyzSize[0]):
@@ -209,10 +223,9 @@ while infile:
           for y in range(xyzSize[1]):
             for i in range(3):
               currentMEAN[i][x][y]/=xyzSize[2]
-        for x in range(xyzSize[d1]):
-          for y in range(xyzSize[d2]):
-            currentMAG[x][y]=sqrt( currentMEAN[0][x][y]**2+currentMEAN[1][x][y]**2+currentMEAN[2][x][y]**2 )
-
+      for x in range(xyzSize[d1]):
+        for y in range(xyzSize[d2]):
+          currentMAG[x][y]=sqrt( currentMEAN[0][x][y]**2+currentMEAN[1][x][y]**2+currentMEAN[2][x][y]**2 )
         for x in range(xyzSize[d1]):
           for y in range(xyzSize[d2]):
             if currentMAG[x][y]>maxV:
@@ -244,8 +257,6 @@ while infile:
     # Save frame
     n=n+1
     fig1, axes = plt.subplots(nrows=1, ncols=1)
-    #plt.cla()
-
     if j==1:
       #Setup the density image
       plt.subplot(1,1,1)
@@ -254,9 +265,9 @@ while infile:
       quiv = quiver( XY[0][::qx, ::qy], XY[1][::qx, ::qy], currentMEAN[d1][::qx, ::qy], currentMEAN[d2][::qx, ::qy] )
       velImage = imshow(currentMAG.T,cmap=myMap,origin='lower',aspect=myAspect,vmin=minV,vmax=maxV)
       velCB = colorbar()
-      velCB.ax.set_ylabel(r'Velocity, $\left|\vec{v}\right|$', fontsize = FS)
-      xlabel(r'$%s$'%labX, fontsize = FS)
-      ylabel(r'$%s$'%labY, fontsize = FS)
+      velCB.ax.set_ylabel(r'Velocity, $\left|\vec{v}\right|$')
+      xlabel(r'$%s$'%labX)
+      ylabel(r'$%s$'%labY)
     else:
       #Velocity image
       plt.subplot(1,1,1)
@@ -264,20 +275,18 @@ while infile:
       quiv = quiver( XY[0][::qx, ::qy], XY[1][::qx, ::qy], currentMEAN[d1][::qx, ::qy], currentMEAN[d2][::qx, ::qy] )
       velImage = imshow(currentMAG.T,cmap=myMap,origin='lower',aspect=myAspect,vmin=minV,vmax=maxV)
       velCB = colorbar()
-      velCB.ax.set_ylabel(r'Velocity, $\left|\vec{v}\right|$', fontsize = FS)
+      velCB.ax.set_ylabel(r'Velocity, $\left|\vec{v}\right|$')
       fig1.canvas.draw()
-      xlabel(r'$%s$'%labX, fontsize = FS)
-      ylabel(r'$%s$'%labY, fontsize = FS)
-    
+      xlabel(r'$%s$'%labX)
+      ylabel(r'$%s$'%labY)    
     plt.axis(xmax=xyzSize[d1], xmin=0, ymax=xyzSize[d2], ymin=0)
 
     # load defects and draw them as necessary
     # FIXME: only works for 2d for now, doesnt take into account d1 or d2
     if LOADDEFECTS and (j < len(defects)):
-      print(f"\tDrawing defects {j}/{len(defects)-1}")
+      print(f"Drawing defects {j}/{len(defects)-1}")
       for defect in defects[j-1]: # j is not 0 indexed reeeeee
         defect.drawDefect(0.5*(qx+qy), 2)
-
     name='frame%04d.png'%(n)
     namepdf='frame%04d.pdf'%(n)
 
@@ -299,7 +308,7 @@ infile.close()
 ### Average the data
 ###########################################################
 #This x and y aren't necessarily the actual x and y
-print( "Average data over %d instances ..."%(j-start) )
+print( "Averaging data over %d instances ..."%(j-start) )
 norm=float(xyzSize[dim])
 for x in range(xyzSize[d1]):
   for y in range(xyzSize[d2]):
@@ -309,12 +318,10 @@ for x in range(xyzSize[d1]):
     MAG[x][y]=sqrt( MEAN[0][x][y]**2+MEAN[1][x][y]**2+MEAN[2][x][y]**2 )
 
 ###########################################################
-### Plot data
+### Visualize data
 ###########################################################
-print( "Plot data ..." )
-
 # Animate
-print( "\tAnimating ..." )
+print( "Animating ..." )
 name='2Dvelocity_animation%s'%suffix
 myCommand="rm %s"%name
 call(myCommand,shell=True)
@@ -324,30 +331,28 @@ if not keepFrames:
     myCommand="rm frame*.png"
     call(myCommand,shell=True)
 
-print( "\tPlotting ..." )
+print( "Plotting ..." )
 fig, ax = plt.subplots()
 imshow(MAG.T,cmap=myMap,origin='lower',aspect='auto')
 cb=colorbar()
-cb.ax.set_ylabel(r'$\left|\vec{u}\right|$', fontsize = FS)
+cb.ax.set_ylabel(r'$\left|\vec{u}\right|$')
 quiver( XY[0][::qx, ::qy], XY[1][::qx, ::qy], MEAN[d1][::qx, ::qy], MEAN[d2][::qx, ::qy] )
-xlabel(r'$%s$'%labX, fontsize = FS)
-ylabel(r'$%s$'%labY, fontsize = FS)
-ax.tick_params(axis='both', which='major', labelsize=TLS)
+xlabel(r'$%s$'%labX)
+ylabel(r'$%s$'%labY)
+ax.tick_params(axis='both', which='major')
 plt.axis(xmax=xyzSize[d1], xmin=0, ymax=xyzSize[d2], ymin=0)
 name='2D_av_%s.pdf'%avdim
-print( "\t%s"%name )
 savefig( name )
 
 fig = plt.figure()
 ax = fig.add_subplot(111, projection='3d')
 surf = ax.plot_surface(XY[0],XY[1],MAG, rstride=1,cstride=1,cmap=myMap,linewidth=0,antialiased=False,alpha=0.6)
 ax.plot_wireframe(XY[0],XY[1],MAG, rstride=1,cstride=1,linewidth=0.25,color='k',alpha=1.0)
-ax.set_xlabel(r'$%s$'%labX, fontsize = FS)
-ax.set_ylabel(r'$%s$'%labY, fontsize = FS)
-ax.set_zlabel(r'$\left|\vec{u}\right|$', fontsize = FS)
-ax.tick_params(axis='both', which='major', labelsize=TLS)
+ax.set_xlabel(r'$%s$'%labX)
+ax.set_ylabel(r'$%s$'%labY)
+ax.set_zlabel(r'$\left|\vec{u}\right|$')
+ax.tick_params(axis='both', which='major')
 name='2Dcontour_av_%s.pdf'%avdim
-print( "\t%s"%name )
 savefig( name )
 
 #plt.show()
