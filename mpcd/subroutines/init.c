@@ -940,18 +940,6 @@ double mdensity( bc WALL[],double MASS ) {
 /* ****************************************** */
 /* ****************************************** */
 
-///
-/// @brief Function that zeros any vector.
-///
-/// This function sets the component of the receiving vector to 0.
-///
-/// @param VEC The vector whose components will be zeroed.
-/// @param dimension The dimension of VEC.
-///
-void zerovec( double VEC[],int dimension ) {
-	int i;
-	for( i=0; i<dimension; i++ ) VEC[i]=0.0;
-}
 
 ///
 /// @brief Function that zeros everything in all the particles.
@@ -961,15 +949,13 @@ void zerovec( double VEC[],int dimension ) {
 /// @param pp Return pointer to the first MPCD particle in the array.
 ///
 void zeroparticles( particleMPC *pp ) {
-	int i,d;
+	int i;
 
 	for( i=0; i<GPOP; i++ ) {
-		for( d=0; d<_3D; d++ ) {
-			(pp+i)->Q[d]=0.0;
-			(pp+i)->V[d]=0.0;
-			(pp+i)->U[d]=0.0;
-			(pp+i)->T[d]=0.0;
-		}
+        zerovec( (pp+i)->Q, _3D );
+        zerovec( (pp+i)->V, _3D );
+        zerovec( (pp+i)->U, _3D );
+        zerovec( (pp+i)->T, _3D );
 	}
 }
 
@@ -984,10 +970,9 @@ void zeroparticles( particleMPC *pp ) {
 /// @param AVS Return pointer to the average scalar order parameter.
 ///
 void zerocnt( double *KBTNOW,double AVNOW[],double *AVS ) {
-	int i;
 	*KBTNOW = 0.;
 	*AVS = 0.;
-	for( i=0; i<_3D; i++ ) AVNOW[i] = 0.;
+    zerovec( AVNOW, _3D );
 }
 
 ///
@@ -998,8 +983,10 @@ void zerocnt( double *KBTNOW,double AVNOW[],double *AVS ) {
 /// @param HIST Vector histogram being zeroed.
 ///
 void zeroHISTVEC( int HIST[_3D][BINS] ) {
-	int i,j;
-	for( j=0; j<BINS; j++ ) for( i=0; i<_3D; i++ ) HIST[i][j] = 0;
+    int i;
+    for (i=0; i < _3D; i++) {
+        zerovec( (double *) HIST[i], BINS);
+    }
 }
 
 ///
@@ -1010,8 +997,7 @@ void zeroHISTVEC( int HIST[_3D][BINS] ) {
 /// @param HIST Scalar histogram being zeroed.
 ///
 void zeroHISTSCALAR( int HIST[BINS] ) {
-	int j;
-	for( j=0; j<BINS; j++ ) HIST[j] = 0;
+    zerovec( (double *) HIST, BINS);
 }
 
 ///
@@ -1026,7 +1012,7 @@ void zeroHISTSCALAR( int HIST[BINS] ) {
 /// @param CL Return pointer to the cell list being zeroed.
 ///
 void zerocell( cell ***CL ) {
-	int i,j,k,l,m;
+	int i,j,k,l;
 	for( i=0; i<XYZ_P1[0]; i++ ) for( j=0; j<XYZ_P1[1]; j++ ) for( k=0; k<XYZ_P1[2]; k++ ) {
 		CL[i][j][k].POP = 0;
 		CL[i][j][k].POPSRD = 0;
@@ -1034,18 +1020,19 @@ void zerocell( cell ***CL ) {
 		CL[i][j][k].POPMD = 0;
 		CL[i][j][k].MASS = 0.0;
 		CL[i][j][k].S = 0.0;
-		for( l=0; l<_3D; l++ ) {
-			CL[i][j][k].CM[l] = 0.0;
-			CL[i][j][k].VCM[l] = 0.0;
-			CL[i][j][k].FLOW[l] = 0.0;
-			CL[i][j][k].DIR[l] = 0.0;
-			for( m=0; m<_3D; m++ ) {
-				CL[i][j][k].E[l][m] = 0.0;
-				CL[i][j][k].I[l][m] = 0.0;
-				CL[i][j][k].Ps[l][m] = 0.0;
-				CL[i][j][k].Pc[l][m] = 0.0;
-			}
-		}
+
+        zerovec( CL[i][j][k].CM, _3D );
+        zerovec( CL[i][j][k].VCM, _3D );
+        zerovec( CL[i][j][k].FLOW, _3D );
+        zerovec( CL[i][j][k].DIR, _3D );
+
+        for (l=0; l<_3D; l++) { // zero matrices
+            zerovec( CL[i][j][k].E[l], _3D );
+            zerovec( CL[i][j][k].I[l], _3D );
+            zerovec( CL[i][j][k].Ps[l], _3D );
+            zerovec( CL[i][j][k].Pc[l], _3D );
+        }
+
 		//The list doesn't have anyone in it yet so it doesn't point anywhere
 		CL[i][j][k].pp = NULL;
 		CL[i][j][k].MDpp = NULL;
@@ -1061,9 +1048,10 @@ void zerocell( cell ***CL ) {
 /// @param CL Return pointer to the cell list whose collisional pressure term is being zeroed.
 ///
 void zeroPressureColl( cell *CL ) {
-
-	int l,m;
-	for( l=0; l<DIM; l++ ) for( m=0; m<DIM; m++ ) CL->Pc[l][m] = 0.0;
+    int i;
+    for (i=0; i<DIM; i++) {
+        zerovec( CL->Pc[i], DIM );
+    }
 }
 
 /* ****************************************** */
@@ -1363,7 +1351,7 @@ int checkplaceMPC( int i,particleMPC *pp,spec SP[],bc WALL[] ) {
 		for( k=0; k<_3D; k++ ) shift[k] = 0.;
 		shiftBC( shift,&WALL[j],(pp+i) );
 		rotateBC( &WALL[j],(pp+i),0 );
-		WALL[j].W = calcW( WALL[j],*(pp+i) );
+        WALL[j].W = calcW( WALL[j],*(pp+i) );
 		rotatebackBC( &WALL[j],(pp+i),0 );
 		shiftbackBC( shift,&WALL[j] );
 		//If W<=0 then the particleMPC is inside an obstacle and must be replaced
@@ -1425,19 +1413,19 @@ void replacePos_WithCheck( particleMPC *pp,bc WALL[] ) {
 /// @param WALL Array of boundary conditions (obstacles).
 /// @param simMD A pointer to the MD simulation.
 /// @param KBT Temperature.
-/// @param MDmode Integer describing the MD simulation mode.
+/// @param MD_mode Integer describing the MD simulation mode.
 /// @see checkplaceMPC()
 /// @return If the particle had to beshifted, it returns IN-1, so the check can be performed again.
 ///         If its not, it returns IN, so the next particle can be checked.
 ///
-int checkplace( int IN,particleMPC *pp,spec SP[],bc WALL[],simptr simMD,double KBT,int MDmode ) {
+int checkplace( int IN,particleMPC *pp,spec SP[],bc WALL[],simptr simMD,double KBT,int MD_mode ) {
 	particleMD *atom;
 	double d[_3D];
 	int i=IN,j;
 
 	i=checkplaceMPC( i,pp,SP,WALL );
 
-	if( MDmode == MPCinMD ) {
+	if(MD_mode == MPCinMD ) {
 		atom = simMD->atom.items;
 		for( j=0; j<simMD->atom.n; j++ ) {
 			d[0] = (pp+i)->Q[0] - (atom+j)->rx;
@@ -1483,14 +1471,14 @@ int checkplace( int IN,particleMPC *pp,spec SP[],bc WALL[],simptr simMD,double K
 /// @param AVVEL Return pointer to average velocity.
 /// @param WALL Array of all boundary conditions (obstacles).
 /// @param simMD A pointer to the MD simulation.
-/// @param MDmode Integer describing the MD simulation mode.
+/// @param MD_mode Integer describing the MD simulation mode.
 /// @param LC Integer determining if the species is isotropic (i.e., not a liquid crystal). 0 means isotropic.
 /// @see place()
 /// @see push()
 /// @see return()
 /// @see checkplace()
 ///
-void setcoord( char dir[],spec SP[],particleMPC *pp,double KBT,double AVVEL[],bc WALL[],simptr simMD,int MDmode,int LC ) {
+void setcoord(char dir[], spec SP[], particleMPC *pp, double KBT, double AVVEL[], bc WALL[], simptr simMD, int MD_mode, int LC ) {
 	int i,j,k=0;
 	FILE *fin[NSPECI];
 	char fileprefix[] = "placeSP";
@@ -1524,7 +1512,7 @@ void setcoord( char dir[],spec SP[],particleMPC *pp,double KBT,double AVVEL[],bc
 	}
 	for( j=0; j<DIM; j++ ) AVVEL[j] /= (double)GPOP;
 	//Check particleMPC coordinates
-	for( i=0; i<GPOP; i++ ) i = checkplace( i,pp,SP,WALL,simMD,KBT,MDmode );
+	for( i=0; i<GPOP; i++ ) i = checkplace(i, pp, SP, WALL, simMD, KBT, MD_mode );
 	//They will all need to stream
 	for( i=0; i<GPOP; i++ ) (pp+i)->S_flag = STREAM;
 
@@ -1946,14 +1934,14 @@ void initOutput( char op[],outputFlagsList *outFlag,outputFilesList *outFile,inp
 /// @param AVV Return pointer to past average flow velocity.
 /// @param avDIR Return pointer to average director.
 /// @param outFlags List of output flags.
-/// @param MDmode Integer specifying MD mode.
+/// @param MD_mode Integer specifying MD mode.
 /// @param fsynopsis Synopsis file.
 /// @param ip Path to input directory.
 /// @see setcoord()
 /// @see initvar()
 /// @see zerocnt()
 ///
-void initializeSIM( cell ***CL,particleMPC *SRDparticles,spec SP[],bc WALL[],simptr simMD,specSwimmer *specS,swimmer *swimmers,int argc, char* argv[],inputList *in,time_t *to,clock_t *co,int *runtime,int *warmtime,double *AVVEL,kinTheory *theory,double *KBTNOW,double *AVS,double *S4,double *stdN,double AVNOW[_3D],double AVV[_3D],double avDIR[_3D], outputFlagsList outFlags,int MDmode,FILE *fsynopsis,char ip[] ) {
+void initializeSIM(cell ***CL, particleMPC *SRDparticles, spec SP[], bc WALL[], simptr simMD, specSwimmer *specS, swimmer *swimmers, int argc, char* argv[], inputList *in, time_t *to, clock_t *co, int *runtime, int *warmtime, double *AVVEL, kinTheory *theory, double *KBTNOW, double *AVS, double *S4, double *stdN, double AVNOW[_3D], double AVV[_3D], double avDIR[_3D], outputFlagsList outFlags, int MD_mode, FILE *fsynopsis, char ip[] ) {
 	int i,j;
 	#ifdef DBG
 		if( DBUG >= DBGINIT ) printf("\tInitialize Parameters\n");
@@ -1992,7 +1980,7 @@ void initializeSIM( cell ***CL,particleMPC *SRDparticles,spec SP[],bc WALL[],sim
 	#ifdef DBG
 		if( DBUG >= DBGINIT ) printf( "\tPlace MPCD particle\n" );
 	#endif
-	setcoord( ip,SP,SRDparticles,in->KBT,AVV,WALL,simMD,MDmode,in->LC );
+	setcoord(ip, SP, SRDparticles, in->KBT, AVV, WALL, simMD, MD_mode, in->LC );
 	//Intialize positions and orientations of swimmers
 	if( NS>0 ) {
 		#ifdef DBG
@@ -2014,7 +2002,7 @@ void initializeSIM( cell ***CL,particleMPC *SRDparticles,spec SP[],bc WALL[],sim
 	binin( SRDparticles,CL );
 	bininSwimmers( *specS,swimmers,CL );
 	if(outFlags.SYNOUT == OUT) fprintf(fsynopsis,"\nMPCD particles binned for first time.\n" );
-	if( MDmode ) bininMD( simMD,CL );
+	if( MD_mode ) bininMD(simMD, CL );
 	localPROP( CL,SP,*specS,in->RTECH,in->LC );
 	*S4=0.;
 	*stdN=0.;
@@ -2041,7 +2029,7 @@ void initializeSIM( cell ***CL,particleMPC *SRDparticles,spec SP[],bc WALL[],sim
 		}
 	#endif
 	//Do the Galilean transformation of the system to its rest frame i.e. remove system's net momentum
-	if( in->RFRAME ) galileantrans( SRDparticles,WALL,simMD,SP,in->KBT,AVV,GPOP,NBC,MDmode,DIM );
+	if( in->RFRAME ) galileantrans(SRDparticles, WALL, simMD, SP, in->KBT, AVV, GPOP, NBC, MD_mode, DIM );
 	//Now that the initial shift is done we use RFRAME to signal when it should happen periodically (with zeroNetMom)
 	//But don't want to do it if accelerating, duh
 	if( !(in->zeroNetMom) ) in->RFRAME = 0;
@@ -2078,15 +2066,15 @@ void initializeSIM( cell ***CL,particleMPC *SRDparticles,spec SP[],bc WALL[],sim
 /// @param specS Array of all species of swimmers.
 /// @param RTECH Integer specifying rotation technique.
 /// @param LC Integer specifying type of Liquid Crystal.
-/// @param MDmode Integer specifying type of MD simulation.
+/// @param MD_mode Integer specifying type of MD simulation.
 /// @param SYNOUT Integer specifying if a synopsis file is requires.
 /// @param fsynopsis Synopsis file.
 ///
-void initializeRecovery( cell ***CL,particleMPC *SRDparticles,spec SP[],specSwimmer specS, int RTECH,int LC,int MDmode,int SYNOUT,FILE *fsynopsis ) {
+void initializeRecovery(cell ***CL, particleMPC *SRDparticles, spec SP[], specSwimmer specS, int RTECH, int LC, int MD_mode, int SYNOUT, FILE *fsynopsis ) {
 	//int i;
 	if(SYNOUT == OUT) fprintf(fsynopsis,"\nSimulation recovered from checkpoint.\n" );
 	// MD isn't checkpointed so can't recover MD simulation
-	if( MDmode != noMD ) {
+	if(MD_mode != noMD ) {
 		printf("Error: Cannot recover MD simulation.\n");
 		exit(EXIT_FAILURE);
 	}

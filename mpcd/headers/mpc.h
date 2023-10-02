@@ -13,7 +13,7 @@
    MPC/SRD algorithm.
 */
 
-void timestep( cell ***CL,particleMPC *SRDparticles,spec SP[],bc WALL[],simptr simMD,specSwimmer *SS,swimmer swimmers[],double AVNOW[_3D],double AVV[_3D],double avDIR[_3D],inputList in,double *KBTNOW, double *AVS,int runtime,int MDmode,outputFlagsList outFlags,outputFilesList outFiles );
+void timestep(cell ***CL, particleMPC *SRDparticles, spec SP[], bc WALL[], simptr simMD, specSwimmer *SS, swimmer swimmers[], double AVNOW[_3D], double AVV[_3D], double avDIR[_3D], inputList in, double *KBTNOW, double *AVS, int runtime, int MD_mode, outputFlagsList outFlags, outputFilesList outFiles,int wmd );
 
 double trans( double t,double V,double QOLD );
 double acc( double t,double G,double VOLD );
@@ -31,7 +31,7 @@ void rewind_BC( bc *WALL,double time );
 void acc_BC( bc *WALL,double t,double GRAV[] );
 void acc_P( particleMPC *p,double t,double GRAV[] );
 void acc_all( particleMPC *pp,double t,double GRAV[] );
-void gridShift_all( double SHIFT[],int shiftBack,particleMPC *SRDparticles,bc WALL[],simptr simMD,swimmer swimmers[],int MDmode );
+void gridShift_all( double SHIFT[],int shiftBack,particleMPC *SRDparticles,bc WALL[],simptr simMD,swimmer swimmers[],int MD_mode );
 void rotate_CL( cell CL,spec *SP,double r0[],double n0[],double dw );
 
 void binin( particleMPC p[],cell ***CL );
@@ -59,15 +59,15 @@ void vicsekLangevinMPC( cell *CL,spec *SP,double KBT,double FRICCO,double Step,d
 void chateAndersenMPC( cell *CL,spec *SP,double KBT,double RELAX,double *CLQ,int outP );
 void chateLangevinMPC( cell *CL,spec *SP,double KBT,double FRICCO,double Step,double RELAX,double *CLQ,int outP );
 void dipoleAndersenMPC( cell *CL,spec *SP,double KBT,double RELAX,double *CLQ,int outP );
-void MPCcollision( cell *CL,spec *SP,specSwimmer SS,double KBT,int RTECH,double C,double S,double FRICCO,double TimeStep,int MDmode,int LC,double RELAX,double *CLQ,int outP );
+void MPCcollision(cell *CL, spec *SP, specSwimmer SS, double KBT, int RTECH, double C, double S, double FRICCO, double TimeStep, int MD_mode, int LC, double RELAX, double *CLQ, int outP );
 
-void incompColl( cell *CL,spec *SP,specSwimmer SS,int INCOMPmode,int MDmode,double *CLQ,int outP );
+void incompColl(cell *CL, spec *SP, specSwimmer SS, int INCOMPmode, int MD_mode, double *CLQ, int outP );
 void incompAddVirial( cell *CL,double virialCoB, double virialCoC, double virialCoD, spec *SP,specSwimmer SS );
 void incompSwap( cell *CL,spec *SP,specSwimmer SS );
 void incompSubtractDivergence( cell *CL,spec *SP,specSwimmer SS );
 
-void multiphaseColl( cell *CL,spec *SP,specSwimmer SS,int multiphaseMode,double KBT,int MDmode,double *CLQ,int outP );
-void multiphaseCollPoint( cell *CL,spec *SP,specSwimmer SS, double KBT,int MDmode,double *CLQ,int outP );
+void multiphaseColl(cell *CL, spec *SP, specSwimmer SS, int multiphaseMode, double KBT, int MD_mode, double *CLQ, int outP );
+void multiphaseCollPoint(cell *CL, spec *SP, specSwimmer SS, double KBT, int MD_mode, double *CLQ, int outP );
 
 void localVCM( double vcm[_3D],cell CL,spec *SP,specSwimmer specS );
 void localMPCVCM( double vcm[_3D],cell CL,spec *SP );

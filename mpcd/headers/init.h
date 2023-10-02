@@ -13,7 +13,6 @@
 /*
    These functions are used to initialize the program
 */
-void zerovec( double VEC[],int dimension );
 void zero_bc_var( double *tfrac,double *tdiff,int *g );
 void zerocnt( double *KBTNOW,double AVNOW[],double *AVS );
 void zeroHISTVEC( int HIST[_3D][BINS] );
@@ -27,7 +26,7 @@ void place( double Q[],int PL,FILE *fin );
 void replace( particleMPC *p );
 void push( double V[],double KBT,int PL,double MASS,FILE *fin );
 void orient( double U[],double Q[],int PL );
-void setcoord( char dir[],spec SP[],particleMPC *pp,double KBT,double VEL[],bc WALL[],simptr simMD,int MDmode,int LC );
+void setcoord(char dir[], spec SP[], particleMPC *pp, double KBT, double VEL[], bc WALL[], simptr simMD, int MD_mode, int LC );
 int checkplaceMPC( int IN,particleMPC *pp,spec SP[],bc WALL[] );
 void replacePos_WithCheck( particleMPC *pp,bc WALL[] );
 int checkplace( int IN,particleMPC *pp,spec SP[],bc WALL[],simptr simMD,int MDmode );
@@ -78,7 +77,7 @@ void openruntumble( FILE **f,char dir[],char fname[],char ext[] );
 void checkSim( FILE *fsynopsis,int SYNOUT,inputList in,spec *SP,bc *WALL,specSwimmer SS );
 
 void initOutput( char op[],outputFlagsList *outFlag,outputFilesList *outFile,inputList in,spec *SP, bc WALL[] );
-void initializeSIM( cell ***CL,particleMPC *SRDparticles,spec SP[],bc WALL[],simptr simMD,specSwimmer *specS,swimmer *swimmers,int argc, char* argv[],inputList *in,time_t *to,clock_t *co,int *runtime,int *warmtime,double *AVVEL,kinTheory *theory,double *KBTNOW,double *AVS,double *S4,double *stdN,double AVNOW[_3D],double AVV[_3D],double avDIR[_3D], outputFlagsList outFlags,int MDmode,FILE *fsynopsis,char ip[] );
-void initializeRecovery( cell ***CL, particleMPC *SRDparticles, spec SP[],specSwimmer specS,int RTECH,int LC,int MDmode,int SYNOUT,FILE *fsynopsis );
+void initializeSIM(cell ***CL, particleMPC *SRDparticles, spec SP[], bc WALL[], simptr simMD, specSwimmer *specS, swimmer *swimmers, int argc, char* argv[], inputList *in, time_t *to, clock_t *co, int *runtime, int *warmtime, double *AVVEL, kinTheory *theory, double *KBTNOW, double *AVS, double *S4, double *stdN, double AVNOW[_3D], double AVV[_3D], double avDIR[_3D], outputFlagsList outFlags, int MD_mode, FILE *fsynopsis, char ip[] );
+void initializeRecovery(cell ***CL, particleMPC *SRDparticles, spec SP[], specSwimmer specS, int RTECH, int LC, int MD_mode, int SYNOUT, FILE *fsynopsis );
 
 #endif

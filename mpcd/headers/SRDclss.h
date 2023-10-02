@@ -404,6 +404,7 @@ typedef struct inputList {
 	int noHI;					///< If noHI=1 remove hydrodynamic interactions by randomly scrambling of velocities.
 	int inCOMP;					///< If inCOMP=1 remove div(v) by ***ALGORITHM NOT CREATED YET. BUILD ON https://doi.org/10.1063/5.0037934?***.
 	int MULTIPHASE;				///< MULTIPHASE mode. If MULTIPHASE==0 then no interactions between particles of different species occurs.
+    int MFPLAYERH; 				///< Height above which MFP goes to 0. For simulating thin ordered films below disordered fluids. If 0, disable this functionality.
 } inputList;
 
 ///

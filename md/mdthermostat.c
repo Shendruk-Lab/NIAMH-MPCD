@@ -55,7 +55,14 @@ void ThermostatRescale (void *simvoid)
 
 	// compute rescaling factor from the target kinetic energy
 	kinETarget = 1.5 * kT;
-	vScale	   = sqrt (kinETarget / kinETherm);
+    // sanity check on if kinETherm is non-zero
+    // in reality, this shouldn't pose any problems as it will only be zero if a bitwise group check fails
+    // this method also does a bitwise group check later, so this should not cause any issues.
+    if (kinETherm > TOL) {
+        vScale	   = sqrt (kinETarget / kinETherm);
+    } else {
+        vScale = 1;
+    }
 
 	// rescale velocities
 	for (i=0; i<nAtom; i++) {

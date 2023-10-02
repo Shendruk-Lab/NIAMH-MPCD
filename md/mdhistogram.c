@@ -637,10 +637,14 @@ void HistogramSetBinSize (real *min, real *max, int *n, real *bin)
 	if (*n > 0) {
 		*bin = (*max - *min) / *n;
 	}
-	else {
+	else if (*bin > 0){
 		*n   = (int) ceil( (*max-*min) / *bin );
 		*max = *min + (*n)*(*bin);
 	}
+    else {
+        *n = 1;
+        *bin = (*max - *min);
+    }
 }
 
 

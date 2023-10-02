@@ -131,9 +131,11 @@ extern int snprintf (char *__restrict __s, size_t __maxlen, __const char *__rest
 #define	LAYOUT_PLATES				4
 #define	LAYOUT_CYLINDER			5
 // Tyler added the following
-#define	LAYOUT_ROD				6
+#define	LAYOUT_RODX				6
+// Zahra added the following
+#define	LAYOUT_RODY				7
 // Karolina added the following
-#define	LAYOUT_U				7
+#define	LAYOUT_U				8
 
 // atom types (index)
 #define TYPE_WALL				0
@@ -641,7 +643,7 @@ typedef struct simulation {		 		// a simulation
     paramptr	param;		 			///< pointer to a list of all parameters
     int			nParam;					///< number of simulation parameters
 	int			randomSeed;				///< Random number generator seed
-
+    int			warmupMD;				///< = 0 No, = 1 yes
     // program information
     pid_t		pid;			 		///< process id of the simulation
     real		version;		 		///< version of the program

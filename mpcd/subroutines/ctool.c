@@ -5,6 +5,7 @@
 
 # include<stdio.h>
 # include<math.h>
+# include <stdarg.h>
 
 /* ****************************************** */
 /* ****************************************** */
@@ -71,4 +72,40 @@ int isNaNs(double *x, int n) {
         }
     }
     return 0;
+}
+
+///
+/// @brief Function that zeros any vector.
+///
+/// This function sets the component of the receiving vector to 0.
+///
+/// @param VEC The vector whose components will be zeroed.
+/// @param dimension The dimension of VEC.
+///
+void zerovec( double VEC[],int dimension ) {
+    int i;
+    for( i=0; i<dimension; i++ ) VEC[i]=0.0;
+}
+
+///
+/// @brief Variadic version of zerovec
+///
+/// This function will set all vectors following the `dim` param to zero.
+/// Ex: `zerovec_v(3, _3D, vec1, vec2, vec3);` will set the 3 3D vectors to zero.
+///
+/// @param count The number of vectors you are zero'ing.
+/// @param dim The dimension of the vectors.
+/// @param ... All vectors to be zeroed, cast as `double *`, and seperated by commas.
+/// @see zerovec
+///
+void zerovec_v(int count, int dim, ...) {
+    int i;
+
+    va_list ap;
+    va_start(ap, dim);
+    for (i=0; i<count; i++) {
+        double *vec = va_arg(ap, double *);
+        zerovec(vec, dim);
+    }
+    va_end(ap);
 }

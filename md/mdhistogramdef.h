@@ -199,7 +199,10 @@
     {
 		h->min1 = 0;
 		h->max1 = 2*pi;
-		h->bin1 = 1/sim->caprIn;
+        if (sim->geometry == GEOM_CYLINDER) // fix for dumb FPE
+            h->bin1 = 1/sim->caprIn;
+        else
+		    h->bin1 = 0;
 
 		h->min2 = -sim->boxHalf[x_];
 		h->max2 = sim->boxHalf[x_];

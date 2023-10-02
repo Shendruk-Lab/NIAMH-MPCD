@@ -35,7 +35,7 @@ char* commentTags[] = {"c", "comment", "//", "#"};
 /// @param head A pointer to the head of the linked list. Expected to be a `NULL` pointer passed as `&head`.
 ///
 void initLL(linkedList **head){
-   *head = (linkedList*) malloc(sizeof(linkedList));
+   *head = (linkedList*) calloc(1, sizeof(linkedList));
    (*head)->next = NULL;
    dynAllocStr("", &((*head)->str)); // fill w blank string
 }
@@ -117,7 +117,7 @@ void pushLL(linkedList * head, const char* val){
    }
 
    // alloc and add to end
-   curr->next = (linkedList*) malloc(sizeof(linkedList));
+   curr->next = (linkedList*) calloc(1, sizeof(linkedList));
    dynAllocStr(val, &curr->next->str);
    curr->next->next = NULL;
 }

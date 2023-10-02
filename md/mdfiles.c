@@ -543,8 +543,13 @@ void TranslateMacros (char **stringptr)
 	ReplaceMacro (stringptr, macro, value);
 
 	// Tyler added the following
-	snprintf (macro, STRMAX, "LAYOUT_ROD");
-	snprintf (value, STRMAX, "%u", LAYOUT_ROD);
+	snprintf (macro, STRMAX, "LAYOUT_RODX");
+	snprintf (value, STRMAX, "%u", LAYOUT_RODX);
+	ReplaceMacro (stringptr, macro, value);
+
+	// Zahra added the following
+	snprintf (macro, STRMAX, "LAYOUT_RODY");
+	snprintf (value, STRMAX, "%u", LAYOUT_RODY);
 	ReplaceMacro (stringptr, macro, value);
 
 	// Karolina added the following

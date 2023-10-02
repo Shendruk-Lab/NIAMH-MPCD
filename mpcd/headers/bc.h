@@ -15,7 +15,7 @@
 
 void BC_BCcollision( bc *WALL1,bc *WALL2,double t_step,int *flag );
 void MPC_BCcollision( particleMPC *pp,int currentP,bc WALL[],spec *pSP,double KBT,double t_step,int LC,int *bcCNT,int *reCNT,int *rethermCNT, int flagMPConBC );
-void BC_MPCcollision(bc WALL[],int BCcurrent,particleMPC *pp,spec *pSP,double KBT,double GRAV[],double t_step,simptr simMD,int MDmode,int LC,int *bcCNT,int *reCNT,int *rethermCNT);
+void BC_MPCcollision(bc WALL[], int BCcurrent, particleMPC *pp, spec *pSP, double KBT, double GRAV[], double t_step, simptr simMD, int MD_mode, int LC, int *bcCNT, int *reCNT, int *rethermCNT);
 
 double calcW( bc WALL,particleMPC P );
 double calcWavyW( bc WALL,double POS[], double W );

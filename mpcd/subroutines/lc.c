@@ -17,6 +17,7 @@
 # include "../headers/bc.h"
 # include "../headers/lc.h"
 # include "../headers/mpc.h"
+# include "../headers/ctools.h"
 
 /* ****************************************** */
 /* ****************************************** */
@@ -966,8 +967,8 @@ double avOrderParam( particleMPC *p,int LC,double avDIR[] ) {
 
 	//Calculate the tensor order parameter
 	//Allocate memory for S and zero
-	S = malloc ( DIM * sizeof( *S ) );
-	for( i=0; i<DIM; i++ ) S[i] = malloc ( DIM * sizeof( *S[i] ) );
+	S = calloc ( DIM, sizeof( *S ) );
+	for( i=0; i<DIM; i++ ) S[i] = calloc ( DIM, sizeof( *S[i] ) );
 	for( j=0; j<DIM; j++ ) for( k=0; k<DIM; k++ ) S[j][k] = 0.0;
 	for( j=0; j<_3D; j++ ) U[j] = 0.0;
 
@@ -1194,8 +1195,8 @@ double binderCumulant( cell ***CL,int L,int LC ) {
 	avS4=0.;
 	fDIM = (double) DIM;
 	invDconst=1./(fDIM-1.);
-	S = malloc ( DIM * sizeof( *S ) );
-	for( d=0; d<DIM; d++ ) S[d] = malloc ( DIM * sizeof( *S[d] ) );
+	S = calloc ( DIM, sizeof( *S ) );
+	for( d=0; d<DIM; d++ ) S[d] = calloc ( DIM, sizeof( *S[d] ) );
 	for( i=0; i<DIM; i++ ) for( j=0; j<DIM; j++ ) S[i][j] = 0.0;
 
 	for( d=0; d<DIM; d++ ) nBins[d] = XYZ[d]/L;
@@ -1731,8 +1732,8 @@ void andersenROT_LC( cell *CL,spec *SP,specSwimmer SS,double KBT,double dt,doubl
 /// @param outP Parameter that determines if we should output pressure (0 not, 1 yes).
 ///
 void dipoleAndersenROT_LC( cell *CL,spec *SP,specSwimmer SS,double KBT,double RELAX,double dt,int RTECH,double *CLQ,int outP ) {
-	int i,j,id;
-	double M,MASS,ACT,pmOne,sigWidth,sigPos;
+	int i=0,j=0,id=0;
+	double M=0.0f,MASS=0.0f,ACT=0.0f,pmOne=0.0f,sigWidth=0.0f,sigPos=0.0f;
 	double RV[CL->POP][_3D];	//Random velocities
 	double RS[_3D];			//Sum of random velocities
 	double DV[CL->POP][_3D];	//Damping velocities
@@ -1747,8 +1748,8 @@ void dipoleAndersenROT_LC( cell *CL,spec *SP,specSwimmer SS,double KBT,double RE
 	double VCM[_3D];
 	double II[_3D][_3D];		//Inverse of moment of inertia tensor (3D)
 	double dp[CL->POP][DIM],relQP[CL->POP][DIM];		//For pressure
-	double pW;			//The particle's pW for passing the plane
-	bc PLANE;			//The plane that cuts the cell in half
+	double pW=0.0f;			//The particle's pW for passing the plane
+	bc PLANE = {0};			//The plane that cuts the cell in half
 	particleMPC *tmpc;		//Temporary particleMPC
 	particleMD *tmd;		//Temporary particleMD
 	smono *tsm;			//Temporary swimmer mnomer
@@ -1773,12 +1774,14 @@ void dipoleAndersenROT_LC( cell *CL,spec *SP,specSwimmer SS,double KBT,double RE
 	for( i=0;i<_3D;i++ ) for( j=0;j<_3D;j++ ) II[i][j]=0.;
 
 	//Define the plane normal to the centre of mass velocity at the centre of mass position
+    //Note: the zero'ing here should be unnecessary (PLANE is force zero'd on init), but keeping this here for now
 	for( i=0;i<4;i++ ) PLANE.P[i]=1;
 	PLANE.INV=0;
 	PLANE.ABS=0;
 	PLANE.R=0.0;
 	PLANE.ROTSYMM[0]=4.0;
 	PLANE.ROTSYMM[1]=4.0;
+    zerovec(PLANE.B, 3);
 	//Normal
 	for( i=0; i<DIM; i++ ) PLANE.A[i] = CL->DIR[i];
 	//Position

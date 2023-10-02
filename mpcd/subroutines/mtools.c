@@ -14,6 +14,7 @@
 # include "../headers/pout.h"
 # include "../headers/ctools.h"
 # include "../headers/bc.h"
+# include "../headers/init.h"
 
 /* ****************************************** */
 /* ****************************************** */
@@ -884,8 +885,8 @@ double determinant( double **a,int n ) {
 	else if( n==3 ) {
 		det = 0.;
 		for( j1=0; j1<n; j1++ ) {
-			m = malloc((n-1)*sizeof(double *));
-			for( i=0; i<n-1; i++ ) m[i] = malloc((n-1)*sizeof(double));
+			m = calloc((n-1), sizeof(double *));
+			for( i=0; i<n-1; i++ ) m[i] = calloc((n-1), sizeof(double));
 			for( i=0; i<n-1; i++ ) for( j=0; j<n-1; j++ ) m[i][j] =0.0;
 			for( i=1; i<n; i++ ) {
 				j2 = 0;
@@ -1685,9 +1686,14 @@ void rotationMatrix( double rotMat[][3],double vx[][3],double c,double s ) {
 /// @see findRotationMatrix()
 ///
 void findRotationMatrix( double rotMat[][3],double *original,double *final ) {
-	double a[_3D],b[_3D],v[_3D];
+	int i;
+    double a[_3D],b[_3D],v[_3D];
+    zerovec_v(_3D, 3, a, b, v);
 	double vx[_3D][_3D];
-	double s,c;
+    for (i=0; i<_3D; i++) {
+        zerovec(vx[i], _3D);
+    }
+	double s=0,c=0;
 
 	normCopy(original,a,_3D);
 	normCopy(final,b,_3D);
@@ -1730,7 +1736,7 @@ void dirdirCorr( cell ***CL,int maxXYZ,int XYZ[3],double *avCorr,int dimension )
 	}
 	for( d=0; d<maxXYZ; d++ ) {
 		avCorr[d] /= (double) (cnt[d]?(cnt[d]):1);
-		avCorr[d] /= (double) (avCorr[0]?(avCorr[0]):1); ;
+		avCorr[d] /= (double) (avCorr[0]?(avCorr[0]):1);
 	}
 	//Transformation to make the correlation function go from unity to zero
 	//corr0=1 and corrINF=2/3 ideally

@@ -83,8 +83,8 @@ void spectout( FILE *fout,double spect[],double t );
 void binderheader( FILE *fout,int binSize );
 
 //Checkpoint
-void checkpoint( FILE *fout,inputList in,spec *SP,particleMPC *pSRD,int MDmode,bc *WALL,outputFlagsList outFlag,int runtime,int warmtime,double AVVEL,double AVS,double avDIR[_3D],double S4,double stdN,double KBTNOW,double AVV[_3D],double AVNOW[_3D],kinTheory theory,specSwimmer specS,swimmer *sw );
-void runCheckpoint(char op[500],time_t *lastCheckpoint,FILE *fout,inputList in,spec *SP,particleMPC *pSRD,int MDmode,bc *WALL,outputFlagsList outFlag,int runtime,int warmtime,double AVVEL,double AVS,double avDIR[_3D],double S4,double stdN,double KBTNOW,double AVV[_3D],double AVNOW[_3D],kinTheory theory,specSwimmer specS,swimmer *sw );
+void checkpoint(FILE *fout, inputList in, spec *SP, particleMPC *pSRD, int MD_mode, bc *WALL, outputFlagsList outFlag, int runtime, int warmtime, double AVVEL, double AVS, double avDIR[_3D], double S4, double stdN, double KBTNOW, double AVV[_3D], double AVNOW[_3D], kinTheory theory, specSwimmer specS, swimmer *sw );
+void runCheckpoint(char op[500], time_t *lastCheckpoint, FILE *fout, inputList in, spec *SP, particleMPC *pSRD, int MD_mode, bc *WALL, outputFlagsList outFlag, int runtime, int warmtime, double AVVEL, double AVS, double avDIR[_3D], double S4, double stdN, double KBTNOW, double AVV[_3D], double AVNOW[_3D], kinTheory theory, specSwimmer specS, swimmer *sw );
 
 // Terminal printing
 void pcoord( particleMPC p );
@@ -106,7 +106,7 @@ void stateinput( inputList in,spec SP[],bc WALL[],specSwimmer SS,outputFlagsList
 void listinput( inputList in,double AVVEL,spec SP[],kinTheory theory );
 
 // Larger output-control routines
-void outputResults( cell ***CL,particleMPC *SRDparticles,spec SP[],bc WALL[],simptr simMD,specSwimmer SS, swimmer swimmers[],double AVNOW[_3D],double AVV[_3D],double avDIR[_3D], int runtime, inputList in, double AVVEL, double KBTNOW,double *AVS,double *S4,double *stdN,int MDmode,outputFlagsList outFlag,outputFilesList outFiles );
+void outputResults(cell ***CL, particleMPC *SRDparticles, spec SP[], bc WALL[], simptr simMD, specSwimmer SS, swimmer swimmers[], double AVNOW[_3D], double AVV[_3D], double avDIR[_3D], int runtime, inputList in, double AVVEL, double KBTNOW, double *AVS, double *S4, double *stdN, int MD_mode, outputFlagsList outFlag, outputFilesList outFiles );
 void outputHist( cell ***CL,int runtime, inputList in,outputFlagsList outFlag,outputFilesList outFiles );
 void closeOutputFiles( spec *SP,bc WALL[],outputFlagsList outFlag,outputFilesList outFiles );
 int writeOutput( int t,outputFlagsList f,int GAL,int zeroNetMom );

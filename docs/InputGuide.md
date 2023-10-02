@@ -72,6 +72,7 @@ Tag             | Type          | Default Value | Description
 `mdIn`          | string        | ""            | Path to the MD input file. This also acts as the switch for enabling MD --- If set to `""`, then MD is disabled, otherwise MD is enabled with the corresponding input file
 `mdCoupleMode`  | int           | 1             | Coupling mode for MD. Only matters if `mdIn` is set. Set to 1 for MD particles to be treated as MPCD particles, 2 for MD particles to be treated as MD particles in the MPCD simulator
 `stepsMD`       | int           | 20            | MD time steps per MPCD time step
+`mfpLayerH`     | int           | 0             | Height above which MFP goes to 0. For simulating thin ordered films below disordered fluids. If 0, disable this functionality entirely.
 `species`       | array(species)| 1 default spec  | An array of species objects.  See the [species table](#species-tag-table) for species tags
 ---             | ---           | ---           | ---
 `debugOut`      | int           | 3             | Debug (verbosity) level. See definitions.h for list
@@ -244,6 +245,7 @@ As a reminder, if you wish to use the default value for a tag, you can leave it 
     "seed":             0,
     "mdIn":             "",
     "stepsMD":          20,
+    "mfpLayerH":        0,
     "species":
     [
         {

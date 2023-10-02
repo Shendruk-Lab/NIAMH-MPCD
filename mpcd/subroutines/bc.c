@@ -45,6 +45,7 @@
 /// - \f$<0\f$ inside the boundary.
 ///
 /// @param WALL The boundary.
+/// @note For this routine to work as intended, then the WALL parameter must have A, Q, ROTSYMM, ABS, P, and B set!
 /// @param P The individual mpcd particle.
 /// @see calcW_PLANE()
 /// @see calcW_BC()
@@ -53,8 +54,8 @@
 ///
 double calcW( bc WALL,particleMPC P ) {
 
-	double terms, W=0.0;
-	int i;
+	double terms=0.0f, W=0.0f;
+	int i=0;
 
 	if( feq(WALL.ROTSYMM[0],4.0) && feq(WALL.ROTSYMM[1],4.0) ) {
 		for( i=0; i<DIM; i++ ) {
@@ -1127,7 +1128,7 @@ void BC_BCcollision( bc *movingWall,bc *stillWall,double t_step,int *flag ) {
 /// @param GRAV Constant acceleration from external force.
 /// @param t_step The time step interval.
 /// @param simMD A pointer to the entire MD portion of the simulation.
-/// @param MDmode The MD coupling mode. Can be off (noMD), MD particles included in the MPCD collisions (MDinMPC), or MPCD particles included in MD pair interactions (MPCinMD).
+/// @param MD_mode The MD coupling mode. Can be off (noMD), MD particles included in the MPCD collisions (MDinMPC), or MPCD particles included in MD pair interactions (MPCinMD).
 /// @param LC The flag for the fluid being liquid crystalline.
 /// @param bcCNT Count for failed particle-boundary interaction.
 /// @param reCNT Count for failed rewind events (particle not able to rewind to boundary).
@@ -1141,7 +1142,8 @@ void BC_BCcollision( bc *movingWall,bc *stillWall,double t_step,int *flag ) {
 /// @note The change in velocity for the boundary (due to this BC-particle interaction) is calculated in MPC_BCcollision()
 /// and the impulse to the boundary is applied in timestep().
 ///
-void BC_MPCcollision(bc WALL[],int BCcurrent,particleMPC *pp,spec *pSP,double KBT,double GRAV[],double t_step,simptr simMD,int MDmode,int LC,int *bcCNT,int *reCNT,int *rethermCNT) {
+void BC_MPCcollision(bc WALL[], int BCcurrent, particleMPC *pp, spec *pSP, double KBT, double GRAV[], double t_step,
+                     simptr simMD, int MD_mode, int LC, int *bcCNT, int *reCNT, int *rethermCNT) {
 
 	int i;
 	int chosenP=GPOP+1;					//Particle to go with t_min

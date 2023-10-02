@@ -19,6 +19,7 @@
     "seed":             0,
     "mdIn":             "",
     "stepsMD":          20,
+    "mfpLayerH":        0,
     "species":
     [
         {
@@ -45,6 +46,7 @@
     "trajSpecOut":      0,
     "coarseOut":        0,
     "flowOut":          0,
+    "velOut":           0,
     "avVelOut":         0,
     "dirSOut":          0,
     "qTensOut":         0,

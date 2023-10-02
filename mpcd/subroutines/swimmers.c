@@ -140,7 +140,7 @@ void readswimmers( char fpath[],specSwimmer *specS,swimmer **sw ) {
 	specS->fixDist = MF;
 
 	//Allocate the memory for the swimmers
-	(*sw) = (swimmer*) malloc( NS * sizeof( swimmer ) );
+	(*sw) = (swimmer*) calloc( NS, sizeof( swimmer ) );
 
 	fclose( finput );
 }
