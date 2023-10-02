@@ -10,7 +10,7 @@ from scipy import integrate
 import os
 
 ###########################################################
-### Plots 2D averaging over user defined direction
+### To average histograms of vector values since histogram range fluctuates
 ###########################################################
 
 ###########################################################
@@ -19,7 +19,7 @@ import os
 print( "Arguments:" )
 for arg in sys.argv:
 	print( "\t" + arg )
-dataName = sys.argv[1]			# Name of the data (should be coarsegrain.dat)
+dataName = sys.argv[1]			# Name of the data (should be a histogram output for a scalar quantity)
 xaxis = sys.argv[2]				# What is this the histogram of?
 start = int(sys.argv[3])		# Average after this number
 finish = int(sys.argv[4])		# Average before this number
@@ -190,6 +190,7 @@ if(plotAv):
 	xlabel(r'%s'%xaxis)
 	ylabel(r'PDF')
 	plt.axis(xmax=max, xmin=min, ymin=0)
+	plt.legend(loc='best',frameon=False)
 	savefig('%s.png'%(avOutName), bbox_inches='tight')
 	savefig('%s.pdf'%(avOutName), bbox_inches='tight')
 	show()
