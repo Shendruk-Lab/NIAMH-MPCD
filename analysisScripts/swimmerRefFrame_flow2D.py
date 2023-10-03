@@ -7,31 +7,44 @@
 ###########################################################
 from pylab import *
 from subprocess import call
-import os
-import json
 
 ###########################################################
 ### Read arguments
 ###########################################################
+FS =25
+TLS = 20		# Tick label size
+xyzSize=zeros( 3,dtype=int )
 print( "Arguments:" )
 for arg in sys.argv:
     print( "\t" + arg )
-dataPath = sys.argv[1]		  # Name of the data
-inputName = sys.argv[2]			# Input json file to read inputs
-start = int(sys.argv[3])		# Average after this number
-finish = int(sys.argv[4])		# Average before this number
-qx = int(sys.argv[5])		    # Only show every qx arrow in x
-qy = int(sys.argv[6])   		# Only show every qy arrow in y
-avdim = sys.argv[7]			    # Dimension to average over
-rotAx=int(sys.argv[8])  		#0=just shift the swimmer to the centre; 1=it aligned in x-direction too
-myAspect=sys.argv[9]		    #'auto' - reshapes into square graph or 'equal' keeps whatever aspect ratio the true values
-makeAni=int(sys.argv[10])	  #0=just make the average (no animation); 1=make animation too
-keepFrames=int(sys.argv[11])	#0=don't keep (delete) frames; 1=keep frames
+dataPath = sys.argv[1]		# Name of the data
+numSw = int(sys.argv[2])	# Number of swimmers --- reference frame shifted about FIRST swimmer
+xyzSize[0] = int(sys.argv[3])	# System size
+xyzSize[1] = int(sys.argv[4])	# System size
+xyzSize[2] = int(sys.argv[5])	# System size
+dipole = float(sys.argv[6])	# Dipole size
+start = int(sys.argv[7])		# Average after this number
+finish = int(sys.argv[8])		# Average before this number
+qx = int(sys.argv[9])		# Only show every qx arrow in x
+qy = int(sys.argv[10])		# Only show every qy arrow in y
+avdim = sys.argv[11]			# Dimension to average over
+rotAx=int(sys.argv[12])		#0=just shift the swimmer to the centre; 1=it aligned in x-direction too
+myAspect=sys.argv[13]		#'auto' - reshapes into square graph or 'equal' keeps whatever aspect ratio the true values
+makeAni=int(sys.argv[14])	#0=just make the average (no animation); 1=make animation too
+keepFrames=int(sys.argv[15])	#0=don't keep (delete) frames; 1=keep frames
+
+###########################################################
+### Set arguments
+###########################################################
+tailFreq=1.0/3.5
+tailWaveLength=(4.0/10.0)*2.0*(1.0+dipole)
+hidgeonLength=1.0
+tailRad=1.0
 
 ###########################################################
 ### Style/formating stuff
 ###########################################################
-# Use our custom style and colours
+# Style
 plt.style.use('shendrukGroupStyle')
 import shendrukGroupFormat as ed
 # Colours
@@ -44,46 +57,10 @@ codec='libx264'		#Other options include mpeg4
 suffix='.mp4'
 
 ###########################################################
-### Read json
-###########################################################
-if not os.path.isfile(inputName):
-	print("%s not found."%inputName)
-	exit()
-with open(inputName, 'r') as f:
-  input = json.load(f)
-xyzSize=array([30,30,1])
-dim=2
-if "domain" in input:
-	xyzSize[0]=input['domain'][0]
-	dim=1
-	if(len(input['domain'])>1):
-		xyzSize[1]=input['domain'][1]
-		dim=2
-	else:
-		xyzSize[1]=1
-	if(len(input['domain'])>2):
-		xyzSize[2]=input['domain'][2]
-		dim=3
-	else:
-		xyzSize[2]=1
-numSw=0
-if "nSwim" in input:
-    numSw=input['nSwim']
-dipole=1
-if "dsSwim" in input:
-    dipole=input['dsSwim']
-
-###########################################################
 ### Initialize
 ###########################################################
 velFieldName="%s/flowfield.dat"%dataPath
-if not os.path.isfile(velFieldName):
-	print("%s not found."%velFieldName)
-	exit()
 swimmerName="%s/swimmers.dat"%dataPath
-if not os.path.isfile(swimmerName):
-	print("%s not found."%swimmerName)
-	exit()
 if avdim=='x':
   dim=0
   d1=1
@@ -111,18 +88,6 @@ elif avdim=='y':
 elif avdim=='z':
     labX='x'
     labY='y'
-
-###########################################################
-### Set arguments
-###########################################################
-tailFreq=1.0/3.5
-tailWaveLength=(4.0/10.0)*2.0*(1.0+dipole)
-hidgeonLength=1.0
-tailRad=1.0
-
-###########################################################
-### Arrays
-###########################################################
 xyzF=zeros( 3,dtype=float )
 for i in range(3):
   xyzF[i]=float(xyzSize[i])
@@ -149,6 +114,7 @@ for x in range(rotSize):
 ###########################################################
 ### Read the data for min/max
 ###########################################################
+print( 'Read file for min/max ...' )
 velFile = open(velFieldName,"r")
 swimFile = open(swimmerName,"r")
 minV=99999999999999.0
@@ -157,22 +123,23 @@ maxV=0.0
 ###########################################################
 ### Read the data for animation
 ###########################################################
-print( 'Reading data ...' )
-# Toss headers
+print( 'Read files for animation ...' )
+print( '\tToss headers ...' )
 for i in range(13):
   line = velFile.readline()
 for i in range(13):
   line = swimFile.readline()
+print( '\tRead data ...' )
 i=0
 j=0
 n=-1
 while velFile:
   i=i+1
   line = velFile.readline()
-  if( len(line)!= 70):
+  if( len(line)!= 57):
     break
   else:
-    time,Qx,Qy,Qz,Vx,Vy,Vz = line.split("\t",7)
+    Qx,Qy,Qz,Vx,Vy,Vz = line.split("\t",6)
     XYZ[0][int(Qx)][int(Qy)][int(Qz)] = float(Qx) + 0.5
     XYZ[1][int(Qx)][int(Qy)][int(Qz)] = float(Qy) + 0.5
     XYZ[2][int(Qx)][int(Qy)][int(Qz)] = float(Qz) + 0.5
@@ -187,8 +154,9 @@ while velFile:
     if j>finish:
       break
     if j<start or j>finish:
-      pass
+      print( 'Toss %d'%j )
     else:
+      #print( 'Work %d'%j )
       #Sum
       if avdim=='x':
         for x in range(xyzSize[0]):
@@ -358,7 +326,7 @@ while velFile:
       quiv = quiver( XY[0][::qx, ::qy], XY[1][::qx, ::qy], rotMEAN[d1][::qx, ::qy], rotMEAN[d2][::qx, ::qy] )
       velImage = imshow(rotMAG.T,cmap=myMap,origin='lower',aspect=myAspect,vmin=minV,vmax=maxV)
       velCB = colorbar()
-      velCB.ax.set_ylabel(r'Velocity, $\left|\vec{v}\right|$')
+      velCB.ax.set_ylabel(r'Velocity, $\left|\vec{v}\right|$', fontsize = FS)
       # Plot the swimmers
       for ns in range(numSw):
         if( fabs(H[ns][d1]-B[ns][d1])<0.5*xyzSize[d1] and fabs(H[ns][d2]-B[ns][d2])<0.5*xyzSize[d2] ):
@@ -368,14 +336,16 @@ while velFile:
         waveLength=(4.0/5.0)*2.0*(1.0+dipole)
         theta=arctan2(H[ns][d2]-B[ns][d2],H[ns][d1]-B[ns][d1])
         X=linspace(0,2.0*(1.0+dipole),20)
+        # Y=sin(2.0*pi*X/waveLength)*sin(0.5*pi + float(n)*tailFreq)
         Y=tailRad*(1.0-exp(-pow(X/hidgeonLength,2)))*sin(2.0*pi*X/tailWaveLength + float(n)*tailFreq)
         tailX=cos(theta)*X - sin(theta)*Y
         tailY=sin(theta)*X + cos(theta)*Y
         plot( B[ns][d1]-tailX,B[ns][d2]-tailY,'-',color=swimmerMap(B[ns][dim]/xyzF[dim]),linewidth=2 )
         plot( H[ns][d1],H[ns][d2],'o',color='k',fillstyle='full' )
         plot( B[ns][d1],B[ns][d2],'h',color=swimmerMap(B[ns][dim]/xyzF[dim]),fillstyle='full' )
-      xlabel(r'$%s$'%labX)
-      ylabel(r'$%s$'%labY)
+      xlabel(r'$%s$'%labX, fontsize = FS)
+      ylabel(r'$%s$'%labY, fontsize = FS)
+      #plt.axis(xmax=xyzSize[0], xmin=0, ymax=xyzSize[1], ymin=0)
       plt.axis(xmax=rotSize, xmin=0, ymax=rotSize, ymin=0)
       name='frame%04d.png'%(n)
       savefig( name )
@@ -395,7 +365,7 @@ swimFile.close()
 ### Animate
 ###########################################################
 if(makeAni):
-    print( "Animating ..." )
+    print( "\tAnimating ..." )
     plt.close("all")
     if rotAx:
         name='%s/swimmerVelField_refFrameRotated_animation%s'%(dataPath,suffix)
@@ -432,14 +402,14 @@ quiv = quiver( XY[0][::qx, ::qy], XY[1][::qx, ::qy], avRotMEAN[d1][::qx, ::qy], 
 velImage = imshow(avRotMAG.T,cmap=myMap,origin='lower',aspect=myAspect,vmin=minV,vmax=maxV)
 if(not makeAni):
     velCB = colorbar()
-    velCB.ax.set_ylabel(r'Velocity, $\left|\vec{v}\right|$')
-xlabel(r'$%s$'%labX)
-ylabel(r'$%s$'%labY)
+    velCB.ax.set_ylabel(r'Velocity, $\left|\vec{v}\right|$', fontsize = FS)
+xlabel(r'$%s$'%labX, fontsize = FS)
+ylabel(r'$%s$'%labY, fontsize = FS)
+#plt.axis(xmax=xyzSize[0], xmin=0, ymax=xyzSize[1], ymin=0)
 plt.axis(xmax=rotSize, xmin=0, ymax=rotSize, ymin=0)
 if rotAx:
     name='%s/swimmerVelField_refFrameRotated_av.pdf'%(dataPath)
 else:
     name='%s/swimmerVelField_RefFrameCentred_av.pdf'%(dataPath)
 savefig( name )
-
 show()
