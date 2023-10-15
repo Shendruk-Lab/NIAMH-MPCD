@@ -29,3 +29,4 @@ docs/doxyout/*
 #Sphinx
 Sphinx/.venv
 Sphinx/.DS_Store
+Sphinx/Example/.DS_Store

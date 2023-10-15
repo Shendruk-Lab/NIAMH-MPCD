@@ -9,12 +9,12 @@ To use Lumache, first install it using pip.
 
    (.venv) $ pip install lumache
 
-.. image:: image1/1.png
+.. image:: part1/image1/1.png
    :scale: 30%
 
 .. _target to image:
 
-.. figure:: image1/1.png
+.. figure:: part1/image1/1.png
    :alt: Logo
    :align: center
    :width: 240px

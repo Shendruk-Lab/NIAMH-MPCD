@@ -13,6 +13,7 @@ Check out the :doc:`introduction/Introduction` section for further information, 
 
 
 .. toctree::
+   :numbered:
    :caption: Table of contents:
 
    introduction/Introduction

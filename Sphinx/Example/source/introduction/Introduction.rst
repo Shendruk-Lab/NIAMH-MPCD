@@ -1,8 +1,8 @@
 Introduction
 =============
 
-.. include:: MPCD.txt
-.. include:: usage.txt
+.. include:: part1/MPCD.txt
+.. include:: part1/usage.txt
 
 .. rubric:: Footnotes
 
