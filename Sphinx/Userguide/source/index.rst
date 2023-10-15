@@ -14,7 +14,7 @@ Welcome to MPCD's documentation!
    Outputs/Outputs
    HardCoded/HardCoded
    Analysis/Analysis
-   DevelopersGuide/DevelopersGuide
+   DeveloperGuide/DeveloperGuide
 
 .. note::
 
