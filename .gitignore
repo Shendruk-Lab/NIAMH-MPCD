@@ -30,3 +30,4 @@ docs/doxyout/*
 Sphinx/.venv
 Sphinx/.DS_Store
 Sphinx/Example/.DS_Store
+Sphinx/Userguide/.DS_Store
