@@ -1,0 +1,9 @@
+.. image:: part1/image1/1.png
+   :scale: 30%
+
+.. _target to image:
+
+.. figure:: part1/image1/1.png
+   :alt: Logo
+   :align: center
+   :width: 240px

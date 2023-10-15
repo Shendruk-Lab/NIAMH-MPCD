@@ -1,0 +1,20 @@
+.. _installation:
+
+Installation
+------------
+
+To use Lumache, first install it using pip.
+
+.. code-block:: console
+
+   (.venv) $ pip install lumache
+
+This is a typical paragraph.  An indented literal block follows.
+
+::
+
+  for a in [5,4,3,2,1]:   # this is program code, shown as-is
+      print a
+  print "it's..."
+  # a literal block continues until the indentation ends
+

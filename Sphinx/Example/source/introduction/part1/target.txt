@@ -1,0 +1,16 @@
+Clicking on this internal hyperlink will take us to the target_
+below.
+
+.. _target:
+
+The hyperlink target above points to this paragraph. :ref:`image1 <target to image>` 
+
+.. _target1:
+.. _target2:
+
+The targets "target1" and "target2" are synonyms; they both
+point to this paragraph.
+
+This text has target1_ returned to the indentation of the first paragraph,
+is outside of the literal block, and is therefore treated as an
+ordinary paragraph.

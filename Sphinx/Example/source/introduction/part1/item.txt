@@ -1,0 +1,55 @@
+.. _MPCD:
+
+MPCD
+------------
+
+Multi Particle Collision Dynamics is a method to silve the Navier stokes equation starightforward.
+
+- The following line appears to be a new sublist:
+
+  - This is a paragraph continuation, not a sublist (since there's no blank line). 
+    I am the continuation.
+  - Warnings may be issued by the implementation.
+
+  - This is a sublist.  The bullet lines up with the left edge of
+    the text blocks above.  A sublist is a new list so requires a
+    blank line above and below.
+
+  - :ref:`item A <itemA>`
+
+1. Item 1.
+
+  .. _itemA:
+
+  (A) Item A.
+
+  (B) Item B.
+
+  (C) Item C.
+ 
+2. Item 2.
+
+* This is a bulleted list.
+* It has two items, the second
+  item uses two lines.
+
+1. This is a numbered list.
+2. It has two items too.
+
+#. This is a numbered list.
+#. It has two items too.
+
+.. This is a comment. the | creates a new line.
+
+| Lend us a couple of bob till Thursday.
+| I'm absolutely skint.
+| But I'm expecting a postal order and I can pay you back
+  as soon as it comes.
+| Love, Ewan.
+
+.. include:: part1/block.txt
+
+.. include:: part1/table.txt
+
+.. include:: part1/target.txt
+

@@ -9,7 +9,7 @@ Facts database <https://world.openfoodfacts.org/>`_ and offers a *simple* and
 *intuitive* API.
 
 Check out the :doc:`introduction/Introduction` section for further information, including how to
-:ref:`install <installation>` the project. :ref:`target1 <target1>`. :ref:`Link title <eq:sara>`
+:ref:`install <installation>` the project. :ref:`target1 <target1>`. :ref:`Link equation <eq:sara>`
 
 
 .. toctree::
