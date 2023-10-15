@@ -25,3 +25,7 @@ Runs/*
 
 #doxygen
 docs/doxyout/*
+
+#Sphinx
+Sphinx/.venv
+Sphinx/.DS_Store

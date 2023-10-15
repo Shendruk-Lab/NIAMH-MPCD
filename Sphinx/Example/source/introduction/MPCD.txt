@@ -1,0 +1,103 @@
+.. _MPCD:
+
+MPCD
+------------
+
+Multi Particle Collision Dynamics is a method to silve the Navier stokes equation starightforward.
+
+- The following line appears to be a new sublist:
+
+  - This is a paragraph continuation, not a sublist (since there's no blank line). 
+    I am the continuation.
+  - Warnings may be issued by the implementation.
+
+  - This is a sublist.  The bullet lines up with the left edge of
+    the text blocks above.  A sublist is a new list so requires a
+    blank line above and below.
+
+  - :ref:`item A <itemA>`
+
+1. Item 1.
+
+  .. _itemA:
+
+  (A) Item A.
+
+  (B) Item B.
+
+  (C) Item C.
+ 
+2. Item 2.
+
+
+* This is a bulleted list.
+* It has two items, the second
+  item uses two lines.
+
+1. This is a numbered list.
+2. It has two items too.
+
+#. This is a numbered list.
+#. It has two items too.
+
+This is a typical paragraph.  An indented literal block follows.
+
+::
+
+  for a in [5,4,3,2,1]:   # this is program code, shown as-is
+      print a
+  print "it's..."
+  # a literal block continues until the indentation ends
+
+This text has target1_ returned to the indentation of the first paragraph,
+is outside of the literal block, and is therefore treated as an
+ordinary paragraph.
+
+| Lend us a couple of bob till Thursday.
+| I'm absolutely skint.
+| But I'm expecting a postal order and I can pay you back
+  as soon as it comes.
+| Love, Ewan.
+
++------------------------+------------+----------+----------+
+| Header row, column 1   | Header 2   | Header 3 | Header 4 |
+| (header rows optional) |            |          |          |
++========================+============+==========+==========+
+| body row 1, column 1   | column 2   | column 3 | column 4 |
++------------------------+------------+----------+----------+
+| body row 2             | Cells may span columns.          |
++------------------------+------------+---------------------+
+| body row 3             | Cells may  | - Table cells       |
++------------------------+ span rows. | - contain           |
+| body row 4             |            | - body elements.    |
++------------------------+------------+---------------------+
+
+
+
++--------------+----------+-----------+-----------+
+| row 1, col 1 | column 2 | column 3  | column 4  |
++--------------+----------+-----------+-----------+
+| row 2        | ``Use the command ls  | more``.  |
++--------------+----------+-----------+-----------+
+| row 3        |          |           |           |
++--------------+----------+-----------+-----------+
+
+
+Clicking on this internal hyperlink will take us to the target_
+below.
+
+.. _target:
+
+The hyperlink target above points to this paragraph. :ref:`image1 <target to image>` 
+
+.. _target1:
+.. _target2:
+
+The targets "target1" and "target2" are synonyms; they both
+point to this paragraph.
+
+[#]_ is a reference to footnote 1, and [#]_ is a reference to
+footnote 2.
+
+[#]_ is a reference to footnote 3.
+
