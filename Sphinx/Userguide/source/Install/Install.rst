@@ -1,15 +1,14 @@
 Installation and Run Guide
 ##########################
 
-This section covers the installation of the Shendruk Lab MPCD simulator. 
-**TODO: Introduce each section we go into later here**
+This section explains how to install and run MPCD, makefile options, and arguments used.
 
-**TODO: there is certainly a nicer way to phrase a "TLDR" here**
-To summarise key information:
+.. note:: 
+    Key information for advanced users:
 
-* MPCD has no external dependencies
-* Compilation is done with a standard makefile
-* All UNIX C compilers we've tested with have compiled fine.
+    * MPCD has no external dependencies
+    * Compilation is done with a standard makefile
+    * All UNIX C compilers we've tested with have compiled fine.
 
 Installation Instructions
 *************************
@@ -18,9 +17,9 @@ It is assumed that you have basic understanding of a CLI terminal.
 
 Depending on your operating system, please follow these instructions to install MPCD:
 
-* If you are running on Windows, and do not have Windows Subsystem for Linux (WSL) installed, please follow the instructions in the :ref:`WSL` section.
-* If you are running on Mac OS, and do not have dev tools such as make or a compiler installed, please follow the instructions in the :ref:`Mac` section.
-* Otherwise, please follow the instructions in the :ref:`InstallCommon` section.
+* If you are running on **Windows**, and do not have Windows Subsystem for Linux (WSL) installed, please follow the instructions in the :ref:`WSL` section.
+* If you are running on **Mac OS**, and do not have dev tools such as make or a compiler installed, please follow the instructions in the :ref:`Mac` section.
+* **Otherwise**, please follow the instructions in the :ref:`InstallCommon` section.
 
 .. _WSL:
 
@@ -116,6 +115,8 @@ To install make and a C compiler using homebrew, run:
     By default on Mac, gcc is an alias for the clang compiler. 
     This can be verified by running ``gcc -v`` in a terminal and verifying output.
 
+    See :ref:`CompilerOptions` for more information on compilers.
+
 .. _InstallCommon:
 
 Common Installation Instructions
@@ -206,24 +207,28 @@ An example of a ``make`` call setting all of these variables is:
 
     make cc=clang cflags="-Wall -Wextra -Werror" opt=-O2
 
+.. _CompilerOptions:
 
 Compilers 
 ---------
 MPCD has been tested with a number of compilers, and is known to work with the following:
 
-- gcc
-- clang
-- icc
+- ``gcc`` --- The GNU C compiler
+- ``clang`` --- The LLVM C compiler
+- ``icc`` --- The Intel C compiler
 
-.. note:: 
-    The Intel C Compiler is known to be very fast, but only if you are running on Intel CPU hardware. 
-    Double check the branch of CPU that your computer or cluster is Intel before using this compiler.
+Of these, ``gcc`` and ``clang`` are the most common and we endeavour to support both primarily. 
+We have qualatative evidence that ``clang`` is more resilient to code "undefined behaviour", and is slighly more performant.
 
 These compilers can be set by setting the ``cc`` parameter of the ``Makefile``: 
 
 .. code-block:: console
 
     make cc=<compiler>
+
+.. note:: 
+    The Intel C Compiler is known to produce very performant code, but only if you are running on Intel CPU hardware. 
+    Double check the brand of CPU that your computer or cluster is Intel before using this compiler.
 
 .. _ProgArgs:
 
@@ -268,7 +273,7 @@ The recommended way to run MPCD is by using a JSON input file.
 This is a single file that is .json formatted, and contains all of the physics information for the simulation.
 
 A guide to all input parameters is provided on Github `here <https://github.com/Shendruk-Lab/MPCD/blob/master/docs/InputGuide.md>`_.
-Furthermore, all tutorials in this document give explanations on how to set up input files for specific simulations.
+Furthermore, all :ref:`tutorials <tutorials>` in this user guide give explanations on how to set up input files for specific simulations.
 
 .. _LegacyInput:
 
@@ -290,4 +295,4 @@ These include:
 
 These files are read in order, and are all required for the simulation to run.
 Furthermore, these files expect parameters input in a particular order to function.
-Examples are provided within the ``sampleInputs`` folder of the MPCD repository, and an incomplete guide is provided `here <https://github.com/Shendruk-Lab/MPCD/blob/master/docs/legacyInputSummary.txt>`_.
+Examples are provided within the ``sampleInputs`` folder of the MPCD repository, and an incomplete guide is provided `on Github <https://github.com/Shendruk-Lab/MPCD/blob/master/docs/legacyInputSummary.txt>`_.
