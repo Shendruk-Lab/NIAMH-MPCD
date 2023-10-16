@@ -1,51 +1,131 @@
 .. _MPCD:
 
-In many situtations in soft matter physics, the fluid medium in which mesoscale objects are suspended is crucial but not of principle interest. 
-This is true of polymeric, colloidal or bacterial suspensions. 
-In such cases, coarse-grained algorithms to simulate the surrounding fluid are needed. 
-If, for example, the most significant effect of the fluid is to induce thermal fluctuations then a Langevin dynamics or Brownian dynamics algorithm would be most suitable [slater2009]_. 
-If, on the other hand, the embedded objects are large enough that thermal fluctuations are negligible but hydrodynamic interactions between them are significant then an immersed boundary solver [mittel2005]_ or lattice-Boltzmann simulation [aidun2010]_ would be more appropriate. 
+In many situtations in soft matter physics, the fluid medium in which mesoscale particles---such as polymers, colloids or cells---are suspended is crucial but not the principle interest of study. 
+In such cases, coarse-grained algorithms that simulate one or more aspect of the surrounding fluid are needed. 
+For example, if the most significant effect of the fluid is to induce thermal fluctuations then a Langevin or Brownian dynamics simulation might be most suitable [slater2009]_. 
+On the other hand, if the embedded particles are large enough that thermal fluctuations are negligible but hydrodynamic interactions between them are significant then an immersed boundary solver [mittel2005]_ or lattice-Boltzmann simulation [aidun2010]_ might be more appropriate. 
 
-* If both fluctuations and hydrodynamic interactions are crucial then **MPCD** may be an appropriate technique. 
+* If both fluctuations and hydrodynamic interactions are crucial then **MPCD** may be an appropriate simulation technique. 
 
-BENEFITS 
 MPCD is well suited for situations involving relatively low Reynolds numbers---in which viscosity dominates over inertia---and moderate Peclet numbers---in which diffusion and advection are of similar significance. 
-BCs, solutes, complex fluids
+It is straightforward to include mobile particles, such as colloids, within the MPCD fluid, even if these have many internal degress of freedom, such as polymers. 
+This makes MPCD an excellent option for simulating complex suspensions. 
+Furthermore, because MPCD is a particle-based method, non-trivial boundaries can be included more easily than methods that require complicated meshes. 
 
 As in any computational approach, these benefits are counterbalanced by complications, including 
 
-#. fluid properties (such as viscosity) are only controlled indirectly, 
-#. multiple runs must be averaged to find statisticly meaningful results, and
-#. compressibility. 
+#. fluid properties (such as viscosity) are only controlled indirectly~\cite{**??**}, 
+#. multiple runs must be averaged to find statisticly meaningful results~\cite{**pooley05**}, and
+#. compressibility~\cite{**stark?**}. 
 
-
-
-
+.. _particleBased:
 Particle-based coarse-graining
 ------------------------------
 
-In MPCD the continuous fluid medium is discretised into point-like coarse-grained fluid particles. 
-An equivalent view is that many atoms or molecules are grouped together and simulated as point-like fluid particles. 
-This coarse-graning eschews molecular-scale details of the atoms and molecules that make up the fluid. 
+In MPCD, the continuous fluid medium is discretised into point-like, coarse-grained fluid particles. 
+Equivalently one may imagine that many fluid atoms or molecules are grouped together and simulated as point-like particles. 
+This coarse-graning eschews molecular-scale details of the molecules that make up the fluid. 
 Respecting conservation of these quantities is what allows the hydrodynamic equations of motion to be obeyed on sufficiently long length and time scales~\cite{**pooley05**}. 
-Discretising the fluid into particle has the secondary effect of allowing MPCD to handle complicated boundaries more easily than methods that require complicated meshes. 
-
 
 Two-step algorithm
 ------------------
 
+In essence, the MPCD algorithm consists of only two steps:
+
+#. The first step is the :ref:`streaming step <streaming>`.
+#. The second is the :ref:`collision step <collision>`.
+
+**MAKE FIGURE**
+
+.. _streaming:
 Streaming step
 ^^^^^^^^^^^^^^
 
+Each fluid particle (labelled :math:`i`) of mass :math:`m_i=m` moves ballistically, and its position :math:`\vec{x}_i\left(t\right)` is updated in discrete time intervals :math:`\delta t`. 
+In the **streaming step** the particles move according to 
+
+.. math::
+    :name: eq:stream
+
+    \vec{x}_i\left(t+\delta t\right) = \vec{x}_i\left(t\right) + \vec{v}_i\left(t\right) \delta t .
+If the MPCD algorithm consisted only of streaming steps then the carrier fluid would be an ideal gas; however, the :ref:`collision step <collision>` introduces coarse-grained interactions between particles. 
+
+.. _collision:
 Collision step
 ^^^^^^^^^^^^^^
 
+The second step is the **collision step** in which momentum is transferred between fluid particles. 
+To exchange momentum the simulation domain is partitioned into :math:`d`-dimensional square cells of size :math:`a`. 
+The collision step is a simple, non-physical scheme constructed to be stochastic but also to conserve momentum within each cell. 
+Multi-particle collisions within cells are represented by the collision operator :math:`\vec{\Xi}` such that the velocity of each particle in a given cell evolves as
+
+.. math::
+    :name: eq:collision
+    
+    \vec{v}_i\left(t + \delta t\right) = \vec{v}^\text{cm}\left(t\right) + \vec{\Xi} \left( \; \vec{v}_i\left(t\right), \vec{v}^\text{cm}\left(t\right) \; \right) .
+The number of fluid particles in the :math:`c^\text{th}` cell at time :math:`t` is :math:`{N_c}\left(t\right)`. 
+The number of particles in each cell may vary from one cell to another but the total number :math:`N_\text{tot}` is conserved and the average number density is :math:`n_\text{MPCD}=\left\langle N_c \right\rangle/a^d` where :math:`d` is the dimensionality of the simulation. 
+Each cell possesses a centre of mass velocity :math:`\vec{v}^\text{cm} = \left(\sum^{N_c}_{i=1} m_i \vec{v}_i\right)/\left(\sum^{N_c}_{i=1} m_i\right)`, which corresponds to the local macroscopic velocity at that point and time, :math:`\vec{u}\left(\vec{x},t\right)`. 
+Conservation of energy, isotropy and a Maxwell-Boltzmann velocity distribution\index{Maxwell-Boltzmann distribution} can be achieved in the continuum limit by an appropriate choice of the collision operator :math:`\vec{\Xi}`. 
+
+The MPCD collision step replaces molecular-scale dynamics with a local, non-physical, stochastic momentum transfer operation. 
+Thus, MPCD **does not** give correct dynamics on microscopic time or length scales. 
+Streaming and collision events conserve the momentum and energy in each collision volume at all times and so MPCD reproduces an accurate representation of the hydrodynamics of the velocity field at large distances. 
+The coarse-grained mesoscopic MPCD fluid provides both a thermal bath and propagates hydrodynamic interactions without having to either solve the entire Navier-Stokes equation (**MISSING**\eq{eq:NS}) for a potentially complex microfluidic system or to simulate the full molecular interactions of all fluid molecules. 
+Therefore, it can be computationally less expensive than numerical, continuum solvers or full *Molecular Dynamics* (MD) simulations. 
+
+.. _galilean:
 Galilean invariance
 -------------------
 
+By discretizing the space into cells, **Galilean invariance** is broken. 
+To understand why, consider a simulation of slow moving fluid particles (low temperatures). 
+If the mean-free path of the molecules is much smaller than the cell size (:math:`\lambda \ll a`) then particles will often fail to travel far enough to leave the cell and may repeatedly exchange momentum with the same set of neighbours. 
+Thus, the implicit assumption of underlying molecular chaos fails and the fixed lattice of cells causes the behaviour in a moving reference frame to be different than a fixed reference frame, since in the moving frame the set of neighbours would be different in each (\fig{fig:galInv}). 
+However, Galilean invariance can be completely reestablished by shifting the cell grid each time step by a random vector. 
+Galilean invariance is then remedied. 
+Practically speaking, this is implemented by shifting all the fluid particles by the same vector whose components were chosen at random from the interval :math:`\left[-a/2,a/2\right]`. 
+
+.. _schmidt:
+Schmidt Number
+--------------
+
+In this work, the MPCD fluid is used to simulate a liquid solvent; however, if the mean-free path of the fluid particles is too large (:math:`\lambda \gg a`), the particle-based Navier-Stokes solver is more akin to a gas than a liquid. 
+This manifests itself in two related ways:
+ 
+#. The fluid becomes quite compressible~\cite{zhao13}. Technically, all particle-based algorithms (such as MD **cite**, DPD **cite**, LB **cite** and MPCD fluids) are more compressible than liquids. This is because a finite amount of time is required for hydrodynamic disturbances to propagate long distances. However, this is not an issue if the applied forces or pressure gradients are limited to small values. 
+#. The ratio of the viscosity :math:`\mu` to the diffusion coefficient :math:`D` (the Schmidt number, :math:`\text{Sc}=\mu/\left(\rho D\right)`) is low. Typical values in a gas are :math:`\text{Sc}\sim1`, while actual liquids often possess Schmidt numbers in the range :math:`\text{Sc}\sim10^2-10^3`. Many particle-based simulation techniques struggle to obtain appropriately large Schmidt numbers. Traditional MD and DPD fluids have :math:`\text{Sc}\sim1`. While the Schmidt values for MPCD fluids are much larger (typically :math:`\text{Sc}\sim10^2`) and can technically be made arbitrarily large, increasing :math:`\text{Sc}` comes at the cost of longer simulation times. Keeping all other simulation parameters fixed and decreasing :math:`\delta t` increases :math:`\text{Sc}`, while increasing the mean-free path causes :math:`\text{Sc}\rightarrow1`, as one would expect for a more gas-like fluid.
+
+.. _angMom:
 Conservation of angular momentum
 --------------------------------
 
+However, the SRD algorithm does not generally conserve angular momentum since the positions of the fluid particles within the cell during a collision operation are not taken into account~\cite{ryder05}. 
+While some of the other variations on the MPCD algorithm do (see \sctn{sctn:anderson_ang}), in the microfluidic situations considered here (and most others~\cite{gotze07,gotze10,gotze11,babu12}) angular momentum does not play an essential role and so this fact is inconsequential. 
+
+The Anderson-MPCD algorithm discussed so far conserves mass\index{mass!conservation}, energy\index{conservation!energy} and translational momentum\index{conservation!momentum} but, just like the SRD collision operations, it does not conserve angular momentum.
+However, it can be extended to do so. 
+
+In conserving the angular momentum of the cell, the position of each fluid particle relative to the centre of mass of the cell :math:`\vec{x}^\prime_i = \vec{x}_i - \vec{x}^\text{cm}` is important. 
+The Anderson-MPCD algorithm presented in \sctn{sctn:anderson} creates a small change in angular momentum every collision step. 
+Let this amount be denoted :math:`\delta \vec{L}`. 
+This angular momentum can be exactly cancelled out by giving the entire cell an appropriate angular velocity :math:`\vec{\omega}`. 
+If the set of particles in the cell have a moment of inertia tensor :math:`\textbf{I}` about the centre of mass (with elements :math:`I_{ij} = \sum_k^{N_c} m_k \left( {x^\prime_k}^2 \delta_{ij} - r_{k,i}^\prime r_{k,j}^\prime\right)`) then the angular velocity needed to cancel the residual angular momentum is :math:`\vec{\omega} = \textbf{I}^{-1} \cdot \delta \vec{L}`. 
+
+A term representing the change in linear velocity resulting from the imposed angular velocity about the centre of mass can be added to \eq{eq:at}:
+% \begin{align}
+%  \vec{\Xi} &= \vec{v}_i^\mathrm{ran} - \frac{1}{N_c} \sum_{j}^{N_c} \vec{v}_j^\mathrm{ran} + \vec{\omega} ts \vec{x}^\prime_i\nn\\
+%         &= \vec{v}_i^\mathrm{ran} - \frac{1}{N_c} \sum_{j}^{N_c} \vec{v}_j^\mathrm{ran} + \left[\textbf{I}^{-1}\cdot\delta\vec{L}\right] ts \vec{x}^\prime_i\nn\\
+%         &= \vec{v}_i^\mathrm{ran} - \frac{1}{N_c} \sum_{j}^{N_c} \vec{v}_j^\mathrm{ran} + 
+%    \left[ m \textbf{I}^{-1} \cdot \left( \sum_{j}^{N_c} \left\lbrace \vec{x}^\prime_j ts \left( \vec{v}_j - \vec{v}_j^\mathrm{ran} \right) \right\rbrace   \right) \right]ts \vec{x}^\prime_i.
+%  \label{at_ang}
+% \end{align}
+
+.. math::
+    :name: eq:angMom
+    
+    \vec{\Xi} = \vec{v}^\text{ran}_i - \frac{\sum_{j}^{N_c} m_j \vec{v}^\text{ran}_{j}}{\sum_{j}^{N_c} m_j} + \left[ \textbf{I}^{-1} \cdot \left( \sum_{j}^{N_c} m_j \left\lbrace \vec{x}^\prime_j ts \left( \vec{v}_j - \vec{v}^\text{ran}_j \right) \right\rbrace   \right) \right]ts \vec{x}^\prime_i.
+For situations in which angular momentum conservation within the solvent plays an important role, \eq{eq:at_ang} should be preferred over \eq{eq:at}. 
 
 .. rubric:: Reference
 
