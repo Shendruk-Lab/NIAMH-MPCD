@@ -1,0 +1,1 @@
+This will explain how to use pushers/pullers, tune the size and weight, create point-like swimmers, turn on depletion interaction, general behaviour of MPCD dumbbell swimmers

@@ -17,6 +17,8 @@ Viscosity
 Units
 *****
 
+.. include:: Units/units.txt
+
 .. _chapter4:
 
 Particle properties
@@ -51,6 +53,8 @@ Viscek MPCD
 
 Multiphase
 **********
+
+.. include:: Multiphase/multiphase.txt
 
 .. _chapter11:
 
