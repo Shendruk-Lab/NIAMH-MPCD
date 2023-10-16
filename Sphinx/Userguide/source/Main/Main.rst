@@ -22,6 +22,8 @@ Units
 Particle properties
 *******************
 
+.. include:: Particles/particle.txt
+
 .. _chapter5:
 
 Collision operators
