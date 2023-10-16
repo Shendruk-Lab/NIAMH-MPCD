@@ -61,3 +61,8 @@ docs:    $(sources)
 	@echo "Building documentation"
 	doxygen doxyfile
 #----------------------------------------------------------------------------------------------------
+.PHONY: guide
+guide:    $(sources)
+	@echo "Building user guide"
+	(cd Sphinx/Userguide && make html)
+#----------------------------------------------------------------------------------------------------
