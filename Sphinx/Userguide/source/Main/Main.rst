@@ -4,8 +4,10 @@ Main
 .. This is a comment. to hyperlink need to define like follwoing
 .. _chapter1:
 
-what is MPCD ?
+What is MPCD ?
 **************
+
+.. include:: introMPCD/intro.txt
 
 .. _chapter2:
 
