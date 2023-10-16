@@ -12,7 +12,6 @@
 Runs/*
 
 #ignore all visualisation output files
-*.png
 *.pdf
 *.mp4
 
@@ -25,9 +24,11 @@ Runs/*
 
 #doxygen
 docs/doxyout/*
+doxyout/*
 
 #Sphinx
 Sphinx/.venv
 Sphinx/.DS_Store
 Sphinx/Example/.DS_Store
 Sphinx/Userguide/.DS_Store
+Sphinx/*/build/
