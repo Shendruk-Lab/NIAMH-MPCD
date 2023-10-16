@@ -14,6 +14,8 @@ Viscosity
 
 .. _chapter3:
 
+.. include:: Viscosity/viscosity.txt
+
 Units
 *****
 
