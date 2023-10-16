@@ -37,9 +37,11 @@ Initialization
 Boundary conditions
 *******************
 
+.. include:: bc/bc.txt
+
 .. _chapter8:
 
-Nematic MPCD 
+Nematic MPCD
 ************
 
 .. _chapter9:

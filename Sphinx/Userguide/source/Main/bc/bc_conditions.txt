@@ -1,0 +1,138 @@
+Requirements
+----------------------------------
+
+The implicit representation for the surface has the property that
+
+* :math:`S(\vec{x}) > 0`, a point is outside the surface
+* :math:`S(\vec{x}) = 0`, a point is on the surface
+* :math:`S(\vec{x}) < 0`, a point is inside the surface.
+
+Following a streaming step, boundary conditions are applied to an MPCD particle if the particle has passed inside a boundary.
+For a particle :math:`i` with position :math:`\vec{x}_i` this condition is
+
+.. math::
+    :name: eq:bccondition
+
+    S(\vec{x}_i) \leq 0
+
+Boundary conditions are only applied to a particle when the position is exactly on the surface,
+which requires tracing back the particle's position :math:`\vec{x}_i^*` to where :math:`S(\vec{x}_i^*) = 0`
+at time :math:`t^*` where :math:`0<t^*<\delta t`. ROUTINES
+
+Boundary rules
+----------------------------------
+
+Boundary rules are operators on a particle's position, velocity or orientation properties.
+
+For a property :math:`f_i (t)`, the rules have the following form
+
+.. math::
+    :name: eq:bcoperators
+
+    f_i(t>t^*) = D_{f,\hat{\nu}} + M_{f,\hat{\nu}} f_i(t<t^*)
+
+NEED TO SHOW THAT THERES ACTUALLY A SUM
+
+where :math:`f_i(t<t^*)` and :math:`f_i(t>t^*)` are the properties before and after the boundary rules are applied,
+:math:`D_{f,\hat{\nu}}` is a shift in direction :math:`\hat{\nu}`
+and :math:`M_{f,\hat{\nu}}` is a multiplier of the PROJECTION components of :math:`f_i(t<t^*)` in direction :math:`\hat{\nu}`.
+
+Examples
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Defaults for no applied conditions are :math:`D_{f,\hat{\nu}} = 0` and :math:`M_{f,\hat{\nu}} = 1`,
+leaving all components of :math:`f_i` unchanged and without shifts.
+Commonly used boundary rules are:
+
+1. **Position**
+
+  **Periodic boundary conditions**
+
+  Extended geometries, such as pipe or channel flows, often use periodic boundary conditions.
+  They simulate open systems. In order to achieve periodicity,
+  a planar boundary surface are created with :math:`D_{x,\hat{n}}=L` as a shift equivalent to the system dimension.
+
+  PICTURE
+
+2. **Velocity**
+
+  **Perfect-slip**
+
+  DESCRIPTION OF PERFECT SLIP.
+  Perfect-slip utilises *reflective* boundary rules to the velocity.
+  The normal component of the velocity is reversed :math:`M_{v,\hat{n}} = -1`,
+  while the tangential component is unchanged :math:`M_{v,\hat{t}} = 1`.
+
+  PICTURE
+
+
+  **No slip**
+
+  No-slip refers to any impermeable boundary condition that brings the velocity of the fluid to zero at the wall.
+  Achieving no-slip utilises *bounce-back* boundary rules to the velocity,
+  reversing the normal and tangential component of the velocity so that :math:`M_{v,\hat{n}} = M_{v,\hat{t}} = -1`.
+
+  PICTURE
+
+3. **Orientation**
+
+For liquid crystalline fluids, boundary conditions (or anchoring conditions)
+can be applied so that the particle orientation :math:`\hat{u}_i` aligns in the normal direction to the boundary (homeotropic)
+or tangential with the boundary (planar).
+
+  **Homeotropic**
+
+  Alignment normal to the boundary requires :math:`M_{v,\hat{n}} = 1` and :math:`M_{v,\hat{t}} = 0`.
+
+  PICTURE
+
+  **Planar**
+
+  Alignment tangential to the boundary requires :math:`M_{v,\hat{n}} = 0` and :math:`M_{v,\hat{t}} = 1`.
+
+  PICTURE
+
+Boundary corrections
+----------------------------------
+
+Ghost particles
+^^^^^^^^^^^^^^^^^
+
+The random grid shifts (for Galilean invariance) can result in fluid cells being intersected by the boundary,
+reducing the cell's population below the average number density.
+With fewer particles in the cell, the centre of mass velocity :math:`\vec{v}^{\mathrm{cm}}_c` can fail to satisfy no-slip.
+A standard method to correct no-slip, so that :math:`\vec{v}^{\mathrm{cm}}_c \approx 0`,
+is to fill the cell with :math:`N_\mathrm{ghost} =\langle N_c \rangle - N_c` virtual particles so that the effective density :math:`N_c` is equal to the average density :math:`\langle N_c \rangle`.
+
+MIGHT HAVE THIS THE WRONG WAY ROUND
+
+.. math::
+  :name: eq:virtualparticles
+
+  \vec{v}^{\mathrm{cm}}_c = \frac{1}{N_c}\left(\sum_{i=1}^{N_c} \vec{v_i} + \sum_{j=1}^{N_{\mathrm{ghost}}} \vec{v_j}^{\mathrm{ghost}} \right)
+
+Each of these virtual particles :math:`\vec{v_j}^{\mathrm{ghost}}` have a velocity drawn from a Maxwell Boltzmann distribution about zero with the same temperature of the fluid, :math:`k_B T`.
+Instead of determining each ghost particle's velocity individually,
+a simpler method is instead to select the entire correction :math:`\vec{v}^{\mathrm{ghost}}`
+from a Maxwell Boltzmann distribution about zero but with a variance of :math:`N_{\mathrm{ghost}} k_B T`.
+
+.. math::
+  :name: eq:virtualparticles
+
+  \vec{v}^{\mathrm{cm}}_c = \frac{1}{N_c}\left(\sum_{i=1}^{N_c} \vec{v_i} + \vec{v}^{\mathrm{ghost}} \right)
+
+REFERENCE PAPERS FOR THIS
+
+LINK TO GHOST PART
+
+Strong anchoring
+^^^^^^^^^^^^^^^^^
+
+Since orientation boundary conditions are only applied to the subset of particles :math:`N_{\mathrm{anch}} \leq N_c` that violate the surface boundary equation :math:`S(\vec{x})\leq0`,
+the cell director :math:`\hat{n}_c` mixes between the anchored and un-anchored orientations.
+The effective anchoring strength is therefore heavily dependent on the proportion :math:`N_{\mathrm{anch}} / N_c`, with strongest anchoring acheived when :math:`N_{\mathrm{anch}} = N_c`.
+To strengthen the effective anchoring, we apply the orientation boundary condition to all :math:`N_c` particles.
+
+MAY NEED TO EXPLAIN HOW THIS CONSERVES STUFF
+
+LINK TO GHOST PART
