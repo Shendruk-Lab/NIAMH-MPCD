@@ -1,0 +1,24 @@
+Multiphase fluids are implemented in this simulator by allowing for several species of particles with species-wide properties (mass, density, ...)
+to coexist and interact through a tuneable interaction. The theory behind this interaction is described in section 4.10.1, and the broad lines
+of the implementation in this algorithm are described in section 4.10.2
+
+Free-Energy of a multiphase fluid
+=================================
+
+A multi-phase mixture can be described by a Landau-Ginzburg free energy functional depending on the local compositional order parameter *𝜙*, 
+a surface tension coefficient *𝜅*
+
+.. math::
+    F = \int d^d r (\frac{\tau}{2}\phi^2+\frac{b}{4}\phi^4+\frac{\kappa}{2}(\nabla \phi)^2) 
+
+Implementation in MPCD
+======================
+
+Multiphase models have been simulated in MPCD before using super-cells: close-by cells are grouped together, and a kick is given to particles based
+on the gradient in compositional order between cells within the supercell [Eisenstecken2018]_. In this simulator, the surface of equilibrium compositional order is found
+within each cell, and a kick is added on during the collision step [Koch2023]_.
+
+.. rubric:: References
+
+.. [Eisenstecken2018] Eisenstecken et al. (2018): `Hydrodynamics of binary-fluid mixtures — An augmented Multiparticle Collison Dynamics approach <https://iopscience.iop.org/article/10.1209/0295-5075/121/24003>`_. *Europhysics Letters*, Vol 121.
+.. [Koch2023] Koch, K. (2023): Swimming in oil, MPhys thesis at the University of Edinburgh

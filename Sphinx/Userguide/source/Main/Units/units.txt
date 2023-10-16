@@ -1,0 +1,68 @@
+Measurements in this simulator are only relevant when compared to a few global values, described in section 4.3.1. In section 4.3.2, these units
+are combined to describe the natural units of the other main observables. In order to compare results with experiments or to identify operating 
+regimes, measurements can be combined into dimensionless numbers: this process is described in section 4.3.3.
+
+Set values
+===============
+
+:math:`m`: Mass of a fluid particle, which sets the natural unit of mass. A fluid particle here means a discretized packet of fluid material. 
+In multiphase fluids, the mass of different species can be set to be different: this will change the unit of most observables between species.
+
+:math:`a`: Cell size, which sets the natural unit of length.
+
+:math:`k_B T`: Temperature of the simulator's thermostat, i.e. the thermal energy of the system.
+
+Since these define every other unit, they are set to one for convenience.
+
+Derived units
+=============
+
+**Time**: Derived from the equipartition theorem: :math:`a\sqrt{\frac{m}{k_B T}}`. Hereafter referred to as [τ]. An important quantity it defines is
+the timestep, dt, which is described in [SECTION ABOUT STREAMING].
+
+**Velocity**: Length divided by time, so [v]= :math:`\sqrt{\frac{k_B T}{m}}`.
+
+**Acceleration**: Velocity divided by time, so [a]= :math:`\frac{k_B T}{m a}`.
+
+**Force**: Mass times acceleration, so [F]= :math:`\frac{k_B T}{a}`.
+
+**Diffusion coefficient**: Length divided by time squared, so [D]= :math:`\frac{k_B T}{a m}`.
+
+**Rotational diffusion coefficient**: Rotational diffusion coefficient divided by length squared, so [D :sub:`R`]= :math:`\frac{K_B T}{a^3 m}`.
+
+**Spring constant**: Force divided by length, so [k] = :math:`\frac{k_B T}{a^2}`.
+
+**Density**: Number of particles divided by cell size, so [ρ]= :math:`a^{-d}`, where d is the number of dimensions in the system.
+
+**Pressure**: Force divided by length to the power of d-1, where d is the number of dimensions.
+[P]= :math:`\frac{k_B T}{a^d}`. Streaming and collisional pressures are added together.
+
+**Viscosity**: Pressure multiplied by time, so [μ] = :math:`\frac{\sqrt{k_B T m}}{a^{d-1}}`. Changing the timestep will result in a 
+change in effective viscosity.
+
+**Coupling to the mean free potential**: Energy divided by two space derivatives, so [K]= :math:`\frac{k_B T}{a^{d-2}}`.  
+
+**Bending potential**: Bending energy divided by cosine squared of the bending angle, so [k :sub:`b`]= :math:`k_B T`. 
+
+**Activity**: The unit of activity in this simulator is the same as the unit of force. Activity gives a contribution to the collision operator 
+that is weighted by activity, the length of a timestep, and the mass of the particles. This results in units of force for the activity - see [kozhukhov2022]_
+for more details. 
+
+Dimensionless numbers
+=====================
+
+Dimensionless numbers allow the user to find out the regime at which the simulator is operating. This allows for comparisons to theoretical regimes
+and to experiments.
+
+The Reynolds number is an example of such a number. It broadly defines the ratio of inertia effects to viscous effects, and is obtained by multiplying
+a typical lenght scale for the system (*L*) by a typical velocity (*v*) and the inverse of a typical viscosity (*μ*). 
+
+.. math::
+    Re=\frac{v L}{μ}
+
+In classical mechanics, turbulence is a phenomenon occuring at high Reynolds number, where excess energy is dissipated by chaotic energy cascades. Active nematics can give rise to 
+low-Reynolds turbulence: this important result can be recreated with this simulator.
+
+.. rubric:: References
+
+.. [kozhukhov2022] Kozhukhov, T.; Shendruk, T. N. (2022): `Mesoscopic simulations of active nematics <https://www.science.org/doi/full/10.1126/sciadv.abo5788>`_. *Science Advances*, Vol 8.
