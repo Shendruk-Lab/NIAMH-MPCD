@@ -1,0 +1,253 @@
+Overview
+========
+
+MPCD is a particle-based algorithm in which this particles could belong to different species. Each of this species has its own features. 
+
+And in the following we can see this features:
+
+::
+
+    typedef struct spec {
+        int POP;	            
+        int QDIST;				
+        int VDIST;				
+        int ODIST;				
+        double MASS;    
+        double RFC;
+        double TUMBLE;		   
+        double CHIHI;
+        double CHIA;		
+        double LEN;
+        double ACT;
+        double DAMP;
+        double M[MAXSPECI];
+        double SIGWIDTH;
+        double SIGPOS;		
+        double MINACTRATIO;
+    } spec;
+
+In our code up to ten different species are supported.
+
+.. _MAXSPECI:
+
+.. code-block:: console
+
+    # define MAXSPECI 10
+
+Properties
+==========
+
+POP
+---
+
+It is the total population of the particles of this species. The equivalent parameter in the json input file is "pop" that is equal to control volume :math:`{\times} 20` ( :math:`20 =` the average number of particles in each cell) and the default value is 18000.
+
+"dens" can override it for simple geometries that do not have cut cells so each cell has :math:`20` particles. 
+
+QDIST
+-----
+
+It specifies how the position of this species' particles is initialised. The available options are to :
+
+- place the particles randomly and freely within the control volume. In the json file 
+
+.. code-block:: console
+
+    "qdist":         0,
+
+- read the particles' positions from a file. In the json file
+
+.. code-block:: console
+
+    "qdist":         1,
+
+The default value is 0.
+
+VDIST
+-----
+
+It specifies how the velocity of this species' particles is initialised. The available options are to :
+
+- draw the velocity from an uniformly random distribution. The particles have an average speed of  
+  :math:`(DIM {\times} K_{B}T/MASS)^{1/2}` in which :math:`DIM` is the dimensionality of the system and :math:`MASS` is the mass of this species. To get uniform must consider from zero to :math:`(2 {\times} K_{B}T/MASS)^{1/2}` for each component. To get the negative velocity we make the interval twice as big and subtract off the original max.
+
+  .. code-block:: console
+
+      "vdist":         0,
+
+- read the particles' velocities from a file. In the json file
+
+  .. code-block:: console
+
+      "vdist":         1,
+
+- give all the particles the same initial speed but in different directions. In the json file
+
+  .. code-block:: console
+
+      "vdist":         2,
+
+- give all the particles the same initial speed along each axis in either direction. In the json file
+
+  .. code-block:: console
+
+      "vdist":         3,
+
+- draw the particles' velocity from a gaussian distribution scaled by :math:`(K_{B}T/MASS)^{1/2}`
+  for each component of the velocity.
+
+  .. code-block:: console
+
+      "vdist":         4,
+
+The default value is 0.
+
+ODIST
+-----
+
+It specifies how the direction of this species' particles is initialised. The available options are to :
+
+- get a unit vector within a sphere distribution. 
+
+  - 3D: Sample the z component on :math:`[{\cos(\pi)}, 1]` and then sample the azimuthal angle, :math:`{\phi}` on :math:`[0, 2{\pi})`.
+
+  - 2D: Simply sample the azimuthal angle homogeneously.
+
+  - 1D: Checks if :math:`{\cos(\phi)}` would be parallel or anti-parallel, returning +1.0 or -1.0.
+
+  In the json file
+
+  .. code-block:: console
+
+      "odist":         0,
+
+- align all particles along X axis. In the json file 
+
+  .. code-block:: console
+
+      "odist":         1,
+
+- align all particles along Y axis. In the json file 
+ 
+  .. code-block:: console
+
+      "odist":         2,
+
+- align all particles along Z axis. In the json file 
+ 
+  .. code-block:: console
+
+      "odist":         3,
+
+- align all particles along 45 degree angle. In the json file 
+ 
+  .. code-block:: console
+
+      "odist":         4,
+
+- align all particles randomly within XY axis. In the json file 
+ 
+  .. code-block:: console
+
+      "odist":         5,
+
+- align all particles randomly within XZ axis. In the json file 
+ 
+  .. code-block:: console
+
+      "odist":         6,
+
+- align all particles randomly within YZ axis. In the json file 
+ 
+  .. code-block:: console
+
+      "odist":         7,
+
+- align all particles in the direction of origin towards positive right hand corner of any cartesian plane.
+  In the json file 
+ 
+  .. code-block:: console 
+
+      "odist":         8,
+
+- align all particles in the direction of two oppositely charged defects. In the json file 
+ 
+  .. code-block:: console 
+
+      "odist":         9,
+
+The default value is 2.
+
+MASS
+----
+
+Mass of this species' particles. The equivalent parameter in the json input file is "mass" and the default value = 1. Should **always** be 1 for at least one species since sets mass scale .
+
+RFC
+---
+
+Rotational friction coefficient of species nematogens.
+
+The angular drift velocity :math:`{\omega} = d{\theta}/dt` in response to an external torque :math:`{\Gamma}` is s given by :math:`{\omega} = {\Gamma}/f_r` where :math:`f_r` is the rotational drag coefficient. The equivalent parameter in the json input file is "rfc" and the default value is 0.01. 
+
+TUMBLE
+------
+
+Coupling between the director and fluid flow is crucial for reproducing nematohydrodynamics since flows can rotate the nematogens just as it can rotate any rodlike, or elongated object. The director profile is not only rotated by the flow, but can also align when subject to a shear. The tumbling parameter specifiec how the nematogens response to a shear, if it is ≥ 1 the director field aligns with the flow - such LCs are known as “flow-aligning” , if it is < 1 the director field rotates in the flow continuously – such LCs are known as “flow-tumbling” [Shendruk2015]_ . The equivalent parameter in the json input file is "tumble" and the default value is 2.
+
+
+CHIHI
+-----
+
+It is the susceptibility of the director to shear. Based on theory it is always 1 but practically a heuristic shear coupling coefficient should exit, that tunes the alignment relaxation time relative to :math:`{\delta} t`. For the rotation of an individual prolate particle subject to shear flow, CHIHI = 1. When the shear coupling coefficient is set to zero (CHIHI = 0) there is no coupling of the director to the velocity field. The equivalent parameter in the json input file is "shearSusc" and the default value is 0.5.
+
+CHIA
+----
+
+It is the susceptibility of the director to a magnetic field by which it is only rotated. The magnitude of the torque applied to the nematogen is proportional to :math:`chia {\times} ({\vec u} {\cdot} {\vec H})` in which the :math:`{\vec u}` is the particle's orientation and :math:`{\vec H}` is the magnetic field. The equivalent parameter in the json input file is "magSusc" and the default value is 0.001.
+
+
+LEN
+---
+
+The effective length of the nematogens in order to couple torque on MPCD into force on boundaries, (smaller => stronger ; bigger => weaker). The equivalent parameter in the json input file is "len" and the default value is 0.007.
+
+ACT
+---
+
+It sets the type and the magnitude of the force dipole on each MPCD particle. Positive values corresponds to extensile force dipoles and negative values to contractile ones. Each collision operator has a defined region for this activity parametr that **active** turbulence exists. The equivalent parameter in the json input file is "act" and the default value is 0.05.
+
+.. note::
+
+    The turbulence interval for contractile force dipoles are not exactly th same as the extensile ones. 
+
+DAMP
+----
+
+A damping/friction coefficient to control hydrodynamics in other words to go from wet to dry. The equivalent parameter in the json input file is "damp" that could be :math:`[0,1]` and the default value is 0. 
+
+M[:ref:`MAXSPECI <MAXSPECI>`]
+-----------------------------
+
+Interaction matrix for multiphase fluids. Each species has a different interaction with all others. The equivalent parameter in the json input file is "interMatr" and it **Must** be of the same length as the number of species. Default will autopopulate with 0s, [0,...].
+
+SIGWIDTH & SIGPOS
+-----------------
+
+SIGWIDTH and SIGPOS are parameters used to modulate local activity as a function of density [Kozhukhov2023]_ .
+
+SIGWIDTH represents how fast should the modulation fall-off as a function of density , should be > 0, ideally around 0.4. The equivalent parameter in json input file is "sigWidth" with the default value 1.0.
+
+SIGPOS is a measure of when modulation should begin, should be in a range 0 to 2, ideally around 0.5. The equivalent parameter in json input file is "sigPos" with the default value 1.0.
+
+MINACTRATIO
+-----------
+
+Activity could be applied to a proportion of particles in the cell, the **Minimum** of which is tgis parameter. The equivalent parameter in the json input file is "minActRatio" and the default value is 0.
+
+
+.. rubric:: References
+
+.. [Shendruk2015] Shendruk and Yeomans (2015), `Multi-particle collision dynamics algorithm for nematic fluids <https://pubs.rsc.org/en/content/articlepdf/2015/sm/c5sm00839e>`_, Soft Matter, vol 11.
+
+.. [Kozhukhov2023] Kozhukhov, Loewe, Shendruk(2023), in Prep.
