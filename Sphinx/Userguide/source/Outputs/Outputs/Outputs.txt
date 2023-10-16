@@ -1,0 +1,181 @@
+.. _Outputs:
+
+The MPCD code contains various input flags which can give different outputs. Default is that the output files are turned off, but they can be turned on by flagging them as a non-zero value. This non-zero value is the interval in simulation timesteps for the output. These different outputs can be classified as following:
+
+1. Fields. Local course-grained data which varies spatially over MPCD boxes. This is outputted as time, than the cell positition QX, QY, QZ and than course-grained values.
+2. Trajactories (TOD)
+3. Averages. Simulation averaged date over the entire box. This is outputted as time and than averaged value.
+4. Distribution. Outputs the probability distribution of a field at a certaint time. The number of bins is set by BINS (set to 101) in definition.h. Range is 0 (or minimum if more relavant for the exact field) and maximum field value.
+
+Fields
+=============
+
+::
+
+    `coarseOut`     | int           | 0             | Coarse grain data (cell velocity, densities, density of each species) field
+
+This creates file named coarsegrain, which contains the field values for the coarse grained cell current population and current explicited velocity data. 
+
+::
+
+    `flowOut`       | int           | 0             | Flow field averaged between output times
+
+This creates file named flowfield, which contains the field values for the time-averaged velocity data (averaged over the timewindow between outputs). 
+
+
+::
+
+    `velOut`        | int           | 0             | Instantaneous velocity field.
+
+This creates file named velfield, which contains the field values for the current explicited velocity data. 
+
+::
+
+    `dirSOut`       | int           | 0             | Director and scalar order parameter fields
+
+This creates file named directorfield, which contains the field values for the local nematic order and director.
+
+::
+
+    `qTensOut`      | int           | 0             | Q tensor field
+
+This creates file named ordertensor, which contains the field values for the local Q tensor values.
+
+::
+
+    `qkTensOut`     | int           | 0             | Reciprocal Q tensor field
+
+This creates file named recipOrder, which contains the field values for the local reciprocal space order parameter.
+
+::
+
+    `oriEnOut`      | int           | 0             | Orientational energy field
+
+This creates file named enfield, which contains the field values for the local orientation interaction energy (if system is liquid crystal) and kinetic energy of the MPC fluid. Not MD or swimmers.
+
+::
+
+    `colourOut`     | int           | 0             | Colour/ phi/ species-type field
+    
+This creates file named multiphase, which contains the field values for the local species type of MPCD particle, colour, and multiphase phi parameter. 
+
+::
+
+    `pressureOut`     | int           | 0             | Colour/ phi/ species-type field
+    
+
+This creates file named pressure, which contains the field values for the local streaming pressure (pre-collision) and collision pressure (after collision) of the MPC fluid. Not MD or swimmers.
+
+
+Trajectories
+=============
+
+Averages
+=============
+::
+
+    `avVelOut`      | int           | 0             | Total average MPCD velocity. System-averaged single value
+
+This creates file named avVel, which contain the average current explicited velocity.
+
+::
+
+    `neighbourEnOut`| int           | 0             | Orientational energy from neighbours. System-averaged single value
+
+This creates file named enneighbours, which contain the total energy based on the local director and tensor order parameter per cell.
+
+::
+
+    `avSOut`        | int           | 0             | Total average scalar order parameter. System-averaged single value
+
+This creates file named avS, which contain the average nematic order.
+
+::
+
+    `densSDOut`     | int           | 0             | SD of the number per cell. System-averaged single value
+
+This creates file named densSTD, which contain the standart deviation of the density of all the cells.
+
+::
+
+    `enstrophyOut`  | int           | 0             | Enstrophy field
+    
+This creates file named avEnstrophy, which contains the average enstrophy (mean squared vorticity) of all the cells.
+
+Averages
+=============
+
+::
+
+    `histVelOut`    | int           | 0             | Velocity distribution
+
+This creates file named distVel, which contains the distribution of velocity vector.
+
+
+::
+
+    `histSpeedOut`  | int           | 0             | Speed distribution
+
+This creates file named distSpeed, which contains the distribution of speed (magnitude of velocity).
+
+::
+
+    `histVortOut`   | int           | 0             | Vorticity distribution
+
+This creates file named distVort, which contains the distribution of vorticity vector.
+
+
+::
+
+    `histEnsOut`    | int           | 0             | Enstrophy distribution
+
+This creates file named distEnstrophy, which contains the distribution of enstrophy magnitude.
+
+
+::
+
+    `histDirOut`    | int           | 0             | Director distribution
+
+This creates file named distDir, which contains the distribution of director vector.
+
+
+::
+
+    `histSOut`      | int           | 0             | Scalar order parameter distribution
+
+This creates file named distS, which contains the distribution of nematic order magnitude.
+
+
+::
+
+    `histNOut`      | int           | 0             | Number per cell distribution
+
+This creates file named distDens, which contains the distribution of number of particles in cells.
+
+
+TODO
+
+
+::
+
+    `trajOut`       | int           | 0             | Detailed particle trajectories for every particle of species type given by `trajSpecOut`
+    `trajSpecOut`   | int           | 0             | Which number of species whose detailed trajectories to output
+    `solidTrajOut`  | int           | 0             | Solid BC trajectories
+    `topoFieldOut`  | int           | 0             | Topological charge field
+    `defectsOut`    | int           | 0             | Defect positions and orientations
+    `disclinOut`    | int           | 0             | Disclination tensor field
+    `energyOut`     | int           | 0             | System energy field
+    `velCorrOut`    | int           | 0             | Velocity autocorrelation (radial function)
+    `dirCorrOut`    | int           | 0             | Director autocorrelation (radial function)
+    `vortCorrOut`   | int           | 0             | Vorticity autocorrelation (radial function)
+    `densCorrOut`   | int           | 0             | Densty autocorrelation (radial function)
+    `orderCorrOut`  | int           | 0             | Scalar order parameter autocorrelation (radial function)
+    `phaseCorrOut`  | int           | 0             | Binary fluid correlation (radial function)
+    `energySpecOut` | int           | 0             | Energy spectra  (radial function)
+    `enstrophySpecOut`| int           | 0             | Enstrophy spectra (radial function)
+    `binderOut`     | int           | 0             | Binder cumulant
+    `binderBin`     | int           | 0             | Binder cumulant bin size
+    `swimQOut`      | int           | 0             | Swimmer positions
+    `swimOOut`      | int           | 0             | Swimmer orientations
+    `swimROut` OR `swimRTOut`| int           | 0             | Swimmer run/ tumble. `swimRTOut` is prioritised
+    `synopsisOut`   | int           | 1             | Synopsis output. Highly recommended to be on. 1 = on, 0 = off

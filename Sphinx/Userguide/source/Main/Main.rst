@@ -61,3 +61,4 @@ MD
 
 Swimmers
 ********
+.. include:: Swimmers/Swimmers.txt
