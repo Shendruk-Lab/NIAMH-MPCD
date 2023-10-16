@@ -1,0 +1,71 @@
+As any other transport coefficient, the viscocity estimates of an MPCD fluid, both dynamical (:math:`\eta`) and kinematic (:math:`\nu = \eta/\rho = \eta/(\langle N_c\rangle m/a^d`) viscocities, have kinematic and collisional contributions. Here, we focus on estimating the kinematic viscocity.
+We first consider the case of a diluted gas. In this case, the kinematic viscocity is dominated by its kinematic contribution, namely, the momentum carried by fluid particles to other regions of space. This can be estimated to be approximately the thermal velocity :math:`\sqrt{K_B T/m}` times the mean free path :math:`\lambda = \delta t \sqrt{K_B T/m}` [Gompper2008]_.
+
+.. math::
+    :name: eq:vis_kin
+
+    \nu_{\text{kin}} \sim \delta t \frac{k_B T}{m}.
+
+As density increases and the dilute gas regime is abandoned, momentum stops being primarely carried out by moving particles but rather is transported through collision events. As such, the collision contribution to the viscocity becomes dominant. Since collisions occur once every :math:`\delta t` in cells of size :math:`a`, simple scaling suggests that collisions contribute to the viscocity approximately as
+
+.. math::
+    :name: eq:vis_col
+
+    \nu_{\text{col}}\sim  \frac{a^2}{\delta t}.
+
+As such, when the mean free path is small compared to the cell size, the collisional contribution dominates. In the opposite case, the kinetic term dominates. In general, the total kinematic viscocity is the sum of kinematic and collisional terms.
+
+.. math::
+    \nu = \nu_{\text{kin}} + \nu_{\text{col}}.
+
+
+The specific way in which the estimates for the :ref:`kinematic <eq:vis_kin>` and :ref:`collisional <eq:vis_col>` contributions are weighted depends on the specifics of the model being used. These are captured through auxiliary functions :math:`f_\text{kin}(\theta,\langle N_c\rangle,d)` and :math:`f_\text{col}(\theta,\langle N_c\rangle,d)`, such that
+
+.. math::
+    \begin{eqnarray}
+        \nu_{\text{kin}} =& \delta t  \frac{k_B T}{m}\, f_\text{kin}(\theta,\langle N_c\rangle,d),\\
+        \nu_{\text{col}} =& \frac{a^2}{\delta t} f_\text{col}(\theta,\langle N_c\rangle,d).
+    \end{eqnarray}
+
+The table below list these functions for the most common collision operators [Kikuchi2003]_, [Tüzel2003]_, [Götze2007]_, [Noguchi2007]_, [Gompper2008]_
+
++------------------+---------------------+--------------------------------------------------------------------------------------------------+
+|Collision Operator| Contribution        | Expression                                                                                       |
++==================+=====================+==============================================================================+===================+
+|     SRD fluid    |:math:`f_\text{kin}` |:math:`\frac{1}{2}\left[\frac{\Xi}{\sin^2(\theta)}-1\right]`                  |  2D               |
+|                  |                     +------------------------------------------------------------------------------+-------------------+
+|                  |                     |:math:`\frac{1}{2}\left[\frac{5\,\Xi}{2-\cos(\theta)-\cos(2 \theta)}-1\right]`|  3D               |
+|                  +---------------------+------------------------------------------------------------------------------+-------------------+
+|                  |:math:`f_\text{col}` | :math:`\frac{1-\cos(\theta)}{6\, d \,\Xi}`                                                       |
++------------------+---------------------+--------------------------------------------------------------------------------------------------+
+| Anderson         |:math:`f_\text{kin}` |:math:`\Xi-\frac{1}{2}`                                                                           |
+|                  +---------------------+--------------------------------------------------------------------------------------------------+
+|                  |:math:`f_\text{col}` |:math:`\frac{1}{12 \Xi}`                                                                          |
++------------------+---------------------+--------------------------------------------------------------------------------------------------+
+|Langevin          |:math:`f_\text{kin}` |:math:`\frac{[1+\alpha/2]^2}{2 \alpha}\,\Xi-\frac{1}{2}`                                          |
+|                  +---------------------+--------------------------------------------------------------------------------------------------+
+|                  |:math:`f_\text{col}` |:math:`\frac{1}{12}\frac{\alpha}{1+\alpha/2}\frac{1}{\Xi}`                                        |
++------------------+---------------------+--------------------------------------------------------------------------------------------------+
+
+in which :math:`\Xi \equiv \langle N_c \rangle/( \langle N_c \rangle-1+\exp(- \langle N_c \rangle))` and :math:`\alpha \equiv (\gamma \delta t)/m` (with :math:`\gamma` the inverse of the Langevin relaxation time) are defined for convenience.
+
+
+
+
+.. rubric:: Reference
+
+
+
+.. [Kikuchi2003] N. Kikuchi, C.M. Pooley, J.F. Ryder, and J.M. Yeomans. Transport coefficients of a mesoscopic fluid dynamics model. The Journal of Chemical Physics, 11(12):6388–6395, 2003.
+
+
+.. [Tüzel2003] E. Tüzel, M. Strauss, T. Ihle, and D.M. Kroll. Transport coefficients for stochastic rotation dynamics in three dimensions. Physical Review E, 68(3):036701, Sep 2003.
+
+
+.. [Götze2007] I.O. Götze, H. Noguchi, and G. Gompper. Relevance of angular momentum conservation in mesoscale hydrodynamics simulations. Physical Review E, 76(4):046705, 2007.
+
+.. [Noguchi2007] H. Noguchi, N. Kikuchi, and G. Gompper. Particle-based mesoscale hydrodynamictechniques. EPL (Europhysics Letters), 78(1):10005, 2007.
+
+
+.. [Gompper2008]    G. Gompper, T. Ihle, D.M. Kroll, and R.G. Winkler. Multi-particle collision dynamics: A particle-based mesoscale simulation approach to the hydrodynamics of complex fluids. Advances in Polymer Science, pages 1–87. Springer Berlin Heidelberg, 2008.
+
