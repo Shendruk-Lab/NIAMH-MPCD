@@ -3,7 +3,7 @@
 Tutorials
 #########
 
-Channel Flow
+Channel flow
 ************
 
 .. include:: ChannelFlow/ChannelFlow.txt

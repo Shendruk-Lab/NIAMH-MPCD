@@ -1,3 +1,5 @@
+.. _installAndRun:
+
 Installation & run guide
 ##########################
 
@@ -9,6 +11,8 @@ This section explains how to install and run MPCD, makefile options, and argumen
     * MPCD has no external dependencies
     * Compilation is done with a standard makefile
     * Common UNIX C compilers successfully compile MPCD.
+
+.. _installation:
 
 Installation instructions
 *************************

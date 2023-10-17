@@ -3,6 +3,8 @@
 Usage
 #####
 
+.. _chapterParticles:
+
 Particle properties
 *******************
 
@@ -15,28 +17,28 @@ Cell properties
 
 .. include:: Cells/cell.txt
 
-.. _chapter5:
+.. _chapterCollOp:
 
 Collision operators
 *******************
 
 .. include:: CollisionOperators/CollisionOperators.rst
 
-.. _chapter6:
+.. _chapterInit:
 
 Initialization
 **************
 
 .. include:: particleInitialization/particleInitialization.txt
 
-.. _chapter7:
+.. _chapterBC:
 
 Boundary conditions
 *******************
 
 .. include:: BC/bc.txt
 
-.. _chapter2:
+.. _chapterVisc:
 
 Transport coefficients
 **********************
