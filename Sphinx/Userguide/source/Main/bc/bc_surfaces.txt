@@ -3,7 +3,7 @@ where :math:`\vec{x}= (x,y,z)` are points on the surface.
 There are multiple forms of implemented surfaces, which can be combined (non-zero surface parameters) or removed (setting surface parameters to zero).
 
 Standard surfaces
-------------------------
+-----------------
 
 Standard surfaces have the basic form,
 
@@ -165,9 +165,3 @@ WHERE ARE THESE EQUATIONS?
 EXAMPLES
 
 PICTURES
-
-Surface normals
-------------------------
-
-In applying boundary conditions, the surface normal is required.
-Describe the hard coded and general form for the surface normals
