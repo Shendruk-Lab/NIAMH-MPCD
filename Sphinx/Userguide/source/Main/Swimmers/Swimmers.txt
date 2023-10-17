@@ -3,7 +3,7 @@
 Swimmer
 =======
 
-The hydrodynamical interaction of model shaped-anisotropic bacilliform are simulated using Active Dumbbell Swimmers (ADS) [ADS]_.
+The hydrodynamical interaction of model shaped-anisotropic bacilliform are simulated using Active Dumbbell Swimmers (ADS) [Nash2008]_.
 
 To model the bacilliform body of swimming microbes, an ADS model is proposed composed of two monomers (head and middle) simulating the body, subject to an explicit propulsion force applied in the dimer's polar axis. The two monomers are connected by a spring.  
 The surrounding MPCD fluid sees these monomers point-particles, but excluded volume with other swimmers/obstacles (Lennord-Jones potential) can be turned on (default) or off.
@@ -142,7 +142,3 @@ The strength of the magnetic moment on the swimmers (if magnetic field is applie
     `fixDistSwim`   | double        | 0                  | The fixed distance from the wall for `DUMBELL_NEARWALL` mode
 
 Used for timeswim=4. 
-
-.. rubric:: Reference
-
-.. [ADS]     R. Nash et al., PRE 77, 026709 (2008).

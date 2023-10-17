@@ -277,9 +277,3 @@ This creates file named runtumble. This prints the signed angle which is the swi
     `synopsisOut`   | int           | 1             | Synopsis output. Highly recommended to be on. 1 = on, 0 = off
 
 This creates file named synopsis.dat, which contains the entire synopsis output.
-
-    
-.. rubric:: Reference
-
-.. [Disclination]     <a href="https://pubs.rsc.org/en/content/articlelanding/2022/SM/D1SM01584B">C Schimming and J Vinals</a>.
-.. [Binder]     See https://en.wikipedia.org/wiki/Binder_parameter.

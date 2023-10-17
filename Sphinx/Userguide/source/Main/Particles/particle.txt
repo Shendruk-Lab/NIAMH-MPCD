@@ -1,12 +1,10 @@
-Overview
-========
 
-MPCD fluid is made of point like particles and these particles could belong to different species with different properties. The main properties are including :ref:`position <position>`, :ref:`velocity <velocity>` and :ref:`mass <mass>`. Moreover, if the MPCD is used to simulate nematic fluid :ref:`orientation <orientation>` plays an important role.
+MPCD fluid is made of point-like particles and these particles could belong to different species with different properties. The main properties are including :ref:`position <position>`, :ref:`velocity <velocity>` and :ref:`mass <mass>`. Moreover, if the MPCD is used to simulate nematic fluid :ref:`orientation <orientation>` plays an important role.
 
 .. _position:
 
 Position
---------
+========
 
 Each particle has a position vector, :math:`{\vec x}_i`, pointing to its position in the control volume. Add the following to your input ``.json`` file:
 
@@ -19,7 +17,7 @@ Available options can be found in the :ref:`position initialization <QDIST>`.
 .. _velocity:
 
 Velocity
---------
+========
 
 Each particle has a velocity vector, :math:`{\vec v}_i`. Add the following to your input ``.json`` file:
 
@@ -32,7 +30,7 @@ Available options can be found in the :ref:`velocity initialization <QDIST>`.
 .. _mass:
 
 Mass
-----
+====
 
 Each MPCD particle is assigned a mass specifing its contribution in the velocity collision step, when its momentum is exchanged with other particles belonging to the same cell. To set it, add the following to your input ``.json`` file: 
 
@@ -45,7 +43,7 @@ More details can be found in :ref:`mass initialization <MASSInitialization>`.
 .. _orientation:
 
 Orientation
------------
+===========
 
 Each MPCD particle is assigned an orientation :math:`{\vec u}_i` contributing to tensor order parameter of the cell
 
@@ -88,7 +86,7 @@ There are also other properties:
 .. _Population:
 
 Population
-----------
+==========
 
 It is the total population of the particles of this species. To set it, add the following to your input ``.json`` file: 
 
@@ -101,7 +99,7 @@ For more details check :ref:`population initialization <POP>` .
 .. _RotationFriction:
 
 Rotational friction coefficient
--------------------------------
+===============================
 
 Rotational friction coefficient of this species.
 
@@ -116,7 +114,7 @@ For more details check :ref:`friction initialization <RFC>` .
 .. _Tumbling:
 
 Tumbling parameter
-------------------
+==================
 
 Coupling between the director and fluid flow is crucial for reproducing nematohydrodynamics since flows can rotate the nematogens just as it can rotate any rodlike, or elongated object. The director profile is not only rotated by the flow, but can also align when subject to a shear. The tumbling parameter specifiec how the nematogens response to a shear, if it is ≥ 1 the director field aligns with the flow - such LCs are known as “flow-aligning” , if it is < 1 the director field rotates in the flow continuously – such LCs are known as “flow-tumbling” [Shendruk2015]_ . To set it, add the following to your input ``.json`` file:
 
@@ -129,7 +127,7 @@ For more details check :ref:`Tumbling initialization <TUMBLE>` .
 .. _ShearSus:
 
 Shear susceptibility
---------------------
+====================
 
 It is the susceptibility of the director to shear. Based on theory it is always 1 but practically a heuristic shear coupling coefficient should exit, that tunes the alignment relaxation time relative to :math:`{\delta} t`. For the rotation of an individual prolate particle subject to shear flow, CHIHI = 1. When the shear coupling coefficient is set to zero there is no coupling of the director to the velocity field. To set it, add the following to your input ``.json`` file:
 
@@ -142,7 +140,7 @@ For more details check :ref:`Shear initialization <CHIHI>` .
 .. _MagSus:
 
 Magnetic susceptibility
------------------------
+=======================
 
 It is the susceptibility of the director to a magnetic field by which it is only rotated. The magnitude of the torque applied to the nematogen is proportional to :math:`chia {\times} ({\vec u} {\cdot} {\vec H})` in which the :math:`{\vec u}` is the particle's orientation and :math:`{\vec H}` is the magnetic field. To set it, add the following to your input ``.json`` file:
 
@@ -155,7 +153,7 @@ For more details check :ref:`Magnetic initialization <CHIA>` .
 .. _Damping:
 
 Damping coefficient
--------------------
+===================
 
 A damping coefficient to control hydrodynamics in other words to go from wet to dry that could be :math:`[0,1]`. To set it, add the following to your input ``.json`` file:
 
@@ -168,7 +166,7 @@ For more details check :ref:`Damping initialization <DAMP>` .
 .. _Length:
 
 Length
-------
+======
 
 It is the effective length of the nematogens in order to couple the torque on MPCD particle into force on boundaries.
 
@@ -204,11 +202,11 @@ For more details check :ref:`Length initialization <LEN>` .
 .. _Activity:
 
 Activity
---------
+========
 
 The force dipole density acting on nematogens in the direction of the local cell director :math:`{\vec n}_c`. 
 
-To make MPCD active, an intrinsically out-of-equilibrium term must be included in the collision operation. To have a MPCD algorithm that conserves momentum (wet) in the active fluids, energy is injected to the fluid constituents in the collision opertaor not momentum. To do so, active stress is introduced to fluid in the form of force dipole density acting on nematogens. This force dipole can be extensile or contractile [Kozhukhov2022]_.
+To make MPCD active, an intrinsically out-of-equilibrium term must be included in the collision operation. To have a MPCD algorithm that conserves momentum (wet) in the active fluids, energy is injected to the fluid constituents in the collision opertaor not momentum. To do so, active stress is introduced to fluid in the form of force dipole density acting on nematogens. This force dipole can be extensile or contractile [kozhukhov2022]_.
 
 To set it, add the following to your input ``.json`` file:
 
@@ -221,9 +219,9 @@ For more details check :ref:`Activity initialization <ACT>` .
 .. _Modulators:
 
 Local activity modulators
--------------------------
+=========================
 
-There are two parameters :math:`{\sigma}_p` and :math:`{\sigma}_w` used to modulate the local activity as a function of density [Kozhukhov2023]_ .
+There are two parameters :math:`{\sigma}_p` and :math:`{\sigma}_w` used to modulate the local activity as a function of density [kozhukhov2023]_ .
 
 :math:`{\sigma}_w` represents how fast should the modulation fall-off as a function of density , should be > 0, ideally around 0.4. To set it, add the following to your input ``.json`` file: 
 
@@ -242,7 +240,7 @@ For more details check :ref:`Modulators initialization <SIG>` .
 .. _ActRatio:
 
 Ratio of active particles
--------------------------
+=========================
 
 Activity could be applied to a proportion of particles in the cell, the **Minimum** of which is this parameter.  To set it, add the following to your input ``.json`` file:
 
@@ -255,7 +253,7 @@ For more details check :ref:`Active ratio initialization <MINACTRATIO>` .
 .. _Interaction:
 
 Interaction matrix
-------------------
+==================
 
 Each species has a different interaction with all other species in a multiphase fluids and this matrix specifies how ther interact. To set it, add the following to your input ``.json`` file:
 
@@ -264,11 +262,3 @@ Each species has a different interaction with all other species in a multiphase 
     "interMatr":    <value>,
 
 For more details check :ref:`Interaction matrix initialization <MATRIX>` .
-
-.. rubric:: References
-
-.. [Shendruk2015] Shendruk and Yeomans (2015), `Multi-particle collision dynamics algorithm for nematic fluids <https://pubs.rsc.org/en/content/articlepdf/2015/sm/c5sm00839e>`_, Soft Matter, vol 11.
-
-.. [Kozhukhov2022] Kozhukhov and Shendruk(2023), `Mesoscopic simulations of active nematics <https://www.science.org/doi/full/10.1126/sciadv.abo5788>`_, Science Advances, vol 8.
-
-.. [Kozhukhov2023] Kozhukhov, Loewe, Shendruk(2023), in Prep.

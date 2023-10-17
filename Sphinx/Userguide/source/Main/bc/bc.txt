@@ -1,27 +1,27 @@
 Overview
 ========
 
-.. include:: bc/bc_overview.txt
+.. include:: BC/bc_overview.txt
 
 Surfaces
 ========
 
-.. include:: bc/bc_surfaces.txt
+.. include:: BC/bc_surfaces.txt
 
 Boundary conditions
 ===================
 
-.. include:: bc/bc_conditions.txt
+.. include:: BC/bc_conditions.txt
 
 Mobile boundaries
 =================
 
-.. include:: bc/bc_mobile.txt
+.. include:: BC/bc_mobile.txt
 
 Liquids inside or outside boundaries
 ====================================
 
-.. include:: bc/bc_liquids.txt
+.. include:: BC/bc_liquids.txt
 
 Other
 =====

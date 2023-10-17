@@ -12,5 +12,3 @@ VicsekLangevin
 ==============
 
 .. include:: VicsekMPCD/vicsekLangevin.txt
-
-.. include:: VicsekMPCD/vicsekRef.txt

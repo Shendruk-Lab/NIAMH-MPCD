@@ -90,13 +90,6 @@ The number of MD steps between an MPCD step can be much smaller that in the MD-i
 
 In both coupling schemes, the MD particles are typically given a mass :math:`m_{\text{MD}}` that is larger than the MPCD particles’ mass m in order to achieve efficient coupling.
 
-
-
-
-.. rubric:: References
-
-.. [Holm2008] Holm and Kremer (2008). `Advanced computer simulation approaches for soft matter sciences III <https://link.springer.com/book/10.1007/978-3-540-87706-6>`_, Springer, vol 221.
-
 .. note::
 
     reference will be added

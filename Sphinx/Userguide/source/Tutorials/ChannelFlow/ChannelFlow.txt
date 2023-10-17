@@ -89,6 +89,7 @@ Understanding the Script
 Here is the breakdown of the input script.
 
 ::
+
     {
         "comment":          "Rectangular geometry",
         "domain":           [150, 30],
@@ -194,6 +195,8 @@ Now we define the bottom walls. We need to define ghost/phantom particles, as th
 Position of this plain intersects with Q=[0, 0, 0], and its normal is aInv=[0,1,0]. The P and R are the same (as we again define a plane).
 Now, when particles touch the wall they should not displace and DN is set to 0.
 We want to have full slip, so the velocity components (normal and tangent) need to be reversed when particles touch the walls (MVN=MVT=-1).
+
+::
 
             {
                 "comment":      "Top wall",

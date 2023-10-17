@@ -2,7 +2,7 @@
 
 In many situtations in soft matter physics, the fluid medium in which mesoscale particles---such as polymers, colloids or cells---are suspended is crucial but not the principle interest of study. 
 In such cases, coarse-grained algorithms that simulate one or more aspect of the surrounding fluid are needed. 
-For example, if the most significant effect of the fluid is to induce thermal fluctuations then a Langevin or Brownian dynamics simulation might be most suitable [slater2009]_. 
+For example, if the most significant effect of the fluid is to induce thermal fluctuations then a Langevin or Brownian dynamics simulation might be most suitable [Slater2009]_. 
 On the other hand, if the embedded particles are large enough that thermal fluctuations are negligible but hydrodynamic interactions between them are significant then an immersed boundary solver [mittel2005]_ or lattice-Boltzmann simulation [aidun2010]_ might be more appropriate. 
 
 * If both **fluctuations and hydrodynamic interactions are crucial** then *MPCD* may be an appropriate simulation technique. 
@@ -31,7 +31,7 @@ Respecting conservation of these quantities is what allows the hydrodynamic equa
 
 Thus, MPCD **does not** give correct dynamics on microscopic time or length scales. 
 Streaming and collision events conserve the momentum and energy in each collision volume at all times and so MPCD reproduces an accurate representation of the hydrodynamics of the velocity field at large distances. 
-The coarse-grained mesoscopic MPCD fluid provides both a thermal bath and propagates hydrodynamic interactions without having to either solve the entire Navier-Stokes equation [yeomans2006]_ for a potentially complex microfluidic system or to simulate the full molecular interactions of all fluid molecules. 
+The coarse-grained mesoscopic MPCD fluid provides both a thermal bath and propagates hydrodynamic interactions without having to either solve the entire Navier-Stokes equation [Yeomans2006]_ for a potentially complex microfluidic system or to simulate the full molecular interactions of all fluid molecules. 
 Therefore, it can be computationally less expensive than numerical, continuum solvers or full *Molecular Dynamics* (MD) simulations. 
 
 Two-step algorithm
@@ -97,17 +97,3 @@ Thus, these cell-based values are interpretted as discretized field values (see 
 
 The MPCD collision step replaces molecular-scale dynamics with a local, non-physical, stochastic momentum transfer operation. 
 A number of collision operators are available (see :ref:`Collision operators <chapter5>`). 
-
-.. rubric:: Reference
-
-.. [slater2009] Slater, *et al* (2009), `Modeling the Separation of Macromolecules <https://doi.org/10.1002/elps.200800673>`_. *Electrophoresis*, vol 30. 
-
-.. [aidun2010] Aidun & Clausen (2010), `Lattice-Boltzmann Method for Complex Flows <https://doi.org/10.1146/annurev-fluid-121108-145519>`_. *Annual Review of Fluid Mechanics*, vol 42.
-
-.. [mittel2005] Mittal & Iaccarino (2005), `Immersed Boundary Methods <https://www.annualreviews.org/doi/full/10.1146/annurev.fluid.37.061903.175743>`_. *Annual Review of Fluid Mechanics*, vol 37.
-
-.. [pooley2005] Poolye & Yeomans (2005), `Kinetic Theory Derivation of the Transport Coefficients of Stochastic Rotation Dynamics <https://pubs.acs.org/doi/full/10.1021/jp046040x>`_. *The Journal of Physical Chemistry B*, vol 109(14).
-
-.. [zhao2013] Zhao, Wang, Jiang & Larson (2005), `Assessment of Mesoscopic Particle-based Methods in Microfluidic Geometries <https://pubs.aip.org/aip/jcp/article/139/8/084109/74206>`_. *The Journal of Chemical Physics*, vol 139(084109).
-
-.. [yeomans2006] Yeomans (2006), `Mesoscale Simulations: Lattice Boltzmann and Particle Algorithms <https://www.sciencedirect.com/science/article/pii/S0378437106004067>`_. *Physica A: Statistical Mechanics and its Applications*, vol 369 (1). 

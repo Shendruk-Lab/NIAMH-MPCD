@@ -71,13 +71,3 @@ Thermostats
 ===================
 
 **TYLER DO THIS TONIGHT**
-
-.. rubric:: References
-
-.. [ihle2003] Ihle & Kroll (2003), `Stochastic Rotation Dynamics. I. Formalism, Galilean Invariance, and Green-Kubo Relations <https://journals.aps.org/pre/abstract/10.1103/PhysRevE.67.066705>`_. *Physical Review E*, vol 67 (066705). 
-
-.. [gotze07] Götze, Noguchi & Gompper (2007), `Relevance of angular momentum conservation in mesoscale hydrodynamics simulations <http://link.aps.org/abstract/PRE/v76/e046705>`_. *Physical Review E*, vol 76 (4).
-
-.. [gotze11] Götze & Gompper (2011), `Dynamic self-assembly and directed flow of rotating colloids in microchannels <http://link.aps.org/doi/10.1103/PhysRevE.84.031404>`_. *Physical Review E*, vol 84 (3).
-
-.. [babu12] Babu & Stark (2012), `Modeling the locomotion of the African trypanosome using multi-particle collision dynamics <http://stacks.iop.org/1367-2630/14/i=8/a=085012>`_. *New Journal of Physics*, vol 14 (8).

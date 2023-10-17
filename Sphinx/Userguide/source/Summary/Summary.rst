@@ -9,7 +9,7 @@ It is serial but versatile, and is able to simulate complex boundary conditions,
 
 In addition to this guide, users should consult pulbished review articles, including:
 
-* Gompper, Ihle, Kroll & Winkler (2009). `Multi-Particle Collision Dynamics: A Particle-Based Mesoscale Simulation Approach to the Hydrodynamics of Complex Fluids <https://link.springer.com/chapter/10.1007/978-3-540-87706-6_1>`_. In *Advanced Computer Simulation Approaches for Soft Matter Sciences III. Advances in Polymer Science*, vol 221.
-* Kapral (2008). `Multiparticle Collision Dynamics: Simulation of Complex Systems on Mesoscales <https://onlinelibrary.wiley.com/doi/10.1002/9780470371572.ch2>`_. In *Advances in Chemical Physics*. 
-* Yeomans (2006). `Mesoscale Simulations: Lattice Boltzmann and Particle Algorithms <https://www.sciencedirect.com/science/article/pii/S0378437106004067>`_. *Physica A: Statistical Mechanics and its Applications*, vol 369 (1). 
-* Howard, Nikoubashman & Palmer (2019). `Modeling Hydrodynamic Interactions in Soft Materials with Multiparticle Collision Dynamics <https://www.sciencedirect.com/science/article/pii/S2211339819300024>`_. *Current Opinion in Chemical Engineering*, vol 23.
+* [Gompper2009]_ Gompper, Ihle, Kroll & Winkler (2009). `Multi-Particle Collision Dynamics: A Particle-Based Mesoscale Simulation Approach to the Hydrodynamics of Complex Fluids <https://link.springer.com/chapter/10.1007/978-3-540-87706-6_1>`_. In *Advanced Computer Simulation Approaches for Soft Matter Sciences III. Advances in Polymer Science*, vol 221.
+* [Kapral2008]_ Kapral (2008). `Multiparticle Collision Dynamics: Simulation of Complex Systems on Mesoscales <https://onlinelibrary.wiley.com/doi/10.1002/9780470371572.ch2>`_. In *Advances in Chemical Physics*. 
+* [Yeomans2006]_ Yeomans (2006). `Mesoscale Simulations: Lattice Boltzmann and Particle Algorithms <https://www.sciencedirect.com/science/article/pii/S0378437106004067>`_. *Physica A: Statistical Mechanics and its Applications*, vol 369 (1). 
+* [Howard2019]_ Howard, Nikoubashman & Palmer (2019). `Modeling Hydrodynamic Interactions in Soft Materials with Multiparticle Collision Dynamics <https://www.sciencedirect.com/science/article/pii/S2211339819300024>`_. *Current Opinion in Chemical Engineering*, vol 23.

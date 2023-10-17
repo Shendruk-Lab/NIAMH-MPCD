@@ -135,7 +135,7 @@ in where :math:`B` is the magnitude of the magnetic field, :math:`\varepsilon` i
 Active nematic MPCD
 ===================
 
-Active nematics inject energy into the system at the particle level. In wet systems, as the ones considered so far, they do so while conserving momentum, behaving as force dipoles. The active nematic MPCD algorithm achieves this at the mesoscale level, i.e., at the level of MPCD cells, by adding an active term to the nematic velocity collision operator so it introduces a force dipole that co-aligns with the cell director :math:`\boldsymbol{n}_c` [Kozhukhov2022]_
+Active nematics inject energy into the system at the particle level. In wet systems, as the ones considered so far, they do so while conserving momentum, behaving as force dipoles. The active nematic MPCD algorithm achieves this at the mesoscale level, i.e., at the level of MPCD cells, by adding an active term to the nematic velocity collision operator so it introduces a force dipole that co-aligns with the cell director :math:`\boldsymbol{n}_c` [kozhukhov2022]_
 
 .. math::
     \Xi^A_{i,c} = \Xi^N_{i,c} + \alpha_c\delta_t\left(\frac{\kappa_i}{m_i}-\left\langle\frac{\kappa_j}{m_j}\right\rangle_c\right)\boldsymbol{n}_c
@@ -308,15 +308,3 @@ Finally, the algorithm also posses utilities to compute on the fly topological f
 
 
 .. [#] For more options see the section on :ref:`particle properties <orientation>`.
-
-
-.. [Archer1995] L. A. Archer and R. G. Larson, A-molecular-theory-of-flow-alignment-and-tumbling, J. Chem. Phys., 1995, 103, 3108–3111.
-
-.. [Shendruk2015] T. N. Shendruk and J. Yeomas, Multi-particle collision dynamics algorithm for nematic fluids,	Soft Matter, 2015,11, 5101-5110
-
-.. [Kozhukhov2022] T. Kozhukhov and T. N. Shendruk,  Mesoscopic simulations of active nematics, Science Advances, 2022, 8, 34
-
-
-KOZHUKHOV
-
-Kozhukhov

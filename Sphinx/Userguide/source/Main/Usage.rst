@@ -32,7 +32,7 @@ Initialization
 Boundary conditions
 *******************
 
-.. include:: bc/bc.txt
+.. include:: BC/bc.txt
 
 .. _chapter2:
 

@@ -22,6 +22,7 @@ The code is available from `GitHub <https://github.com/Shendruk-Lab/MPCD>`_ and 
    Analysis/Analysis
    DeveloperGuide/DeveloperGuide
    Glossary/Glossary
+   References/References
 
 .. note::
 

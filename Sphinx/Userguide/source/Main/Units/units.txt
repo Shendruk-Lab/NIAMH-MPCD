@@ -100,7 +100,7 @@ where *μ* is the viscosity, *D* is the diffusivity, and *ρ* is the density.
 
 The Schmidt number offers a way to measure the compressibility of a fluid, broadly speaking how 'gas-like' this fluid is. In MPCD, hydrodynamic disturbances
 travel at a finite speed, while they are instantaneous in an classical fluid - this translates to a relatively low Sc. Particle-based methods (such as
-Molecular Dynamics, Lattice Boltzmann, Dissipative Particle Dynamics, or MPCD) simulate fluids that are not incompressible, which is a drawback [slater2009]_.
+Molecular Dynamics, Lattice Boltzmann, Dissipative Particle Dynamics, or MPCD) simulate fluids that are not incompressible, which is a drawback [Slater2009]_.
 However, this is not an issue if the applied forces or pressure gradients are limited to small values.
 
 Mach number
@@ -117,9 +117,3 @@ In MPCD, the speed of sound is relatively low, which results in high Mach number
 .. warning:: 
     When using periodic boundary conditions, finite size effects come into play. As hydrodynamic interactions are long range, the simulated
     system can then interact with itself, potentially impacting measurements. This is important to keep in mind.
-
-.. rubric:: References
-
-.. [kozhukhov2022] Kozhukhov, T.; Shendruk, T. N. (2022): `Mesoscopic simulations of active nematics <https://www.science.org/doi/full/10.1126/sciadv.abo5788>`_. *Science Advances*, Vol. 8.
-.. [slater2009] Slater, *et al* (2009), `Modeling the Separation of Macromolecules <https://doi.org/10.1002/elps.200800673>`_. *Electrophoresis*, vol 30. 
-.. [padding2004] Padding, J. T.; Louis, A. A. (2004): `Hydrodynamic and Brownian Fluctuations in Sedimenting Suspensions <https://journals.aps.org/prl/abstract/10.1103/PhysRevLett.93.220601>`_. *Physical Review Letters*, Vol. 93.

@@ -94,7 +94,7 @@ Once installed, you can continue with the :ref:`InstallCommon` section.
 .. _Mac:
 
 Mac OS X - Dev Tools Setup
----------------------
+--------------------------
 To run MPCD on a Mac, the only requirements are a C compiler and the GNU make utility.
 These can be installed via the XCode command line tools:
 Open a terminal (under Applications/Utilities), and run:

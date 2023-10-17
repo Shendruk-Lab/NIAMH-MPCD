@@ -26,9 +26,3 @@ quadratic equation, so that the gradient can be taken: this algorithm can theref
 
 This method still works for N>=2 fluid species by running the same algorithm for each pair of 
 species, and so a variety of multiphase fluids can be simulated.
-
-.. rubric:: References
-
-.. [Cates2018] Cates, M. E.; Tjhung, E. (2018): `Theories of binary fluid mixtures: from phase-separation kinetics to active emulsions <https://www.cambridge.org/core/journals/journal-of-fluid-mechanics/article/theories-of-binary-fluid-mixtures-from-phaseseparation-kinetics-to-active-emulsions/5BD133CB20D89F47E724D77C296FEF80>`_. *Journal of Fluid Mechanics*, Vol. 836.
-.. [Eisenstecken2018] Eisenstecken et al. (2018): `Hydrodynamics of binary-fluid mixtures — An augmented Multiparticle Collison Dynamics approach <https://iopscience.iop.org/article/10.1209/0295-5075/121/24003>`_. *Europhysics Letters*, Vol 121.
-.. [Koch2023] Koch, K. (2023): Swimming in oil, MPhys thesis at the University of Edinburgh

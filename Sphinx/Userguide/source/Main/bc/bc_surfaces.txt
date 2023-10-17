@@ -33,7 +33,7 @@ where the surface parameters represent DESCRIBE A, Q and R. Writing surfaces in 
 
   with the perpendicular distance from the original as :math:`A \cdot Q = d`.
 
-  .. figure:: bc/bc_images/Plane.png
+  .. figure:: BC/bc_images/Plane.png
      :alt: Logo
      :scale: 30%
      :align: center
@@ -51,7 +51,7 @@ where the surface parameters represent DESCRIBE A, Q and R. Writing surfaces in 
 
   Describing a sphere centred at :math:`\vec{Q} = (Q_x,Q_y,Q_z)` with a radius :math:`R`.
 
-  .. figure:: bc/bc_images/Sphere.png
+  .. figure:: BC/bc_images/Sphere.png
      :alt: Logo
      :scale: 30%
      :align: center
@@ -70,7 +70,7 @@ where the surface parameters represent DESCRIBE A, Q and R. Writing surfaces in 
 
   Describing an ellipsoid centred at :math:`\vec{Q} = (Q_x,Q_y,Q_z)` with principle semi-axes :math:`a, b, c`.
 
-  .. figure:: bc/bc_images/Ellipsoid.png
+  .. figure:: BC/bc_images/Ellipsoid.png
      :alt: Logo
      :scale: 30%
      :align: center
@@ -88,7 +88,7 @@ where the surface parameters represent DESCRIBE A, Q and R. Writing surfaces in 
 
   Describing an cylinder centred at :math:`\vec{Q} = (Q_x,Q_y)` on the :math:`XY` plane with radius :math:`R`.
 
-  .. figure:: bc/bc_images/Cylinder.png
+  .. figure:: BC/bc_images/Cylinder.png
      :alt: Logo
      :scale: 30%
      :align: center
@@ -108,7 +108,7 @@ where the surface parameters represent DESCRIBE A, Q and R. Writing surfaces in 
 
   Describing a squircle centred at :math:`\vec{Q} = (Q_x,Q_y,Q_z)` with a minor radius :math:`R`.
 
-  .. figure:: bc/bc_images/Squircle.png
+  .. figure:: BC/bc_images/Squircle.png
      :alt: Logo
      :scale: 30%
      :align: center
@@ -125,7 +125,7 @@ where the surface parameters represent DESCRIBE A, Q and R. Writing surfaces in 
 
       S(\vec{x})= \left(\frac{x-Q_x}{a}\right)^n + \left(\frac{y-Q_y}{b}\right)^n + \left(\frac{z-Q_z}{c}\right)^n  - 1 = 0
 
-  .. figure:: bc/bc_images/SuperEllipsoid.png
+  .. figure:: BC/bc_images/SuperEllipsoid.png
      :alt: Logo
      :scale: 30%
      :align: center

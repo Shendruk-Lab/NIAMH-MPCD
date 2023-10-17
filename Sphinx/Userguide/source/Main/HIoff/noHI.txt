@@ -19,8 +19,3 @@ To turn off hydrodynamic interactions, add the following to your input ``.json``
     Hydrodynamic interactions are "scrambled" by randomly exchange particle velocities.
 
 If on the other hand a friction acts on the fluid (like a Brinkman term) (rather than ignoring hydrodynamic interactions), this can be set as a :ref:`damping friction coefficient <Damping>`. 
-
-.. rubric:: References
-
-.. [ali2004] Ali, Marenduzzo & Yeomans (2004), `Dynamics of Polymer Packaging <https://doi.org/10.1063/1.1798052>`_. *EThe Journal of Chemical Physics*, vol 121 (8635–8641). 
-
