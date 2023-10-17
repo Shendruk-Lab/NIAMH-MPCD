@@ -8,7 +8,7 @@ This section explains how to install and run MPCD, makefile options, and argumen
 
     * MPCD has no external dependencies
     * Compilation is done with a standard makefile
-    * All UNIX C compilers we've tested with have compiled fine.
+    * Common UNIX C compilers we have tested have compiled MPCD fine.
 
 Installation Instructions
 *************************
@@ -19,7 +19,7 @@ Depending on your operating system, please follow these instructions to install 
 
 * If you are running on **Windows**, and do not have Windows Subsystem for Linux (WSL) installed, please follow the instructions in the :ref:`WSL` section.
 * If you are running on **Mac OS**, and do not have dev tools such as make or a compiler installed, please follow the instructions in the :ref:`Mac` section.
-* **Otherwise**, please follow the instructions in the :ref:`InstallCommon` section.
+* If you are running on native **Linux**, or **otherwise**, please follow the instructions in the :ref:`InstallCommon` section.
 
 .. _WSL:
 
@@ -35,7 +35,7 @@ To run MPCD on Windows, it needs to be done through the Windows Subsystem for Li
 This is a feature of Windows 10 and 11, allowing for native Linux calls to be made from the Windows kernel, effectively acting as a low-level VM.
 More practically, it gives you a UNIX terminal within Windows.
 
-The remainder of this section roughly follows the explanation given by Microsoft in their `official installation guide for WSL <https://learn.microsoft.com/en-us/windows/wsl/install>`_, and `tutorial for setting up a developer environment <https://learn.microsoft.com/en-us/windows/wsl/setup/environment#set-up-your-linux-username-and-password>`_.
+The remainder of this section roughly follows the explanation given by Microsoft in their `official installation guide for WSL <https://learn.microsoft.com/en-us/windows/wsl/install>`_, and `tutorial for setting up a developer environment in WSL <https://learn.microsoft.com/en-us/windows/wsl/setup/environment#set-up-your-linux-username-and-password>`_.
 
 For the simplest install, simply open up a command prompt or powershell terminal as administrator, and run:
 
@@ -89,9 +89,11 @@ In Ubuntu, this will be done by running:
 
     sudo apt install git
 
+Once installed, you can continue with the :ref:`InstallCommon` section.
+
 .. _Mac:
 
-Mac OS X - Make Setup
+Mac OS X - Dev Tools Setup
 ---------------------
 To run MPCD on a Mac, the only requirements are a C compiler and the GNU make utility.
 These can be installed via the XCode command line tools:
@@ -117,6 +119,8 @@ To install make and a C compiler using homebrew, run:
 
     See :ref:`CompilerOptions` for more information on compilers.
 
+Once done, you can continue with the :ref:`InstallCommon` section.
+
 .. _InstallCommon:
 
 Common Installation Instructions
@@ -131,7 +135,14 @@ To clone via git, open a UNIX terminal and run:
     git clone https://github.com/Shendruk-Lab/MPCD.git
 
 This will create a folder called ``MPCD`` in your current directory, containing the source code for MPCD. 
-To compile, navigate within this folder (such that the ``Makefile`` is at the same level as your current working directory) and then call ``make`` in your terminal, which will create an executable file called ``mpcd.out`` in the same directory.
+To compile, navigate within this folder (such that the ``Makefile`` is at the same level as your current working directory) and then call 
+
+.. code-block:: console
+
+    make
+
+**This is all that is required to compile the code**.
+The compiled executable file will be called ``mpcd.out`` and will be located in the same directory as the ``Makefile``.
 This can then be run by calling ``./mpcd.out``, with arguments as detailed in the :ref:`ProgArgs` section.
 
 Makefile Options
@@ -245,7 +256,7 @@ Command Line Arguments
 MPCD arguments are purely programmatic --- There is no GUI, or interacive mode, and all physics is specified by the input files.
 There are only two required arguments for MPCD:
 
-* Input files, which can either use ``-i`` and point to a ``.json`` file for :ref:`JSONInput`, or use ``-Li`` and point to a directory for :ref:`LegacyInput`.
+* Input files, which can either use ``-i`` and point to a ``.json`` file for :ref:`JSONInput`, or use :ref:`LegacyInput`.
 * An output directory, which can be set using ``-o``.
 
 Optional arguments include:
@@ -260,7 +271,6 @@ Some examples of valid calls are:
 .. code-block:: console
 
     ./mpcd.out -i ./path/to/input.json -o ./path/to/output
-    ./mpcd.out -Li ./path/to/input/directory -o ./path/to/output
     ./mpcd.out -h 
     ./mpcd.out -v
 
@@ -275,6 +285,10 @@ This is a single file that is .json formatted, and contains all of the physics i
 A guide to all input parameters is provided on Github `here <https://github.com/Shendruk-Lab/MPCD/blob/master/docs/InputGuide.md>`_.
 Furthermore, all :ref:`tutorials <tutorials>` in this user guide give explanations on how to set up input files for specific simulations.
 
+.. note:: 
+    If you want to use the MD subsystem, you will need to also provide an MD .inp file along with a .json input file.
+    See `the MD input guide <https://github.com/Shendruk-Lab/MPCD/blob/master/docs/MDguide.md>`_ for more information.
+
 .. _LegacyInput:
 
 Legacy Input
@@ -283,6 +297,13 @@ Legacy Input
 .. warning:: 
     Legacy input files have been considered depreciated since the introduction of JSON input files in summer 2021.
     They are still supported, but no features implemented since 2020 are supported in them.
+
+In order to use legacy input files, you pass them to the ``mpcd.out`` using the legacy input argument ``-Li`` followed by the path to the input files.
+For example:
+
+.. code-block:: console
+
+    ./mpcd.out -Li ./path/to/input/files/directory -o ./path/to/output
 
 Legacy input files are a series of 5 ``.inp`` files, which are read in order to set up the simulation. 
 These include:
