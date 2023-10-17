@@ -13,10 +13,15 @@ The swimmers induce hydrodynamical forces on the surrounding MPCD fluid, which c
 The swimmer has a self-propulsion force, which is applied split evenly between the head and middle monomer to induce self-propulsion. Simultaneously, the head and middle monomer exert an equal drag force on the MPCD particles in the box they inhabit.
 To make the sum of forces on the fluid force-free, an opposite force to these two drag forces is applied at a localized tail position. This induces the dipole force, which results in the far-flow field of swimming microbes. 
 
+.. error::
+    TYLER: Please add caption to figure. Also if have better quality picture, please add.
 
+.. figure:: Swimmers/swimmerSchematic.jpg
+    :alt: Logo
+    :scale: 150%
+    :align: center
 
-.. image:: Swimmers/1.jpg
-   :scale: 70%
+    **CAPTION**
 
 Besides that, the swimmer monomers are treated as other MD particles.
 

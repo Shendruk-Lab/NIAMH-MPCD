@@ -5,7 +5,16 @@
 
 MPCD employ a square-shaped cell. The particles are represented as continuously moving points on a plane, following a continuous trajectory (off-lattice).
 
-.. image:: VicsekMPCD/VicsekMPCD.jpg
+
+.. error::
+    TYLER: Please add caption to figure. Also if have better quality picture, please add.
+
+.. figure:: VicsekMPCD/VicsekMPCD.jpg
+    :alt: Logo
+    :scale: 100%
+    :align: center
+
+    **CAPTION**
 
 Particle positions are being update as in :ref:`Streaming step <eq:stream>`. The positions of individual particles at time :math:`t + 1` are updated based on their current positions and velocities. Each particle moves in the direction of its velocity vector by a certain distance:
 
