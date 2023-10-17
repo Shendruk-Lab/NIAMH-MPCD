@@ -3,26 +3,32 @@ to coexist and interact through a tuneable interaction. The theory behind this i
 of the implementation in this algorithm are described in :ref:`the next section <MPImp>`.
 
 .. _landauGinz:
-Free-Energy of a multiphase fluid
+Free-Energy of a bimodal fluid
 =================================
 
 A multi-phase mixture can be described by a Landau-Ginzburg free energy functional depending on the local compositional order parameter *𝜙*, 
-a surface tension coefficient *𝜅*
+defined as
 
 .. math::
     F = \int d^d r (\frac{\tau}{2}\phi^2+\frac{b}{4}\phi^4+\frac{\kappa}{2}(\nabla \phi)^2) ,
 
-where *d* is the number of dimensions in the system.
+where *d* is the number of dimensions in the system, *b* and *τ* describe the bulk dynamic and phase separation, and *𝜅* is a surface tension 
+coefficient [Cates2018]_. Minimising this free energy with the Euler-Lagrange equation reveals the equation of motion for the system.
 
 .. _MPImp:
 Implementation in MPCD
 ======================
 
-Multiphase models have been simulated in MPCD before using super-cells: close-by cells are grouped together, and a kick is given to particles based
-on the gradient in compositional order between cells within the supercell [Eisenstecken2018]_. In this simulator, the surface of equilibrium compositional order is found
-within each cell, and a kick is added on during the collision step [Koch2023]_.
+Bimodal models have been simulated in MPCD before using super-cells: close-by cells are grouped together, and a kick is given to particles based
+on the gradient in compositional order between cells within the supercell [Eisenstecken2018]_. In this simulator, the surface of equilibrium 
+compositional order is found within each cell, and a kick is added on during the collision step [Koch2023]_. This surface is defined by a 
+quadratic equation, so that the gradient can be taken: this algorithm can therefore resolve surface tension effects up to the cell-length scale.
+
+This method still works for N>=2 fluid species by running the same algorithm for each pair of 
+species, and so a variety of multiphase fluids can be simulated.
 
 .. rubric:: References
 
+.. [Cates2018] Cates, M. E.; Tjhung, E. (2018): `Theories of binary fluid mixtures: from phase-separation kinetics to active emulsions <https://www.cambridge.org/core/journals/journal-of-fluid-mechanics/article/theories-of-binary-fluid-mixtures-from-phaseseparation-kinetics-to-active-emulsions/5BD133CB20D89F47E724D77C296FEF80>`_. *Journal of Fluid Mechanics*, Vol. 836.
 .. [Eisenstecken2018] Eisenstecken et al. (2018): `Hydrodynamics of binary-fluid mixtures — An augmented Multiparticle Collison Dynamics approach <https://iopscience.iop.org/article/10.1209/0295-5075/121/24003>`_. *Europhysics Letters*, Vol 121.
 .. [Koch2023] Koch, K. (2023): Swimming in oil, MPhys thesis at the University of Edinburgh
