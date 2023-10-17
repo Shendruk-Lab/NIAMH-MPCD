@@ -1,5 +1,5 @@
 Requirements
-----------------------------------
+------------
 
 The implicit representation for the surface has the property that
 
@@ -20,7 +20,7 @@ which requires tracing back the particle's position :math:`\vec{x}_i^*` to where
 at time :math:`t^*` where :math:`0<t^*<\delta t`.
 
 Boundary rules
-----------------------------------
+--------------
 
 Boundary rules are operators on a particle's position, velocity or orientation properties.
 
@@ -38,7 +38,7 @@ where :math:`f_i(t<t^*)` and :math:`f_i(t>t^*)` are the properties before and af
 and :math:`M_{f,\hat{\nu}}` is a multiplier of the PROJECTION components of :math:`f_i(t<t^*)` in direction :math:`\hat{\nu}`.
 
 Examples
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^
 
 Defaults for no applied conditions are :math:`D_{f,\hat{\nu}} = 0` and :math:`M_{f,\hat{\nu}} = 1`,
 leaving all components of :math:`f_i` unchanged and without shifts.
@@ -92,11 +92,14 @@ or tangential with the boundary (planar).
 
   PICTURE
 
+TALK ABOUT THE ANCHORING TORQUE BEING EITHER DISSIPATED WITH THE BOUNDARY OR CONSERVED.
+LINK TO BENJAMINS SECTION
+
 Boundary corrections
-----------------------------------
+--------------------
 
 Ghost particles
-^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^
 
 The random grid shifts (for Galilean invariance) can result in fluid cells being intersected by the boundary,
 reducing the cell's population below the average number density.
@@ -122,11 +125,11 @@ from a Maxwell Boltzmann distribution about zero but with a variance of :math:`N
 REFERENCE PAPERS FOR THIS
 
 Strong anchoring
-^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^
 
-Since orientation boundary conditions are only applied to the subset of particles :math:`N_{\mathrm{anch}} \leq N_c` that violate the surface boundary equation :math:`S(\vec{x})\leq0`,
+Since orientation boundary conditions are only applied to the subset of particles :math:`N_{c*} \leq N_c` that violate the surface boundary equation :math:`S(\vec{x})\leq0`,
 the cell director :math:`\hat{n}_c` mixes between the anchored and un-anchored orientations.
-The effective anchoring strength is therefore heavily dependent on the proportion :math:`N_{\mathrm{anch}} / N_c`, with strongest anchoring acheived when :math:`N_{\mathrm{anch}} = N_c`.
+The effective anchoring strength is therefore heavily dependent on the proportion :math:`N_{c*} / N_c`, with strongest anchoring acheived when :math:`N_{c*} = N_c`.
 To strengthen the effective anchoring, we apply the orientation boundary condition to all :math:`N_c` particles.
 
 THE TORQUE APPLIED IS CONSERVED WITH THE BOUNDARY. IF NOT, THE BOUNDARY ABSORBS IT.
