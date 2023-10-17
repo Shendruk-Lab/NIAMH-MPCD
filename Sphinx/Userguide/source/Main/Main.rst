@@ -47,6 +47,14 @@ Collision operators
 
 .. include:: CollisionOperators/CollisionOperators.rst
 
+.. _noHI:
+
+Turn-off Hydrodynamics
+**********************
+
+.. include:: HIoff/noHI.txt
+
+
 .. _chapter6:
 
 Initialization
