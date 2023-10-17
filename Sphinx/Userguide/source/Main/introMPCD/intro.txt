@@ -7,7 +7,7 @@ On the other hand, if the embedded particles are large enough that thermal fluct
 
 * If both **fluctuations and hydrodynamic interactions are crucial** then *MPCD* may be an appropriate simulation technique. 
 
-Multi-Particle Collision Dynamics (MPCD) is a technique for simulating fluctuating hydrodynamics that reproduces the Navier-Stokes equation on sufficiently long length and time acales~\cite{**CCC**}. 
+Multi-Particle Collision Dynamics (MPCD) is a technique for simulating fluctuating hydrodynamics that reproduces the Navier-Stokes equation on sufficiently long length and time acales [pooley2005]_. 
 It is well suited for situations for which viscosity dominates over inertia, and diffusion is of similar significance to advective flow (see :ref:`Dimensionless Numbers <chapterUnits>`). 
 It is straightforward to include mobile particles, such as colloids, within the MPCD fluid, even if these have many internal degress of freedom, such as polymers. 
 This makes MPCD an excellent option for simulating complex suspensions. 
@@ -15,9 +15,9 @@ Furthermore, because MPCD is a particle-based method, non-trivial boundaries can
 
 As in any computational approach, these benefits are counterbalanced by complications, including 
 
-#. fluid properties (such as viscosity or other transport coefficients) are only controlled indirectly~\cite{**??**}, 
-#. multiple runs must be averaged to find statisticly meaningful results~\cite{**pooley05**}, and
-#. compressibility~\cite{**stark?**}. 
+#. :ref:`fluid properties <chapter2>` (such as viscosity or other transport coefficients) are only controlled indirectly, 
+#. multiple runs must be averaged to find statisticly meaningful results, and
+#. :ref:`compressibility <dimensionlessNumbers>` [zhao2013]_. 
 
 .. _particleBased:
 Particle-based coarse-graining
@@ -26,11 +26,11 @@ Particle-based coarse-graining
 In MPCD, the continuous fluid medium is discretised into point-like, coarse-grained fluid particles. 
 Equivalently one may imagine that many fluid atoms or molecules are grouped together and simulated as point-like particles. 
 This coarse-graning eschews molecular-scale details of the molecules that make up the fluid. 
-Respecting conservation of these quantities is what allows the hydrodynamic equations of motion to be obeyed on sufficiently long length and time scales~\cite{**pooley05**}. 
+Respecting conservation of these quantities is what allows the hydrodynamic equations of motion to be obeyed on sufficiently long length and time scales [pooley2005]_. 
 
 Thus, MPCD **does not** give correct dynamics on microscopic time or length scales. 
 Streaming and collision events conserve the momentum and energy in each collision volume at all times and so MPCD reproduces an accurate representation of the hydrodynamics of the velocity field at large distances. 
-The coarse-grained mesoscopic MPCD fluid provides both a thermal bath and propagates hydrodynamic interactions without having to either solve the entire Navier-Stokes equation (**MISSING**\eq{eq:NS}) for a potentially complex microfluidic system or to simulate the full molecular interactions of all fluid molecules. 
+The coarse-grained mesoscopic MPCD fluid provides both a thermal bath and propagates hydrodynamic interactions without having to either solve the entire Navier-Stokes equation [yeomans2006]_ for a potentially complex microfluidic system or to simulate the full molecular interactions of all fluid molecules. 
 Therefore, it can be computationally less expensive than numerical, continuum solvers or full *Molecular Dynamics* (MD) simulations. 
 
 Two-step algorithm
@@ -41,7 +41,19 @@ In essence, the MPCD algorithm consists of only two steps:
 #. The first step is the :ref:`streaming step <streaming>`.
 #. The second is the :ref:`collision step <collision>`.
 
-**MAKE FIGURE**
+.. list-table:: 
+    :header-rows: 0
+    :widths: 50 50
+    :align: center
+
+    * - .. image:: ./introMPCD/mpcdAlgorithm_streaming.png
+            :width: 95%
+            :align: center
+      - .. image:: ./introMPCD/mpcdAlgorithm_collision.png
+            :width: 95%
+            :align: center
+    * - :ref:`Streaming step <streaming>`.
+      - :ref:`Collision step <collision>`.
 
 .. _streaming:
 Streaming step
@@ -76,44 +88,21 @@ The number of fluid particles in the :math:`c^\text{th}` cell at time :math:`t` 
 The number of particles in each cell may vary from one cell to another but the total number :math:`N_\text{tot}` is conserved and the average number density is :math:`n=\left\langle N_c \right\rangle/a^d` where :math:`d` is the dimensionality of the simulation and :math:`\left\langle \cdot \right\rangle` is the average over all cells. 
 Each cell possesses a centre of mass velocity :math:`\vec{v}^{c} = \left\langle v_i \right\rangle_c = \left(\sum^{N_c}_{i=1} m_i \vec{v}_i\right)/\left(\sum^{N_c}_{i=1} m_i\right)`, where :math:`\left\langle \cdot \right\rangle_c` represents the average within cell :math:`c`. 
 The cell velocity :math:`\vec{v}^{c}` corresponds to the local macroscopic velocity :math:`\vec{v}\left(\vec{x}_c,t\right)` at the location of cell :math:`c` and time :math:`t`. 
-Thus, these cell-based values are interpretted as discretized field values (see :ref:`Cell Properties <chapterCell>`)
+Thus, these cell-based values are interpretted as discretized field values (see :ref:`Cell Properties <chapterCell>`).
 
 The MPCD collision step replaces molecular-scale dynamics with a local, non-physical, stochastic momentum transfer operation. 
-A number of collision operators are available (see :ref:Collision operators <chapter5>). 
-
-.. _angMom:
-Conservation of angular momentum
-================================
-
-However, the SRD algorithm does not generally conserve angular momentum since the positions of the fluid particles within the cell during a collision operation are not taken into account~\cite{ryder05}. 
-While some of the other variations on the MPCD algorithm do (see \sctn{sctn:anderson_ang}), in the microfluidic situations considered here (and most others~\cite{gotze07,gotze10,gotze11,babu12}) angular momentum does not play an essential role and so this fact is inconsequential. 
-
-The Anderson-MPCD algorithm discussed so far conserves mass\index{mass!conservation}, energy\index{conservation!energy} and translational momentum\index{conservation!momentum} but, just like the SRD collision operations, it does not conserve angular momentum.
-However, it can be extended to do so. 
-
-In conserving the angular momentum of the cell, the position of each fluid particle relative to the centre of mass of the cell :math:`\vec{x}^\prime_i = \vec{x}_i - \vec{x}^{c}` is important. 
-The Anderson-MPCD algorithm presented in \sctn{sctn:anderson} creates a small change in angular momentum every collision step. 
-Let this amount be denoted :math:`\delta \vec{L}`. 
-This angular momentum can be exactly cancelled out by giving the entire cell an appropriate angular velocity :math:`\vec{\omega}`. 
-If the set of particles in the cell have a moment of inertia tensor :math:`\textbf{I}` about the centre of mass (with elements :math:`I_{ij} = \sum_k^{N_c} m_k \left( {x^\prime_k}^2 \delta_{ij} - r_{k,i}^\prime r_{k,j}^\prime\right)`) then the angular velocity needed to cancel the residual angular momentum is :math:`\vec{\omega} = \textbf{I}^{-1} \cdot \delta \vec{L}`. 
-
-A term representing the change in linear velocity resulting from the imposed angular velocity about the centre of mass can be added to \eq{eq:at}:
-% \begin{align}
-%  \vec{\Xi} &= \vec{v}_i^\mathrm{ran} - \frac{1}{N_c} \sum_{j}^{N_c} \vec{v}_j^\mathrm{ran} + \vec{\omega} ts \vec{x}^\prime_i\nn\\
-%         &= \vec{v}_i^\mathrm{ran} - \frac{1}{N_c} \sum_{j}^{N_c} \vec{v}_j^\mathrm{ran} + \left[\textbf{I}^{-1}\cdot\delta\vec{L}\right] ts \vec{x}^\prime_i\nn\\
-%         &= \vec{v}_i^\mathrm{ran} - \frac{1}{N_c} \sum_{j}^{N_c} \vec{v}_j^\mathrm{ran} + 
-%    \left[ m \textbf{I}^{-1} \cdot \left( \sum_{j}^{N_c} \left\lbrace \vec{x}^\prime_j ts \left( \vec{v}_j - \vec{v}_j^\mathrm{ran} \right) \right\rbrace   \right) \right]ts \vec{x}^\prime_i.
-%  \label{at_ang}
-% \end{align}
-
-.. math::
-    :name: eq:angMom
-    
-    \vec{\Xi} = \vec{v}^\text{ran}_i - \frac{\sum_{j}^{N_c} m_j \vec{v}^\text{ran}_{j}}{\sum_{j}^{N_c} m_j} + \left[ \textbf{I}^{-1} \cdot \left( \sum_{j}^{N_c} m_j \left\lbrace \vec{x}^\prime_j ts \left( \vec{v}_j - \vec{v}^\text{ran}_j \right) \right\rbrace   \right) \right]ts \vec{x}^\prime_i.
-For situations in which angular momentum conservation within the solvent plays an important role, \eq{eq:at_ang} should be preferred over \eq{eq:at}. 
+A number of collision operators are available (see :ref:`Collision operators <chapter5>`). 
 
 .. rubric:: Reference
 
 .. [slater2009] Slater, *et al* (2009), `Modeling the Separation of Macromolecules <https://doi.org/10.1002/elps.200800673>`_. *Electrophoresis*, vol 30. 
+
 .. [aidun2010] Aidun & Clausen (2010), `Lattice-Boltzmann Method for Complex Flows <https://doi.org/10.1146/annurev-fluid-121108-145519>`_. *Annual Review of Fluid Mechanics*, vol 42.
+
 .. [mittel2005] Mittal & Iaccarino (2005), `Immersed Boundary Methods <https://www.annualreviews.org/doi/full/10.1146/annurev.fluid.37.061903.175743>`_. *Annual Review of Fluid Mechanics*, vol 37.
+
+.. [pooley2005] Poolye & Yeomans (2005), `Kinetic Theory Derivation of the Transport Coefficients of Stochastic Rotation Dynamics <https://pubs.acs.org/doi/full/10.1021/jp046040x>`_. *The Journal of Physical Chemistry B*, vol 109(14).
+
+.. [zhao2013] Zhao, Wang, Jiang & Larson (2005), `Assessment of Mesoscopic Particle-based Methods in Microfluidic Geometries <https://pubs.aip.org/aip/jcp/article/139/8/084109/74206>`_. *The Journal of Chemical Physics*, vol 139(084109).
+
+.. [yeomans2006] Yeomans (2006), `Mesoscale Simulations: Lattice Boltzmann and Particle Algorithms <https://www.sciencedirect.com/science/article/pii/S0378437106004067>`_. *Physica A: Statistical Mechanics and its Applications*, vol 369 (1). 
