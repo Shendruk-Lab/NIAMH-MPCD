@@ -1,16 +1,15 @@
 Colloids
 ------------------------
 
-Colloids are modelled as boundaries that are mobile.
-What this means is the surface parameters Q and A have a temporal dependence.
+MPCD Colloids are implemented as boundaries that are able to translate and rotate in response to interactions with the fluid.
+Mobile boundaries have temporally-dependent surface parameters :math:`\vec{Q}(t)` and :math:`\vec{A}(t)`. Translational and rotational motion are supported through the boundary's velocity and angular velocity properties :math:`\vec{v}_{b}(t)` and :math:`\vec{\omega}_{b}(t)`.
 
-The boundaries have a velocity and an angular velocity assocaited to them that can update Q and A.
+WRITE THE EVOLUTION EQUATION FOR HOW U AND L ARE UPDATED DUE TO PARTICLE INTERACTIONS.
 
-Currently, we only use spherical colloids and for this, surface equations translate and rotate in time.
-HOW DOES THIS HAPPEN?
+Using the total boundary velocity and angular momentum, the surface equation :math:`S_b(\vec{x}(t),\vec{Q}(t),\vec{A}(t),t)` is updated at the end of the timestep.
 
-In determining V and L, we assume that the particle boundary conditions
-have conserved interactions (angular and linear momentum) at each point on the boundary.
+.. warning::
+    The current version only support mobile spherical colloids where :math:`\vec{A}(t) = \vec{A}(0)`.
 
 Motion due to velocity BC
 -----------------------------
