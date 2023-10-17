@@ -2,16 +2,43 @@
 Though particle properties are continuous, collision events occur on a descretized lattice of cells. 
 Each cell :math:`c` has a number of properties, which are interpretted as the discretized values of the macroscopic fields. 
 
-.. _cells:
-Properties
-==========
+.. _numberInCell:
 
+Number density
+==============
+
+Each cell has an instantaneous number of MPCD particles :math:`N_c`. 
+The average number :math:`\left\langle N_c \right\rangle` can be set in your input ``.json`` file for each fluid-species by setting the total number of particles of that species :math:`N_\text{tot}` in the input ``.json`` file
+
+.. code-block:: console 
+
+    "species":
+    [
+        {
+            "POP":         100000
+        }
+    ]
+
+and dividing by the number of accessible MPCD cells in the control volume. 
+Alternatively, the number density for each species can be set explicitly  in the input ``.json`` file
+
+.. code-block:: console 
+
+    "species":
+    [
+        {
+            "dens":         20
+        }
+    ]
+
+This uses a Monte Carlo integration of the accessible volume to determine the total number of MPCD particles required to set *e.g.* :math:`\left\langle N_c \right\rangle = 20`.
 
 .. _galilean:
+
 Galilean invariance
 ===================
 
-By discretizing the space into cells, **Galilean invariance** is broken. 
+By discretizing the space into cells, **Galilean invariance** is broken [ihle2003]_. 
 To understand why, consider a simulation of slow moving fluid particles (low temperatures). 
 If the mean-free path of the molecules is much smaller than the cell size (:math:`\lambda \ll a`) then particles will often fail to travel far enough to leave the cell and may repeatedly exchange momentum with the same set of neighbours. 
 Thus, the implicit assumption of underlying molecular chaos fails and the fixed lattice of cells causes the behaviour in a moving reference frame to be different than a fixed reference frame, since in the moving frame the set of neighbours would be different in each (\fig{fig:galInv}). 
@@ -21,6 +48,7 @@ Practically speaking, this is implemented by shifting all the fluid particles by
 
 
 .. _angMom:
+
 Conservation of angular momentum
 ================================
 
@@ -49,8 +77,17 @@ A term representing the change in linear velocity resulting from the imposed ang
     :name: eq:angMom
     
     \vec{\Xi} = \vec{v}^\text{ran}_i - \frac{\sum_{j}^{N_c} m_j \vec{v}^\text{ran}_{j}}{\sum_{j}^{N_c} m_j} + \left[ \textbf{I}^{-1} \cdot \left( \sum_{j}^{N_c} m_j \left\lbrace \vec{x}^\prime_j ts \left( \vec{v}_j - \vec{v}^\text{ran}_j \right) \right\rbrace   \right) \right]ts \vec{x}^\prime_i.
+
 For situations in which angular momentum conservation within the solvent plays an important role, \eq{eq:at_ang} should be preferred over \eq{eq:at}. 
 
 
+.. _thermostat:
+
+Thermostats
+===================
+
+XXX
+
 .. rubric:: References
 
+.. [ihle2003] Ihle & Kroll (2003), `Stochastic Rotation Dynamics. I. Formalism, Galilean Invariance, and Green-Kubo Relations <https://journals.aps.org/pre/abstract/10.1103/PhysRevE.67.066705>`_. *Physical Review E*, vol 67 (066705). 

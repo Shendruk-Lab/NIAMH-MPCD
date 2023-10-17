@@ -20,6 +20,7 @@ As in any computational approach, these benefits are counterbalanced by complica
 #. :ref:`compressibility <dimensionlessNumbers>` [zhao2013]_. 
 
 .. _particleBased:
+
 Particle-based coarse-graining
 ==============================
 
@@ -56,6 +57,7 @@ In essence, the MPCD algorithm consists of only two steps:
       - :ref:`Collision step <collision>`.
 
 .. _streaming:
+
 Streaming step
 --------------
 
@@ -66,10 +68,12 @@ In the **streaming step** the particles move according to
     :name: eq:stream
 
     \vec{x}_i\left(t+\delta t\right) = \vec{x}_i\left(t\right) + \vec{v}_i\left(t\right) \delta t .
+
 If the MPCD algorithm consisted only of streaming steps then the carrier fluid would be an ideal gas; however, the :ref:`collision step <collision>` introduces coarse-grained interactions between particles. 
 Particle properties are continuous---not discretised (see :ref:`Particle Properties <chapter4>`). 
 
 .. _collision:
+
 Collision step
 --------------
 
@@ -84,6 +88,7 @@ Multi-particle collisions within cells are represented by the collision operator
     :name: eq:collision
     
     \vec{v}_i\left(t + \delta t\right) = \vec{v}^{c}\left(t\right) + \vec{\Xi} \left( \; \vec{v}_i\left(t\right), \vec{v}^{c}\left(t\right) \; \right) .
+
 The number of fluid particles in the :math:`c^\text{th}` cell at time :math:`t` is :math:`{N_c}\left(t\right)`. 
 The number of particles in each cell may vary from one cell to another but the total number :math:`N_\text{tot}` is conserved and the average number density is :math:`n=\left\langle N_c \right\rangle/a^d` where :math:`d` is the dimensionality of the simulation and :math:`\left\langle \cdot \right\rangle` is the average over all cells. 
 Each cell possesses a centre of mass velocity :math:`\vec{v}^{c} = \left\langle v_i \right\rangle_c = \left(\sum^{N_c}_{i=1} m_i \vec{v}_i\right)/\left(\sum^{N_c}_{i=1} m_i\right)`, where :math:`\left\langle \cdot \right\rangle_c` represents the average within cell :math:`c`. 
