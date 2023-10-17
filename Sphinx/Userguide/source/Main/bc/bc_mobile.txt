@@ -50,20 +50,52 @@ The reorientation of particle :math:`i` corresponds to a rotational impulse :mat
 
     \vec{\omega}_i(t+\delta t) - \vec{\omega}_i(t) = \vec{\mathcal{T}}_i.
 
-The equation has a pivot point defined at the particle position at the point on the boundary.
+The equation has a pivot point defined at the particle position on the boundary.
 
 Similar to the velocity rules, if the boundary is static, then the rotational impulse is absorbed by the boundary.
 However, if the boundary is mobile, then we assume rotational impulse conservation between the particle and boundary.
 It is the rotational impulse that needs to be converted into boundary increments :math:`\Delta \vec{v}_{b,i}^\mathrm{ori}` and :math:`\Delta \vec{\omega}_{b,i}^\mathrm{ori}`.
 
-For our mobile colloid, EQUATION can be recast into a discretised torque balance, through :math:`\mathcal{T}_i=\Gamma_i \delta t`,
+For our mobile colloid, EQUATION can be recast into a torque balance, through :math:`\mathcal{T}_i=\Gamma_i \delta t`
+
+.. math::
+    :name: eq:torque
+
+    \vec{\Gamma}_i + \vec{\Gamma}_{b,i} = 0
+
+where :math:`\vec{\Gamma}_{b,i}` is the torque that is transferred to the colloid at the position of particle :math:`i`.
+
+For a particle with initial orientation :math:`\hat{u}_i` with an anchoring direction of :math:`\hat{\nu}`, the torque on the particle takes the form
 
 .. math::
     :name: eq:impulse
 
-    \vec{\Gamma}_i + \vec{\Gamma}_{b,i}
+    \vec{\Gamma}_i = \frac{\gamma_R}{\ell_u \delta t} \frac{M_{\nu}-M_{\perp}}{\sqrt{M_\nu^2 + M_\perp^2}}\left(\hat{u}_i \cdot \hat{\nu} \right)\left( \hat{u}_i \times \hat{\nu} \right)
+with :math:`\frac{M_{\nu}-M_{\perp}}{\sqrt{M_\nu^2 + M_\perp^2}}=1` since anchoring applies :math:`M_{\nu}=1` and :math:`M_{\perp}=0`.
 
+The torque is only dependent on fixed simulation/material parameters and the relative alignment of :math:`\hat{u}_i` and :math:`\hat{\nu}`.
+Defining the alignment as :math:`\cos\theta_i = \hat{u}_i\cdot \hat{\nu}`, the torque :math:`\Gamma_i = \frac{\gamma_R}{\ell_u \delta t} \sin 2\theta`.
+The torque is odd under :math:`\Gamma_i(-\theta)=-\Gamma_i(\theta)`,
+which motivates that the torque transferred to the colloid can be treated as a virtual MPCD particle at the same point, oriented in the direction :math:`\hat{u}_{b,i}` that has :math:`-\theta`, and rotating in the opposite sense to align with :math:`\hat{\nu}`.
+This satisfies the torque conservation equation EQUATION.
 
+The torque :math:`\vec{\Gamma}_{b,i}` on the virtual particle, is converted into a force at the colloidal boundary by,
+
+.. math::
+    :name: eq:force
+
+    \vec{F}_{b,i} = \frac{\vec{\Gamma}_{b,i} \times \hat{u}_{b,i}}{\ell_u}
+
+where we have assumed :math:`\vec{\hat{u}}_{b,i}{\ell_u}` and :math:`\vec{F}_{b,i}` are orthogonal (OK AS THERE'S NO TRANSLATIONAL MOTION).
+
+Note that the force is subject to the head-tail symmetry of the orientation :math:`\vec{\hat{u}}_{b,i}{\ell_u}`, SHOW F(-U) = -F(U), making the force direction ambiguous.
+We select the orientation/force that points into the boundary (since colloids will move away from large elastic stress build up rather than into it.)
+
+CLEAN UP THE ABOVE TOMORROW
+
+MAKE A NOTE_ ABOUT THAT THIS ONLY CURRENT WORKS FOR NU = NORMAL DIRECTION OUT OF THE COLLOID.
 
 Motion from boundary-boundary interactions
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+TO DO TOMORROW
