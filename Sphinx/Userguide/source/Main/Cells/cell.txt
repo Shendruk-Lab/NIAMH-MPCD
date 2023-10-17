@@ -40,45 +40,29 @@ Galilean invariance
 
 By discretizing the space into cells, **Galilean invariance** is broken [ihle2003]_. 
 To understand why, consider a simulation of slow moving fluid particles (low temperatures). 
-If the mean-free path of the molecules is much smaller than the cell size (:math:`\lambda \ll a`) then particles will often fail to travel far enough to leave the cell and may repeatedly exchange momentum with the same set of neighbours. 
+If the mean-free path of the molecules (see :ref:`Viscosity <chapter2>`) is much smaller than the cell size (:math:`\lambda \ll a`) then particles will often fail to travel far enough to leave the cell and may repeatedly exchange momentum with the same set of neighbours. 
 Thus, the implicit assumption of underlying molecular chaos fails and the fixed lattice of cells causes the behaviour in a moving reference frame to be different than a fixed reference frame, since in the moving frame the set of neighbours would be different in each (\fig{fig:galInv}). 
 However, Galilean invariance can be completely reestablished by shifting the cell grid each time step by a random vector. 
 Galilean invariance is then remedied. 
 Practically speaking, this is implemented by shifting all the fluid particles by the same vector whose components were chosen at random from the interval :math:`\left[-a/2,a/2\right]`. 
 
+.. figure:: Cells/galileanInv.png
+    :alt: Logo
+    :scale: 30%
+    :align: center
+
+    Galilean invariance is restored by randomly shifting the lattice of MPCD cells. 
 
 .. _angMom:
 
 Conservation of angular momentum
 ================================
 
-However, the SRD algorithm does not generally conserve angular momentum since the positions of the fluid particles within the cell during a collision operation are not taken into account~\cite{ryder05}. 
-While some of the other variations on the MPCD algorithm do (see \sctn{sctn:anderson_ang}), in the microfluidic situations considered here (and most others~\cite{gotze07,gotze10,gotze11,babu12}) angular momentum does not play an essential role and so this fact is inconsequential. 
-
-The Anderson-MPCD algorithm discussed so far conserves mass\index{mass!conservation}, energy\index{conservation!energy} and translational momentum\index{conservation!momentum} but, just like the SRD collision operations, it does not conserve angular momentum.
-However, it can be extended to do so. 
-
-In conserving the angular momentum of the cell, the position of each fluid particle relative to the centre of mass of the cell :math:`\vec{x}^\prime_i = \vec{x}_i - \vec{x}^{c}` is important. 
-The Anderson-MPCD algorithm presented in \sctn{sctn:anderson} creates a small change in angular momentum every collision step. 
-Let this amount be denoted :math:`\delta \vec{L}`. 
-This angular momentum can be exactly cancelled out by giving the entire cell an appropriate angular velocity :math:`\vec{\omega}`. 
-If the set of particles in the cell have a moment of inertia tensor :math:`\textbf{I}` about the centre of mass (with elements :math:`I_{ij} = \sum_k^{N_c} m_k \left( {x^\prime_k}^2 \delta_{ij} - r_{k,i}^\prime r_{k,j}^\prime\right)`) then the angular velocity needed to cancel the residual angular momentum is :math:`\vec{\omega} = \textbf{I}^{-1} \cdot \delta \vec{L}`. 
-
-A term representing the change in linear velocity resulting from the imposed angular velocity about the centre of mass can be added to \eq{eq:at}:
-% \begin{align}
-%  \vec{\Xi} &= \vec{v}_i^\mathrm{ran} - \frac{1}{N_c} \sum_{j}^{N_c} \vec{v}_j^\mathrm{ran} + \vec{\omega} ts \vec{x}^\prime_i\nn\\
-%         &= \vec{v}_i^\mathrm{ran} - \frac{1}{N_c} \sum_{j}^{N_c} \vec{v}_j^\mathrm{ran} + \left[\textbf{I}^{-1}\cdot\delta\vec{L}\right] ts \vec{x}^\prime_i\nn\\
-%         &= \vec{v}_i^\mathrm{ran} - \frac{1}{N_c} \sum_{j}^{N_c} \vec{v}_j^\mathrm{ran} + 
-%    \left[ m \textbf{I}^{-1} \cdot \left( \sum_{j}^{N_c} \left\lbrace \vec{x}^\prime_j ts \left( \vec{v}_j - \vec{v}_j^\mathrm{ran} \right) \right\rbrace   \right) \right]ts \vec{x}^\prime_i.
-%  \label{at_ang}
-% \end{align}
-
-.. math::
-    :name: eq:angMom
-    
-    \vec{\Xi} = \vec{v}^\text{ran}_i - \frac{\sum_{j}^{N_c} m_j \vec{v}^\text{ran}_{j}}{\sum_{j}^{N_c} m_j} + \left[ \textbf{I}^{-1} \cdot \left( \sum_{j}^{N_c} m_j \left\lbrace \vec{x}^\prime_j ts \left( \vec{v}_j - \vec{v}^\text{ran}_j \right) \right\rbrace   \right) \right]ts \vec{x}^\prime_i.
-
-For situations in which angular momentum conservation within the solvent plays an important role, \eq{eq:at_ang} should be preferred over \eq{eq:at}. 
+Multiple MPCD algorithm do not conserve angular momentum since they do not consider the positions of the fluid particles within the cell during a collision operation. 
+In many advecting situations angular momentum does not play an essential role and so this fact is inconsequential [gotze07]_ [gotze11]_ [babu12]_. 
+To conserving the angular momentum of the cell, the change in angular momentum relative to the centre of mass position during the collision event position is calculated. 
+This angular momentum is then exactly cancelled out by giving the entire cell an appropriate angular velocity. 
+For situations in which angular momentum conservation within the solvent plays an important role, appropriate collision operators should be chosen (see :ref:`Collision operators <chapter5>`).
 
 
 .. _thermostat:
@@ -86,8 +70,14 @@ For situations in which angular momentum conservation within the solvent plays a
 Thermostats
 ===================
 
-XXX
+**TYLER DO THIS TONIGHT**
 
 .. rubric:: References
 
 .. [ihle2003] Ihle & Kroll (2003), `Stochastic Rotation Dynamics. I. Formalism, Galilean Invariance, and Green-Kubo Relations <https://journals.aps.org/pre/abstract/10.1103/PhysRevE.67.066705>`_. *Physical Review E*, vol 67 (066705). 
+
+.. [gotze07] Götze, Noguchi & Gompper (2007), `Relevance of angular momentum conservation in mesoscale hydrodynamics simulations <http://link.aps.org/abstract/PRE/v76/e046705>`_. *Physical Review E*, vol 76 (4).
+
+.. [gotze11] Götze & Gompper (2011), `Dynamic self-assembly and directed flow of rotating colloids in microchannels <http://link.aps.org/doi/10.1103/PhysRevE.84.031404>`_. *Physical Review E*, vol 84 (3).
+
+.. [babu12] Babu & Stark (2012), `Modeling the locomotion of the African trypanosome using multi-particle collision dynamics <http://stacks.iop.org/1367-2630/14/i=8/a=085012>`_. *New Journal of Physics*, vol 14 (8).

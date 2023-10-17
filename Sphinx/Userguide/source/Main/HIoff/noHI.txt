@@ -11,6 +11,13 @@ To turn off hydrodynamic interactions, add the following to your input ``.json``
 
     "noHI":         1,
 
+.. figure:: HIoff/brownian.png
+    :alt: Logo
+    :scale: 30%
+    :align: center
+
+    Hydrodynamic interactions are "scrambled" by randomly exchange particle velocities.
+
 If on the other hand a friction acts on the fluid (like a Brinkman term) (rather than ignoring hydrodynamic interactions), this can be set as a :ref:`damping friction coefficient <Damping>`. 
 
 .. rubric:: References
