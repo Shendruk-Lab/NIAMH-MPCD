@@ -13,12 +13,15 @@ The code is available from `GitHub <https://github.com/Shendruk-Lab/MPCD>`_ and 
 
    Summary/Summary
    Install/Install
-   Tutorials/Tutorials
-   Main/Main
+   Main/Background
+   Main/Usage
+   Main/ExtraOptions
    Outputs/Outputs
    HardCoded/HardCoded
+   Tutorials/Tutorials
    Analysis/Analysis
    DeveloperGuide/DeveloperGuide
+   Glossary/Glossary
 
 .. note::
 

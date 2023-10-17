@@ -153,8 +153,8 @@ This creates file named densSTD, which contain the standart deviation of the den
     
 This creates file named avEnstrophy, which contains the average enstrophy (mean squared vorticity) of all the cells.
 
-Averages
-========
+Histograms
+==========
 
 ::
 
