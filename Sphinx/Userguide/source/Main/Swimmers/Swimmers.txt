@@ -1,22 +1,24 @@
 .. _Swimmers:
 
 Swimmer
-=============
+=======
 
 The hydrodynamical interaction of model shaped-anisotropic bacilliform are simulated using Active Dumbbell Swimmers (ADS) [ADS]_.
 
-To model the bacilliform body of swimming microbes, an ADS model is proposed composed of two monomers (head and middle) simulating the body, subject to an explicit propulsion force applied in the dimer's polar axis. The two monomers are connected by a spring. 
-The surrounding MPCD fluid sees these monomers point-particles, but excluded volume with other swimmers/obstacles can be turned on (default) or off.
+To model the bacilliform body of swimming microbes, an ADS model is proposed composed of two monomers (head and middle) simulating the body, subject to an explicit propulsion force applied in the dimer's polar axis. The two monomers are connected by a spring.  
+The surrounding MPCD fluid sees these monomers point-particles, but excluded volume with other swimmers/obstacles (Lennord-Jones potential) can be turned on (default) or off.
 
-The ADS forcing scheme is implemented by giving the MPCD boxes containing the head and body particle half the propulsion force and then adding an opposite force at a distance from the middle. This distance sets the type of swimmer (puller or pusher.)
+The swimmers induce hydrodynamical forces on the surrounding MPCD fluid, which captures the far-flow field of swimming microbes.
+
+The swimmer has a self-propulsion force, which is applied split evenly between the head and middle monomer to induce self-propulsion. Simultaneously, the head and middle monomer exert an equal drag force on the MPCD particles in the box they inhabit.
+To make the sum of forces on the fluid force-free, an opposite force to these two drag forces is applied at a localized tail position. This induces the dipole force, which results in the far-flow field of swimming microbes. 
+
 
 
 .. image:: Swimmers/1.jpg
    :scale: 70%
 
-Run-and tumble is included in the model. Through the tumble step, the spring constant and spring length are reduced, so that rotational diffusion is substantially increased. This mimics the tumble part.
-
-Swimemrs can also induce rotlet torques on the surrounding fluid. The rotlet torque is applied om the head of the swimmer and an equal-but-opposite rotlet is applied on the tail position
+Besides that, the swimmer monomers are treated as other MD particles.
 
 Swimmers are included in the code by adding the following input script into the input file
 
@@ -27,8 +29,18 @@ Swimmers are included in the code by adding the following input script into the 
 
 Which sets the number of swimmers to 1. 
 
+Extra parameters
+----------------
+
+Swimmers can have the following additional interactions:
+
+* Swimmers can be made to be run-and tumbling. Through the tumble step, the spring constant and spring length are reduced, so that rotational diffusion is substantially increased. This mimics the tumble part.
+* Swimemrs can induce rotlet torques on the surrounding fluid. The rotlet torque is applied om the head of the swimmer and an equal-but-opposite rotlet is applied on the tail position
+* Swimmers can experience an external magnetic field through which they allign their orientation due to the magnetic moment, exerting a torque exerted on the swimmer due to the magnetic field and the swimmer alignment mismatch. 
+
+
 Input Guide
-=============
+-----------
 
 ::
 
@@ -58,13 +70,20 @@ Distance from the middle (in multiples of head-middle length/spring seperation) 
     `kSwim`         | double        | 30                 | Spring constant
     `roSwim`        | double        | 4                  | Spring seperation
 
-Spring constant and seperation. This sets the size of the swimmers. 
+Spring constant and seperation. This sets the size of the swimmers. The roSwim should be the same as the monomer size. 
+Springs are implemented using FENE chains. 
 
 ::
 
     `sigSwim`       | double        | 4                  | Diameter approx sigma
 
-Size of excluded volume of the head/middle monomer part. Only works if excluded volume is activated.
+Size of excluded volume of the head/middle monomer part with other swimmers/MD particles. Only works if excluded volume is activated. This is implemented with a Lennord-Jones potential.
+
+::
+
+    `epsSwim`       | double        | 1                  | Interaction energy
+
+Interaction strength of the Lennord Jones potential used for excluded volume interaction (Lennord-Jones potential).
 
 ::
 
@@ -96,13 +115,21 @@ If multiphase enables, treat swimmer as this type. Currently, make sure both par
 
 ::
 
-    `sizeShrinkSwim`| double        | 0.1                | How much do LJ sigma ro shrink when tumbling
-    `springShrinkSwim`| double        | 0.1                | How much the spring constant is shrunk when tumbling
     `runTSwim`      | double        | 0                  | Average run time in units of MPCD timesteps dt (iterations, not MPCD time units)
     `tumTSwim`      | double        | 0                  | Average tumble time in units of MPCD timesteps dt (iterations, not MPCD time units)
+
+Run and tumble parameters. In order to make swimmers run and tumble, set runTSwim and tumTSwim to non-zero values. 
+These set the average run and tumble time (in MPCD timesteps) that the particle runs and tumbles respectively. 
+Run and tumble are stochastic processes, drawn from a stochastic exponential distribution.
+
+    `springShrinkSwim`| double        | 0.1                | How much the spring constant is shrunk when tumbling
+    `sizeShrinkSwim`| double        | 0.1                | How much do LJ sigma ro shrink when tumbling
+
+Tumbling is implemented by reducing the sping size and particle size. For tumbling state, the spring is replaced with a Hookean spring.
+
     `shrTSwim`      | double        | 2                  | Set time to shrink/ extend in units of MPCD timesteps dt (iterations, not MPCD time units)
 
-Run and tumble parameters. In order to make particle run and tumble, set runTSwim and tumTSwim to non-zero values. 
+Shrinkage during tumbling is not instantaniously, rather it is done in smaller steps, which is set here.
 
 ::
 
