@@ -127,7 +127,7 @@ Averages
 
     `avVelOut`      | int           | 0             | Total average MPCD velocity. System-averaged single value
 
-This creates file named avVel, which contain the average current explicited velocity.
+This creates file named avVel, which contain the average current explicited velocity. It also outputs the average stress components.
 
 ::
 
