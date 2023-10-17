@@ -1,14 +1,25 @@
-Overview
-========
+Vicsek model of collective motion
+=================================
+
+This collission operator is based on the famous vicsek model of self-driven particles [Vicsek1995]_. It describes the collective behavior in the simplest possible way.  It was designed to explore how local interactions among simple, self-propelled particles can give rise to global order and collective motion.
+Key Principles of the Vicsek Model:
+
+- **Self-Propelled Particles**: The fundamental units in the Vicsek Model are self-propelled particles, often referred to as agents or individuals. These particles move at a constant speed and possess a heading direction, which can be influenced by their local neighbors.
+- **Local Interaction**: Agents interact with their immediate neighbors within a defined radius, simulating a finite perception range. These interactions involve aligning their velocities and directions to some extent.
+- **Noise**: The model incorporates a random noise factor to account for unpredictability and stochasticity in the behavior of real-world entities.
+- **Order Parameter**: The degree of alignment among the agents is quantified using an "order parameter," which measures the average direction of motion across the group. This parameter helps to determine whether the system exhibits collective motion or remains in a disordered state.
+
+Vicsek MPCD
+===========
 
 .. include:: VicsekMPCD/vicsekClassic.txt
 
-VicsekAnderson
-==============
+Vicsek-Anderson MPCD
+====================
 
 .. include:: VicsekMPCD/vicsekAndersen.txt
 
-VicsekLangevin
-==============
+Vicsek-Langevin MPCD
+====================
 
 .. include:: VicsekMPCD/vicsekLangevin.txt

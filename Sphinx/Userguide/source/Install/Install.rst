@@ -1,4 +1,4 @@
-Installation and Run Guide
+Installation & run guide
 ##########################
 
 This section explains how to install and run MPCD, makefile options, and arguments used.
@@ -8,12 +8,12 @@ This section explains how to install and run MPCD, makefile options, and argumen
 
     * MPCD has no external dependencies
     * Compilation is done with a standard makefile
-    * Common UNIX C compilers we have tested have compiled MPCD fine.
+    * Common UNIX C compilers successfully compile MPCD.
 
-Installation Instructions
+Installation instructions
 *************************
 In this section, we describe how to install MPCD, and how to prepare to install it on a new system.
-It is assumed that you have basic understanding of a CLI terminal. 
+It is assumed that you have basic understanding of a `command-line terminal <https://ubuntu.com/tutorials/command-line-for-beginners#1-overview>`_. 
 
 Depending on your operating system, please follow these instructions to install MPCD:
 
@@ -23,7 +23,7 @@ Depending on your operating system, please follow these instructions to install 
 
 .. _WSL:
 
-Windows - WSL Setup
+Windows - WSL setup
 -------------------
 .. warning:: 
     The Shendruk Lab does not support MPCD natively on Windows without WSL. 
@@ -31,19 +31,19 @@ Windows - WSL Setup
     This is due to lacking support for ``make`` on Windows, and a requirement of the MD subsystem not compiling using MinGW or MSVC.
     Ultimately, this is likely to be fixed in a future update.
 
-To run MPCD on Windows, it needs to be done through the Windows Subsystem for Linux (WSL) compatability layer.
+Running MPCD on Windows must be done through the Windows Subsystem for Linux (WSL) compatability layer.
 This is a feature of Windows 10 and 11, allowing for native Linux calls to be made from the Windows kernel, effectively acting as a low-level VM.
 More practically, it gives you a UNIX terminal within Windows.
 
 The remainder of this section roughly follows the explanation given by Microsoft in their `official installation guide for WSL <https://learn.microsoft.com/en-us/windows/wsl/install>`_, and `tutorial for setting up a developer environment in WSL <https://learn.microsoft.com/en-us/windows/wsl/setup/environment#set-up-your-linux-username-and-password>`_.
 
-For the simplest install, simply open up a command prompt or powershell terminal as administrator, and run:
+For basic install, open up a command prompt or powershell terminal as administrator, and run
 
 .. code-block:: powershell
 
     wsl --install
 
-By default, this installs Ubuntu, however alternative distributions can be installed via terminal commands, or via the Microsoft store app (search for WSL). 
+By default, this installs Ubuntu; however, alternative distributions can be installed via terminal commands, or via the Microsoft store app (search for WSL). 
 You will be able to then open WSL by opening the start menu, and searching for the distribution you installed.
 You can also directly open a WSL instance from the new Windows terminal.
 
@@ -65,7 +65,7 @@ This is separate from your Windows account, and can be anything you like.
 Note that the password will be required in the future for ``sudo`` commands, such as to install packages.
 
 Note that the default WSL file system is located within your appdata folder and is not easily accessible from the Windows file system.
-Instead, from within WSL, you can open a Windows file explorer window by running:
+Instead, from within WSL, you can open a Windows file explorer window by running
 
 .. code-block:: console
 
@@ -76,14 +76,14 @@ This will open a file explorer window in the current directory of your WSL insta
 An alternative method is to save files in a Windows directory easily accessible from a root drive, such as ``C:\\``. 
 These can be accessed within WSL by navigating to ``/mnt/c/`` (or whichever drive you saved the files to).
 
-Before continuing, ensure git is installed on your WSL instance by running:
+Before continuing, ensure git is installed on your WSL instance by running
 
 .. code-block:: console
 
     git --version
 
 If not, it will need to be installed via your Linux distribution's package manager.
-In Ubuntu, this will be done by running:
+In Ubuntu, this will be done by running
 
 .. code-block:: console
 
@@ -93,11 +93,11 @@ Once installed, you can continue with the :ref:`InstallCommon` section.
 
 .. _Mac:
 
-Mac OS X - Dev Tools Setup
+Mac OS X - Dev tools setup
 --------------------------
 To run MPCD on a Mac, the only requirements are a C compiler and the GNU make utility.
 These can be installed via the XCode command line tools:
-Open a terminal (under Applications/Utilities), and run:
+Open a terminal (under Applications/Utilities), and run
 
 .. code-block:: console
 
@@ -107,7 +107,7 @@ In the pop-up window, click Install and agree to the terms of service.
 This will install both make and a C compiler.
 
 An alternative method is to install using homebrew, a package manager for Mac OS.
-To install make and a C compiler using homebrew, run:
+To install make and a C compiler using homebrew, run
 
 .. code-block:: console
 
@@ -123,12 +123,11 @@ Once done, you can continue with the :ref:`InstallCommon` section.
 
 .. _InstallCommon:
 
-Common Installation Instructions
+Common installation instructions
 --------------------------------
 
-MPCD is distributed via it's `Github repository <https://github.com/Shendruk-Lab/MPCD>`_.
-It can be downloaded from there by either clicking the green "Code" button and selecting "Download ZIP", or by cloning the repository using git.
-To clone via git, open a UNIX terminal and run:
+MPCD is distributed via it's `Github repository <https://github.com/Shendruk-Lab/MPCD>`_, from which it can be downloaded by either clicking the green "Code" button and selecting "Download ZIP", or by cloning the repository using git. 
+To clone via git, open a UNIX terminal and run
 
 .. code-block:: console
 
@@ -142,39 +141,43 @@ To compile, navigate within this folder (such that the ``Makefile`` is at the sa
     make
 
 **This is all that is required to compile the code**.
-The compiled executable file will be called ``mpcd.out`` and will be located in the same directory as the ``Makefile``.
-This can then be run by calling ``./mpcd.out``, with arguments as detailed in the :ref:`ProgArgs` section.
 
-Makefile Options
+Resulting executable
+^^^^^^^^^^^^^^^^^^^^
+
+The compiled executable file will be called ``mpcd.out`` and will be located in the same directory as the ``Makefile``.
+The program can then be run by calling ``./mpcd.out``, with arguments as detailed in the :ref:`ProgArgs` section.
+
+Makefile options
 ****************
 The functionality of the ``make`` call to compile MPCD is entirely controled by the ``Makefile`` in the root MPCD directory. 
 There are two main ways to control the compilation process: By adjustng Makefile variables, or calling make phonies.
 In this section we highlight a specific important phony call, before explaining both methods.
 
-Make Clean
+Make clean
 ----------
 A clean operation is a particularly important phony call.
 This will remove compiled binaries and "object files", which are used by the compiler.
 Performing a make clean after any significant code change, or before a new compilation, is highly recommended.
 
-To perform a clean, simply run:
+To perform a clean, simply run
 
 .. code-block:: console
 
     make clean
 
-Makefile Phonies 
+Makefile phonies 
 ----------------
 Makefile phonies are the recommended way to compile non-standard builds of MPCD.
 These are pre-defined rules that can be called by running ``make <phony>``, of which ``make clean`` is the most important example.
 
-Phonies are defiend in the ``Makefile`` by a line of format:
+Phonies are defiend in the ``Makefile`` by a line of format
 
 .. code-block:: makefile
 
     .PHONY: <phony>
 
-The most up-to-date list of these will always be present in the ``Makefile``, but a summary of particularly important ones include:
+The most up-to-date list of these will always be present in the ``Makefile``, but a summary of particularly important ones include
 
 * ``clean``: 
     Removes all compiled binaries and object files.
@@ -195,7 +198,7 @@ The most up-to-date list of these will always be present in the ``Makefile``, bu
     Designed for easier use with the ``gprof`` profiler, and is used to optimise the simulator during development.
 
 
-Makefile Variables
+Makefile variables
 ------------------
 Direct editing of the ``Makefile`` is highly discouraged.
 Instead, variables can be appended to the ``make`` call to change compilation behaviour.
@@ -212,7 +215,7 @@ There are three variables that may be helpful to modify:
     Compilers will try to optimise and speed up the binaries they produce by making shortcuts in code, however this can cause issues with the compiled code.
     By default, this is set to ``-O3``, which is the highest level of optimisation, so it may be necessary to lower it to lower levels such as ``-O2``, ``-O1``, or ``-O0``.
 
-An example of a ``make`` call setting all of these variables is:
+An example of a ``make`` call setting all of these variables is
 
 .. code-block:: console
 
@@ -222,7 +225,7 @@ An example of a ``make`` call setting all of these variables is:
 
 Compilers 
 ---------
-MPCD has been tested with a number of compilers, and is known to work with the following:
+MPCD has been tested with a number of compilers, and is known to work with the following
 
 - ``gcc`` --- The GNU C compiler
 - ``clang`` --- The LLVM C compiler
@@ -243,30 +246,30 @@ These compilers can be set by setting the ``cc`` parameter of the ``Makefile``:
 
 .. _ProgArgs:
 
-Program Arguments and Input Files
+Program arguments & input files
 *********************************
 MPCD is designed to be run from command line, and as such has an arguments interface.
 In this section, we will describe the arguments, and also describe the required input files for the two input modes.
 
-Command Line Arguments
+Command line arguments
 ----------------------
 .. note:: 
     All arguments are case sensitive.
 
 MPCD arguments are purely programmatic --- There is no GUI, or interacive mode, and all physics is specified by the input files.
-There are only two required arguments for MPCD:
+There are only two required arguments for MPCD
 
 * Input files, which can either use ``-i`` and point to a ``.json`` file for :ref:`JSONInput`, or use :ref:`LegacyInput`.
 * An output directory, which can be set using ``-o``.
 
-Optional arguments include:
+Optional arguments include
 
 * ``-h``: 
     Prints a help message, explaining arguments and their usage, then exits.
 * ``-v``: 
     Prints a legacy version message.
 
-Some examples of valid calls are:
+Some examples of valid calls are
 
 .. code-block:: console
 
@@ -276,37 +279,39 @@ Some examples of valid calls are:
 
 .. _JSONInput:
 
-JSON Input
+JSON input
 ----------
 
 The recommended way to run MPCD is by using a JSON input file. 
 This is a single file that is .json formatted, and contains all of the physics information for the simulation.
 
 A guide to all input parameters is provided on Github `here <https://github.com/Shendruk-Lab/MPCD/blob/master/docs/InputGuide.md>`_.
-Furthermore, all :ref:`tutorials <tutorials>` in this user guide give explanations on how to set up input files for specific simulations.
+Furthermore, the :ref:`Usage <usageChapter>` section and the :ref:`Tutorials <tutorials>` in this user guide give explanations on how to set up input files for specific simulations.
 
 .. note:: 
-    If you want to use the MD subsystem, you will need to also provide an MD .inp file along with a .json input file.
+    If you want to use the molecular dynamics (MD) subsystem, you will need to also provide an MD .inp file along with a .json input file. 
     See `the MD input guide <https://github.com/Shendruk-Lab/MPCD/blob/master/docs/MDguide.md>`_ for more information.
 
 .. _LegacyInput:
 
-Legacy Input
+Legacy input
 ------------
 
 .. warning:: 
     Legacy input files have been considered depreciated since the introduction of JSON input files in summer 2021.
     They are still supported, but no features implemented since 2020 are supported in them.
 
+    Use of legacy input is strongly discouraged.
+
 In order to use legacy input files, you pass them to the ``mpcd.out`` using the legacy input argument ``-Li`` followed by the path to the input files.
-For example:
+For example
 
 .. code-block:: console
 
     ./mpcd.out -Li ./path/to/input/files/directory -o ./path/to/output
 
 Legacy input files are a series of 5 ``.inp`` files, which are read in order to set up the simulation. 
-These include:
+These include
 
 * input.inp
 * bc.inp

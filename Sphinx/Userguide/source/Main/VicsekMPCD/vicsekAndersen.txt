@@ -1,5 +1,3 @@
-VicsekAnderson-MPCD
--------------------
 
 This collision operator applies a thermostat to the simulation [Holm2009]_. The collision operator generates random velocity vectors for all the MPCD particles in the cell. The random velocitities are drawn from Gaussian distribtions with variance :math:`\sqrt{k_BT/m}` and so obey Maxwell-Boltzmann statistics. The average of the random velocities is then subtracted from all to conserve momentum. Energy is not conserved; rather the system is thermostatted to `KBT`. Also does not conserve angular momentum.
 If the streaming step remains the same the :ref:`collision opearator<eq:collision>` has the next form:

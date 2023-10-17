@@ -1,5 +1,3 @@
-Overview
-========
 
 .. include:: BC/bc_overview.txt
 

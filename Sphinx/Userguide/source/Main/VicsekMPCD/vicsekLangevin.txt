@@ -1,5 +1,3 @@
-VicsekLangevin-MPCD
--------------------
 
 In conserving the angular momentum of the cell, the position of each fluid particle relative to the centre of mass of the cell :math:`\vec{x}^{'}_i = \vec{x}_i + \vec{x}^{cm}` is important. The VicseAndersen-MPCD algorithm creates a small change in angular momentum every collision step. Let this amount be denoted :math:`\delta \vec{L}`. This angular momentum can be exactly cancelled out by giving the entire cell an appropriate angular velocity :math:`\vec{\omega}`. If the set of particles in the cell have a moment of inertia tensor :math:`\hat{I}` about the centre of mass then the angular velocity needed to cancel the residual angular momentum is :math:`\vec{\omega} = \hat{I}^{-1} \cdot \delta \vec{L}`.
 The :ref:`collision operator<eq:collision>` is expressed as follows:

@@ -3,7 +3,7 @@ to coexist and interact through a tuneable interaction. The theory behind this i
 of the implementation in this algorithm are described in :ref:`the next section <MPImp>`.
 
 .. _landauGinz:
-Free-Energy of a bimodal fluid
+Free energy of a bimodal fluid
 =================================
 
 A multi-phase mixture can be described by a Landau-Ginzburg free energy functional depending on the local compositional order parameter *𝜙*, 

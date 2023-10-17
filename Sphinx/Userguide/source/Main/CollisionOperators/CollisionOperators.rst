@@ -11,7 +11,7 @@ In this section, we describe the various families of collision operators availab
 
 .. _SRD:
 
-Stochastic Rotation Dynamics
+Stochastic rotation dynamics
 ============================
 The original derivation of MPCD is known as Stochastic Rotation Dynamics (SRD) **TODO: cite**.
 Translating to modern terminology, SRD's collision operator :math:`\vec\Xi` performs
@@ -68,7 +68,7 @@ It is possible to verify that momentum and energy are conserved before and after
 
 .. _Andersen:
 
-Andersen Thermostatted MPCD
+Andersen-thermostatted MPCD
 ===========================
 While SRD is sufficient for some applications, it is not without its drawbacks:
 
@@ -166,7 +166,7 @@ Vicsek MPCD
 
 .. _ActiveNematic:
 
-Active Nematic MPCD
+Active nematic MPCD
 ===================
 .. warning:: 
     The Active-nematic MPCD algorithm relies on liquid crystal mode being enabled. See the section on :ref:`Nematic MPCD <chapter8>` for more information.
@@ -237,7 +237,7 @@ These are described in the sub-sections below.
 
 .. _ActiveSum:
 
-Active-Sum
+Active-sum
 ----------
 
 Active-Sum is the simplest formulation, and is akin to a "particle-carried activity" **TODO: cite**.
@@ -255,8 +255,9 @@ This is implemented with a keycode of ``16``, and can be used by adding the foll
 
 .. _ActiveAv:
 
-Active-Average
+Active-average
 --------------
+
 In contrast to active-sum, with "particle-carried activity", active-average instead has "cell-carried activity" **TODO: cite**.
 Mathematicaly, the sum of particle activities within a cell is averaged, which is then applied as an active force magnitude to every particle. 
 ie:
@@ -275,8 +276,9 @@ This is implemented with a keycode of ``17``, and can be used by adding the foll
 
 .. _SigmoidalANMPCD:
 
-Sigmoidally Modulated Active-Nematic MPCD
+Sigmoidally modulated active-nematic MPCD
 -----------------------------------------
+
 In an effort to reduce the density fluctuations seen in Active-Sum and Active-Average, the code implements a density modulated active-nematic MPCD algorithm **TODO: cite**.
 A sigmoidally shaped modulation function is used
 

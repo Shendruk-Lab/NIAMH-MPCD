@@ -1,7 +1,8 @@
+.. _backgroundChapter:
+
 Background
 ##########
 
-.. This is a comment. to hyperlink need to define like follwoing
 .. _chapter1:
 
 What is MPCD ?

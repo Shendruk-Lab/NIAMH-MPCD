@@ -1,11 +1,12 @@
 Executive summary
 ##################
 
-*Multi-Particle Collision Dynamics* (**MPCD**) is a coarse-grained, particle-based, simulation technique for simulating fluids that reproduces thermally fluctuating, hydrodynamics interactions. 
-MPCD is ideal for situations involving moderate Peclet numbers---where diffusion and advection are both significant. 
+*Multi-Particle Collision Dynamics* (MPCD) is a coarse-grained, particle-based, numerical technique for simulating thermally fluctuating hydrodynamics within fluids. 
+MPCD is ideal for situations involving moderate Peclet numbers---where diffusion and advection are of comparable significance. 
 
 This implementation of MPCD is written in *C* and requires no external libraries. 
-It is serial but versatile, and is able to simulate complex boundary conditions, polymer suspensions, nematic fluids, colloids and swimming bacteria. 
+It is serial; however, it is expected that numerical studies utilizing this code will invariably run many parallel instances to acquire statistical significance for stochastic processes. 
+The code is versatile, able to simulate complex boundary conditions, polymer suspensions, nematic fluids, colloids and swimming bacteria. 
 
 In addition to this guide, users should consult pulbished review articles, including:
 

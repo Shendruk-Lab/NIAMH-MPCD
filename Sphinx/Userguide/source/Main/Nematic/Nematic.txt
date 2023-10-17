@@ -1,4 +1,4 @@
-Passive Nematics
+Passive nematics
 =================
 
 A nematic liquid crystal can be simulated via an MPCD algorithm by including an orientation field. This is done by assigning each MPCD particle an orientation :math:`\boldsymbol{u}_i`, which, when averaged over a cell, leads to a tensor order parameter :math:`\boldsymbol{Q}_c` for each cell [Shendruk2015]_.
@@ -11,7 +11,7 @@ A nematic liquid crystal can be simulated via an MPCD algorithm by including an 
 The scalar order parameter :math:`S_c` then corresponds to the largest eigenvalue of :math:`\boldsymbol{Q}`, while the director :math:`\boldsymbol{n}_c` is assigned to the corresponding eigenvector. 
 
 
-Nematogen Alignment
+Nematogen alignment
 -------------------
 
 
@@ -82,14 +82,14 @@ In turn, the nematic MPCD algorithm included the backflow induced by the nematog
 
 Proceeding in this way ensures that the system's total angular momentum is conserved. Furthermore, as setting :math:`\gamma_R=0` kills the transfer or momentum for each particle, this also results in turning this coupling off. 
 
-Isotropic-Nematic transition
+Isotropic-nematic transition
 ----------------------------
 
 As mentioned above, increasing :math:`\beta U` changes the orientation distribution from flat to highly peaked. Operationally, this means that a system with a small :math:`\beta U` will exist in an isotropic fluid state with a global scalar order parameter :math:`S` close to zero. On the contrary, setting a large value of :math:`\beta U` will lead to a nematic order. Even though the algorithm assumes a near-equilibrium Maier-Saupe distribution for the orientation, it does so at the local cell level. This means that in general the scalar order parameter and the director are spatially varying variables, which allows the system to exist with local nematic order between the two regimes discussed above. 
 In MPCD units, for a mean population of 20 particles per MPCD cell, :math:`U=5` sets the threshold for nematic order. By default, the code runs at :math:`U=10`.
 
 
-Frank Elastic Coefficients
+Frank elastic coefficients
 --------------------------
 
 Spatial distortions of the nematic director $\boldsymbol{n}$ have an energetic cost. This cost is given by the following free energy density
@@ -105,8 +105,8 @@ in which :math:`K_{\text{splay}}`, :math:`K_{\text{twist}}` and :math:`K_{\text{
 In the nematic-MPCD algorithm, :math:`\beta U` controls the interaction between nematogens. Thus, it is not surprising that it also sets the Frank coefficients. All three coefficients are of order :math:`\sim U/a`. Although in principle there are differences between the three coefficients, in the regime of small rods (compared to interaction lengths) under which nematic MPCD operates, these are negligible, and thus the algorithm presents isotropic elasticity.  
 
 
-Tumbling and Shear Alignment
-----------------------------
+Tumbling & shear alignment
+--------------------------
 
 The bare tumbling parameter :math:`\lambda` in the Jeffery's equation only applies in the limit of a dilute suspension of nematogens. Away from that limit, Jeffery's equation can still be used but, because of nematogen-nematogen interactions) with a renormalized tumbling parameter [Archer1995]_
 
@@ -127,10 +127,6 @@ The free energy associated to this effect is given by
     f_\text{mag} = -\frac{1}{2} \chi_M B^2 \sin^2(\varepsilon),
 
 in where :math:`B` is the magnitude of the magnetic field, :math:`\varepsilon` is the angle between the nematogen's orientation and the magnetic field and :math:`\chi_M` is a magnetic susceptibility which sets the strength of this effect.
-
-
-
-
 
 Active nematic MPCD
 ===================
@@ -162,9 +158,7 @@ As explained above, :math:`\alpha_c` sets the strength of the active dipoles, an
 The algorithm can set this parameter in four different ways, depending on the desired connection between cell population and activity, thus resulting in four different active collision operators. 
 
 
-    
-
-Particle carried activity
+Particle-carried activity
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 
 In this version of the collision operator, each particle carries a bare activity parameter `alpha_i`. The cell activity :math:`\alpha_c`  is just the sum of the activities of all the particles inside the cell
@@ -177,10 +171,7 @@ This implies that with this choise, the strenght of the active impulses provided
 
 This active collision operator has the tag  collOp: 16.  
 
-
-
-
-Cell carried activity
+Cell-carried activity
 ^^^^^^^^^^^^^^^^^^^^^
 
 In this version of the collision opertor, the cell activity strength is the mean activities for all particles inside the cell
@@ -195,8 +186,8 @@ In the particular case in which all particles have the same activity (for a exam
 This active collision operator has the tag  collOp: 17.  
 
 
-Modulated particle carried activity and cell carried activity
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Modulated particle-carried & cell-carried activity
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 In addition to the above choices of activity strength, the algorithm also offers the possibility to couple the cell activity strength to the cell population by largely supressing it at high densities. This leads to two more collision operators: Modulated particle carried activity and Modulated cell carried activity. 
 
