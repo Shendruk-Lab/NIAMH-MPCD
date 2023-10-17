@@ -1,0 +1,52 @@
+We can not only have partcies/liquids inside closed system. Like we have a 2D square system with absolute solid walls
+
+.. image:: VicsekMPCD/BC_classic.jpg
+
+But the boudaries also can be movable and interact with other boundaries and particles/liquids in the system.
+The ones which are solid
+
+.. image:: VicsekMPCD/BC_another_bc_inside.jpg
+
+Teh example configuration for this boundary looks like this
+
+::
+
+    "BC":
+        [
+            "inv":      0,
+            "A":        [1,1,1,1],
+            "P":        4,
+            "Q":        [50, 50],
+            "R":        1,
+            "dsplc":    1,
+        ]
+
+inv parameter is necessary there, 0 indicates that particles should move outside the obstacle in the initialization. Dsplc parameter indicates that obstacle can be moved.
+
+And the ones which can have particles/liquid inside.
+If we want the liquid to be inside the obstacle we should set inv paramter to 1 can set species distribution to be inside the obstacle. An example configuration for it
+
+.. image:: VicsekMPCD/BC_another_bc_filled.jpg
+
+
+::
+
+    "species":
+        [
+            {
+                "dens": 10,
+                "mass": 1,
+                "qDist": 2
+            }
+        ]
+    "BC":
+        [
+            "inv":      1,
+            "A":        [1,1,1],
+            "P":        [2,2,2,2],
+            "Q":        [50, 50],
+            "R":        10,
+            "dsplc":    1,
+        ]
+
+The inv 1 will make sure that particles will be inside our obstacle and qDist 2 will place all particles in the center of control volume.

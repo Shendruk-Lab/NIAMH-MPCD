@@ -1,0 +1,33 @@
+VicsekLangevin-MPCD
+-------------------
+
+In conserving the angular momentum of the cell, the position of each fluid particle relative to the centre of mass of the cell :math:`\vec{x}^{'}_i = \vec{x}_i + \vec{x}^{cm}` is important. The VicseAndersen-MPCD algorithm creates a small change in angular momentum every collision step. Let this amount be denoted :math:`\delta \vec{L}`. This angular momentum can be exactly cancelled out by giving the entire cell an appropriate angular velocity :math:`\vec{\omega}`. If the set of particles in the cell have a moment of inertia tensor :math:`\hat{I}` about the centre of mass then the angular velocity needed to cancel the residual angular momentum is :math:`\vec{\omega} = \hat{I}^{-1} \cdot \delta \vec{L}`.
+The :ref:`collision operator<eq:collision>` is expressed as follows:
+
+.. math::
+    :name: eq:vicsekLangevin
+
+    \vec{v}_i(t+\delta t) = a\vec{v}_i(t) + b\vec{\xi}_i
+
+Where:
+
+- :math:`a = \frac{2m- \gamma \delta t}{2m+ \gamma \delta t}`.
+- :math:`b = \frac{2\sqrt{\gamma \delta t}}{2m + \gamma \delta t}`.
+- :math:`m` is the mass of the particle.
+- :math:`\vec{v}_i` is the velocity of the particle.
+- :math:`\vec{v}_{cm}` stands for the center of mass velocity of the cell.
+- :math:`N_c` is the number of particles in the cell.
+- :math:`\gamma` constant which is represent resistive, viscous force that opposes the motion of the fluid particles.
+- :math:`\vec{\xi}_i` white noise constant.
+
+Similar to the rest, in order to launch experiment with this collision operator set collOp parameter to 12
+
+::
+
+    "collOp": 12,
+
+In the equation we have friction coefficient which we also able to set
+
+::
+
+    "fricCoef": 1.0,

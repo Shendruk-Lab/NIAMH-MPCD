@@ -1,0 +1,4 @@
+.. rubric:: Reference
+
+.. [Holm2009] Dunweg, B., Kremer, K., Holm, C., Binder, K., Curro, J. G., Frenkel, D., Grest, G. S., Heine, D. R., Hünenberger, P. H., MacDowell, L. G., Müller, M., & Paul, W. (Eds.). (2009). Advanced computer simulation approaches for soft matter sciences III. Springer Science & Business Media.
+.. [Vicsek1995] 12.	T. Vicsek, A. Czirók, E. Ben-Jacob, I. Cohen, O. Shochet, Novel type of phase transition in a system of self-driven particles, Phys. Rev. Lett. 75 (6) (1995)1226–1229. URL http://dx.doi.org/10.1103/PhysRevLett.75.1226

@@ -1,0 +1,36 @@
+VicsekAnderson-MPCD
+-------------------
+
+This collision operator applies a thermostat to the simulation [Holm2009]_. The collision operator generates random velocity vectors for all the MPCD particles in the cell. The random velocitities are drawn from Gaussian distribtions with variance :math:`\sqrt{k_BT/m}` and so obey Maxwell-Boltzmann statistics. The average of the random velocities is then subtracted from all to conserve momentum. Energy is not conserved; rather the system is thermostatted to `KBT`. Also does not conserve angular momentum.
+If the streaming step remains the same the :ref:`collision opearator<eq:collision>` has the next form:
+
+.. math::
+    :name: eq:vicsekAnderson
+
+    \vec{v}_i(t + \delta t) = \vec{v}_{cm} + \tau (\alpha \hat{v}_{cm} - \vec{v}_i(t)) + \vec{\xi}_i - \langle \vec{\xi} \rangle
+
+Where:
+
+- :math:`\vec{v}_{cm}` - represents the center of mass velocity of the cell.
+- :math:`\hat{v}_{cm} = \vec{v}_{cm}/|v_{cm}|` - denotes the unit vector indicating the direction of the velocity.
+- :math:`\vec{\xi}_i` - stands for a random velocity assigned to each particle.
+- :math:`\langle \vec{\xi} \rangle` - signifies the cell average of random velocities.
+- :math:`\tau` - is a relaxation rate parameter.
+- :math:`\alpha` - represents the target speed.
+
+Effectively, this collision operator computes a new velocity for each fluid particle within a cell. It is composed of the center of mass velocity of the cell, a random direction of the center of mass, minus the sum of all random velocities within the cell. Importantly, this collision operator conserves momentum, which leads to more physically realistic particle behavior.
+
+In order to run experiment with this collision operator you need to change collOp value to 11
+
+::
+
+    "collOp": 11,
+
+Additionaly we can configure temperature relaxation time and kbt value
+
+::
+
+    "tau": 0.5,
+    "kbt": 1,
+
+The Anderson-MPCD algorithm discussed so far conserves mass, energy and translational momentum but, just like the Vicsek collision operator, it does not conserve angular momentum. However, it can be extended to do so.

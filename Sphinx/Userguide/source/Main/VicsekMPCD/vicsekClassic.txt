@@ -1,0 +1,94 @@
+Vicsek system
+-------------
+
+This collission operator is based on the famous vicsek model of self-driven particles [Vicsek1995]_. It describes the collective behavior in the simplest possible way.  It was designed to explore how local interactions among simple, self-propelled particles can give rise to global order and collective motion.
+Key Principles of the Vicsek Model:
+
+- **Self-Propelled Particles**: The fundamental units in the Vicsek Model are self-propelled particles, often referred to as agents or individuals. These particles move at a constant speed and possess a heading direction, which can be influenced by their local neighbors.
+- **Local Interaction**: Agents interact with their immediate neighbors within a defined radius, simulating a finite perception range. These interactions involve aligning their velocities and directions to some extent.
+- **Noise**: The model incorporates a random noise factor to account for unpredictability and stochasticity in the behavior of real-world entities.
+- **Order Parameter**: The degree of alignment among the agents is quantified using an "order parameter," which measures the average direction of motion across the group. This parameter helps to determine whether the system exhibits collective motion or remains in a disordered state.
+
+MPCD employ a square-shaped cell. The particles are represented as continuously moving points on a plane, following a continuous trajectory (off-lattice).
+
+.. image:: VicsekMPCD/VicsekMPCD.jpg
+
+Particle positions are being update as in :ref:`Streaming step <eq:stream>`. The positions of individual particles at time :math:`t + 1` are updated based on their current positions and velocities. Each particle moves in the direction of its velocity vector by a certain distance:
+
+.. math::
+    :name: eq:positionVicsek
+
+    \vec{r}_i(t+\delta t) = \vec{r}_i(t)+\delta t \cdot v_0 \cdot \vec{u}_i(t)
+
+Where:
+
+- :math:`\vec{r}_i(t+\delta t)` is the position of particle :math:`i` at time :math:`t + \delta t`.
+- :math:`\vec{r}_i(t)` is the current position of particle :math:`i` at time :math:`t`.
+- :math:`\delta t` is the time step.
+- :math:`v_0` is the constant speed of the particle.
+- :math:`\vec{u}_i(t)` is the normalized velocity vector of particle :math:`i` at time :math:`t`.
+
+Velocity Alignment are similar with the :ref:`collision step <eq:collision>`. The velocity of each particle at time :math:`t + 1` is updated by averaging the velocities of its neighbors within a specified radius, and then normalizing the resulting velocity vector:
+
+.. math::
+    :name: eq:velocityVicsek
+
+    \vec{u}_i(t+\delta t) = \frac{1}{N_c} \sum_{j=1}^{N_c} \vec{u}_j(t) + \eta \cdot \delta \Theta
+
+Where:
+
+- :math:`\vec{u}_i(t+\delta t)` is the updated velocity vector of particle :math:`i` at time :math:`t + \delta t`.
+- :math:`N_c` is the number of neighbors within the cell :math:`c`.
+- :math:`\vec{u}_j(t)` is the velocity vector of the :math:`j`-th neighboring particle at time :math:`t`.
+- :math:`\eta` is a noise parameter that introduces random perturbations.
+- :math:`\delta \Theta` is a random angle drawn from a uniform distribution.
+
+Example configuration for the Vicsek system. Let`s say we would have 100 by 100 square system
+
+input.json
+::
+
+    "domain": [100, 100],
+
+with 1000 simluation steps and 0 warmup steps
+::
+
+    "warmUp": 0,
+    "simSteps": 1000,
+
+In order to use standart Vicsek collision operator described above set collOp paramater to 7
+
+::
+
+    "collOp": 7,
+
+Let`s conigure one specie to have mass 1, activity value 0.5 and have random distribution.
+Activity value is used as noise in the next form :math:`\eta = 1.0 - act`
+
+::
+
+    "species":
+        [
+            {
+                "comment": "Particle density of 10 within square area",
+                "dens": 10,
+                "comment": "Particle`s mass",
+                "mass": 1,
+                "comment": "Particle activity, effectively is used as noise. But in the next form noise = 1.0 - act",
+                "act": 0.5,
+                "comment": "Random distribution function for particles",
+                "qDist": 0
+            }
+        ],
+
+Let`s set gravity and magnetic fields to zero.
+
+::
+
+    "grav": [0.0, 0.0, 0.0],
+    "mag": [0.0, 0.0, 0.0],
+
+And this is enough in order to have classic vicsek experiment.
+
+
+The main disadvantage of the vicsek collision operator is the luck of conservation laws. The one thing which is being conserved is the number of particles. However MPCD can propose modifications of the vicsek collision operator in order to apply conservation laws.
