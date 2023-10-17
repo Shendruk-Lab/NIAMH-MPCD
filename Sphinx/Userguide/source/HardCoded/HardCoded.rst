@@ -1,8 +1,8 @@
-Hard coded options
+Hard-coded options
 ##################
 
 While MPCD is almost entirely configureable from its input files, there are a several options that are hard coded. 
-These hard coded options are in the form of preprocessor defines (such as ``# define DBG``), which are read by the compiler at compile time and are within the ``mpcd/headers/definitions.h`` file. 
+These hard-coded options are in the form of preprocessor defines (such as ``# define DBG``), which are read by the compiler at compile time and are within the ``mpcd/headers/definitions.h`` file. 
 The majority of these options relate to the operation of the simulator, rather than the simulation of the physics, and are detailed on this page.
 
 There are two variants of these options, which are configured in different ways:
@@ -13,7 +13,7 @@ There are two variants of these options, which are configured in different ways:
 .. warning:: 
     Changing these options will require the simulator to be re-compiled to enable them. 
 
-Random Number Generation Options
+Random number generation options
 ********************************
 
 MPCD uses two types of random number generators: 
@@ -24,13 +24,13 @@ MPCD uses two types of random number generators:
 By default, the Xoroshiro generator is used, as it is significantly faster while still retaining a sufficiently large period for MPCD simulations.
 To enable the Mersenne-Twister method, uncomment the ``// # define RNG_MERSENNE`` line in ``mpcd/headers/definitions.h``.
 
-Mersenne-Twister Options
+Mersenne-Twister options
 ------------------------
 
 .. note:: 
     These options only take effect if the Mersenne-Twister random number generator is enabled.
 
-Of the two random number generator options, only the Mersenne-Twister has configureable options.
+Of the two random number generator options, only the `Mersenne-Twister <http://www.math.sci.hiroshima-u.ac.jp/m-mat/MT/emt.html>`_ has configureable options.
 
 .. warning:: 
     These options are not designed to be configurable by a typical user. 
@@ -52,7 +52,7 @@ These options include:
 * ``# define LOWER_MASK 0x7fffffffUL``: 
     The least significant r bits of the state vector.
 
-Debug Modes/ Verbosity
+Debug modes/verbosity
 **********************
 All non-essential and non-error verbosity in MPCD is enabled by enabling "debug mode".
 This occurs if the ``# define DBG`` line is uncommented in ``mpcd/headers/definitions.h``.
@@ -91,7 +91,7 @@ The following debug levels are less frequently used, and are most helpful when d
 22. Swimmer Torque --- Outputs intermediary debug information on swimmer torques. Only outputs at this verbosity level.
 23. Incompressibility --- Outputs intermediary debug information for the incompressibility algorithm. Only outputs at this verbosity level.
 
-Floating Point Error Handling
+Floating-point error handling
 *****************************
 .. warning:: 
     This feature only works on Linux (and WSL) systems. It does not function on Mac OS.
@@ -100,18 +100,19 @@ Floating Point Error Handling
     For normal operation, this should be kept disabled.
 
 Primarily for debugging purposes, it is possible to set MPCD to halt execution upon receipt of a ``SIGFPE`` hardware signal. 
-This hardware signal is thrown by the CPU when a floating point error occurs, such as a division by zero or an overflow.
+This hardware signal is thrown by the CPU when a floating-point error occurs, such as a division by zero or an overflow.
 Typically, such errors will cause the program to be flooded with ``NaN`` values, which will either cause the simulation to crash, or propagate through the system to give garbled output.
 
 To enable this feature, uncomment the ``// #define FPE`` line in ``mpcd/headers/definitions.h``.
 This is most useful when running through a debugger, such as ``gdb``, to identify the source of the error.
 
-Dump File Flush
+File flush
 ***************
 .. note:: 
-    There are generally no drawbacks to enabling this, and it is recommended to keep this on.
+    There are few drawbacks to enabling this, and it is recommended to keep this on. 
+    There is a slight slowdown associated with writting to file before the buffer is full. 
 
-By default, codes written in the C programming language do not immediatly write to a terminal, or to a file.
-Instead, they write to a buffer controlled by the operating system, which will periodically flush the buffer to the terminal or file.
+By default, codes written in the *C* programming language do not immediatly write to terminal or file.
+Instead, they write to a buffer controlled by the operating system, which will periodically flush the buffer. 
 It is possible to force the operating system to flush the buffer immediatly, which in MPCD is controlled by the ``# define FFLSH`` line in ``mpcd/headers/definitions.h``.
-To disable this option, comment out the appropriate line.
+To disable this option, comment out the definition. 
