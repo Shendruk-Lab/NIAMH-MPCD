@@ -40,6 +40,8 @@ Collision operators
 Initialization
 **************
 
+.. include:: particleInitialization/particleInitialization.txt
+
 .. _chapter7:
 
 Boundary conditions
