@@ -1,0 +1,103 @@
+Molecular Dynamics (MD) numerically integrates the classical equations of motion for a large number of particles that interact via a set of pair potentials. It is a common approach to simulate polymer dynamics. Polymer molecules are composed of a large number of equal repeat units called monomers which are connected linearly by bonds. The dynamics of the chain monomers is determined by Newtons’ equations of motion. These equations are integrated using the velocity Verlet algorithm.  The standard implementation scheme of this algorithm is to 
+
+#. calculate :math:`{\vec v}(t+1/2 {\Delta}t) = {\vec v}(t) + 1/2 {\vec a}(t){\Delta}t`.
+
+#. calculate :math:`{\vec x}(t+{\Delta}t) = {\vec x}(t) + {\vec v}(t+1/2{\Delta}t){\Delta}t`.
+
+#. derive :math:`{\vec a}(t+{\Delta}t)` from the interaction potentials using :math:`{\vec x}(t+{\Delta}t)`.
+
+#. calculate :math:`{\vec v}(t+{\Delta}t) = {\vec v}(t+1/2{\Delta}t) + 1/2 {\vec a}(t+{\Delta}t) {\Delta}t`.
+
+This algorithm gives the particle’s velocity and position at the next time step using the interaction forces from the potentials as :math:`f = - \nabla U(r_{ij})` for pairs of particles that are separated by a distance :math:`r_{ij}`. The most common pair potentials for simulating polymers are 
+
+- **Lennard-Jones (LJ) Potential**, :math:`U_{\text{LJ}}`: The interaction between two free, uncharged molecules (respectively labelled :math:`i` and :math:`j`) 
+
+.. math::
+
+    U_{\text{LJ}}(r_{ij}) = 4\epsilon \left[ \left(\frac{\sigma}{r_{ij}}\right)^{12} - \left(\frac{\sigma}{r_{ij}}\right)^6 \right],
+
+where :math:`r_{ij}` is the separation, :math:`\epsilon` is the well depth and :math:`\sigma` is the effective diameter of the pair of MD particles.
+
+- **Weeks-Chandler-Andersen (WCA) Potential**, :math:`U_{\text{WCA}}`: A purely repulsive, truncated form   of the LJ potential called the Weeks-Chandler-Andersen potential is commonly used as a coarse-grained interaction. The LJ potential is shifted and truncated at its minimum value so that it ends smoothly at a distance :math:`r_c`. The WCA potential can be written as
+
+.. math::
+
+    U{\text{WCA}}(r_{ij}) = 4\epsilon
+    \begin{cases}
+         \left(\frac{\sigma}{r_{ij}}\right)^{12} - \left(\frac{\sigma}{r_{ij}}\right)^6
+        + \frac{1}{4},
+        & r_{ij}<r_c\\
+        0,
+        & r_{ij}>r_c
+    \end{cases}
+
+
+where :math:`r_c = \sqrt[6]{2}\sigma`.
+
+- **Finitely Extensible Bonds**, :math:`U_{\text{FENE}}`: In any coarse-grained model of a polymer, adjacent MD beads must be connected together to form a chain of monomers. The use of harmonic potentials can lead to unphysical bond stretching effects. For this reason, a finitely extensible force with a hard limit on the bond length is utilized. The most common choice is the finitely extensible nonlinear elastic potential (FENE):
+
+.. math::
+
+    U_{\text{FENE}}(r_{ij})
+    = -\frac{k_{\text{FENE}}}{2} {r_0}^2 \ln 
+    \left( 1-\frac{{r_{ij}}^2}{{r_0}^2} \right),
+
+where :math:`k_{\text{FENE}}` is a spring constant representing the stiffness of the bond inresponse to stretching and :math:`r_0` is the equilibrium length of the bonds.
+
+- **Bond Bending Potential**, :math:`U_{\text{bend}}`: This potential captures the stiffness of the polymer in response to bending force. There are several bending potentials including angular harmonic, cosine harmonic or cosine expansion. For instance angular harmonic is given by
+
+.. math::
+
+    U_{\text{bend}}(\theta _{ijk}) = \frac{k_{\text {bend}}}{2} (\theta _{ijk} - \vartheta)^2.
+
+The angle :math:`\theta_{ijk}` is the angle created by three consecutive monomers :math:`i, j` and :math:`k` and :math:`\vartheta` is the equilibrium angle. The parameter to modulate the bend stiffness is :math:`k_{\text{bend}}`
+
+- **Coulombic Potential**, :math:`U_{\text{coul}}`: The bare electrostatic interaction between pairs of particles is given by the Coulombic potential
+
+.. note::
+
+    The equation is going to be added
+
+- **Nematic Coupling Potential**, :math:`U_{\text{Nem}}`: This potential aligns the bonds of the polymer with the local nematic orientation. it works similar to the
+.. math::
+
+    U_{\text{bend}}(\theta _{ijk}) = \frac{k_{\text {bend}}}{2} (\theta _{ijk} - \vartheta)^2.
+
+.. note::
+
+    This will be changed
+
+
+The dynamical behavior of macromolecules in solution is strongly affected or even dominated by hydrodynamic interactions. Mesoscale hydrodynamic simulations can be used to introduce hydrodynamic interactions to molecular dynamic (MD) simulations and consequently to provide a full characterization of the polymer dynamics [Holm2008]_. This coupling to the fluid can be done in two ways. Either the MD beads can be included in the MPCD algorithm or the MPCD particles can be included in the MD calculations.
+
+MD-in-MPCD Coupling
+===================
+
+The MD monomers can be included in the MPCD collision operations. This scheme is referred to as MD-in-MPCD coupling. In the MD-in-MPCD scheme the MD algorithm integrates the MD monomer trajectories over some number of MD time-steps :math:`N_{\text{MD}}`. In a sense, during this period the MD simulation occurs in a vacuum. After this the program exits the MD portion of the algorithm and enters the MPCD side. The MD beads are ported into the MPCD algorithm as point particles and are included in the collision operation. In this way, the MD beads exchange momentum with the fluid. The MPCD particles perform the streaming step (the MD particles do not) before the MD algorithm is reinitiated for another :math:`N_{\text{MD}}` MD time-steps.
+
+Values of :math:`N_{\text{MD}}` are typically large (on the order of 10 although smaller values have been used in the literature). This separation of time scales ensures that the momentum transferred to the polymer during the collision step is well distributed throughout the chain.
+
+MPCD-in-MD Coupling
+====================
+
+The second coupling scheme is more accurately described as a hybrid MPCD/MD approach. In the MPCD-in-MD coupling scheme MPCD solvent particles are included in the MD integrator. In the MD portion of the program the monomers interact with one another (monomer-monomer interactions) and also with the solvent fluid particles (monomer-solvent interactions) but the solvent particles do not interact with each other (no solvent-solvent interactions). In this implementation the MPCD fluid particles are cast as MD beads with the same properties as the monomers but this is not necessary. If desired, the program could be altered such that the MPCD particles would be cast as MD beads with different pair potentials than the monomers. The position and velocity of the all MPCD fluid particles is updated in time by the Verlet algorithm. After:math:`N_{\text{MD}}` MD time-steps, the MD integrator is exited and the MPCD portion of the program is performed. MPCD fluid particles are binned into cells and exchange momentum by the MPCD collision operator. Since their positions are updated in the MD portion of the program, they do not stream.
+
+.. note::
+
+    images for the above aforementioned options will be added.
+
+The number of MD steps between an MPCD step can be much smaller that in the MD-in-MPCD scheme.
+
+In both coupling schemes, the MD particles are typically given a mass :math:`m_{\text{MD}}` that is larger than the MPCD particles’ mass m in order to achieve efficient coupling.
+
+
+
+
+.. rubric:: References
+
+.. [Holm2008] Holm and Kremer (2008). `Advanced computer simulation approaches for soft matter sciences III <https://link.springer.com/book/10.1007/978-3-540-87706-6>`_, Springer, vol 221.
+
+.. note::
+
+    reference will be added
+
