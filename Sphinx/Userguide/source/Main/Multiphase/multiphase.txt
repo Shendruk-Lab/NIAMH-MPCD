@@ -1,7 +1,8 @@
 Multiphase fluids are implemented in this simulator by allowing for several species of particles with species-wide properties (mass, density, ...)
-to coexist and interact through a tuneable interaction. The theory behind this interaction is described in section 4.10.1, and the broad lines
-of the implementation in this algorithm are described in section 4.10.2
+to coexist and interact through a tuneable interaction. The theory behind this interaction is described :ref:`here <landauGinz>`, and the broad lines
+of the implementation in this algorithm are described in :ref:`the next section <MPImp>`.
 
+.. _landauGinz:
 Free-Energy of a multiphase fluid
 =================================
 
@@ -9,8 +10,11 @@ A multi-phase mixture can be described by a Landau-Ginzburg free energy function
 a surface tension coefficient *𝜅*
 
 .. math::
-    F = \int d^d r (\frac{\tau}{2}\phi^2+\frac{b}{4}\phi^4+\frac{\kappa}{2}(\nabla \phi)^2) 
+    F = \int d^d r (\frac{\tau}{2}\phi^2+\frac{b}{4}\phi^4+\frac{\kappa}{2}(\nabla \phi)^2) ,
 
+where *d* is the number of dimensions in the system.
+
+.. _MPImp:
 Implementation in MPCD
 ======================
 

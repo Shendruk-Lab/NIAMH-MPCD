@@ -1,24 +1,28 @@
-Measurements in this simulator are only relevant when compared to a few global values, described in section 4.3.1. In section 4.3.2, these units
+Measurements in this simulator are only relevant when compared to a few global values, described :ref:`here <set_values>`. In the :ref:`following subsection <theFollowingSubsection>`, these units
 are combined to describe the natural units of the other main observables. In order to compare results with experiments or to identify operating 
-regimes, measurements can be combined into dimensionless numbers: this process is described in section 4.3.3.
+regimes, measurements can be combined into dimensionless numbers: this process is described in the :ref:`last paragraph of this section <dimensionlessNumbers>`.
 
-Set values
-===============
+.. _set_values:
 
-:math:`m`: Mass of a fluid particle, which sets the natural unit of mass. A fluid particle here means a discretized packet of fluid material. 
-In multiphase fluids, the mass of different species can be set to be different: this will change the unit of most observables between species.
+Fundamental units
+=================
 
-:math:`a`: Cell size, which sets the natural unit of length.
+    **Mass** (:math:`m`): The mass of a fluid particle sets the natural unit of mass. A fluid particle here means a discretized packet of fluid material. 
+    In multiphase fluids, the mass of different species can be set to be different: this will change the unit of most observables between species.
 
-:math:`k_B T`: Temperature of the simulator's thermostat, i.e. the thermal energy of the system.
+    **Length** (:math:`a`): The cell size sets the natural unit of length.
+
+    **Energy** (:math:`k_B T`): Temperature of the simulator's thermostat, i.e. the thermal energy of the system.
 
 Since these define every other unit, they are set to one for convenience.
+
+.. _theFollowingSubsection:
 
 Derived units
 =============
 
 **Time**: Derived from the equipartition theorem: :math:`a\sqrt{\frac{m}{k_B T}}`. Hereafter referred to as [τ]. An important quantity it defines is
-the timestep, dt, which is described in [SECTION ABOUT STREAMING].
+the timestep, dt, which is described in :ref:`the introduction chapter <streaming>`.
 
 **Velocity**: Length divided by time, so [v]= :math:`\sqrt{\frac{k_B T}{m}}`.
 
@@ -32,13 +36,15 @@ the timestep, dt, which is described in [SECTION ABOUT STREAMING].
 
 **Spring constant**: Force divided by length, so [k] = :math:`\frac{k_B T}{a^2}`.
 
-**Density**: Number of particles divided by cell size, so [ρ]= :math:`a^{-d}`, where d is the number of dimensions in the system.
+**Number density**: Number of particles divided by cell size, so [n]= :math:`a^{-d}`, where d is the number of dimensions in the system.
+
+**Mass density**: Total mass of particles in a cell divided by cell size, so [ρ]= :math:`n m`, where d is the number of dimensions in the system.
 
 **Pressure**: Force divided by length to the power of d-1, where d is the number of dimensions.
 [P]= :math:`\frac{k_B T}{a^d}`. Streaming and collisional pressures are added together.
 
 **Viscosity**: Pressure multiplied by time, so [μ] = :math:`\frac{\sqrt{k_B T m}}{a^{d-1}}`. Changing the timestep will result in a 
-change in effective viscosity.
+change in effective viscosity. See :ref:`this section <ViscositySection>` for more details.
 
 **Coupling to the mean free potential**: Energy divided by two space derivatives, so [K]= :math:`\frac{k_B T}{a^{d-2}}`.  
 
@@ -48,21 +54,72 @@ change in effective viscosity.
 that is weighted by activity, the length of a timestep, and the mass of the particles. This results in units of force for the activity - see [kozhukhov2022]_
 for more details. 
 
+.. _dimensionlessNumbers:
 Dimensionless numbers
 =====================
 
 Dimensionless numbers allow the user to find out the regime at which the simulator is operating. This allows for comparisons to theoretical regimes
 and to experiments.
 
-The Reynolds number is an example of such a number. It broadly defines the ratio of inertia effects to viscous effects, and is obtained by multiplying
-a typical lenght scale for the system (*L*) by a typical velocity (*v*) and the inverse of a typical viscosity (*μ*). 
+Reynolds number
+---------------
+
+The Reynolds number is an example of such a number. It broadly defines the ratio of inertia effects to viscous effects, and is defined as 
 
 .. math::
-    Re=\frac{v L}{μ}
+    Re=\frac{v L}{μ},
+
+where *L* is a typical length scale for the system, *v* is a typical velocity, and *μ* is a typical viscosity.
 
 In classical mechanics, turbulence is a phenomenon occuring at high Reynolds number, where excess energy is dissipated by chaotic energy cascades. Active nematics can give rise to 
 low-Reynolds turbulence: this important result can be recreated with this simulator.
 
+.. _Peclet:
+Péclet number
+-------------
+
+The Péclet number defines the ratio of diffusive transport rate to advective transport rate, i.e. propulsive behaviour against thermal behaviour. It is defined as
+
+.. math::
+    Pe=\frac{v L}{D},
+
+where *L* is a typical length scale, *v* is a typical velocity, and *D* is a typical diffusion coefficient.
+
+Small values indicate a system dominated by diffusivity, and larger values indicate a system dominated by advection - MPCD typically operates at 
+moderate Pe, where both behaviours are important.
+
+Schmidt number
+--------------
+
+The Schmidt number compares the relative importances of diffusion and viscosity. It is defined as
+
+.. math::
+    Sc=\frac{μ}{D ρ},
+
+where *μ* is the viscosity, *D* is the diffusivity, and *ρ* is the density.
+
+The Schmidt number offers a way to measure the compressibility of a fluid, broadly speaking how 'gas-like' this fluid is. In MPCD, hydrodynamic disturbances
+travel at a finite speed, while they are instantaneous in an classical fluid - this translates to a relatively low Sc. Particle-based methods (such as
+Molecular Dynamics, Lattice Boltzmann, Dissipative Particle Dynamics, or MPCD) simulate fluids that are not incompressible, which is a drawback [slater2009]_.
+However, this is not an issue if the applied forces or pressure gradients are limited to small values.
+
+Mach number
+-----------
+
+The Mach number relates the flow velocity past a boundary (*v*) to the local speed of sound (*c*). It is defined as 
+
+.. math::
+    M=\frac{v}{c}.
+
+In MPCD, the speed of sound is relatively low, which results in high Mach numbers. To be more precise, the speed of sound is :math:`\sqrt{\frac{2 k_B T}{m}}`, as defined in [padding2004]_.
+
+
+.. warning:: 
+    When using periodic boundary conditions, finite size effects come into play. As hydrodynamic interactions are long range, the simulated
+    system can then interact with itself, potentially impacting measurements. This is important to keep in mind.
+
 .. rubric:: References
 
-.. [kozhukhov2022] Kozhukhov, T.; Shendruk, T. N. (2022): `Mesoscopic simulations of active nematics <https://www.science.org/doi/full/10.1126/sciadv.abo5788>`_. *Science Advances*, Vol 8.
+.. [kozhukhov2022] Kozhukhov, T.; Shendruk, T. N. (2022): `Mesoscopic simulations of active nematics <https://www.science.org/doi/full/10.1126/sciadv.abo5788>`_. *Science Advances*, Vol. 8.
+.. [slater2009] Slater, *et al* (2009), `Modeling the Separation of Macromolecules <https://doi.org/10.1002/elps.200800673>`_. *Electrophoresis*, vol 30. 
+.. [padding2004] Padding, J. T.; Louis, A. A. (2004): `Hydrodynamic and Brownian Fluctuations in Sedimenting Suspensions <https://journals.aps.org/prl/abstract/10.1103/PhysRevLett.93.220601>`_. *Physical Review Letters*, Vol. 93.
