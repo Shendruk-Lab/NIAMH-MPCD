@@ -35,6 +35,8 @@ Particle properties
 Collision operators
 *******************
 
+.. include:: CollisionOperators/CollisionOperators.rst
+
 .. _chapter6:
 
 Initialization
