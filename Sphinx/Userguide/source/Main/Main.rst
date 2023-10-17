@@ -14,9 +14,10 @@ What is MPCD ?
 Viscosity
 *********
 
+.. include:: Viscosity/viscosity.txt
+
 .. _chapter3:
 
-.. include:: Viscosity/viscosity.txt
 
 Units
 *****
@@ -51,6 +52,8 @@ Boundary conditions
 
 Nematic MPCD
 ************
+
+.. include:: Nematic/Nematic.txt
 
 .. _chapter9:
 

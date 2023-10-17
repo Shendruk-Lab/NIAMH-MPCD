@@ -1,0 +1,135 @@
+Passive Nematics
+=================
+
+A nematic liquid crystal can be simulated via an MPCD algorithm by including an orientation field. This is done by assigning each MPCD particle an orientation :math:`\boldsymbol{u}_i`, which, when averaged over a cell, leads to a tensor order parameter :math:`\boldsymbol{Q}_c` for each cell (CITATION)
+
+.. math::
+
+    \boldsymbol{Q}_c = \frac{1}{d-1}\left\langle d \boldsymbol{u}_i\boldsymbol{u}_i-\boldsymbol{I} \right\rangle_{N_c}
+
+
+The scalar order parameter :math:`S_c` then corresponds to the largest eigenvalue of :math:`\boldsymbol{Q}`, while the director :math:`\boldsymbol{n}_c` is assigned to the corresponding eigenvector. 
+
+
+Nematogen Alignment
+-------------------
+
+
+Similarly to the Andersen MPCD collision operator, the time evolution of the particles' orientation is carried out through an orientation collision event
+
+.. math::
+
+    \boldsymbol{u}_i(t+\delta t) = \Psi_c(U,\boldsymbol{Q}_{c},(t)),
+
+
+in which :math:`U` denotes a globally specified interaction constant that represents the inter-molecular interactions, and as such, sets the energy scale that dictates the time evolution 
+of the particles' orientation.  More specifically, the algorithm assumes that the local equilibrium distribution for the orientation fields is well described by the Maier-Saupe self-consistent mean-field theory (CITATION)
+
+.. math::
+
+    f_\text{ori} = g \exp(-\beta W_\text{MF}(U,S_c,u_n)),
+
+in which :math:`u_n \equiv \boldsymbol{u}_i\cdot\boldsymbol{n}_c`, :math:`\beta=1/k_B T` and 
+
+.. math::
+
+    W_{\text{MF}} = -U S_c u_n^2 + \frac{U}{d}(S_c-1)
+
+is the mean field interaction potential. 
+Since the second term in this potential is independent of :math:`u_n`, the distribution is controlled by the competition between the thermal energy :math:`\beta^{-1}` and the interaction energy :math:`S_c U`. This competition is quantified by the scaled energy :math:`\beta U S_c`.  When the scaled energy is small, the distribution is flat, and all values of :math:`n_c` are equally likely. If, instead, the scaled energy is large, the distribution becomes sharply centered around :math:`\boldsymbol{n}_c`.
+The nematic collision operator works by drawing random orientations from the equilibrium orientation distribution :math:`f_ori`, leading to values centered around :math:`\boldsymbol{n}_c`. Due to this, for a high enough cell population, the changes in individual particle orientations, :math:`\delta\boldsymbol{u}_{\text{col},i} = \boldsymbol{u}_i(t+\delta t)-\boldsymbol{u}_i(t)]`, do not alter the cell's director :math:`\boldsymbol{n}_c(t)`. 
+
+
+Two-way couping between flow and orientation
+--------------------------------------------
+
+While the orientation collision operator deals with the alignment of the nematic MPCD particles, to correctly reproduce nematohydrodynamics it is equally important to incorporate the coupling between the particle's orientation and the fluid flow. This coupling comes in two ways: the fluid flow can rotate the particle's orientation, whereas the particles' motion can produce backflow.  To address this, the nematic MPCD algorithm treats nematogens as if they were rotating through their own flow, envisioning them as dilute rods in a viscous / non-inertial fluid. 
+With this assumption, it follows that the nematic MPCD particles are subjected to three different sources of torque
+
+.. math::
+
+    \boldsymbol{\Gamma}_{\text{net},i} = \boldsymbol{\Gamma}_{\text{HI},i}+ \boldsymbol{\Gamma}_{\text{col},i}+\boldsymbol{\Gamma}_{\text{ext},i}.
+
+These are:
+
+1. :math:`\boldsymbol{\Gamma}_{\text{HI},i}`: Hydrodynamic torques due to the vorticity of the flow field and its shear rate,
+2. :math:`\boldsymbol{\Gamma}_{\text{col},i} = \gamma_R\boldsymbol{u}_i\times \dot{\boldsymbol{u}}_{\text{col},i}`: The thermal torque caused by the orientational collision operator (where :math:`\dot{\boldsymbol{u}}_{\text{col},i} =\delta\boldsymbol{u}_{\text{col},i}/\delta t` denotes the thermally induced rotation rate), and
+3.  :math:`\boldsymbol{\Gamma}_{\text{ext},i}`, external torques, caused, for example, by electric or magnetic fields.
+
+Because this algorithm assumes a viscous overdamped fluid, these torques must balance each other, resulting in a vanishing net torque:
+
+.. math::
+
+    \boldsymbol{\Gamma}_{\text{net},i} = 0.
+
+Solving this equation for the rotation rate of an MPCD particle, :math:`\dot{\boldsymbol{u}}_i`, shows that :math:`\dot{\boldsymbol{u}}_i = \dot{\boldsymbol{u}}_{\text{HI},i}+\dot{\boldsymbol{u}}_{\text{col},i}`, in which
+:math:`\dot{\boldsymbol{u}}_{\text{col},i}` is the thermally induced rotation rate and :math:`\dot{\boldsymbol{u}}_{\text{HI},i}` is the rotation rate induced by the vorticity and shear rate of the fluid. In the particular case of a thin rod, which is assumed by the algorithm, the latter is described by Jeffery's equation
+
+.. math::
+
+    \frac{\delta \boldsymbol{u}_{\text{HI},i}}{\delta t} = \chi_{\text{HI}} \left[\boldsymbol{u}_i\cdot\boldsymbol{w}+\lambda (\boldsymbol{u}_i\cdot \boldsymbol{D}-\boldsymbol{u}_i(\boldsymbol{u}_i\boldsymbol{u}_i:\boldsymbol{\omega}))\right],
+
+
+
+in which :math:`\chi_{HI}` is an heuristic shear coupling coefficient that sets the alignment relaxation time, :math:`\lambda` is the bare tumbling parameter, while :math:`\boldsymbol{D}` and :math:`\boldsymbol{\omega}` represent the shear rate and vorticity tensors, respectively.
+
+In turn, the nematic MPCD algorithm included the backflow induced by the nematogen in the fluid by modifiying the velocity collision operator to include balancing angular impulses , i.e.,equal in magnitude but opposite in direction, to those caused by the hydrodynamic torques on each nematogen :math:`\boldsymbol{\Gamma}_{\text{HI},i} = -(\boldsymbol{\Gamma}_{\text{col},i}+\boldsymbol{\Gamma}_{\text{ext},i})`. To counter this impulse with the htdrodynamic drag, this is then transferred to the linear momentum portion of the algorithm, thus modifying the MPCD collision operator to:
+
+.. math::
+    \boldsymbol{\Xi}_{i,c} = \boldsymbol{\xi}_i - \langle \xi_j\rangle _{N_c} +\left(\boldsymbol{I}_c^{-1}\cdot\left[\delta \boldsymbol{L}_c-\sum_{i=1}^{N_c}\boldsymbol{\Gamma}_{\text{HI},i}\delta t\right]\right)\times \boldsymbol{r}_i'
+
+Proceeding in this way ensures that the system's total angular momentum is conserved. Furthermore, as setting :math:`\gamma_R=0` kills the transfer or momentum for each particle, this also results in turning this coupling off. 
+
+Isotropic-Nematic transition
+----------------------------
+
+As mentioned above, increasing :math:`\beta U` changes the orientation distribution from flat to highly peaked. Operationally, this means that a system with a small :math:`\beta U` will exist in an isotropic fluid state with a global scalar order parameter :math:`S` close to zero. On the contrary, setting a large value of :math:`\beta U` will lead to a nematic order. Even though the algorithm assumes a near-equilibrium Maier-Saupe distribution for the orientation, it does so at the local cell level. This means that in general the scalar order parameter and the director are spatially varying variables, which allows the system to exist with local nematic order between the two regimes discussed above. 
+In MPCD units, for a mean population of 20 particles per MPCD cell, :math:`U=5` sets the threshold for nematic order. By default, the code runs at :math:`U=10`.
+
+
+Frank Elastic Coefficients
+--------------------------
+
+Spatial distortions of the nematic director $\boldsymbol{n}$ have an energetic cost. This cost is given by the following free energy density
+
+.. math::
+
+    f = \frac{1}{2}K_{\text{splay}}(\boldsymbol{\nabla}\cdot\boldsymbol{n})^2
+    +\frac{1}{2}K_{\text{twist}}(\boldsymbol{n}\cdot\boldsymbol{\nabla}\times\boldsymbol{n})^2
+    +\frac{1}{2}K_{\text{bend}}(\boldsymbol{n}\times(\boldsymbol{\nabla}\times\boldsymbol{n}))^2,
+
+in which :math:`K_{\text{splay}}`, :math:`K_{\text{twist}}` and :math:`K_{\text{bend}}` are three coeffiecients quantifying the energetic cost of the three different possible distortions: splay, twist and bend respectively.  This coefficients are collectively known as Frank Elastic coefficients.
+
+In the nematic-MPCD algorithm, :math:`\beta U` controls the interaction between nematogens. Thus, it is not surprising that it also sets the Frank coefficients. All three coefficients are of order :math:`\sim U/a`. Although in principle there are differences between the three coefficients, in the regime of small rods (compared to interaction lengths) under which nematic MPCD operates, these are negligible, and thus the algorithm presents isotropic elasticity.  
+
+
+Tumbling and Shear Alignment
+----------------------------
+
+The bare tumbling parameter :math:`\lambda` in the Jeffery's equation only applies in the limit of a dilute suspension of nematogens. Away from that limit, Jeffery's equation can still be used but, because of nematogen-nematogen interactions) with a renormalized tumbling parameter
+
+.. math::
+    \lambda' = \left(\frac{15\,S+84\,S_4+42}{105\, S}\right) \lambda,
+
+in which :math:`S_4` is the fourth moment of the Marie-Soupe distribution.
+In the nematic MPCD algorithm, the input is the bare tumbling parameter :math:`\lambda`. As such, care must be paid in that what determines the behaviour of the nematogens is :math:`\lambda'`, not :math:`\lambda`. 
+For :math:`\lambda'<1`, the nematogens tumble, i.e., continuously revolve. For :math:`|\lambda'|`>1$ the nematogens experience shear align to the flow. 
+
+
+
+Inputs for nematic MPCD
+-----------------------
+
+To make an MPCD fluid a nematic, the input file must turn on the liquid crystal mode, which is done by setting the main input tag lc to 1 (default value is 0)
+
++------+------+-----------------------------------------------+
+| lc   |  int | Liquid crystal mode: 1 (on), 0 (off, default) |
++------+------+-----------------------------------------------+
+
+In addition, because of the need to conserve angular momentum, the velocity collision operator must be set to the Andersen collision operator that preserves angular momentum. This is done by setting the main input tag rTech to 3 (for a passive nematic) or 16, 17, 20 or 21 for an active nematic.
+
++-------+----+-----------------------------------------------------------+
+| rTech | int| Collision operator: 3 (passive); 16, 17, 20 or 21 (active)|
++-------+----+-----------------------------------------------------------+
+
+Other main input tags that 

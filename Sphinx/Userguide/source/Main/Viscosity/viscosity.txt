@@ -1,3 +1,5 @@
+.. _ViscositySection:
+
 As any other transport coefficient, the viscocity estimates of an MPCD fluid, both dynamical (:math:`\eta`) and kinematic (:math:`\nu = \eta/\rho = \eta/(\langle N_c\rangle m/a^d`) viscocities, have kinematic and collisional contributions. Here, we focus on estimating the kinematic viscocity.
 We first consider the case of a diluted gas. In this case, the kinematic viscocity is dominated by its kinematic contribution, namely, the momentum carried by fluid particles to other regions of space. This can be estimated to be approximately the thermal velocity :math:`\sqrt{K_B T/m}` times the mean free path :math:`\lambda = \delta t \sqrt{K_B T/m}` [Gompper2008]_.
 
@@ -19,7 +21,7 @@ As such, when the mean free path is small compared to the cell size, the collisi
     \nu = \nu_{\text{kin}} + \nu_{\text{col}}.
 
 
-The specific way in which the estimates for the :ref:`kinematic <eq:vis_kin>` and :ref:`collisional <eq:vis_col>` contributions are weighted depends on the specifics of the model being used. These are captured through auxiliary functions :math:`f_\text{kin}(\theta,\langle N_c\rangle,d)` and :math:`f_\text{col}(\theta,\langle N_c\rangle,d)`, such that
+The specific way in which the estimates for the kinematic and :ref:`collisional <eq:vis_col>` contributions are weighted depends on the specifics of the model being used. These are captured through auxiliary functions :math:`f_\text{kin}(\theta,\langle N_c\rangle,d)` and :math:`f_\text{col}(\theta,\langle N_c\rangle,d)`, such that
 
 .. math::
     \begin{eqnarray}
@@ -31,23 +33,23 @@ The table below list these functions for the most common collision operators [Ki
 
 +------------------+---------------------+--------------------------------------------------------------------------------------------------+
 |Collision Operator| Contribution        | Expression                                                                                       |
-+==================+=====================+==============================================================================+===================+
-|     SRD fluid    |:math:`f_\text{kin}` |:math:`\frac{1}{2}\left[\frac{\Xi}{\sin^2(\theta)}-1\right]`                  |  2D               |
-|                  |                     +------------------------------------------------------------------------------+-------------------+
-|                  |                     |:math:`\frac{1}{2}\left[\frac{5\,\Xi}{2-\cos(\theta)-\cos(2 \theta)}-1\right]`|  3D               |
-|                  +---------------------+------------------------------------------------------------------------------+-------------------+
-|                  |:math:`f_\text{col}` | :math:`\frac{1-\cos(\theta)}{6\, d \,\Xi}`                                                       |
++==================+=====================+===================================================================================+==============+
+|     SRD fluid    |:math:`f_\text{kin}` |:math:`\frac{1}{2}\left[\frac{\Upsilon}{\sin^2(\theta)}-1\right]`                  |  2D          |
+|                  |                     +-----------------------------------------------------------------------------------+--------------+
+|                  |                     |:math:`\frac{1}{2}\left[\frac{5\,\Upsilon}{2-\cos(\theta)-\cos(2 \theta)}-1\right]`|  3D          |
+|                  +---------------------+-----------------------------------------------------------------------------------+--------------+
+|                  |:math:`f_\text{col}` | :math:`\frac{1-\cos(\theta)}{6\, d \,\Upsilon}`                                                  |
 +------------------+---------------------+--------------------------------------------------------------------------------------------------+
-| Anderson         |:math:`f_\text{kin}` |:math:`\Xi-\frac{1}{2}`                                                                           |
+| Andersen         |:math:`f_\text{kin}` |:math:`\Upsilon-\frac{1}{2}`                                                                      |
 |                  +---------------------+--------------------------------------------------------------------------------------------------+
-|                  |:math:`f_\text{col}` |:math:`\frac{1}{12 \Xi}`                                                                          |
+|                  |:math:`f_\text{col}` |:math:`\frac{1}{12 \Upsilon}`                                                                     |
 +------------------+---------------------+--------------------------------------------------------------------------------------------------+
-|Langevin          |:math:`f_\text{kin}` |:math:`\frac{[1+\alpha/2]^2}{2 \alpha}\,\Xi-\frac{1}{2}`                                          |
+|Langevin          |:math:`f_\text{kin}` |:math:`\frac{[1+\alpha/2]^2}{2 \alpha}\,\Upsilon-\frac{1}{2}`                                     |
 |                  +---------------------+--------------------------------------------------------------------------------------------------+
-|                  |:math:`f_\text{col}` |:math:`\frac{1}{12}\frac{\alpha}{1+\alpha/2}\frac{1}{\Xi}`                                        |
+|                  |:math:`f_\text{col}` |:math:`\frac{1}{12}\frac{\alpha}{1+\alpha/2}\frac{1}{\Upsilon}`                                   |
 +------------------+---------------------+--------------------------------------------------------------------------------------------------+
 
-in which :math:`\Xi \equiv \langle N_c \rangle/( \langle N_c \rangle-1+\exp(- \langle N_c \rangle))` and :math:`\alpha \equiv (\gamma \delta t)/m` (with :math:`\gamma` the inverse of the Langevin relaxation time) are defined for convenience.
+in which :math:`\Upsilon \equiv \langle N_c \rangle/( \langle N_c \rangle-1+\exp(- \langle N_c \rangle))` and :math:`\alpha \equiv (\gamma \delta t)/m` (with :math:`\gamma` the inverse of the Langevin relaxation time) are defined for convenience.
 
 
 
