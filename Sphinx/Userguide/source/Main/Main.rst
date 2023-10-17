@@ -18,6 +18,8 @@ Viscosity
 
 .. include:: Viscosity/viscosity.txt
 
+.. _chapterUnits:
+
 Units
 *****
 
@@ -29,6 +31,13 @@ Particle properties
 *******************
 
 .. include:: Particles/particle.txt
+
+.. _chapterCell:
+
+Cell properties
+*******************
+
+.. include:: Cells/cell.txt
 
 .. _chapter5:
 

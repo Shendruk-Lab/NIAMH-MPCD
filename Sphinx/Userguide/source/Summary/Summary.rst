@@ -8,7 +8,7 @@ MPCD is ideal for situations involving moderate Peclet numbers---where diffusion
 This implementation of MPCD is written in *C* and requires no external libraries. 
 It is serial but versatile, and is able to simulate complex boundary conditions, polymer suspensions, nematic fluids, colloids and swimming bacteria. 
 
-In addition to this userguide, a number of reviews have been published including:
+In addition to this guide, users should consult pulbished review articles, including:
 
 * Gompper, Ihle, Kroll & Winkler (2009). `Multi-Particle Collision Dynamics: A Particle-Based Mesoscale Simulation Approach to the Hydrodynamics of Complex Fluids <https://link.springer.com/chapter/10.1007/978-3-540-87706-6_1>`_. In *Advanced Computer Simulation Approaches for Soft Matter Sciences III. Advances in Polymer Science*, vol 221.
 * Kapral (2008). `Multiparticle Collision Dynamics: Simulation of Complex Systems on Mesoscales <https://onlinelibrary.wiley.com/doi/10.1002/9780470371572.ch2>`_. In *Advances in Chemical Physics*. 
