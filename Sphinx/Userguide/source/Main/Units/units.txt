@@ -51,10 +51,11 @@ change in effective viscosity. See :ref:`this section <ViscositySection>` for mo
 **Bending potential**: Bending energy divided by cosine squared of the bending angle, so [k :sub:`b`]= :math:`k_B T`. 
 
 **Activity**: The unit of activity in this simulator is the same as the unit of force. Activity gives a contribution to the collision operator 
-that is weighted by activity, the length of a timestep, and the mass of the particles. This results in units of force for the activity - see [kozhukhov2022]_
+that is weighted by activity, the length of a timestep, and the mass of the particles. This results in units of force for the activity - see [Kozhukhov2022]_
 for more details. 
 
 .. _dimensionlessNumbers:
+
 Dimensionless numbers
 =====================
 
@@ -75,6 +76,7 @@ In classical mechanics, turbulence is a phenomenon occuring at high Reynolds num
 low-Reynolds turbulence: this important result can be recreated with this simulator.
 
 .. _Peclet:
+
 Péclet number
 -------------
 
@@ -111,7 +113,7 @@ The Mach number relates the flow velocity past a boundary (*v*) to the local spe
 .. math::
     M=\frac{v}{c}.
 
-In MPCD, the speed of sound is relatively low, which results in high Mach numbers. To be more precise, the speed of sound is :math:`\sqrt{\frac{2 k_B T}{m}}`, as defined in [padding2004]_.
+In MPCD, the speed of sound is relatively low, which results in high Mach numbers. To be more precise, the speed of sound is :math:`\sqrt{\frac{2 k_B T}{m}}`, as defined in [Padding2004]_.
 
 
 .. warning:: 

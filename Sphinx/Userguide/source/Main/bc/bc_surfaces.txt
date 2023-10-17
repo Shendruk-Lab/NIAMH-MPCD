@@ -7,19 +7,23 @@ Standard surfaces
 
 Standard surfaces have the basic form,
 
+.. error::
+  TYLER: Nearly all equations named "eq:surface". Gave numbers. Give better names.
+
 .. math::
-    :name: eq:surface
+    :name: eq:surface1
 
     S(\vec{x})=[A_x\left(x-Q_x\right)]^{p_x} + [A_y\left(y-Q_y\right)]^{p_y} + [A_z\left(z-Q_z\right)]^{p_z} - R^{p_R} = 0
 
 where the surface parameters represent DESCRIBE A, Q and R. Writing surfaces in this way is versatile and enables following surfaces to be created
 
 1. Plane
+
   To construct a plane, set :math:`p_x=p_y=p_z=p_R=1`,
   :math:`Q_x=Q_y=Q_z=0` and :math:`R=d` to give the surface equation
 
   .. math::
-      :name: eq:surface
+      :name: eq:surface2
 
       S(\vec{x})= A_x x + A_y y + A_z z  - d = 0
 
@@ -27,7 +31,7 @@ where the surface parameters represent DESCRIBE A, Q and R. Writing surfaces in 
   Alternatively, can write the surface equation with :math:`R=0` so that
 
   .. math::
-      :name: eq:surface
+      :name: eq:surface3
 
       S(\vec{x})= A_x (x-Q_x) + A_y(y-Q_y) + A_z (z-Q_z) = 0
 
@@ -41,11 +45,12 @@ where the surface parameters represent DESCRIBE A, Q and R. Writing surfaces in 
      CAPTION
 
 2. Sphere
+
   To construct a sphere, :math:`p_x=p_y=p_z=p_R=2` and
   :math:`A_x=A_y=A_z=1` to give the surface equation
 
   .. math::
-      :name: eq:surface
+      :name: eq:surface4
 
       S(\vec{x})= \left(x-Q_x\right)^2 + \left(y-Q_y\right)^2 + \left(z-Q_z\right)^2  - R^2 = 0
 
@@ -64,7 +69,7 @@ where the surface parameters represent DESCRIBE A, Q and R. Writing surfaces in 
   :math:`A_x=\frac{1}{a}, A_z=\frac{1}{b}, A_z=\frac{1}{c}` and :math:`R=1` to give the surface equation
 
   .. math::
-      :name: eq:surface
+      :name: eq:surface5
 
       S(\vec{x})= \left(\frac{x-Q_x}{a}\right)^2 + \left(\frac{y-Q_y}{b}\right)^2 + \left(\frac{z-Q_z}{c}\right)^2  - 1 = 0
 
@@ -102,7 +107,7 @@ where the surface parameters represent DESCRIBE A, Q and R. Writing surfaces in 
   The construction of a squircle has :math:`p_x=p_y=p_z=p_R=4` and :math:`A_x=A_y=A_z=1`
 
   .. math::
-      :name: eq:surface
+      :name: eq:surface6
 
       S(\vec{x})= \left(x-Q_x\right)^4 + \left(y-Q_y\right)^4 + \left(z-Q_z\right)^4  - R^4 = 0
 
@@ -114,6 +119,7 @@ where the surface parameters represent DESCRIBE A, Q and R. Writing surfaces in 
      :align: center
 
      Figure caption
+
 6. Superellipsoid
 
   A superellipse is a closed surface that resembles an ellipse, ..., but with different shape.
@@ -121,7 +127,7 @@ where the surface parameters represent DESCRIBE A, Q and R. Writing surfaces in 
   :math:`A_x=\frac{1}{a}, A_z=\frac{1}{b}, A_z=\frac{1}{c}` and :math:`R=1`
 
   .. math::
-      :name: eq:surface
+      :name: eq:surface7
 
       S(\vec{x})= \left(\frac{x-Q_x}{a}\right)^n + \left(\frac{y-Q_y}{b}\right)^n + \left(\frac{z-Q_z}{c}\right)^n  - 1 = 0
 
@@ -156,7 +162,7 @@ PICTURES
 Other types
 
 .. math::
-    :name: eq:surface
+    :name: eq:surface8
 
     S(\vec{x})= other
 

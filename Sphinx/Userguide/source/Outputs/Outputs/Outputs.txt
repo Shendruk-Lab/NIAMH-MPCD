@@ -83,7 +83,7 @@ This creates file named topochargefield, which contains the local topological ch
 
     `disclinOut`    | int           | 0             | Disclination tensor field
 
-This creates file named disclinTensorfield, which outputs the three-dimensional disclination tensor data based on [Disclination]_.
+This creates file named disclinTensorfield, which outputs the three-dimensional disclination tensor data based on [Schimming2022]_.
 
 Trajectories
 ============

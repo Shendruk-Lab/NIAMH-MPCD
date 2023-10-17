@@ -26,8 +26,11 @@ Motion from velocity rules
 In section LINKSECTION when a particle interacts with a boundary, the velocity can be updated through the velocity shift :math:`D_{v,\hat{\nu}}` and multiplier operators :math:`M_{v,\hat{\nu}}` in the directions specified by :math:`\hat{\nu}` --- corresponding to a change in the particle's momentum (if any :math:`M_{v,\hat{\nu}}\neq 1` or :math:`D_{v,\hat{\nu}}\neq 0`).
 The change of momentum of the particle over the time-step interval :math:`\delta t` can be written in terms of the particle impulse :math:`\vec{J}_i`
 
+.. error::
+    TYLER: Multiple equations named "eq:impulse". I made them "eq:impulse1" etc. but should be renamed
+
 .. math::
-    :name: eq:impulse
+    :name: eq:impulse1
 
     \vec{p}_i(t+\delta t) - \vec{p}_i(t) = \vec{J}_i.
 
@@ -46,7 +49,7 @@ The particle-boundary interactions can update the particle orientation through t
 The reorientation of particle :math:`i` corresponds to a rotational impulse :math:`\vec{\mathcal{T}}_i` due to a change in angular momentum over time interval :math:`\delta t`.
 
 .. math::
-    :name: eq:impulse
+    :name: eq:impulse2
 
     \vec{\omega}_i(t+\delta t) - \vec{\omega}_i(t) = \vec{\mathcal{T}}_i.
 
@@ -68,9 +71,10 @@ where :math:`\vec{\Gamma}_{b,i}` is the torque that is transferred to the colloi
 For a particle with initial orientation :math:`\hat{u}_i` with an anchoring direction of :math:`\hat{\nu}`, the torque on the particle takes the form
 
 .. math::
-    :name: eq:impulse
+    :name: eq:impulse3
 
     \vec{\Gamma}_i = \frac{\gamma_R}{\ell_u \delta t} \frac{M_{\nu}-M_{\perp}}{\sqrt{M_\nu^2 + M_\perp^2}}\left(\hat{u}_i \cdot \hat{\nu} \right)\left( \hat{u}_i \times \hat{\nu} \right)
+
 with :math:`\frac{M_{\nu}-M_{\perp}}{\sqrt{M_\nu^2 + M_\perp^2}}=1` since anchoring applies :math:`M_{\nu}=1` and :math:`M_{\perp}=0`.
 
 The torque is only dependent on fixed simulation/material parameters and the relative alignment of :math:`\hat{u}_i` and :math:`\hat{\nu}`.
@@ -91,9 +95,11 @@ where we have assumed :math:`\vec{\hat{u}}_{b,i}{\ell_u}` and :math:`\vec{F}_{b,
 Note that the force is subject to the head-tail symmetry of the orientation :math:`\vec{\hat{u}}_{b,i}{\ell_u}`, SHOW F(-U) = -F(U), making the force direction ambiguous.
 We select the orientation/force that points into the boundary (since colloids will move away from large elastic stress build up rather than into it.)
 
-CLEAN UP THE ABOVE TOMORROW
+.. error::
+    TYLER: CLEAN UP THE ABOVE TOMORROW
 
-MAKE A NOTE_ ABOUT THAT THIS ONLY CURRENT WORKS FOR NU = NORMAL DIRECTION OUT OF THE COLLOID.
+.. error::
+    TYLER: MAKE A NOTE ABOUT THAT THIS ONLY CURRENT WORKS FOR NU = NORMAL DIRECTION OUT OF THE COLLOID.
 
 Motion from boundary-boundary interactions
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

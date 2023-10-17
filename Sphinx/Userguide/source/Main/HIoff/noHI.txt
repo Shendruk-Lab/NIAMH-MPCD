@@ -3,7 +3,7 @@ Hydrodynamics can be turned off, which essentially creates a Langenvin dynamics 
 Though computationally costly, the benefit is that the material properties of the fluid are preserved. 
 By turning them off, the role of hydrodynamic interactions can be probed. 
 
-Hydrodynamic interactions are turned off by randomly exchanging the velocity of all fluid particles after  the collision collision step [ali2004]_. 
+Hydrodynamic interactions are turned off by randomly exchanging the velocity of all fluid particles after  the collision collision step [Ali2004]_. 
 
 To turn off hydrodynamic interactions, add the following to your input ``.json`` file:
 

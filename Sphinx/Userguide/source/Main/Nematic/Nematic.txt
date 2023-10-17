@@ -131,7 +131,7 @@ in where :math:`B` is the magnitude of the magnetic field, :math:`\varepsilon` i
 Active nematic MPCD
 ===================
 
-Active nematics inject energy into the system at the particle level. In wet systems, as the ones considered so far, they do so while conserving momentum, behaving as force dipoles. The active nematic MPCD algorithm achieves this at the mesoscale level, i.e., at the level of MPCD cells, by adding an active term to the nematic velocity collision operator so it introduces a force dipole that co-aligns with the cell director :math:`\boldsymbol{n}_c` [kozhukhov2022]_
+Active nematics inject energy into the system at the particle level. In wet systems, as the ones considered so far, they do so while conserving momentum, behaving as force dipoles. The active nematic MPCD algorithm achieves this at the mesoscale level, i.e., at the level of MPCD cells, by adding an active term to the nematic velocity collision operator so it introduces a force dipole that co-aligns with the cell director :math:`\boldsymbol{n}_c` [Kozhukhov2022]_
 
 .. math::
     \Xi^A_{i,c} = \Xi^N_{i,c} + \alpha_c\delta_t\left(\frac{\kappa_i}{m_i}-\left\langle\frac{\kappa_j}{m_j}\right\rangle_c\right)\boldsymbol{n}_c

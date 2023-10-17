@@ -3,6 +3,7 @@ to coexist and interact through a tuneable interaction. The theory behind this i
 of the implementation in this algorithm are described in :ref:`the next section <MPImp>`.
 
 .. _landauGinz:
+
 Free energy of a bimodal fluid
 =================================
 
@@ -16,6 +17,7 @@ where *d* is the number of dimensions in the system, *b* and *τ* describe the b
 coefficient [Cates2018]_. Minimising this free energy with the Euler-Lagrange equation reveals the equation of motion for the system.
 
 .. _MPImp:
+
 Implementation in MPCD
 ======================
 

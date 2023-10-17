@@ -122,6 +122,8 @@ Run and tumble parameters. In order to make swimmers run and tumble, set runTSwi
 These set the average run and tumble time (in MPCD timesteps) that the particle runs and tumbles respectively. 
 Run and tumble are stochastic processes, drawn from a stochastic exponential distribution.
 
+::
+
     `springShrinkSwim`| double        | 0.1                | How much the spring constant is shrunk when tumbling
     `sizeShrinkSwim`| double        | 0.1                | How much do LJ sigma ro shrink when tumbling
 

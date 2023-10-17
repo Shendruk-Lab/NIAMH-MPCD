@@ -206,7 +206,7 @@ Activity
 
 The force dipole density acting on nematogens in the direction of the local cell director :math:`{\vec n}_c`. 
 
-To make MPCD active, an intrinsically out-of-equilibrium term must be included in the collision operation. To have a MPCD algorithm that conserves momentum (wet) in the active fluids, energy is injected to the fluid constituents in the collision opertaor not momentum. To do so, active stress is introduced to fluid in the form of force dipole density acting on nematogens. This force dipole can be extensile or contractile [kozhukhov2022]_.
+To make MPCD active, an intrinsically out-of-equilibrium term must be included in the collision operation. To have a MPCD algorithm that conserves momentum (wet) in the active fluids, energy is injected to the fluid constituents in the collision opertaor not momentum. To do so, active stress is introduced to fluid in the form of force dipole density acting on nematogens. This force dipole can be extensile or contractile [Kozhukhov2022]_.
 
 To set it, add the following to your input ``.json`` file:
 
@@ -221,7 +221,7 @@ For more details check :ref:`Activity initialization <ACT>` .
 Local activity modulators
 =========================
 
-There are two parameters :math:`{\sigma}_p` and :math:`{\sigma}_w` used to modulate the local activity as a function of density [kozhukhov2023]_ .
+There are two parameters :math:`{\sigma}_p` and :math:`{\sigma}_w` used to modulate the local activity as a function of density [Kozhukhov2023]_ .
 
 :math:`{\sigma}_w` represents how fast should the modulation fall-off as a function of density , should be > 0, ideally around 0.4. To set it, add the following to your input ``.json`` file: 
 

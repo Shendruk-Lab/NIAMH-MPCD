@@ -3,11 +3,11 @@
 In many situtations in soft matter physics, the fluid medium in which mesoscale particles---such as polymers, colloids or cells---are suspended is crucial but not the principle interest of study. 
 In such cases, coarse-grained algorithms that simulate one or more aspect of the surrounding fluid are needed. 
 For example, if the most significant effect of the fluid is to induce thermal fluctuations then a Langevin or Brownian dynamics simulation might be most suitable [Slater2009]_. 
-On the other hand, if the embedded particles are large enough that thermal fluctuations are negligible but hydrodynamic interactions between them are significant then an immersed boundary solver [mittel2005]_ or lattice-Boltzmann simulation [aidun2010]_ might be more appropriate. 
+On the other hand, if the embedded particles are large enough that thermal fluctuations are negligible but hydrodynamic interactions between them are significant then an immersed boundary solver [Mittel2005]_ or lattice-Boltzmann simulation [Aidun2010]_ might be more appropriate. 
 
 * If both **fluctuations and hydrodynamic interactions are crucial** then *MPCD* may be an appropriate simulation technique. 
 
-Multi-Particle Collision Dynamics (MPCD) is a technique for simulating fluctuating hydrodynamics that reproduces the Navier-Stokes equation on sufficiently long length and time acales [pooley2005]_. 
+Multi-Particle Collision Dynamics (MPCD) is a technique for simulating fluctuating hydrodynamics that reproduces the Navier-Stokes equation on sufficiently long length and time acales [Pooley2005]_. 
 It is well suited for situations for which viscosity dominates over inertia, and diffusion is of similar significance to advective flow (see :ref:`Dimensionless Numbers <chapterUnits>`). 
 It is straightforward to include mobile particles, such as colloids, within the MPCD fluid, even if these have many internal degress of freedom, such as polymers. 
 This makes MPCD an excellent option for simulating complex suspensions. 
@@ -15,9 +15,9 @@ Furthermore, because MPCD is a particle-based method, non-trivial boundaries can
 
 As in any computational approach, these benefits are counterbalanced by complications, including 
 
-#. :ref:`fluid properties <chapter2>` (such as viscosity or other transport coefficients) are only controlled indirectly, 
+#. :ref:`fluid properties <chapterVisc>` (such as viscosity or other transport coefficients) are only controlled indirectly, 
 #. multiple runs must be averaged to find statisticly meaningful results, and
-#. :ref:`compressibility <dimensionlessNumbers>` [zhao2013]_. 
+#. :ref:`compressibility <dimensionlessNumbers>` [Zhao2013]_. 
 
 .. _particleBased:
 
@@ -27,7 +27,7 @@ Particle-based coarse-graining
 In MPCD, the continuous fluid medium is discretised into point-like, coarse-grained fluid particles. 
 Equivalently one may imagine that many fluid atoms or molecules are grouped together and simulated as point-like particles. 
 This coarse-graning eschews molecular-scale details of the molecules that make up the fluid. 
-Respecting conservation of these quantities is what allows the hydrodynamic equations of motion to be obeyed on sufficiently long length and time scales [pooley2005]_. 
+Respecting conservation of these quantities is what allows the hydrodynamic equations of motion to be obeyed on sufficiently long length and time scales [Pooley2005]_. 
 
 Thus, MPCD **does not** give correct dynamics on microscopic time or length scales. 
 Streaming and collision events conserve the momentum and energy in each collision volume at all times and so MPCD reproduces an accurate representation of the hydrodynamics of the velocity field at large distances. 
@@ -70,7 +70,7 @@ In the **streaming step** the particles move according to
     \vec{x}_i\left(t+\delta t\right) = \vec{x}_i\left(t\right) + \vec{v}_i\left(t\right) \delta t .
 
 If the MPCD algorithm consisted only of streaming steps then the carrier fluid would be an ideal gas; however, the :ref:`collision step <collision>` introduces coarse-grained interactions between particles. 
-Particle properties are continuous---not discretised (see :ref:`Particle Properties <chapter4>`). 
+Particle properties are continuous---not discretised (see :ref:`Particle Properties <chapterParticles>`). 
 
 .. _collision:
 
@@ -96,4 +96,4 @@ The cell velocity :math:`\vec{v}^{c}` corresponds to the local macroscopic veloc
 Thus, these cell-based values are interpretted as discretized field values (see :ref:`Cell Properties <chapterCell>`).
 
 The MPCD collision step replaces molecular-scale dynamics with a local, non-physical, stochastic momentum transfer operation. 
-A number of collision operators are available (see :ref:`Collision operators <chapter5>`). 
+A number of collision operators are available (see :ref:`Collision operators <chapterCollOp>`). 

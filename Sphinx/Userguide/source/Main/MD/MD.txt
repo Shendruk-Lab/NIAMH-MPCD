@@ -59,6 +59,7 @@ The angle :math:`\theta_{ijk}` is the angle created by three consecutive monomer
     The equation is going to be added
 
 - **Nematic Coupling Potential**, :math:`U_{\text{Nem}}`: This potential aligns the bonds of the polymer with the local nematic orientation. it works similar to the
+
 .. math::
 
     U_{\text{bend}}(\theta _{ijk}) = \frac{k_{\text {bend}}}{2} (\theta _{ijk} - \vartheta)^2.
@@ -66,7 +67,6 @@ The angle :math:`\theta_{ijk}` is the angle created by three consecutive monomer
 .. note::
 
     This will be changed
-
 
 The dynamical behavior of macromolecules in solution is strongly affected or even dominated by hydrodynamic interactions. Mesoscale hydrodynamic simulations can be used to introduce hydrodynamic interactions to molecular dynamic (MD) simulations and consequently to provide a full characterization of the polymer dynamics [Holm2008]_. This coupling to the fluid can be done in two ways. Either the MD beads can be included in the MPCD algorithm or the MPCD particles can be included in the MD calculations.
 

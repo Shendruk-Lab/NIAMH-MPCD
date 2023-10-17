@@ -107,8 +107,11 @@ With fewer particles in the cell, the centre of mass velocity :math:`\vec{v}^{\m
 A standard method to correct no-slip, so that :math:`\vec{v}^{\mathrm{cm}}_c \approx 0`,
 is to fill the cell with :math:`N_\mathrm{ghost} =\langle N_c \rangle - N_c` virtual particles so that the effective cell density :math:`N_c` is equal to the average density :math:`\langle N_c \rangle`.
 
+.. error::
+  TYLER: multiple equations named "eq:virtualparticles". Gave numbers. Give better names.
+
 .. math::
-  :name: eq:virtualparticles
+  :name: eq:virtualparticles1
 
   \vec{v}^{\mathrm{cm}}_c = \frac{1}{N_c}\left(\sum_{i=1}^{N_c} \vec{v_i} + \sum_{j=1}^{N_{\mathrm{ghost}}} \vec{v_j}^{\mathrm{ghost}} \right)
 
@@ -118,7 +121,7 @@ a simpler method is instead to select the entire correction :math:`\vec{v}^{\mat
 from a Maxwell Boltzmann distribution about zero but with a variance of :math:`N_{\mathrm{ghost}} k_B T`.
 
 .. math::
-  :name: eq:virtualparticles
+  :name: eq:virtualparticles2
 
   \vec{v}^{\mathrm{cm}}_c = \frac{1}{N_c}\left(\sum_{i=1}^{N_c} \vec{v_i} + \vec{v}^{\mathrm{ghost}} \right)
 

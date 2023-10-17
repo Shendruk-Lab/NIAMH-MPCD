@@ -38,9 +38,9 @@ This uses a Monte Carlo integration of the accessible volume to determine the to
 Galilean invariance
 ===================
 
-By discretizing the space into cells, **Galilean invariance** is broken [ihle2003]_. 
+By discretizing the space into cells, **Galilean invariance** is broken [Ihle2003]_. 
 To understand why, consider a simulation of slow moving fluid particles (low temperatures). 
-If the mean-free path of the molecules (see :ref:`Viscosity <chapter2>`) is much smaller than the cell size (:math:`\lambda \ll a`) then particles will often fail to travel far enough to leave the cell and may repeatedly exchange momentum with the same set of neighbours. 
+If the mean-free path of the molecules (see :ref:`Viscosity <chapterVisc>`) is much smaller than the cell size (:math:`\lambda \ll a`) then particles will often fail to travel far enough to leave the cell and may repeatedly exchange momentum with the same set of neighbours. 
 Thus, the implicit assumption of underlying molecular chaos fails and the fixed lattice of cells causes the behaviour in a moving reference frame to be different than a fixed reference frame, since in the moving frame the set of neighbours would be different in each (\fig{fig:galInv}). 
 However, Galilean invariance can be completely reestablished by shifting the cell grid each time step by a random vector. 
 Galilean invariance is then remedied. 
@@ -59,10 +59,10 @@ Conservation of angular momentum
 ================================
 
 Multiple MPCD algorithm do not conserve angular momentum since they do not consider the positions of the fluid particles within the cell during a collision operation. 
-In many advecting situations angular momentum does not play an essential role and so this fact is inconsequential [gotze07]_ [gotze11]_ [babu12]_. 
+In many advecting situations angular momentum does not play an essential role and so this fact is inconsequential [Götze2007]_ [Götze2011]_ [Babu2012]_. 
 To conserving the angular momentum of the cell, the change in angular momentum relative to the centre of mass position during the collision event position is calculated. 
 This angular momentum is then exactly cancelled out by giving the entire cell an appropriate angular velocity. 
-For situations in which angular momentum conservation within the solvent plays an important role, appropriate collision operators should be chosen (see :ref:`Collision operators <chapter5>`).
+For situations in which angular momentum conservation within the solvent plays an important role, appropriate collision operators should be chosen (see :ref:`Collision operators <chapterCollOp>`).
 
 
 .. _thermostat:

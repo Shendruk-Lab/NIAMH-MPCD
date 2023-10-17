@@ -29,7 +29,7 @@ The specific way in which the estimates for the kinematic and :ref:`collisional 
         \nu_{\text{col}} =& \frac{a^2}{\delta t} f_\text{col}(\theta,\langle N_c\rangle,d).
     \end{eqnarray}
 
-The table below list these functions for the most common collision operators [Kikuchi2003]_, [Tüzel2003]_, [gotze07]_, [Noguchi2007]_, [Gompper2009]_
+The table below list these functions for the most common collision operators [Kikuchi2003]_, [Tüzel2003]_, [Götze2007]_, [Noguchi2007]_, [Gompper2009]_
 
 +------------------+---------------------+--------------------------------------------------------------------------------------------------+
 |Collision Operator| Contribution        | Expression                                                                                       |
