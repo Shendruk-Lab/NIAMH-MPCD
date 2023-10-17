@@ -1,0 +1,167 @@
+.. _ParticleInitialization:
+
+Particle initialization
+=======================
+
+.. _QDIST:
+
+Position
+--------
+It specifies how the position of this species' particles is initialised. The available options are to :
+
+- place the particles randomly and freely within the control volume. 
+  Add the following to your input ``.json`` file: 
+
+.. code-block:: json
+
+    "qdist":         0,
+
+- read the particles' positions from a file.
+  Add the following to your input ``.json`` file:
+
+.. code-block:: json
+
+    "qdist":         1,
+
+.. _note::
+
+    The default value is 0.
+
+.. _VDIST:
+
+Velocity
+--------
+
+It specifies how the velocity of this species' particles is initialised. The available options are to :
+
+- draw the velocity from an uniformly random distribution. To get uniform must consider from zero to :math:`(2 {\times} K_{B}T/MASS)^{1/2}` for each component. To get the negative velocity we make the interval twice as big and subtract off the original max. Add the following to your input ``.json`` file:
+
+  .. code-block:: json
+
+      "vdist":         0,
+
+- read the particles' velocities from a file. Add the following to your input ``.json`` file:
+
+  .. code-block:: json
+
+      "vdist":         1,
+
+- give all the particles the same initial speed but in different directions. Add the following to your input ``.json`` file:
+
+  .. code-block:: json
+
+      "vdist":         2,
+
+- give all the particles the same initial speed along each axis in either direction.Add the following to your input ``.json`` file:
+
+  .. code-block:: json
+
+      "vdist":         3,
+
+- draw the particles' velocity from a gaussian distribution scaled by :math:`(K_{B}T/MASS)^{1/2}`
+  for each component of the velocity. Add the following to your input ``.json`` file:
+
+  .. code-block:: json
+
+      "vdist":         4,
+
+.. _note::
+
+    The default value is 0.
+
+.. _MASSInitialization:
+
+Mass
+----
+
+Mass of this species' particles. To set it, add the following to your input ``.json`` file:
+
+  .. code-block:: console
+
+      "mass":  <value>,
+
+.. _note::
+
+    The default value = 1 and it should be **always** be 1 for at least one species since it sets the mass scale .
+
+
+.. _ODIST:
+
+Orientation
+-----------
+
+It specifies how the direction of this species' particles is initialised. The available options are to :
+
+- get a unit vector within a sphere distribution. 
+
+  - 3D: Sample the z component on :math:`[{\cos(\pi)}, 1]` and then sample the azimuthal angle, :math:`{\phi}` on :math:`[0, 2{\pi})`.
+
+  - 2D: Simply sample the azimuthal angle homogeneously.
+
+  - 1D: Checks if :math:`{\cos(\phi)}` would be parallel or anti-parallel, returning +1.0 or -1.0.
+
+  Add the following to your input ``.json`` file:
+
+  .. code-block:: json
+
+      "odist":         0,
+
+- align all particles along X axis. Add the following to your input ``.json`` file:
+
+  .. code-block:: json
+
+      "odist":         1,
+
+- align all particles along Y axis. Add the following to your input ``.json`` file:
+ 
+  .. code-block:: json
+
+      "odist":         2,
+
+- align all particles along Z axis. Add the following to your input ``.json`` file: 
+ 
+  .. code-block:: json
+
+      "odist":         3,
+
+- align all particles along 45 degree angle. Add the following to your input ``.json`` file: 
+ 
+  .. code-block:: json
+
+      "odist":         4,
+
+- align all particles randomly within XY axis. Add the following to your input ``.json`` file: 
+ 
+  .. code-block:: json
+
+      "odist":         5,
+
+- align all particles randomly within XZ axis. Add the following to your input ``.json`` file: 
+ 
+  .. code-block:: json
+
+      "odist":         6,
+
+- align all particles randomly within YZ axis. Add the following to your input ``.json`` file: 
+ 
+  .. code-block:: json
+
+      "odist":         7,
+
+- align all particles in the direction of origin towards positive right hand corner of any cartesian plane.
+  Add the following to your input ``.json`` file: 
+ 
+  .. code-block:: json 
+
+      "odist":         8,
+
+- align all particles in the direction of two oppositely charged defects.
+  Add the following to your input ``.json`` file:
+ 
+  .. code-block:: json 
+
+      "odist":         9,
+
+.. _note::
+
+    The default value is 2.
