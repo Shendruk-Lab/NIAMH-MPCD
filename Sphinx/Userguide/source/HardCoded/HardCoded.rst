@@ -1,7 +1,7 @@
 Hard coded options
 ##################
 
-While MPCD is almost entirely configureable from it's input files, there are a several options that are hard coded. 
+While MPCD is almost entirely configureable from its input files, there are a several options that are hard coded. 
 These hard coded options are in the form of preprocessor defines (such as ``# define DBG``), which are read by the compiler at compile time and are within the ``mpcd/headers/definitions.h`` file. 
 The majority of these options relate to the operation of the simulator, rather than the simulation of the physics, and are detailed on this page.
 
@@ -18,7 +18,7 @@ Random Number Generation Options
 
 MPCD uses two types of random number generators: 
 
-1. A Xoshiro128++ generator, derived from `this source <https://prng.di.unimi.it/xoshiro128plusplus.c>`_.
+1. A Xoshiro128++ generator, derived from `this example <https://prng.di.unimi.it/xoshiro128plusplus.c>`_.
 2. A Mersenne-Twister, taken from `this source <http://www.math.sci.hiroshima-u.ac.jp/~m-mat/MT/MT2002/CODES/mt19937ar.c>`_.
 
 By default, the Xoroshiro generator is used, as it is significantly faster while still retaining a sufficiently large period for MPCD simulations.
@@ -33,7 +33,7 @@ Mersenne-Twister Options
 Of the two random number generator options, only the Mersenne-Twister has configureable options.
 
 .. warning:: 
-    These options are not designed to be configureable by a typical user. 
+    These options are not designed to be configurable by a typical user. 
     We strongly discourage altering these options unless you are familiar with the Mersenne-Twister algorithm, and the implications of changing these options.
 
     This is especially true due to MPCD's dependence on random number generation.
@@ -51,10 +51,6 @@ These options include:
     The most significant w-r bits of the state vector.
 * ``# define LOWER_MASK 0x7fffffffUL``: 
     The least significant r bits of the state vector.
-
-Checkpointing
-*************
-**NOTE: This should be in the output section. Move it there once I've figured out what Kristian's doing there**
 
 Debug Modes/ Verbosity
 **********************
@@ -93,7 +89,7 @@ The following debug levels are less frequently used, and are most helpful when d
 20. Escape --- Legacy: Used to be used for debugging particle escapes from the domain. Currently identical to LC Collision.
 21. Swimmer Details --- Outputs high level detail of all intermediary debug information when swimmers are present. Only outputs at this verbosity level.
 22. Swimmer Torque --- Outputs intermediary debug information on swimmer torques. Only outputs at this verbosity level.
-23. Incompressibility --- Outputs intermediary debug information for the Incompressibility algorithm. Only outputs at this verbosity level.
+23. Incompressibility --- Outputs intermediary debug information for the incompressibility algorithm. Only outputs at this verbosity level.
 
 Floating Point Error Handling
 *****************************
