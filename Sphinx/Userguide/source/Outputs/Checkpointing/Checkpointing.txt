@@ -1,0 +1,53 @@
+.. _Checkpointing:
+
+Checkpointing
+=============
+The MPCD simulator has support for simulation checkpointing.
+This feature will store a complete dump of the internal simulation state to a file, which can then be loaded at a later time.
+Two particularly important use cases for this are:
+
+#. Chaining together simulations --- If you need to run a system for a very long time, but cannot submit a single job to a cluster to run it, then you can run one system to a reasonable limit, checkpoint it, and then start a new simulation from the checkpoint after a break. 
+#. Restarting simulations --- If a simulation crashes, you can restart it from the last checkpoint, rather than starting over from the beginning. 
+
+.. warning::
+    A checkpoint file is not gauranteed to be compatible with future versions of the MPCD simulator. 
+    You should keep track of which version of the code you ran a simulation with and use the same version to restart a checkpointed run.
+
+Launching a Simulation with Checkpointing
+-----------------------------------------
+There are two methods to launch a simulation with checkpointing enabled. 
+These involve setting a specific input tag in the simulation input ``.json`` file:
+
+- ``"checkpointOut": <int>`` --- After every ``<int>`` simulation steps have passed (across both warmup and normal runtime), the simulation will write a checkpoint file.
+- ``"checkpointTimerOut": <float>`` --- After every ``<float>`` hours, the simulation will write a checkpoint file.
+
+These options will override the other, so choose one or the other.
+Generally, ``checkpointOut`` is best for making a general backup to resume the simulation, whereas ``checkpointTimerOut`` is best for making a backup to chain together simulations.
+
+.. note::
+    When later loading a checkpoint, it will remember the input you launched the simulation with during the original run.
+    This means that if you want to chain together runs, set your simulation timestep count to be very large initially.
+
+.. warning:: 
+    Checkpoint files store the entire simulation state, meaning that they can be very very large. 
+    MPCD itself is relatively stable, so more than one or two checkpoints per week of simulation runtime is probably overkill on a regular cluster.
+
+Restarting a Checkpointed Simulation
+------------------------------------
+To restart a checkpointed simulation, move the checkpoint file ``checkpoint.dat`` to the same directory as your input ``.json`` file. 
+In your input ``.json`` file, you are required to set the seed input tag to -1:
+
+.. code-block:: json
+
+    {
+        "seed": -1
+    }
+
+With this, launch MPCD normally and the simulation will resume from the checkpoint file.
+
+.. note:: 
+    When loading a checkpointed simulation, MPCD will automatically load the input file you used to run the simulation originally. 
+
+.. warning::
+    The random number generator state vector is not saved during the checkpoint process, instead it is re-initialized using a pseudo-random seed.
+    This means that if you restart two simulations from the same checkpoint, they can give different results from then on.
