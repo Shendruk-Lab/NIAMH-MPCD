@@ -76,6 +76,8 @@ in which :math:`\chi_{HI}` is an heuristic shear coupling coefficient that sets 
 In turn, the nematic MPCD algorithm included the backflow induced by the nematogen in the fluid by modifiying the velocity collision operator to include balancing angular impulses , i.e.,equal in magnitude but opposite in direction, to those caused by the hydrodynamic torques on each nematogen :math:`\boldsymbol{\Gamma}_{\text{HI},i} = -(\boldsymbol{\Gamma}_{\text{col},i}+\boldsymbol{\Gamma}_{\text{ext},i})`. To counter this impulse with the htdrodynamic drag, this is then transferred to the linear momentum portion of the algorithm, thus modifying the MPCD collision operator to:
 
 .. math::
+    :name: eq:NematicCollision
+
     \boldsymbol{\Xi}_{i,c} = \boldsymbol{\xi}_i - \langle \xi_j\rangle _{N_c} +\left(\boldsymbol{I}_c^{-1}\cdot\left[\delta \boldsymbol{L}_c-\sum_{i=1}^{N_c}\boldsymbol{\Gamma}_{\text{HI},i}\delta t\right]\right)\times \boldsymbol{r}_i'
 
 Proceeding in this way ensures that the system's total angular momentum is conserved. Furthermore, as setting :math:`\gamma_R=0` kills the transfer or momentum for each particle, this also results in turning this coupling off. 
