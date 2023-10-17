@@ -17,7 +17,7 @@ For a particle :math:`i` with position :math:`\vec{x}_i` this condition is
 
 Boundary conditions are only applied to a particle when the position is exactly on the surface,
 which requires tracing back the particle's position :math:`\vec{x}_i^*` to where :math:`S(\vec{x}_i^*) = 0`
-at time :math:`t^*` where :math:`0<t^*<\delta t`. ROUTINES
+at time :math:`t^*` where :math:`0<t^*<\delta t`.
 
 Boundary rules
 ----------------------------------
@@ -102,9 +102,7 @@ The random grid shifts (for Galilean invariance) can result in fluid cells being
 reducing the cell's population below the average number density.
 With fewer particles in the cell, the centre of mass velocity :math:`\vec{v}^{\mathrm{cm}}_c` can fail to satisfy no-slip.
 A standard method to correct no-slip, so that :math:`\vec{v}^{\mathrm{cm}}_c \approx 0`,
-is to fill the cell with :math:`N_\mathrm{ghost} =\langle N_c \rangle - N_c` virtual particles so that the effective density :math:`N_c` is equal to the average density :math:`\langle N_c \rangle`.
-
-MIGHT HAVE THIS THE WRONG WAY ROUND
+is to fill the cell with :math:`N_\mathrm{ghost} =\langle N_c \rangle - N_c` virtual particles so that the effective cell density :math:`N_c` is equal to the average density :math:`\langle N_c \rangle`.
 
 .. math::
   :name: eq:virtualparticles
@@ -123,8 +121,6 @@ from a Maxwell Boltzmann distribution about zero but with a variance of :math:`N
 
 REFERENCE PAPERS FOR THIS
 
-LINK TO GHOST PART
-
 Strong anchoring
 ^^^^^^^^^^^^^^^^^
 
@@ -133,6 +129,4 @@ the cell director :math:`\hat{n}_c` mixes between the anchored and un-anchored o
 The effective anchoring strength is therefore heavily dependent on the proportion :math:`N_{\mathrm{anch}} / N_c`, with strongest anchoring acheived when :math:`N_{\mathrm{anch}} = N_c`.
 To strengthen the effective anchoring, we apply the orientation boundary condition to all :math:`N_c` particles.
 
-MAY NEED TO EXPLAIN HOW THIS CONSERVES STUFF
-
-LINK TO GHOST PART
+THE TORQUE APPLIED IS CONSERVED WITH THE BOUNDARY. IF NOT, THE BOUNDARY ABSORBS IT.
