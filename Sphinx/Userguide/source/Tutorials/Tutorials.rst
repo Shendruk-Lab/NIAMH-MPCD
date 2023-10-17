@@ -3,6 +3,11 @@
 Tutorials
 #########
 
+Channel Flow
+****************
+
+.. include:: ChannelFlow/ChannelFlow.txt
+
 Dumbbell swimmers
 ****************
 
