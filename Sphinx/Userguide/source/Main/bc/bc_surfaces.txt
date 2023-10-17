@@ -1,5 +1,5 @@
 All boundaries are defined by an implicit surface equation :math:`S(\vec{x})=0`,
-where :math:`\vec{x}=x \hat{e}_x + y \hat{e}_y + z \hat{e}_z` are points on the surface.
+where :math:`\vec{x}= (x,y,z)` are points on the surface.
 There are multiple forms of implemented surfaces, which can be combined (non-zero surface parameters) or removed (setting surface parameters to zero).
 
 Standard surfaces
@@ -15,19 +15,30 @@ Standard surfaces have the basic form,
 where the surface parameters represent DESCRIBE A, Q and R. Writing surfaces in this way is versatile and enables following surfaces to be created
 
 1. Plane
-  To construct a plane, set :math:`p_x=p_y=p_z=p_R=1` and
-  :math:`Q_x=Q_y=Q_z=0` to give the surface equation
+  To construct a plane, set :math:`p_x=p_y=p_z=p_R=1`,
+  :math:`Q_x=Q_y=Q_z=0` and :math:`R=d` to give the surface equation
 
   .. math::
       :name: eq:surface
 
-      S(\vec{x})= A_x x + A_y y + A_z z  - R = 0
+      S(\vec{x})= A_x x + A_y y + A_z z  - d = 0
 
-  Describing a plane ...
+  Describing a plane with normal vector :math:`\hat{n} = (A_x,A_y,A_z)` and located at a distance :math:`d` from the origin.
+  Alternatively, can write the surface equation with :math:`R=0` so that
 
-  Alternatively can ...
+  .. math::
+      :name: eq:surface
 
-  Picture of plane
+      S(\vec{x})= A_x (x-Q_x) + A_y(y-Q_y) + A_z (z-Q_z) = 0
+
+  with the perpendicular distance from the original as :math:`A \cdot Q = d`.
+
+  .. figure:: bc/bc_images/Plane.png
+     :alt: Logo
+     :scale: 30%
+     :align: center
+
+     CAPTION
 
 2. Sphere
   To construct a sphere, :math:`p_x=p_y=p_z=p_R=2` and
@@ -38,14 +49,14 @@ where the surface parameters represent DESCRIBE A, Q and R. Writing surfaces in 
 
       S(\vec{x})= \left(x-Q_x\right)^2 + \left(y-Q_y\right)^2 + \left(z-Q_z\right)^2  - R^2 = 0
 
-  Describing a sphere centred at :math:`Q_x \hat{e}_x + Q_y \hat{e}_y + Q_z \hat{e}_z` with a radius :math:`R`.
+  Describing a sphere centred at :math:`\vec{Q} = (Q_x,Q_y,Q_z)` with a radius :math:`R`.
 
   .. figure:: bc/bc_images/Sphere.png
      :alt: Logo
      :scale: 30%
      :align: center
 
-     Figure caption
+     CAPTION
 
 3. Ellipsoid
 
@@ -57,16 +68,35 @@ where the surface parameters represent DESCRIBE A, Q and R. Writing surfaces in 
 
       S(\vec{x})= \left(\frac{x-Q_x}{a}\right)^2 + \left(\frac{y-Q_y}{b}\right)^2 + \left(\frac{z-Q_z}{c}\right)^2  - 1 = 0
 
-  Describing an ellipsoid centred at :math:`Q_x \hat{e}_x + Q_y \hat{e}_y + Q_z \hat{e}_z` with the ...  :math:`a, b, c`.
+  Describing an ellipsoid centred at :math:`\vec{Q} = (Q_x,Q_y,Q_z)` with principle semi-axes :math:`a, b, c`.
 
   .. figure:: bc/bc_images/Ellipsoid.png
      :alt: Logo
      :scale: 30%
      :align: center
 
-     Figure caption
+     CAPTION
 
-4. Squircle
+4. Cylinder
+
+  A cylinder aligned along :math:`\hat{e}_z` can be constructed using :math:`p_x=p_y=p_R=2`, :math:`A_x=A_y=1, A_z=0` and :math:`R\neq 0`.
+
+  .. math::
+      :name: eq:cylinder
+
+      S(\vec{x})= \left(x-Q_x\right)^2 + \left(y-Q_y\right)^2 - R^2 = 0
+
+  Describing an cylinder centred at :math:`\vec{Q} = (Q_x,Q_y)` on the :math:`XY` plane with radius :math:`R`.
+
+  .. figure:: bc/bc_images/Cylinder.png
+     :alt: Logo
+     :scale: 30%
+     :align: center
+
+     CAPTION
+
+
+5. Squircle
 
   A squircle is a surface that is intermediate between a sphere and a cube.
   The construction of a squircle has :math:`p_x=p_y=p_z=p_R=4` and :math:`A_x=A_y=A_z=1`
@@ -76,7 +106,7 @@ where the surface parameters represent DESCRIBE A, Q and R. Writing surfaces in 
 
       S(\vec{x})= \left(x-Q_x\right)^4 + \left(y-Q_y\right)^4 + \left(z-Q_z\right)^4  - R^4 = 0
 
-  Describing a squircle centred at :math:`Q_x \hat{e}_x + Q_y \hat{e}_y + Q_z \hat{e}_z` with a minor radius :math:`R`.
+  Describing a squircle centred at :math:`\vec{Q} = (Q_x,Q_y,Q_z)` with a minor radius :math:`R`.
 
   .. figure:: bc/bc_images/Squircle.png
      :alt: Logo
@@ -84,7 +114,7 @@ where the surface parameters represent DESCRIBE A, Q and R. Writing surfaces in 
      :align: center
 
      Figure caption
-5. Superellipsoid
+6. Superellipsoid
 
   A superellipse is a closed surface that resembles an ellipse, ..., but with different shape.
   The construction of a superellipse has :math:`p_x=p_y=p_z=p_R=n` and

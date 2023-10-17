@@ -1,1 +1,11 @@
-Text for overview
+
+All simulations require boundary conditions.
+Creating surfaces to define the fluid control volume, establishes the fluid domain over which the hydrodynamic interactions take place.
+For this algorithm, boundary conditions are applied directly to fluid particles that violate surface equations.
+
+The following steps are required:
+
+- Defining the surfaces
+- Boundary condition rules
+
+These two processes can model a wide variety of confining systems, including open systems (through periodic boundary conditions), channels and confinement in complex environments.

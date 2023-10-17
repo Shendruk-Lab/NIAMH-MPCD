@@ -19,5 +19,5 @@ Mobile boundaries
 .. include:: bc/bc_mobile.txt
 
 Other
-=================
+=====
 Thermal boundaries, and whatever the other non-momentum conserving interaction is.
