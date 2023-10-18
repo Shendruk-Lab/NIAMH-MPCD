@@ -43,15 +43,20 @@ Writing surfaces in this way is versatile and enables following surfaces to be c
 
      CAPTION
 
-  EXAMPLE OF USE
+  ::
 
-  HOW CAN CONSTRUCT CONFINING WALLS IN A SYSTEM
-  MENTION THE DEFAULT AND LINK IN PBC
+    {
+      "comment":      "Plane BC",
+      "Q":            [0, 0, 0],
+      "aInv":         [1, 0, 0],
+      "P":            [1, 1, 1, 1],
+      "R":            distance of plane from origin in direction by aInv (here the x direction),
+    }
 
 2. **Sphere**
 
   To construct a sphere, :math:`p_x=p_y=p_z=p_R=2`,
-  :math:`A_x=A_y=A_z=1` and :math:`R\neq1` to give the surface equation
+  :math:`A_x=A_y=A_z=1` and :math:`R\neq0` to give the surface equation
 
   .. math::
       :name: eq:surfacesphere
@@ -67,7 +72,15 @@ Writing surfaces in this way is versatile and enables following surfaces to be c
 
      CAPTION
 
-  EXAMPLE OF USE
+  ::
+
+    {
+      "comment":      "Sphere BC",
+      "Q":            [Qx, Qy, Qz],
+      "aInv":         [1, 1, 1],
+      "P":            [2, 2, 2, 2],
+      "R":            radius of sphere,
+    }
 
 3. **Ellipsoid**
 
@@ -88,7 +101,15 @@ Writing surfaces in this way is versatile and enables following surfaces to be c
 
      CAPTION
 
-  EXAMPLE OF USE
+  ::
+
+    {
+      "comment":      "Ellipsoid BC",
+      "Q":            [Qx, Qy, Qz],
+      "aInv":         [1/a, 1/b, 1/c],
+      "P":            [2, 2, 2, 2],
+      "R":            1,
+    }
 
 4. **Cylinder**
 
@@ -108,7 +129,15 @@ Writing surfaces in this way is versatile and enables following surfaces to be c
 
      CAPTION
 
-  EXAMPLE OF USE
+  ::
+
+    {
+      "comment":      "Cylinder BC",
+      "Q":            [Qx, Qy, Qz],
+      "aInv":         [1, 1, 0],
+      "P":            [2, 2, 2, 2],
+      "R":            radius of cylinder,
+    }
 
 
 5. **Squircle**
@@ -130,7 +159,15 @@ Writing surfaces in this way is versatile and enables following surfaces to be c
 
      CAPTION
 
-  EXAMPLE OF USE
+  ::
+
+    {
+      "comment":      "Squircle BC",
+      "Q":            [Qx, Qy, Qz],
+      "aInv":         [1, 1, 1],
+      "P":            [4, 4, 4, 4],
+      "R":            Minor radius,
+    }
 
 6. **Superellipsoid**
 
@@ -150,6 +187,15 @@ Writing surfaces in this way is versatile and enables following surfaces to be c
      :align: center
 
      CAPTION
+  ::
+
+    {
+      "comment":      "Superellipsoid BC",
+      "Q":            [Qx, Qy, Qz],
+      "aInv":         [1/a, 1/b, 1/c],
+      "P":            [n, n, n, n],
+      "R":            1,
+    }
 
 
 Additional surface forms
