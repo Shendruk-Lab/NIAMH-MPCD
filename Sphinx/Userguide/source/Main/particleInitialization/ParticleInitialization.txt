@@ -1,23 +1,25 @@
 .. _ParticleInitialization:
 
-Particle initialization
-=======================
-
 .. _QDIST:
+
+The fluid is determined in the input ``.json`` file and all relevant values need to be declared there.
+
+Basic fluid
+===========
+
+Any fluid solved with MPC particles needs to have the following properties initialized. 
 
 Position
 --------
-It specifies how the position of this species' particles is initialised. The available options are to :
+qdist specifies how the position of this species' particles are initialised. The available options are to :
 
 - place the particles randomly and freely within the control volume. 
-  Add the following to your input ``.json`` file: 
 
 .. code-block:: json
 
     "qdist":         0,
 
 - read the particles' positions from a file.
-  Add the following to your input ``.json`` file:
 
 .. code-block:: json
 
@@ -32,34 +34,34 @@ It specifies how the position of this species' particles is initialised. The ava
 Velocity
 --------
 
-It specifies how the velocity of this species' particles is initialised. The available options are to :
+vdist specifies how the velocity of this species' particles is initialised. The available options are to :
 
-- draw the velocity from an uniformly random distribution. To get uniform must consider from zero to :math:`(2 {\times} K_{B}T/MASS)^{1/2}` for each component. To get the negative velocity we make the interval twice as big and subtract off the original max. Add the following to your input ``.json`` file:
+- draw the velocity from an uniformly random distribution. To get uniform must consider from zero to :math:`(2 {\times} K_{B}T/MASS)^{1/2}` for each component. To get the negative velocity we make the interval twice as big and subtract off the original max. 
 
   .. code-block:: json
 
       "vdist":         0,
 
-- read the particles' velocities from a file. Add the following to your input ``.json`` file:
+- read the particles' velocities from a file. (HOW DOES THE USER GIVE THIS FILE?)
 
   .. code-block:: json
 
       "vdist":         1,
 
-- give all the particles the same initial speed but in different directions. Add the following to your input ``.json`` file:
+- give all the particles the same initial speed but in different directions. 
 
   .. code-block:: json
 
       "vdist":         2,
 
-- give all the particles the same initial speed along each axis in either direction.Add the following to your input ``.json`` file:
+- give all the particles the same initial speed along each axis in either direction.
 
   .. code-block:: json
 
       "vdist":         3,
 
 - draw the particles' velocity from a gaussian distribution scaled by :math:`(K_{B}T/MASS)^{1/2}`
-  for each component of the velocity. Add the following to your input ``.json`` file:
+  for each component of the velocity. 
 
   .. code-block:: json
 
@@ -84,87 +86,6 @@ Mass of this species' particles. To set it, add the following to your input ``.j
 
     The default value = 1 and it should be **always** be 1 for at least one species since it sets the mass scale .
 
-
-.. _ODIST:
-
-Orientation
------------
-
-It specifies how the direction of this species' particles is initialised. The available options are to :
-
-- get a unit vector within a sphere distribution. 
-
-  - 3D: Sample the z component on :math:`[{\cos(\pi)}, 1]` and then sample the azimuthal angle, :math:`{\phi}` on :math:`[0, 2{\pi})`.
-
-  - 2D: Simply sample the azimuthal angle homogeneously.
-
-  - 1D: Checks if :math:`{\cos(\phi)}` would be parallel or anti-parallel, returning +1.0 or -1.0.
-
-  Add the following to your input ``.json`` file:
-
-  .. code-block:: json
-
-      "odist":         0,
-
-- align all particles along X axis. Add the following to your input ``.json`` file:
-
-  .. code-block:: json
-
-      "odist":         1,
-
-- align all particles along Y axis. Add the following to your input ``.json`` file:
- 
-  .. code-block:: json
-
-      "odist":         2,
-
-- align all particles along Z axis. Add the following to your input ``.json`` file: 
- 
-  .. code-block:: json
-
-      "odist":         3,
-
-- align all particles along 45 degree angle. Add the following to your input ``.json`` file: 
- 
-  .. code-block:: json
-
-      "odist":         4,
-
-- align all particles randomly within XY axis. Add the following to your input ``.json`` file: 
- 
-  .. code-block:: json
-
-      "odist":         5,
-
-- align all particles randomly within XZ axis. Add the following to your input ``.json`` file: 
- 
-  .. code-block:: json
-
-      "odist":         6,
-
-- align all particles randomly within YZ axis. Add the following to your input ``.json`` file: 
- 
-  .. code-block:: json
-
-      "odist":         7,
-
-- align all particles in the direction of origin towards positive right hand corner of any cartesian plane.
-  Add the following to your input ``.json`` file: 
- 
-  .. code-block:: json 
-
-      "odist":         8,
-
-- align all particles in the direction of two oppositely charged defects.
-  Add the following to your input ``.json`` file:
- 
-  .. code-block:: json 
-
-      "odist":         9,
-
-.. note::
-
-    The default value is 2.
 
 .. _POP:
 
@@ -194,7 +115,113 @@ It is equal to control volume :math:`{\times} 20` ( :math:`20 =` the average num
 
       "dens":    20, 
 
+.. _DAMP:
+
+Damping coefficient
+-------------------
+A friction coefficient to control hydrodynamics. in other words to go from wet to dry that could be :math:`[0,1]`. To set it, add the following to your input ``.json`` file:
+
+.. code-block:: console 
+
+    "damp":    <value>, 
+.. note::
+
+  The default value is 0. 
+
+.. _LEN:
+
+
+Nematic fluid
+=============
+
+The MPC particles can be given nematic orientational symmetry, by setting 
+
+.. code-block:: lc 
+  "lc": 1
+
+In that case, the following properties need to be initialized.
+
+.. _ODIST:
+
+
+Orientation
+-----------
+
+odist specifies how the direction of this species' particles is initialised. The available options are to :
+
+- get a unit vector within a sphere distribution. 
+
+  - 3D: Sample the z component on :math:`[{\cos(\pi)}, 1]` and then sample the azimuthal angle, :math:`{\phi}` on :math:`[0, 2{\pi})`.
+
+  - 2D: Simply sample the azimuthal angle homogeneously.
+
+  - 1D: Checks if :math:`{\cos(\phi)}` would be parallel or anti-parallel, returning +1.0 or -1.0.
+
+  .. code-block:: json
+
+      "odist":         0,
+
+- align all particles along X axis. 
+
+  .. code-block:: json
+
+      "odist":         1,
+
+- align all particles along Y axis. 
+ 
+  .. code-block:: json
+
+      "odist":         2,
+
+- align all particles along Z axis. 
+ 
+  .. code-block:: json
+
+      "odist":         3,
+
+- align all particles along 45 degree angle.
+ 
+  .. code-block:: json
+
+      "odist":         4,
+
+- align all particles randomly within XY axis. 
+ 
+  .. code-block:: json
+
+      "odist":         5,
+
+- align all particles randomly within XZ axis. 
+ 
+  .. code-block:: json
+
+      "odist":         6,
+
+- align all particles randomly within YZ axis. 
+ 
+  .. code-block:: json
+
+      "odist":         7,
+
+- align all particles in the direction of origin towards positive right hand corner of any cartesian plane.
+
+ 
+  .. code-block:: json 
+
+      "odist":         8,
+
+- align all particles in the direction of two oppositely charged defects.
+
+  .. code-block:: json 
+
+      "odist":         9,
+
+.. note::
+
+    The default value is 2.
+
 .. _RFC:
+
 
 Rotational friction coefficient
 -------------------------------
@@ -257,21 +284,6 @@ It is the susceptibility of the director to a magnetic field. To set it, add the
 
   The default value is 0.001.
 
-.. _DAMP:
-
-Damping coefficient
--------------------
-A friction coefficient to control hydrodynamics in other words to go from wet to dry that could be :math:`[0,1]`. To set it, add the following to your input ``.json`` file:
-
-.. code-block:: console 
-
-    "damp":    <value>, 
-.. note::
-
-  The default value is 0. 
-
-.. _LEN:
-
 Length
 ------
 
@@ -306,13 +318,13 @@ To set it, add the following to your input ``.json`` file:
 Local activity modulators
 -------------------------
 
-:math:`{\sigma}_w` represents how fast should the modulation fall-off as a function of density , should be > 0, ideally around 0.4. To set it, add the following to your input ``.json`` file: 
+:math:`{\sigma}_w` represents how fast should the modulation fall-off as a function of density , should be > 0, ideally around 0.4. 
 
 .. code-block:: console 
 
     "sigWidth":    <value>,
 
-:math:`{\sigma}_p` is a measure of when modulation should begin, should be in a range 0 to 2, ideally around 0.5. To set it, add the following to your input ``.json`` file:
+:math:`{\sigma}_p` is a measure of when modulation should begin, should be in a range 0 to 2, ideally around 0.5. 
 
 .. code-block:: console 
 
@@ -340,6 +352,11 @@ Activity could be applied to a proportion of particles in the cell, the **Minimu
   The default value is 0.
 
 .. _MATRIX:
+
+Multiphase
+==========
+
+The MPC particles can also be of different species to induce multi-phases. HOW DO I ACTIVATE THIS?
 
 Interaction matrix
 ------------------
