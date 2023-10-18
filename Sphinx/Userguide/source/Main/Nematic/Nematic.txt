@@ -175,11 +175,14 @@ Variation on the strength of activity
 As explained above, :math:`\alpha_c` sets the strength of the active dipoles, and thus of the active stress. 
 In the algorithm, particles individually carry an activity :math:`\alpha_i` --- The algorithm can interpret this into a dipole strength :math:`\alpha_c` in four different ways, encoded as four different collision operators:
 
-16. Particle-carried activity
-17. Cell-carried activity
-20. Modulated cell-carried activity
-21. Modulated particle-carried activity
+1. Particle-carried activity --- 16
+2. Cell-carried activity --- 17
+3. Modulated cell-carried activity --- 20
+4. Modulated particle-carried activity --- 21
 
+
+.. warning::
+    Note: You can use :math:`\alpha_i < 0` to simulate contractile nematics, but only in a very limited regime. 
 
 Particle-carried activity
 ^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -193,6 +196,7 @@ In this version of the collision operator, each particle is thought to carry its
 This implies that with this choice, the strength of the active impulses provided by the collision operator increases with the population of the cell. In general, this leads to large density fluctuations which reduce the operational regime of the algorithm and make it unsuitable to treat solutes such as colloids, swimmers and polymers.
 
 This active collision operator has the tag collOp: 16.  
+
 
 Cell-carried activity
 ^^^^^^^^^^^^^^^^^^^^^
