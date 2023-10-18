@@ -3,6 +3,13 @@
 Tutorials
 #########
 
+.. _Isoptropic:
+
+First simulation
+************
+
+.. include:: Isotropic/Isotropic.txt
+
 Channel flow
 ************
 
