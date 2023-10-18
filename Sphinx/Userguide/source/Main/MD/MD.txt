@@ -1,4 +1,9 @@
-Molecular Dynamics (MD) numerically integrates the classical equations of motion for a large number of particles that interact via a set of pair potentials [Slater2009]_. It is a common approach to simulate polymer dynamics. Polymer molecules are composed of a large number of equal repeat units called monomers which are connected linearly by bonds. The dynamics of the chain monomers is determined by Newtons’ equations of motion. These equations are integrated using the velocity Verlet algorithm.  The standard implementation scheme of this algorithm is to 
+Molecular Dynamics (MD) numerically integrates the classical equations of motion for a large number of particles that interact via a set of pair potentials [Slater2009]_. It is a common approach to simulate polymer dynamics. Polymer molecules are composed of a large number of equal repeat units called monomers which are connected linearly by bonds.
+
+Dry sytsem 
+==========
+
+The term **dry** indicates that there are no hydrodynamic interactions included. Moreover, in our version of the MD solver the dynamics of the chain monomers is determined by Newtons’ equations of motion (No noise). These equations are integrated using the velocity Verlet algorithm.  The standard implementation scheme of this algorithm is to 
 
 #. calculate :math:`{\vec v}(t+1/2 {\Delta}t) = {\vec v}(t) + 1/2 {\vec a}(t){\Delta}t`.
 
@@ -46,7 +51,7 @@ where :math:`k_{\text{FENE}}` is a spring constant representing the stiffness of
 
 .. _Bending Potential:
 
-- **Bond Bending Potential**, :math:`U_{\text{Bend}}`: This potential captures the stiffness of the polymer in response to bending force. There are several bending potentials including angular harmonic, cosine harmonic or cosine expansion [Bulacu2013]_. For instance angular harmonic is given by
+- **Bond Bending Potential**, :math:`U_{\text{Bend}}`: This potential captures the stiffness of the polymer in response to bending force. Since the simulations are coarse-grained these are not intended to represent chemical bending potentials but can give polymer chains microscopic characteristics such as correlations along the back-bone (a non-zero persistence length). There are several bending potentials including angular harmonic, cosine harmonic or cosine expansion [Bulacu2013]_. For instance angular harmonic is given by
 
 .. math::
 
@@ -83,6 +88,59 @@ The Coulombic interactions are long-range scaling like :math:`∼ r_{ij}^{−1}`
     U_{\text{Coul}}(r_{ij}) \approx K_BT \frac{Q_i Q_j}{e^2} \frac{\lambda_B}{r_{ij}} \exp(\frac{-r_{ij}}{\lambda_{\text{D}}})
 
 
+Wet system
+==========
+
+Isotropic fluid
+---------------
+
+The dynamical behavior of macromolecules in solution is strongly affected or even dominated by hydrodynamic interactions. Mesoscale hydrodynamic simulations can be used to introduce hydrodynamic interactions to molecular dynamic (MD) simulations and consequently to provide a full characterization of the polymer dynamics [Holm2008]_. This coupling to the fluid can be done in two ways. Either the MD beads can be included in the MPCD algorithm or the MPCD particles can be included in the MD calculations.
+
+.. list-table:: 
+    :header-rows: 0
+    :widths: 50 50
+    :align: center
+
+    * - .. figure:: MD/MDinMPCD.png
+            :width: 95%
+            :align: center
+
+      - .. figure:: MD/MPCDinMD.png
+            :width: 95%
+            :align: center
+
+    * - :ref:`MD-in-MPCD Coupling <MD-in-MPCD Coupling>`
+
+      - :ref:`MPCD-in-MD Coupling <MPCD-in-MD Coupling>`
+
+.. _MD-in-MPCD Coupling:
+
+MD-in-MPCD Coupling
+^^^^^^^^^^^^^^^^^^^
+
+The MD monomers can be included in the MPCD collision operations. This scheme is referred to as MD-in-MPCD coupling. In the MD-in-MPCD scheme the MD algorithm integrates the MD monomer trajectories over some number of MD time-steps :math:`N_{\text{MD}}`. In a sense, during this period the MD simulation occurs in a vacuum. After this the program exits the MD portion of the algorithm and enters the MPCD side. The MD beads are ported into the MPCD algorithm as point particles and are included in the collision operation. In this way, the MD beads exchange momentum with the fluid. The MPCD particles perform the streaming step (the MD particles do not) before the MD algorithm is reinitiated for another :math:`N_{\text{MD}}` MD time-steps.
+
+Values of :math:`N_{\text{MD}}` are typically large (on the order of 10 although smaller values have been used in the literature). This separation of time scales ensures that the momentum transferred to the polymer during the collision step is well distributed throughout the chain.
+
+.. _MPCD-in-MD Coupling:
+
+MPCD-in-MD Coupling
+^^^^^^^^^^^^^^^^^^^
+
+The second coupling scheme is more accurately described as a hybrid MPCD/MD approach. In the MPCD-in-MD coupling scheme MPCD solvent particles are included in the MD integrator. In the MD portion of the program the monomers interact with one another (monomer-monomer interactions) and also with the solvent fluid particles (monomer-solvent interactions) but the solvent particles do not interact with each other (no solvent-solvent interactions). In this implementation the MPCD fluid particles are cast as MD beads with the same properties as the monomers but this is not necessary. If desired, the program could be altered such that the MPCD particles would be cast as MD beads with different pair potentials than the monomers. The position and velocity of the all MPCD fluid particles is updated in time by the Verlet algorithm. After :math:`N_{\text{MD}}` MD time-steps, the MD integrator is exited and the MPCD portion of the program is performed. MPCD fluid particles are binned into cells and exchange momentum by the MPCD collision operator. Since their positions are updated in the MD portion of the program, they do not stream.
+
+The number of MD steps between an MPCD step can be much smaller that in the MD-in-MPCD scheme.
+
+In both coupling schemes, the MD particles are typically given a mass :math:`m_{\text{MD}}` that is larger than the MPCD particles’ mass in order to achieve efficient coupling.
+
+
+Nematic fluid
+-------------
+
+When it comes to a nematic background, the orientational order of the fluid also plays an important role. A polymer embedded in an isotropic fluid is just coupled to the flow field through exchanging momentum. But in the case of a nematic fluid the backbone of the polymer can be coupled to the orientation field and the following potential captures this coupling in our model
+
+.. _Coupling Potential:
+
 - **Nematic Coupling Potential**, :math:`U_{\text{Nem}}`: This potential aligns each bond of the polymer connecting two consecutive monomers with the local nematic orientation. it works similarly to the :ref:`Bond Bending Potential <Bending Potential>` with one difference. The angle in this case is the angle beween the bond and the local nematic orientation.
 
 .. math::
@@ -99,27 +157,4 @@ where :math:`\vartheta` is the equilibrium angle which in this case is **zero**.
     * - .. figure:: MD/coupling.png
             :width: 40%
             :align: center
-    * - The coupling potential is an angular harmonic potential, :math:`U_{\text{Nem}} = \frac{1}{2}k_{\text{Nem}} \theta^2`, between tangent along the backbone of the polymer and the local nematic director, :math:`{\vec n}_{c}`.
-
-The dynamical behavior of macromolecules in solution is strongly affected or even dominated by hydrodynamic interactions. Mesoscale hydrodynamic simulations can be used to introduce hydrodynamic interactions to molecular dynamic (MD) simulations and consequently to provide a full characterization of the polymer dynamics [Holm2008]_. This coupling to the fluid can be done in two ways. Either the MD beads can be included in the MPCD algorithm or the MPCD particles can be included in the MD calculations.
-
-MD-in-MPCD Coupling
-===================
-
-The MD monomers can be included in the MPCD collision operations. This scheme is referred to as MD-in-MPCD coupling. In the MD-in-MPCD scheme the MD algorithm integrates the MD monomer trajectories over some number of MD time-steps :math:`N_{\text{MD}}`. In a sense, during this period the MD simulation occurs in a vacuum. After this the program exits the MD portion of the algorithm and enters the MPCD side. The MD beads are ported into the MPCD algorithm as point particles and are included in the collision operation. In this way, the MD beads exchange momentum with the fluid. The MPCD particles perform the streaming step (the MD particles do not) before the MD algorithm is reinitiated for another :math:`N_{\text{MD}}` MD time-steps.
-
-Values of :math:`N_{\text{MD}}` are typically large (on the order of 10 although smaller values have been used in the literature). This separation of time scales ensures that the momentum transferred to the polymer during the collision step is well distributed throughout the chain.
-
-MPCD-in-MD Coupling
-====================
-
-The second coupling scheme is more accurately described as a hybrid MPCD/MD approach. In the MPCD-in-MD coupling scheme MPCD solvent particles are included in the MD integrator. In the MD portion of the program the monomers interact with one another (monomer-monomer interactions) and also with the solvent fluid particles (monomer-solvent interactions) but the solvent particles do not interact with each other (no solvent-solvent interactions). In this implementation the MPCD fluid particles are cast as MD beads with the same properties as the monomers but this is not necessary. If desired, the program could be altered such that the MPCD particles would be cast as MD beads with different pair potentials than the monomers. The position and velocity of the all MPCD fluid particles is updated in time by the Verlet algorithm. After:math:`N_{\text{MD}}` MD time-steps, the MD integrator is exited and the MPCD portion of the program is performed. MPCD fluid particles are binned into cells and exchange momentum by the MPCD collision operator. Since their positions are updated in the MD portion of the program, they do not stream.
-
-.. note::
-
-    images for the above aforementioned options will be added.
-
-The number of MD steps between an MPCD step can be much smaller that in the MD-in-MPCD scheme.
-
-In both coupling schemes, the MD particles are typically given a mass :math:`m_{\text{MD}}` that is larger than the MPCD particles’ mass m in order to achieve efficient coupling.
-
+    * - :ref:`Nematic Coupling Potential <Coupling Potential>`
