@@ -5,20 +5,20 @@ These are set in the input ``.json`` file using either the ``"rTech"`` or ``"col
 
     "collOp": <int value>
 
-Where ``<int value>`` is an integer code corresonding to the desired collision operator.
+Where ``<int value>`` is an integer code corresponding to the desired collision operator.
 
-In this section, we describe the various families of collision operators available in MPCD, state their associated keycodes, and describe the parameters they make use of.
+In this section, we describe the various families of collision operators available in MPCD, state their associated keycodes, and describe the parameters they use.
 
 .. _SRD:
 
 Stochastic rotation dynamics
 ============================
-The original derivation of MPCD is known as Stochastic Rotation Dynamics (SRD) **TODO: cite**.
-Translating to modern terminology, SRD's collision operator :math:`\vec\Xi` performs
-a rotation through an angle :math:`\theta` about a randomly chosen axis such that conservation of energy, isotropy and a Maxwell Boltzmann velocity distribution are met in the continuum limit.
-It is this random rotation operation that gives this MPCD variant the name Stochastic Rotation Dynamics (SRD). 
+The original implementation of MPCD is known as Stochastic Rotation Dynamics (SRD) **TODO: cite**.
+Translating to modern terminology, SRD's collision operator :math:`\vec\Xi` choses a random axis, around which it performs
+a rotation through an angle :math:`\theta`. This is done by conservating energy, preserving isotropy and the Maxwell Boltzmann velocity distribution in the continuum limit.
+This random rotation is what gives its this MPCD variant its name: Stochastic Rotation Dynamics (SRD). 
 
-More formally, in SRD the collision operator is
+More formally, the SRD the collision operator is
 
 .. math:: 
     :name: eq:SRD
@@ -27,9 +27,9 @@ More formally, in SRD the collision operator is
         \vec{v}_i(t) - \vec{v}_{cm}(t)    
     \right)
 
-where :math:`\Omega_\theta` is a rotation tensor through an angle :math:`\theta` about a given axis, and :math:`\vec{v}_{cm}` is the center of mass velocity of the particles in the collision cell.
+in which :math:`\Omega_\theta` is a rotation tensor through an angle :math:`\theta` about a given axis, and :math:`\vec{v}_{cm}` is the center of mass velocity of the particles in the collision cell.
 
-To be specific, the rotation tensor :math:`\Omega_\theta` is defined as
+Being a 3D rotation tensor, :math:`\Omega_\theta` is defined as
 
 .. math:: 
     :name: eq:SRD_rotation_tensor
@@ -39,23 +39,20 @@ To be specific, the rotation tensor :math:`\Omega_\theta` is defined as
             n_x^2+(1-n_x^2)\cos\theta & n_xn_y\left(1 - \cos\theta\right)-n_z \sin\theta & n_xn_z\left(1-\cos\theta\right)+n_y \sin\theta \\
             n_xn_y \left(1 - \cos\theta\right)+n_z \sin\theta & n_y^2 + \left(1-n_y^2\right)\cos\theta & n_yn_z \left(1 - \cos\theta\right)-n_x \sin\theta \\
             n_xn_z\left(1 - \cos\theta\right)-n_y \sin\theta & n_yn_z\left(1 - \cos\theta\right)+n_x \sin\theta  &n_z^2 + \left(1-n_z^2\right)\cos\theta 
-        \end{pmatrix}. 
+        \end{pmatrix}, 
     \end{align}
-
-where the vector :math:`\vec{\hat{n}} = [n_x, n_y, n_z]` defines a unit vector representing the axis of rotation.
+in which the vector :math:`\hat{n} = [n_x, n_y, n_z]` defines a unit vector representing the axis of rotation.
 
 **TODO: SRD schematic from Tyler's thesis**
 
-This version of SRD where :math:`\vec{\hat{n}}` is chosen from the unit sphere is implemented with a keycode of ``0``. 
+The version of SRD in where :math:`\hat{n}` is chosen from the unit sphere is implemented with a keycode of ``0``. 
 To use it add the following to your input ``.json`` file:
 
 .. code-block:: console
 
     "collOp": 0
 
-However, it is found that it is sufficient to choose the axis of rotation :math:`\vec{\hat{n}}` randomly from the the cartesian axes. 
-ie, :math:`\vec{\hat{n}} = [1, 0, 0]`, :math:`[0, 1, 0]` or :math:`[0, 0, 1]`.
-This is quicker, and in bulk is sufficient to reproduce a fluid with the correct hydrodynamic properties **TODO: cite**.
+However, in order to reproduce in bulk a fluid with the correct hydrodynamic properties, it is sufficient to choose the axis of rotation :math:`\vec{\hat{n}}` randomly from the cartesian axes, i.e., :math:`\vec{\hat{n}} = [1, 0, 0]`, :math:`[0, 1, 0]` or :math:`[0, 0, 1]`, which increases the efficiency of the algorithm.
 
 This version of SRD is implemented with a keycode of ``1``.
 To use it add the following to your input ``.json`` file:
@@ -64,7 +61,7 @@ To use it add the following to your input ``.json`` file:
 
     "collOp": 1
 
-It is possible to verify that momentum and energy are conserved before and after collision by explicitly computing the them.
+It is possible to verify that momentum and energy are conserved before and after collision by explicitly computing them.
 
 .. _Andersen:
 
@@ -72,28 +69,25 @@ Andersen-thermostatted MPCD
 ===========================
 While SRD is sufficient for some applications, it is not without its drawbacks:
 
-- The SRD collision operator does not generally conserve angular momentum, as the positions of particles within the cell are not considered.
-- An explicit external thermostat is required to control the system energy when external forces or activity is applied.
+- The SRD collision operator does not generally conserve angular momentum, as it does not consider the positions of particles within the cell.
+- An explicit external thermostat is required to control the system energy when external forces or activity are applied.
 
-Following other mesoscale simulation techniques, such as DPD, where a thermostat is included intrisically as part of the simulation technique, thermostats have been incoroporated into MPCD collision operators.
-That is, :math:`\vec\Xi` is both the collision operator, and a local thermostat for the cell, such that no velocity rescaling techniques are necessary.
+Following other mesoscale simulation techniques, such as DPD, where a thermostat is included intrinsically as part of the simulation technique, thermostats have been incoroporated into MPCD collision operators.
+That is, :math:`\vec\Xi` acts both as the collision operator and a local thermostat for the cell, such that no velocity rescaling techniques are necessary.
 
-The primary thermostatted collision operator of use in this simulator is the Andersen thermostatted collision operator **TODO: cite**.
-This collision operator is defined as
+The primary thermostatted collision operator in this simulator is the Andersen thermostatted collision operator **TODO: cite**, defined as
 
 .. math:: 
     :name: eq:AndersenOp
 
     \vec{\Xi}_i^\mathrm{A}(t) = 
     \vec\xi_i -
-    \frac{\sum_j^{N_C} m_j \vec\xi_j}{\sum_j^{N_C} m_j}
+    \frac{\sum_j^{N_C} m_j \vec\xi_j}{\sum_j^{N_C} m_j},
+in which each component of :math:`\vec\xi_i` is randomly generated from a Gaussian distribution with variance :math:`\sqrt{k_B T/ m}`.
 
-where each component of :math:`\vec\xi_i` is randomly generated from a Gaussian distribution with variance :math:`\sqrt{k_B T/ m}`.
-
-The final term in :ref:`the Andersen collision operator <eq:AndersenOp>` is often referred to simply as the residual, and denoted :math:`\langle \vec\xi_j \rangle_{N_C}`. 
+The final term in :ref:`the Andersen collision operator <eq:AndersenOp>` is referred to as the residual, and denoted :math:`\langle \vec\xi_j \rangle_{N_C}`. 
 Each fluid particle in a given cell is assigned a new, randomly chosen velocity during each collision.
-However, the presence of the residual means that each particle's velocity is the cell’s centre of mass velocity plus its new randomly assigned value, minus the average of all the new random values for that cell.
-This ensures that the center of mass velocity of each cell does not change during collision, and thus momentum is conserved.
+However, the presence of the residual means that each particle's velocity is a new randomly assigned value, minus the mass weighted velocity of all the new random values for that cell. This ensures that the center of mass velocity of each cell does not change during collision, ensuring moomentum conservation.
 
 .. list-table:: 
     :header-rows: 0
@@ -125,11 +119,11 @@ To use it, add the following to your input ``.json`` file:
     "collOp": 2
 
 Note that the :ref:`the basic Andersen collision operator <eq:AndersenOp>` conserves mass and translational momentum, but not angular momentum (or energy, as it is thermostatted).
-However, it can be extended to do so: The basic Andersen collision operator introduces a small change in angular momentum every timestep, which we can denote :math:`\delta \vec{L}`. 
+However, it can be extended to do so. The basic Andersen collision operator introduces a small change in angular momentum every timestep, which we denote :math:`\delta \vec{L}`. 
 This can be cancelled out by applying a small counter-rotation to each particle, such that the total angular momentum change is zero.
-If the particles in the cell have a given intertia tensor :math:`I` about the center of mass, then the counter-rotation required will be :math:`\vec \omega = I \cdot \delta \vec{L}`.
+If the particles in the cell have a given intertia tensor :math:`I` about the center of mass, then the required counter-rotation required is :math:`\vec \omega = I^{-1} \cdot \delta \vec{L}`.
 
-A term can be added to the Andersen collision operator that performs this counter-rotation, as such:
+This correction is done by adding an extra term to the Andersen collision operator that performs this counter-rotation
 
 .. math:: 
     :name: eq:AndersenOpAngular
@@ -138,12 +132,14 @@ A term can be added to the Andersen collision operator that performs this counte
     \vec\xi_i -
     \langle \vec\xi_j \rangle_{N_C} +
     \left[
-        I \cdot \left(
+        I^{-1} \cdot \left(
             \sum_j^{N_C} m_j \left\lbrace
                 \vec{x}'_j \times (\vec{v}_j - \vec\xi_j)
             \right\rbrace
         \right)
-    \right] \times \vec{x}'_j
+    \right] \times \vec{x}'_j,
+
+in which \vec{x}'_j denotes the position of the particle with respect to the cell's cooridnate center of mass. 
 
 .. note:: 
     The angular-conserving Andersen thermostatted collision operator above is the default, and preferred, collision operator in this MPCD simulator for traditional fluids.
