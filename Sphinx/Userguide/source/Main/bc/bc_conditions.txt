@@ -35,15 +35,12 @@ For a property :math:`\vec{f}_i (t)`, the rules have the following form
 .. math::
     :name: eq:bcoperators2
 
-    \vec{f}_i(t>t^*) \: \text{+=} \: M_{f,\hat{\nu}} (\hat{\nu}\cdot\vec{f}_i(t<t^*)) \hat{\nu}
+    \vec{f}_i(t>t^*) \: \text{+=} \: M_{f,\hat{\nu}} \vec{f}_{i,\hat{\nu}}(t<t^*)
 
 where :math:`\hat{\nu}` are implemented as each of the cartesian axes :math:`\hat{x},\hat{y},\hat{z}`, the local surface normal :math:`\hat{n}` and the local surface tangent :math:`\hat{t}`.
 The properties before and after the boundary rules are applied are :math:`\vec{f}_i(t<t^*)` and :math:`\vec{f}_i(t>t^*)`.
-The shift operator EQUATION is an additive shift on vector :math:`\vec{f}_i` in direction :math:`\hat{\nu}` with magnitude :math:`D_{f,\hat{\nu}}`.
-and :math:`M_{f,\hat{\nu}}` is a multiplier of the projection of components :math:`\vec{f}_i(t<t^*)` in direction :math:`\hat{\nu}`.
-
-WRITE SOMEWHERE THAT THE TANGENT IS NU = (1-NORMAL).
-PLEASE CAN SOMEONE CHECK THIS.
+The shift operator :ref:`(19) <eq:bcoperators1>` is an additive shift on vector :math:`\vec{f}_i` in direction :math:`\hat{\nu}` with magnitude :math:`D_{f,\hat{\nu}}`.
+and :ref:`(20) <eq:bcoperators2>` is a scalar multiplier :math:`M_{f,\hat{\nu}}` on the projection :math:`\vec{f}_{i,\hat{\nu}}` of the property :math:`\vec{f}_i` in the direction :math:`\hat{\nu}`.
 
 Examples
 ^^^^^^^^
@@ -134,9 +131,6 @@ or tangential with the boundary (planar).
 
   EXAMPLE OF USE
 
-TALK ABOUT THE ANCHORING TORQUE BEING EITHER DISSIPATED WITH THE BOUNDARY OR CONSERVED.
-LINK TO BENJAMINS SECTION
-
 Boundary corrections
 --------------------
 
@@ -169,6 +163,15 @@ from a Maxwell Boltzmann distribution about zero but with a variance of :math:`N
 
 REFERENCE PAPERS FOR THIS
 
+Ghost particles are turned on for each boundary through the ``phantom`` tag.
+::
+
+    "BC":
+        [
+            "phantom":      1,          "this is 0 for off and 1 for on"
+        ]
+
+
 Strong anchoring
 ^^^^^^^^^^^^^^^^
 
@@ -177,4 +180,10 @@ the cell director :math:`\hat{n}_c` mixes between the anchored and un-anchored o
 The effective anchoring strength is therefore heavily dependent on the proportion :math:`N_{c*} / N_c`, with strongest anchoring acheived when :math:`N_{c*} = N_c`.
 To strengthen the effective anchoring, we apply the orientation boundary condition to all :math:`N_c` particles.
 
-THE TORQUE APPLIED IS CONSERVED WITH THE BOUNDARY. IF NOT, THE BOUNDARY ABSORBS IT.
+Strong anchoring is turned on for each boundary through the ``phantom`` tag.
+::
+
+    "BC":
+        [
+            "phantom":      1,          "this is 0 for off and 1 for on"
+        ]

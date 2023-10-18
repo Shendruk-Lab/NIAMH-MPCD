@@ -1,3 +1,4 @@
+.. _subsection_boundarysurfaces:
 
 .. include:: BC/bc_overview.txt
 
@@ -5,6 +6,8 @@ Surfaces
 ========
 
 .. include:: BC/bc_surfaces.txt
+
+.. _subsection_boundaryrules:
 
 Boundary rules
 ==============
