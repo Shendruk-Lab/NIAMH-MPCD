@@ -1,0 +1,168 @@
+This tutorial will show how to run a MPCD simulation confined within an impermeable cylinder. It is 
+
+* an isotropic fluid
+* in 3D
+* with no flow or external forces
+* and no solutes
+* contained within a cylinder along x direction with 
+    * periodic boundary conditions at both ends
+    * perfect slip at walls
+
+
+Input File
+==========
+
+::
+
+    {
+        "comment":          "cuboid geometry",
+        "domain":           [20, 10, 10],
+        "comment":          "To have PBCs at walls of the cuboid geometry on top of a cylider within this geometry",
+        "domainWalls":      1,
+        "simSteps":         500,
+        "comment":          "Isotropic fluid using Andersen MPCD",
+        "collOp":           2,
+        "species":
+        [
+            {
+                "comment":     "The total number of particles in a cylider = \pi * r^2 * L * 20",
+                "pop":         20106
+            }
+        ],
+        "debugOut":         3,
+        "flowOut":          20,
+        "energyOut":        0,
+        "synopsisOut":      1,
+        "comment":          "BC for a cylinder with two ends and impermeable, perfect-slip walls",
+        "BC":
+        [
+            {
+                "comment":      "Since the particle are transfering momentum to the walls",
+                "E":            1,
+                "comment":      "The position of the centeral axis of the cylinder in yz planes",
+                "Q":            [0, 5,5],
+                "aInv":         [0, 1, 1],
+                "rotSym":       [4, 4],
+                "abs":          0,
+                "P":            [2, 2, 2, 2],
+                "comment":      "The radius of the cylinder",
+                "R":            4,
+                "comment":      "The normal component of velocity is reversed",
+                "MVN":          -1,
+                "comment":      "The tangent component of velocity is kept what it was",
+                "MVT":          1,
+                "comment":      "To have the particles inside the cylinder",
+                "inv":          1
+            }
+        ]
+    }
+
+
+Understanding the Script
+========================
+
+Here is the breakdown of the input script.
+
+::
+
+    {
+        "comment":          "cuboid geometry",
+        "domain":           [20, 10, 10],
+        "comment":          "To have PBCs at walls of the cuboid geometry on top of a cylider within this geometry",
+        "domainWalls":      1,
+        "simSteps":         500,
+        "comment":          "Isotropic fluid using Andersen MPCD",
+        "collOp":           2,
+
+We first define the system size (:math:`20 \times 10 \times 10` in MPCd units). The `"domainWalls": 1,` is to add extra periodic boundary conditions on the domain walls, on top of the defined cylinder boundaries. Then it is specified how long the simulation will run and output data.  To have an Isotropic fluid the Andersen collision operator is used.
+
+::
+
+    "species":
+    [
+        {
+            "comment":     "The total number of particles in a cylider = \pi * r^2 * L * 20",
+            "pop":         20106
+        }
+    ],
+
+Here, we set the total number of particles inside the cylinder using the its volume and average number of particles in each MPCD cell. The radius of cylinder , :math:`r = 4` (it is enetred later in `BC` part) and its length, :math:`L = 20` (the length of the cuboid) :math:`\text{pop} = \pi r^2L * 20 \approx 20106`.
+
+::
+
+    "debugOut":         3,
+    "flowOut":          20,
+    "energyOut":        0,
+    "synopsisOut":      1,
+
+We now define what things we want to write out during the simulation (see output for details). We use debugOut level 3. We write out the flow field every 20 timesteps. 
+We don't write out the energy in this example, but that can be turned on. We also include a synopsis file.
+::
+
+    "comment":          "BC for a cylinder with two ends and impermeable, perfect-slip walls",
+    "BC":
+    [
+        {
+            ..
+        }
+    ]
+Now we define BC. (See Boundary Conditions for more details) Remember, that this needs to be between [].
+
+::
+
+            "E":            1,
+
+Since particles are transferring momentum to the walls .
+
+Before going into details lets see how a cylinder could be defined. The following equation can be adapted to define a 3D cylinder.
+
+.. _shape:
+
+.. math::
+
+    a(x - x_c )^p + b(y - y_c )^p + c(z - z_c )^p = r^p
+
+For example, for a cylinder that is along the x axis (its base circle C lying in the yz-plane), and is centered at :math:`(0, y_c, z_c)` and has radius :math:`r` is can be written as 
+
+.. math::
+
+    (y - y_c )^2 + (z - z_c )^2 = r^2
+
+So now we need to define the base circle of our cylinder and it is radius. Q is the coordinates of the center of this base circle that lies in the yz-plane , R is the radius and P is the power in the :ref:`aforementioned equation <shape>`. And `aInv = [a,b,c]`.
+
+::
+            "Q":            [0, 5, 5],
+            "aInv":         [0, 1, 1],
+            "P":            [2, 2, 2, 2],
+            "R":            4,
+
+The next part deals with how the velocity of particles changhes when the collide with the wall. In this case to creat the perfect slip boundary conditions just the normal component is reversed.
+
+::
+            "comment":      "The normal component of velocity is reversed",
+            "MVN":          -1,
+            "comment":      "The tangent component of velocity is kept what it was",
+            "MVT":          1,
+
+And finally to have the particles inside this volume 
+
+::
+
+            "inv":          1
+
+The end of the input file
+
+::
+
+    }
+
+
+
+Running
+=======
+
+This script can be run with 
+
+::
+
+    /<directory>/MPCD/mpcd.out -i <directory>/MPCD/SampleInputs/3DCylinder/input.json <directory>/MPCD/3DCylinder/<OUTPUT>

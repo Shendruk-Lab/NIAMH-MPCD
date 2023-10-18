@@ -1,0 +1,42 @@
+{
+    "comment":          "cuboid geometry",
+    "domain":           [20, 10, 10],
+    "comment":          "To have PBCs at walls of the cuboid geometry on top of a cylider within this geometry",
+    "domainWalls":      1,
+    "simSteps":         500,
+    "comment":          "Isotropic fluid using Andersen MPCD",
+    "collOp":           2,
+    "species":
+    [
+        {
+            "comment":     "The total number of particles in a cylider = pi * r^2 * L * 20",
+            "pop":         20106
+        }
+    ],
+    "debugOut":         3,
+    "flowOut":          20,
+    "energyOut":        0,
+    "synopsisOut":      1,
+    "comment":          "BC for a cylinder with two ends and impermeable, perfect-slip walls",
+    "BC":
+    [
+        {
+            "comment":      "Since the particle are transfering momentum to the walls",
+            "E":            1,
+            "comment":      "The position of the centeral axis of the cylinder in yz planes",
+            "Q":            [0, 5,5],
+            "aInv":         [0, 1, 1],
+            "rotSym":       [4, 4],
+            "abs":          0,
+            "P":            [2, 2, 2, 2],
+            "comment":      "The radius of the cylinder",
+            "R":            4,
+            "comment":      "The normal component of velocity is reversed",
+            "MVN":          -1,
+            "comment":      "The tangent component of velocity is kept what it was",
+            "MVT":          1,
+            "comment":      "To have the particles inside the cylinder",
+            "inv":          1
+        }
+    ]
+}

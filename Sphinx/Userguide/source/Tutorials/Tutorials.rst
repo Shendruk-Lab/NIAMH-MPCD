@@ -35,3 +35,8 @@ Dumbbell swimmers
 ******************
 
 .. include:: ActiveNematic/ActiveNematic.txt
+
+3D cylinder
+***********
+
+.. include:: 3DCylinder.txt
