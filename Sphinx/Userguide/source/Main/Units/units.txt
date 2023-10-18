@@ -1,6 +1,7 @@
-Measurements in this simulator are only relevant when compared to a few global values, described :ref:`here <set_values>`. In the :ref:`following subsection <theFollowingSubsection>`, these units
-are combined to describe the natural units of the other main observables. In order to compare results with experiments or to identify operating 
-regimes, measurements can be combined into dimensionless numbers: this process is described in the :ref:`last paragraph of this section <dimensionlessNumbers>`.
+Measurements in this simulator are only relevant when compared to a few global values, described the :ref:`fundamental units <set_values>`. 
+In the :ref:`derived units section <derivedUnits>`, these units are combined to describe the natural units of the other main observables.
+In order to compare results with experiments or to identify operating regimes, measurements can be combined into dimensionless numbers: this
+process is described in the :ref:`dimensionless numbers paragraph <dimensionlessNumbers>`.
 
 .. _set_values:
 
@@ -16,13 +17,13 @@ Fundamental units
 
 Since these define every other unit, they are set to one for convenience.
 
-.. _theFollowingSubsection:
+.. _derivedUnits:
 
 Derived units
 =============
 
 **Time**: Derived from the equipartition theorem: :math:`a\sqrt{\frac{m}{k_B T}}`. Hereafter referred to as [τ]. An important quantity it defines is
-the timestep, dt, which is described in :ref:`the introduction chapter <streaming>`.
+the timestep, δt, which is described in :ref:`the introduction chapter <streaming>`.
 
 **Velocity**: Length divided by time, so [v]= :math:`\sqrt{\frac{k_B T}{m}}`.
 
@@ -46,7 +47,8 @@ the timestep, dt, which is described in :ref:`the introduction chapter <streamin
 **Viscosity**: Pressure multiplied by time, so [μ] = :math:`\frac{\sqrt{k_B T m}}{a^{d-1}}`. Changing the timestep will result in a 
 change in effective viscosity. See :ref:`this section <ViscositySection>` for more details.
 
-**Coupling to the mean free potential**: Energy divided by two space derivatives, so [K]= :math:`\frac{k_B T}{a^{d-2}}`.  
+**Coupling to the mean field potential**: Energy divided by two space derivatives, so [U]= :math:`\frac{k_B T}{a^{d-2}}`. Used for nematic MPCD,
+see :ref:`this section <NematicSection>` for more details.
 
 **Bending potential**: Bending energy divided by cosine squared of the bending angle, so [k :sub:`b`]= :math:`k_B T`. 
 
