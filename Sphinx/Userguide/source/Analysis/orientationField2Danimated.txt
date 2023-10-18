@@ -1,1 +1,51 @@
-orientationField2Danimated
+**TODO: write intro**
+
+Command to run
+==============
+
+::
+
+    python3 analysisScripts/orientationField2Danimated.py [dataname] [inputname] [start] [finish] [avdim] --qx [qx] -- qy [qy] -c [length] -a [aspect ratio] -k [keep frames] -d [defect data]
+
+Most arguments are described in the :ref:`common <ConsistentArguments>` section. The exceptions are as follows:
+
+- ``qx``:
+    (Optional, default ``1``) 
+    How frequently to draw director arrows in the x direction.
+- ``qy``:
+    (Optional, default ``1``) 
+    How frequently to draw director arrows in the y direction.
+- ``length``:
+    (Optional, default ``0.5``) 
+    Length of the director lines.
+- ``defect data``:
+    (Optional, default ``""``) 
+    Path to a topological charge field data file.
+    If unset, or set to ``""``, then no defects will be drawn.
+    Otherwise, attempt to load and then draw defects from file.
+
+Outputted files
+===============
+
+A video called 2Dorientation_animation.mp4. 
+If ``-k`` is set to 1, then every frame of the movie will be kept as a png file titled ``frameNNNN.png``.
+
+For illustration purposes, the output of the script on a single simulation is shown below.
+One snapshot is without defects rendered, and the other is with defects rendered.
+
+.. list-table:: 
+    :header-rows: 0
+    :widths: 50 50
+    :align: center
+
+    * - .. figure:: ./orientationField.png
+            :width: 95%
+            :align: center
+
+            Snapshot of an active-nematic simulation without defects rendered
+      - .. figure :: ./orientationField-defects.png
+            :width: 95%
+            :align: center
+
+            Snapshot of an active-nematic simulation with defects rendered
+    
