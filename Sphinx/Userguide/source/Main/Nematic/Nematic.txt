@@ -1,4 +1,5 @@
 .. _NematicSection:
+
 Passive nematics
 =================
 
@@ -147,28 +148,63 @@ The free energy associated to this effect is given by
 
 in where :math:`B` is the magnitude of the magnetic field, :math:`\varepsilon` is the angle between the nematogen's orientation and the magnetic field and :math:`\chi_M` is a magnetic susceptibility which sets the strength of this effect.
 
+.. _ActiveNematic:
+
 Active nematic MPCD
 ===================
 
-Active nematics inject energy into the system at the particle level. In wet systems, as the ones considered so far, they do so while conserving momentum, behaving as force dipoles. The active nematic MPCD algorithm achieves this at the mesoscale level, i.e., at the level of MPCD cells, by adding an active term to the nematic velocity collision operator so it introduces a force dipole that co-aligns with the cell director :math:`\vec{n}_c` [Kozhukhov2022]_
+Active nematics inject energy into the system at the particle level. 
+In wet systems, as the ones considered so far, they do so while conserving momentum, behaving as force dipoles. 
+The active nematic MPCD algorithm achieves this at the mesoscale level, i.e., at the level of MPCD cells, by adding an active term to the nematic velocity collision operator so it introduces a force dipole that co-aligns with the cell director :math:`\vec{n}_c` [Kozhukhov2022]_. 
+
+In order to induce force dipoles, a planar collision operator is applied to the nematic particles in the cell:
+A plane normal to the cell's director, :math:`\vec{n}_C`, is placed at the cell center of mass.
+Particles forward of the plane get a kick forward, and particles backward of the plane get a kick backward.
+
+.. list-table:: 
+    :header-rows: 0
+    :widths: 50 50
+    :align: center
+
+    * - .. image:: ./Nematic/ActivityDiagram-0.png
+            :width: 95%
+            :align: center
+      - .. image:: ./Nematic/ActivityDiagram-1.png
+            :width: 95%
+            :align: center
+    * - **(a)** Bin MPCD particles into cells.
+      - **(b)** Place a plane normal to the cell director at the cell center of mass.
+    * - .. image:: ./Nematic/ActivityDiagram-2.png
+            :width: 95%
+            :align: center
+      - .. image:: ./Nematic/ActivityDiagram-3.png
+            :width: 95%
+            :align: center
+    * - **(c)** For each MPCD particle forward of the plane, give a kick forward, and vica-versa.
+      - **(d)** Apply kicks to the post-nematic velocity collision.
+
+This is sufficient to reproduce a local force dipole within each cell. 
+Furthermore, the positioning of the plane ensures that this operation conserves linear momentum, despite the local injection of energy. 
+
+Mathematically, this collision operation is expressed as:
 
 .. math::
-    \vec\Xi^A_{i,c} = \vec\Xi^N_{i,c} + \alpha_c\delta_t\left(\frac{\kappa_i}{m_i}-\left\langle\frac{\kappa_j}{m_j}\right\rangle_c\right)\vec{n}_c
+    :name: eq:ActiveNematicCollision
+
+    \vec{\Xi}_i^\mathrm{AN}(t) =
+    \vec{\Xi}_i^\mathrm{N}(t) +
+    \alpha_C \delta t \left( 
+        \frac{\kappa_i}{m_i} - \langle \frac{\kappa_j}{m_j} \rangle_C
+    \right)
+
+where :math:`\kappa_i=\pm1` represent whether a particle is forward or backward of the plane [Kozhukhov2022]_.
 
 The active contribution is then composed of two terms:
 
-The first term, :math:`\alpha_c\delta_t\left(\frac{\kappa_i}{m_i}\right)\vec{n}`, corresponds to the active force driving a change in momentum over \delta t. EXplicitly, it provides individual impulses (per unit mass) to each particle.
-
-The second term, :math:`-\alpha_c\delta_t\left\langle\frac{\kappa_j}{m_j}\right\rangle_c\vec{n}`, ensures the conservation of momentum inside the cell by removing any residual impulse.
+1. The first term, :math:`\alpha_c\delta_t\left(\frac{\kappa_i}{m_i}\right)\vec{n}`, corresponds to the active force driving a change in momentum over \delta t. EXplicitly, it provides individual impulses (per unit mass) to each particle.
+2. The second term, :math:`-\alpha_c\delta_t\left\langle\frac{\kappa_j}{m_j}\right\rangle_c\vec{n}`, ensures the conservation of momentum inside the cell by removing any residual impulse.
 
 In this regard, the philosophy behind this active term is similar to the one behind the usual passive Andersen collision operator. The difference comes through in that the impulses imparted to each particle are not random. Instead, they have a fixed strength, set by :math:`\alpha_c\delta t/m_i`, and are parallel or anti-parallel to the cell director :math:`\vec{n}_c`, thus directly coupling the orientational and translational degrees of freedom. 
-
-What determines whether an impulse is parallel or antiparallel to :math:`\vec{n}_c` is :math:`\kappa_i = \pm 1`. These coefficients are computed at each time step for every particle in the following manner: 
-
-i) The algorithm first computes the coordinates of the center of mass of each cell. 
-ii) Combining this information with the cell director, it establishes the equation of the plane perpendicular to the director that passes through the cell's center of mass.  This plane divides the cell into two halves. 
-iii) If a particle lies above this plane, it receives a forward impulse, that is, in the direction of the director (:math:`\kappa_i=+1`).  If, instead, the particle lies below this plane, it receives a backward impulse (anti-parallel to the director, :math:`\kappa_i=-1`).
-
 
 Variation on the strength of activity
 -------------------------------------
@@ -181,6 +217,9 @@ In the algorithm, particles individually carry an activity :math:`\alpha_i` --- 
 3. Modulated cell-carried activity --- 20
 4. Modulated particle-carried activity --- 21
 
+.. note:: 
+    For optimal density behaviour, we recommend using 
+    modulated particle-carried activity (collision operator ID 21).
 
 .. warning::
     Note: You can use :math:`\alpha_i < 0` to simulate contractile nematics, but only in a very limited regime. 
@@ -196,7 +235,11 @@ In this version of the collision operator, each particle is thought to carry its
 
 This implies that with this choice, the strength of the active impulses provided by the collision operator increases with the population of the cell. In general, this leads to large density fluctuations which reduce the operational regime of the algorithm and make it unsuitable to treat solutes such as colloids, swimmers and polymers.
 
-This active collision operator has the tag collOp: 16.  
+This is implemented with a keycode of ``16``, and can be used by adding the following to your input ``.json`` file:
+
+.. code-block:: console
+
+    "collOp": 16
 
 
 Cell-carried activity
@@ -212,8 +255,11 @@ In this version of the collision opertor, we interpret cell activity strength as
 making the cell activity strength largely independent of the cell's population. 
 In the particular case in which all particles have the same activity (for a example, a simulation with a single species), this makes the cell activity strength the same among all cells.
 
-This active collision operator has the tag  collOp: 17.  
+This is implemented with a keycode of ``17``, and can be used by adding the following to your input ``.json`` file:
 
+.. code-block:: console
+
+    "collOp": 17 
 
 Modulated particle-carried & cell-carried activity
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -224,21 +270,40 @@ The way in which this suprression takes place is through a modulation function, 
 
 .. math::
 
-    S_C = \frac{1}{2}\left(1-\tanh\left(\frac{N_c-\langle N_c\rangle (1+\sigma_P)}{\langle N_c\rangle \sigma_W}\right)\right),
+    S_C(N_C; \sigma_p, \sigma_w) = \frac{1}{2}\left(1-\tanh\left(\frac{N_c-\langle N_c\rangle (1+\sigma_P)}{\langle N_c\rangle \sigma_W}\right)\right),
 
-in where :math:`\sigma_P` and :math:`\sigma_W` are parameters that set at around which density the modulation takes place and over which range of densities it takes place, respectively. With this, the activity considered by these collision operators is:
+This modulation function takes the local cell number density, :math:`\rho_C`, and returns a values in the range :math:`[0, 1]` to modulate it.
+This is controlled by two parameters:
 
-* For Modulated cell carried activity: :math:`\alpha^{\text{MC}}_c = S_C\alpha^C_c` (tag  collOp: 20).
-* For Modulated particle carried activity: :math:`\alpha^{\text{MP}}_c = S_C\alpha^P_c` (tag  collOp: 21).
+- :math:`\sigma_p` is a decimale repesenting where the modulation function is centred relative, in units of mean density.
+- :math:`\sigma_w` is a decimal representing how wide the modulation drop-off should be, in units of the mean density.
 
+These are configured with species-based parameters ``"sigPos"`` and ``"sigWidth"`` in the input ``.json`` respectively.
 
+.. list-table:: 
+    :header-rows: 0
+    :align: center
 
+    * - .. image:: ./Nematic/ANModulationFn.png
+            :width: 95%
+            :align: center
+    * - A demonstration of the sigmoidal modulation function :math:`\mathcal{S}_C(\rho_C; \sigma_p, \sigma_w)`.
+        Here, :math:`\langle\rho_C\rangle=5` for illustration purposes, with :math:`\sigma_p=1` and :math:`\sigma_w=1`.
 
-.. warning::
-    The choice of active collision operator has big consequences on the degree of density fluctuations. For application in which this not desired, the recommended operator is Modulated cell carried activity (collOp: 20). This collision operator is well behaved with bare activities (tag act) of up to 0.3.
+This modulation function is then applied to each cells active force magnitude, giving two new formulations:
 
+- **Modulated cell-carried**: :math:`\alpha_C^\mathrm{MC} = \mathcal{S}_C(\rho_C) \alpha_C^\mathrm{C}`
+- **Sigmoidal-Sum**: :math:`\alpha_C^\mathrm{MP} = \mathcal{S}_C(\rho_C) \alpha_C^\mathrm{P}`
 
+These are implemented with keycodes ``20`` and ``21`` respectively, and can be used by adding the following to your input ``.json`` file:
 
+.. code-block:: console
+
+    "collOp": 20
+
+.. code-block:: console
+
+    "collOp": 21
 
 
 Inputs for nematic MPCD

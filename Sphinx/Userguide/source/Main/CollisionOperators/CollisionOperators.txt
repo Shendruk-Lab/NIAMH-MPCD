@@ -41,6 +41,7 @@ Being a 3D rotation tensor, :math:`\Omega_\theta` is defined as
             n_xn_z\left(1 - \cos\theta\right)-n_y \sin\theta & n_yn_z\left(1 - \cos\theta\right)+n_x \sin\theta  &n_z^2 + \left(1-n_z^2\right)\cos\theta 
         \end{pmatrix}, 
     \end{align}
+
 in which the vector :math:`\hat{n} = [n_x, n_y, n_z]` defines a unit vector representing the axis of rotation.
 
 A visual description of the algorithmic implementation of the SRD collision operator is shown below.
@@ -111,6 +112,7 @@ The primary thermostatted collision operator in this simulator is the Andersen t
     \vec{\Xi}_i^\mathrm{A}(t) = 
     \vec\xi_i -
     \frac{\sum_j^{N_C} m_j \vec\xi_j}{\sum_j^{N_C} m_j},
+    
 in which each component of :math:`\vec\xi_i` is randomly generated from a Gaussian distribution with variance :math:`\sqrt{k_B T/ m}`.
 
 The final term in :ref:`the Andersen collision operator <eq:AndersenOp>` is referred to as the residual, and denoted :math:`\langle \vec\xi_j \rangle_{N_C}`. 
@@ -182,167 +184,5 @@ To use it, add the following to your input ``.json`` file:
 .. note:: 
     The angular-conserving Andersen thermostatted collision operator is the basis used for the :ref:`Nematic MPCD <chapter8>` algorithm.
 
-.. _ActiveNematic:
-
-Active nematic MPCD
-===================
-
-.. error:
-    Tim's note: This is going to get spliced into Benjamin's nematic section!
-
-.. warning:: 
-    The Active-nematic MPCD algorithm relies on liquid crystal mode being enabled. See the section on :ref:`Nematic MPCD <chapter8>` for more information.
-
-    This can be enabled by adding the following to your input ``.json`` file:
-    
-    .. code-block:: console
-
-        "lc": 1
-
-The simulator also has the capability to simulate active-nematic fluids [Kozhukhov2022]_.
-This builds on the :ref:`Nematic MPCD collision operator <eq:NematicCollision>`, henceforth referred to as :math:`\vec\Xi^\mathrm{N}`.
-
-The fundamental requirement for a nematic to be turned into an active-nematic is the presence of local force dipoles. 
-In order to induce these, a planar collision operator is applied to the nematic particles in the cell:
-A plane normal to the cell's director, :math:`\vec{n}_C`, is placed at the cell center of mass.
-Particles forward of the plane get a kick forward, and particles backward of the plane get a kick backward.
-
-.. list-table:: 
-    :header-rows: 0
-    :widths: 50 50
-    :align: center
-
-    * - .. image:: ./CollisionOperators/ActivityDiagram-0.png
-            :width: 95%
-            :align: center
-      - .. image:: ./CollisionOperators/ActivityDiagram-1.png
-            :width: 95%
-            :align: center
-    * - **(a)** Bin MPCD particles into cells.
-      - **(b)** Place a plane normal to the cell director at the cell center of mass.
-    * - .. image:: ./CollisionOperators/ActivityDiagram-2.png
-            :width: 95%
-            :align: center
-      - .. image:: ./CollisionOperators/ActivityDiagram-3.png
-            :width: 95%
-            :align: center
-    * - **(c)** For each MPCD particle forward of the plane, give a kick forward, and vica-versa.
-      - **(d)** Apply kicks to the post-nematic velocity collision.
-
-This is sufficient to reproduce a local force dipole within each cell. 
-Furthermore, the positioning of the plane ensures that this operation conserves linear momentum, despite the local injection of energy. 
-
-Mathematically, this collision operation is expressed as:
-
-.. math:: 
-    :name: eq:ActiveNematicCollision
-
-    \vec{\Xi}_i^\mathrm{AN}(t) =
-    \vec{\Xi}_i^\mathrm{N}(t) +
-    \alpha_C \delta t \left( 
-        \frac{\kappa_i}{m_i} - \langle \frac{\kappa_j}{m_j} \rangle_C
-    \right)
-
-where :math:`\kappa_i=\pm1` represent whether a particle is forward or backward of the plane [Kozhukhov2022]_.
-
-The magnitude of the kicks, ie the active energy input :math:`\alpha_C`, has 4 different formulations:
-
-1. **Active-Sum**
-2. **Active-Average**
-3. **Sigmoidal-Average**
-4. **Sigmoidal-Sum**
-
-These are described in the sub-sections below.
-
-.. note:: 
-    For optimal density behaviour, we recommend using Sigmoid-Sum in the general case.
-
-.. _ActiveSum:
-
-Active-sum
-----------
-
-Active-Sum is the simplest formulation, and is akin to a "particle-carried activity" [Kozhukhov2022]_.
-The activity of every particle within the cell is summed, and a kick of this magnitude is then applied to every particle. ie:
-
-.. math::
-
-    \alpha_C^\mathrm{Sum} = \sum_j^{N_C} \alpha_j
-
-This is implemented with a keycode of ``16``, and can be used by adding the following to your input ``.json`` file:
-
-.. code-block:: console
-
-    "collOp": 16
-
-.. _ActiveAv:
-
-Active-average
---------------
-
-In contrast to active-sum, with "particle-carried activity", active-average instead has "cell-carried activity" [Kozhukhov2023]_.
-Mathematicaly, the sum of particle activities within a cell is averaged, which is then applied as an active force magnitude to every particle. 
-ie:
-
-.. math:: 
-
-    \alpha_C^\mathrm{Av} = \frac{1}{N_C} \sum_j^{N_C} \alpha_j
-
-This leads to smaller active forces than active-sum, resulting in less severe density fluctuations while still maintaining active nematic scaling laws [Kozhukhov2023]_.
-
-This is implemented with a keycode of ``17``, and can be used by adding the following to your input ``.json`` file:
-
-.. code-block:: console
-
-    "collOp": 17
-
-.. _SigmoidalANMPCD:
-
-Sigmoidally modulated active-nematic MPCD
------------------------------------------
-
-In an effort to reduce the density fluctuations seen in Active-Sum and Active-Average, the code implements a density modulated active-nematic MPCD algorithm [Kozhukhov2023]_.
-A sigmoidally shaped modulation function is used
-
-.. math:: 
-
-    \mathcal{S}_C(\rho_C; \sigma_p, \sigma_w) = 
-    \frac{1}{2}
-    \left(
-        1 - \tanh \left(
-            \frac{\rho_C - \langle\rho_C\rangle_{N_C} \left( 1 + \sigma_p \right)}{\langle\rho_C\rangle_{N_C} \sigma_w}
-        \right)
-    \right)
-
-This modulation function takes the local cell number density, :math:`\rho_C`, and returns a values in the range :math:`[0, 1]` to modulate it.
-This is controlled by two parameters:
-
-- :math:`\sigma_p` is a decimale repesenting where the modulation function is centred relative, in units of mean density.
-- :math:`\sigma_w` is a decimal representing how wide the modulation drop-off should be, in units of the mean density.
-
-These are configured with species-based parameters ``"sigPos"`` and ``"sigWidth"`` in the input ``.json`` respectively.
-
-.. list-table:: 
-    :header-rows: 0
-    :align: center
-
-    * - .. image:: ./CollisionOperators/ANModulationFn.png
-            :width: 95%
-            :align: center
-    * - A demonstration of the sigmoidal modulation function :math:`\mathcal{S}_C(\rho_C; \sigma_p, \sigma_w)`.
-        Here, :math:`\langle\rho_C\rangle=5` for illustration purposes, with :math:`\sigma_p=1` and :math:`\sigma_w=1`.
-
-This modulation function is then applied to each cells active force magnitude, giving two new formulations:
-
-- **Sigmoidal-Average**: :math:`\alpha_C = \mathcal{S}_C(\rho_C) \alpha_C^\mathrm{Av}`
-- **Sigmoidal-Sum**: :math:`\alpha_C = \mathcal{S}_C(\rho_C) \alpha_C^\mathrm{Sum}`
-
-These are implemented with keycodes ``20`` and ``21`` respectively, and can be used by adding the following to your input ``.json`` file:
-
-.. code-block:: console
-
-    "collOp": 20
-
-.. code-block:: console
-
-    "collOp": 21
+.. note::
+    MPCD can also simulate active nematics using the :ref:`Active Nematic MPCD <ActiveNematic>` algorithm.
