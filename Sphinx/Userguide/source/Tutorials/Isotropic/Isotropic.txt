@@ -1,0 +1,315 @@
+
+This tutorial will show how to run the most basic MPCD simulation conceivable:
+
+* an isotropic fluid
+* in 2D
+* with no flow or external forces
+* and no solutes
+* contained within periodic boundary conditions.
+
+This is simply a thermalized fluid to introduce how the input files works for first time users. 
+
+This tutorial is based on the input file found in ``MPCD/SampleInputs/01_FirstSimulation_PassiveIsotropic2D/input.json``.
+
+Input File
+==========
+
+::
+
+    {
+        "comment":          "SIMULATION-SCALE INPUTS",
+        "comment":          "Small, square geometry --- Regardless of boundary conditions, you need to specify the simulation box size",
+        "domain":           [50, 50],
+        "comment":          "Number of simulation steps to perform in the simulation --- this is in iterations; not MPCD time units",
+        "simSteps":         1000,
+        "comment":          "Number of times steps to perform prior to outputting data --- this allows the system to reach equilibrium or steady state",
+        "warmUp":           0,
+        "comment":          "Isotropic fluid using Andersen MPCD",
+        "rTech":            2,
+        "comment":          "MPCD relies on generating random numbers. If need to repeat a simulation exactly can set random seed by hand. seed==0 generates a 'random' random seed",
+        "seed":            0,
+        "comment":          "FLUID PARTICLE SPECIES INPUTS",
+        "comment":          "All the information regarding the chemical species --- can have multiple species but commonly just one species",
+        "species":
+        [
+            {
+                "comment":      "dens is an alternative to pop for setting the average cell density. A density of 20 particles per MPCD cell is standard",    
+                "dens":         20,
+                "comment":      "An equivalent to the above line is ''pop': 50000', which would be need system included unaccessible volume like colloid interiors",
+                "comment":      "Mass of particles",
+                "mass":         1,
+                "comment":      "Initial velocity distribution --- MPCD quickly thermalizes due to thermostate. 0==isorandom; 4==Gaussian dist",
+                "vDist":        0
+            }
+        ],
+        "comment":          "All the above species information is the DEFAULT --- therefore, extreneous and could have left out",
+        "comment":          "BOUNDARY CONDITION INPUTS",
+        "c":                "BCs are four periodic boundary conditions (PBC) at the edges of the system box",
+        "BC":
+        [
+            {
+                "c":            "Left PBC",
+                "phantom":      0,
+                "comment":      "Position of BC",
+                "Q":            [0, 0, 0],
+                "comment":      "Direction/surface normal",
+                "aInv":         [1, 0, 0],
+                "comment":      "Power on terms --- 1==plane, 2==sphere or ellipsoid, etc",
+                "P":            [1, 1, 1, 1],
+                "comment":      "Constant term --- typically, radius for spheres",
+                "R":            0,
+                "comment":      "PBCs displace/shift/teleport the particles in the normal direction",
+                "DN":           50,
+                "comment":      "PBCs do NOT modify particle positions in the tangential direction",
+                "DN":           0,
+                "comment":      "PBCs do NOT modify particle velocity in either the normal or tangential directions --- MVN=multiplicative factor in normal direction; MVT=multiplicative factor in tangential direction",
+                "MVN":          1,
+                "MVT":          1
+            },
+            {
+                "c":            "Right PBC",
+                "phantom":      0,
+                "Q":            [50, 0, 0],
+                "aInv":         [-1, 0, 0],
+                "P":            [1, 1, 1, 1],
+                "R":            0,
+                "DN":           50,
+                "MVN":          1,
+                "MVT":          1
+            },
+            {
+                "c":            "Bottom wall",
+                "phantom":      1,
+                "Q":            [0, 0, 0],
+                "aInv":         [0, 1, 0],
+                "P":            [1, 1, 1, 1],
+                "R":            0,
+                "DN":           50,
+                "MVN":          1,
+                "MVT":          1
+            },
+            {
+                "c":            "Top wall",
+                "phantom":      1,
+                "Q":            [0, 50, 0],
+                "aInv":         [0, -1, 0],
+                "P":            [1, 1, 1, 1],
+                "R":            0,
+                "DN":           50,
+                "MVN":          1,
+                "MVT":          1
+            }
+        ],
+        "comment":          "The above is just PBCs and since this is a standard BC, all those lines could be replaced by just ``domainWalls':1' sets PBCs around the domain",
+        "comment":          "Furthermore, `adomainWalls':1' is the default so even that is extreneous and could have left out",
+        "comment":          "OUTPUTS",
+        "comment":          "There are very many things that can be outputted but you will never need all of the possible output, so specify what to output",
+        "comment":          "ALWAYS output a synopsis file so that you can check if the simulation is really what you thought it was",
+        "comment":          "Synopsis file also includes info like the viscosity of the fluid based on input parameters",
+        "synopsisOut":      1,
+        "comment":          "debugOut specifies how much information is writen to the terminal. When programming you might want lots, when running small, local, simulations you might want a little (like just writing the current time step; debugOut==3) but when running on a cluster/super computer you don't want any (debugOut==0)",
+        "debugOut":         3,
+        "comment":          "All other outputs are NOT outputted if zero. If not zero, then they output data at a frequency determined by their value",
+        "comment":          "Checkpointing dumps ALL simulation information so that the simulation can be restarted from a fail point. Only use for big, important simulations",
+        "checkpointOut":    0,
+        "comment":          "Output the average velocity every 10 iterations",
+        "avVelOut":         10,
+        "comment":          "Contributions to energy",
+        "energyOut":        10,
+        "comment":          "Standard deviation of density",
+        "densSDOut":        10,
+        "comment":          "Flow field --- notice that fields are much large data files than global values",
+        "flowOut":          50,
+        "comment":          "Pressure field",
+        "pressureOut":      0,
+        "comment":          "Histogram of velocities",
+        "histVelOut":       100,
+        "comment":          "Histogram of speed",
+        "histSpeedOut":     100,
+        "comment":          "Histogram of number of particles per cell",
+        "histNOut":         100,
+        "comment":          "Velocity-velocity autocorrelation function --- autocorrelation functions are costly to calculate so beware of including",
+        "velCorrOut":       100,
+        "comment":          "Velocity-velocity autocorrelation function",
+        "densCorrOut":      100
+    }
+
+Understanding the Script
+========================
+
+In this first script, many options are being included for the purpose of introducing them --- in future tutorials and when users create their own scripts, often default values will be used and so the arguments can be left out. 
+
+Here is the breakdown of the input script. 
+
+::
+
+    {
+        "comment":          "SIMULATION-SCALE INPUTS",
+
+The input arguments must all be contained between curly brackets ``{}``. 
+Arguments are given in quotation marks ``""``, followed by a colon ``:`` then the argument and concluded with a comma ``,`` to indicate that an subsequent argument will follow. 
+``"comment"`` is an example tag, which allows users to comment their input scripts, for their own reference. 
+If a given argument does not exist then the simulation will exit and give the warning
+
+::
+
+    JSON Read Warning: Found unrecognised json tag: commental. Tag will be ignored.
+    JSON Read Error: Errors found.
+
+Comments can be left using the tags ``"comment"``, ``"c"``, ``"//"``, or ``"#"``. 
+
+::
+
+        "domain":           [50, 50],
+
+The domain is set to :math:`50\times50`. 
+The dimensionality is determined to be 2D from the length of the domain array. 
+A 3D simulation of a :math:`50\times50\times50` domain would instead set 
+
+::
+
+        "domain":           [50, 50, 50],
+
+.. note:: 
+    Setting the domain for the simulation **does not** set the boundary conditions. 
+    Boundary conditions must be set independently, later in the ``.json`` file. 
+
+::
+
+        "simSteps":         1000,
+
+The number of simulations steps tells the simulation how many iterations to loop over. 
+
+.. note:: 
+    ``"simSteps"`` is in iterations/steps, **not the time in MPCD units** τ (see :ref:`Derived units <derivedUnits>`). 
+
+::
+
+        "warmUp":           0,
+
+The code can also run for warmup phase (for a number of iterations ``"warmUp"``) prior to the productions phase (of ``"simSteps"`` iterations). 
+In the warmup phase, the simulation runs but results are not outputted, allowing the simulation to achieve equilibrium or steady state prior to writing data. 
+
+::
+
+        "rTech":            2,
+
+Set the MPCD collision operator (see :ref:`Collision operators <chapterCollOp>`) one uses the tag ``"rTech"`` or ``"collOp"`` (which are aliases). 
+By choosing ``2`` here, the collision operator is being set to the basic Andersen thermostatted operator (see :ref:Andersen-thermostatted MPCD `<Andersen>`). 
+
+::
+
+        "seed":            0,
+
+Since the collision operators stochastically exchange properties between particles within the same cell, MPCD relies heavily on generating random numbers. 
+Setting ``"seed": 0`` generates a 'random' random seed by combing microseconds from the clock and the process id. 
+If one wishes to repeat a simulation exactly, they can set random seed by hand. 
+The seed used by a simulation is written to ``synopsis.dat`` (see :ref:`Outputs <Outputs>`). 
+
+::
+
+        "comment":          "FLUID PARTICLE SPECIES INPUTS",
+        "comment":          "All the information regarding the chemical species --- can have multiple species but commonly just one species",
+        "species":
+        [
+            {
+                "comment":      "dens is an alternative to pop for setting the average cell density. A density of 20 particles per MPCD cell is standard",    
+                "dens":         20,
+                "comment":      "An equivalent to the above line is ''pop': 50000', which would be need system included unaccessible volume like colloid interiors",
+                "comment":      "Mass of particles",
+                "mass":         1,
+                "comment":      "Initial velocity distribution --- MPCD quickly thermalizes due to thermostate. 0==isorandom; 4==Gaussian dist",
+                "vDist":        0
+            }
+        ],
+        "comment":          "All the above species information is the DEFAULT --- therefore, extreneous and could have left out",
+        "comment":          "BOUNDARY CONDITION INPUTS",
+        "c":                "BCs are four periodic boundary conditions (PBC) at the edges of the system box",
+        "BC":
+        [
+            {
+                "c":            "Left PBC",
+                "phantom":      0,
+                "comment":      "Position of BC",
+                "Q":            [0, 0, 0],
+                "comment":      "Direction/surface normal",
+                "aInv":         [1, 0, 0],
+                "comment":      "Power on terms --- 1==plane, 2==sphere or ellipsoid, etc",
+                "P":            [1, 1, 1, 1],
+                "comment":      "Constant term --- typically, radius for spheres",
+                "R":            0,
+                "comment":      "PBCs displace/shift/teleport the particles in the normal direction",
+                "DN":           50,
+                "comment":      "PBCs do NOT modify particle positions in the tangential direction",
+                "DN":           0,
+                "comment":      "PBCs do NOT modify particle velocity in either the normal or tangential directions --- MVN=multiplicative factor in normal direction; MVT=multiplicative factor in tangential direction",
+                "MVN":          1,
+                "MVT":          1
+            },
+            {
+                "c":            "Right PBC",
+                "phantom":      0,
+                "Q":            [50, 0, 0],
+                "aInv":         [-1, 0, 0],
+                "P":            [1, 1, 1, 1],
+                "R":            0,
+                "DN":           50,
+                "MVN":          1,
+                "MVT":          1
+            },
+            {
+                "c":            "Bottom wall",
+                "phantom":      1,
+                "Q":            [0, 0, 0],
+                "aInv":         [0, 1, 0],
+                "P":            [1, 1, 1, 1],
+                "R":            0,
+                "DN":           50,
+                "MVN":          1,
+                "MVT":          1
+            },
+            {
+                "c":            "Top wall",
+                "phantom":      1,
+                "Q":            [0, 50, 0],
+                "aInv":         [0, -1, 0],
+                "P":            [1, 1, 1, 1],
+                "R":            0,
+                "DN":           50,
+                "MVN":          1,
+                "MVT":          1
+            }
+        ],
+        "comment":          "The above is just PBCs and since this is a standard BC, all those lines could be replaced by just ``domainWalls':1' sets PBCs around the domain",
+        "comment":          "Furthermore, `adomainWalls':1' is the default so even that is extreneous and could have left out",
+        "comment":          "OUTPUTS",
+        "comment":          "There are very many things that can be outputted but you will never need all of the possible output, so specify what to output",
+        "comment":          "ALWAYS output a synopsis file so that you can check if the simulation is really what you thought it was",
+        "comment":          "Synopsis file also includes info like the viscosity of the fluid based on input parameters",
+        "synopsisOut":      1,
+        "comment":          "debugOut specifies how much information is writen to the terminal. When programming you might want lots, when running small, local, simulations you might want a little (like just writing the current time step; debugOut==3) but when running on a cluster/super computer you don't want any (debugOut==0)",
+        "debugOut":         3,
+        "comment":          "All other outputs are NOT outputted if zero. If not zero, then they output data at a frequency determined by their value",
+        "comment":          "Checkpointing dumps ALL simulation information so that the simulation can be restarted from a fail point. Only use for big, important simulations",
+        "checkpointOut":    0,
+        "comment":          "Output the average velocity every 10 iterations",
+        "avVelOut":         10,
+        "comment":          "Contributions to energy",
+        "energyOut":        10,
+        "comment":          "Standard deviation of density",
+        "densSDOut":        10,
+        "comment":          "Flow field --- notice that fields are much large data files than global values",
+        "flowOut":          50,
+        "comment":          "Pressure field",
+        "pressureOut":      0,
+        "comment":          "Histogram of velocities",
+        "histVelOut":       100,
+        "comment":          "Histogram of speed",
+        "histSpeedOut":     100,
+        "comment":          "Histogram of number of particles per cell",
+        "histNOut":         100,
+        "comment":          "Velocity-velocity autocorrelation function --- autocorrelation functions are costly to calculate so beware of including",
+        "velCorrOut":       100,
+        "comment":          "Velocity-velocity autocorrelation function",
+        "densCorrOut":      100
+    }
