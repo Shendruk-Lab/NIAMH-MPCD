@@ -156,13 +156,11 @@ Additional surface forms
 ------------------------
 
 MPCD boundaries are versatile and many possible surface geometries can be implemented.
-Two other types of in-built surfaces include wavy surfaces,
-and boundaries with higher rotational symmetries.
 
 Wavy surfaces
 ^^^^^^^^^^^^^
 
-WAVYPLANES, WAVYSPHERES and WAVYCYLINDERS can be created with surface equations :math:`S(\vec{x})=S^S(\vec{x})+S^W(\vec{x})`, combining standard surfaces :math:`S^{S}(\vec{x})` with a wavy component :math:`S^{W}(\vec{x})`.
+Modulated planes, spheres and cylinders can be created with surface equations :math:`S(\vec{x})=S^S(\vec{x})+S^W(\vec{x})`, combining standard surfaces :math:`S^{S}(\vec{x})` with a wavy component :math:`S^{W}(\vec{x})`.
 For a surface indexed by :math:`b`, wavy surfaces are implemented with the form
 
 .. math::
@@ -289,16 +287,3 @@ the orientation equations :math:`S_{b,1}(\vec{x})` and :math:`S_{b,2}(\vec{x})` 
         - .. image:: BC/bc_images/eggCartonCylinder.png
               :width: 95%
               :align: center
-
-Higher rotational surfaces
-^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-NEEDS TO BE WRITTEN UP
-
-REFERENCE THIS https://bsapubs.onlinelibrary.wiley.com/doi/epdf/10.3732/ajb.90.3.333
-
-I NEED TO EXPLAIN WHATS IMPLEMENTED FOR B, S
-
-EXAMPLES
-
-PICTURES
