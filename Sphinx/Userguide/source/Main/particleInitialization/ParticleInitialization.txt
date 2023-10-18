@@ -123,7 +123,7 @@ A friction coefficient to control hydrodynamics. in other words to go from wet t
 
 .. code-block:: console 
 
-    "damp":    <value>, 
+    "damp": <value>, 
 .. note::
 
   The default value is 0. 
@@ -136,8 +136,9 @@ Nematic fluid
 
 The MPC particles can be given nematic orientational symmetry, by setting 
 
-.. code-block:: lc 
-  "lc": 1
+.. code-block:: json 
+
+  "lc": 1,
 
 In that case, the following properties need to be initialized.
 
