@@ -1,0 +1,157 @@
+This tutorial will show how to simulate a 2D active nematic liquid crystal starting in an ordered state under periodic boundary conditions. Because of the active stress, the nematic will go through a bending instability, leading to the unbinding of topological defects and transitioning into active turbulence.
+
+Input file
+==========
+
+::
+
+    {
+        "comment":          "Square geometry",
+        "domain":           [50, 50],
+        "simSteps":         1000,
+        "comment":          "No warmup, in order to see the trnaisition to active turbulence",
+        "warmUp":           0,
+
+        "comment":          "Active collision operator with modulated activity",
+        "collOp":            17,
+        "comment":          "Liquid crystal mode turned on",
+        "lc":               1,
+
+        "species":
+        [
+            {
+                "dens":         20,
+                "comment":      "Strength of activity"
+                "act":          0.08
+            }
+        ],
+
+        "comment":          "Periodic Boundary Contions",
+        "domainWalls":      1,
+
+        "comment":          "To see the active spontaneous flows, we output the flow field",
+        "flowOut":          250,
+        "comment":          "We output the director and scalar order parameter fields",
+        "dirSOut":          250,
+        "comment":          "We output the position, orientation and charge of topological defects, if present",
+        "defectsOut":       250,
+        "comment":          "Outputting summary of the parameters used in the simulation",
+        "synopsisOut":      1
+    }
+
+
+Understanding the Script
+========================
+
+Here is the breakdown of the input script.
+
+::
+
+    {
+        "comment":          "Square geometry",
+        "domain":           [50, 50],
+        "simSteps":         1000,
+        "comment":          "No warmup, in order to capture the relaxation towards the ordered state"#,
+        "warmUp":           0,
+
+We define the system size (50 by 50 in MPCD simulation units), and define how long the system will actually run and output.  Because we are interested in capturing the transition from an ordered state to active turbulence, we do not set up a warm up. 
+
+
+:: 
+
+    "comment":          "Active collision operator with modulated activity",
+    "collOp":            17,
+    "comment":          "Liquid crystal mode turned on",
+    "lc":               1,
+
+
+
+We also define the collision operator for the MPCD fluid (in this case, we model an active nematic liquid crystal, so we need an active collision operator) and turn on the liquid crystal mode.
+
+::  
+
+    "species":
+    [
+        {
+            "dens":         20,
+        }
+    ],
+
+We say that every MPCD box should be initialized with 20 MPC particles.
+
+.. note::
+
+    Since we did not input a specific initial orientation, the solve will assume the default one, which sets all nematogens to be oriented along the :math:`y`-axis.
+
+
+::
+
+    "comment":         "Periodic Boundary Contions",
+    "domainWalls":      1,
+
+We say that the system has periodic boundary conditions.
+
+
+::      
+
+    "comment":          "To see the active spontaneous flows, we output the flow field",
+    "flowOut":          250,
+    "comment":          "We output the director and scalar order parameter fields",
+    "dirSOut":          10,
+    "comment":          "We output the position, orientation and charge of topological defects, if present",
+    "defectsOut":       10,
+    "comment":          "Outputting summary of the parameters used in the simulation",
+    "synopsisOut":      1
+
+We specify our outputs. Since active systems present active spontaneous flows, we output the floe field of the system (every 250 time steps). In addition, since we are interested in the liquid crystal aspect of the simulation, we output the director and scalar order parameter fields (every 250 time steps), the list of topological defects, with their position, polarization and charge (every 250 time steps) and turn on the sysnopsis file, which summarizes the parameters used in the simulation.
+
+::
+
+    }
+
+The end of the input file
+
+
+Running the Script
+==================
+
+Running
+=======
+
+This script can be run with 
+
+::
+
+    /<directory>/MPCD/mpcd.out -i <directory>/MPCD/SampleInputs/activeNem2D/input.json -o <directory>/MPCD/<OUTPUT>
+
+Output
+======
+
+In the corresponding ``defects.dat``, you should now see the number of topological defects at each time step, with a list of their positions, charge and angle.  In the beginning there should be no defects, but the their numbers increase as the system enters into turbulence
+
+
+:: 
+
+    t	 numDefects	 
+    QX		 QY		 charge		 angle
+    0.00	0
+
+    25.00	0
+
+    50.00	0
+
+    75.00	2
+    4.50000e+01	 2.30000e+01	-0.500	 8.49837e-01
+    4.20000e+01	 2.40000e+01	00.500	 6.12024e+00
+
+    100.00	9
+    1.50000e+01	 9.00000e+00	00.500	 2.71453e+00
+    4.85000e+01	 1.20000e+01	-0.500	 2.09440e+00
+    3.00000e+00	 1.50000e+01	-0.500	 1.65045e+00
+    4.10000e+01	 1.90000e+01	00.500	 5.91872e+00
+    2.90000e+01	 2.00000e+01	00.500	 3.15935e-01
+    4.10000e+01	 2.20000e+01	-0.500	 1.10006e-01
+    4.40000e+01	 2.20000e+01	00.500	 3.24418e+00
+    4.40000e+01	 2.60000e+01	-0.500	 1.29505e+00
+    1.30000e+01	 4.10000e+01	00.500	 5.30896e+00
+

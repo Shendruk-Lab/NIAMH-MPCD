@@ -19,5 +19,6 @@
     "coarseOut":        250,
     "flowOut":          250,
     "dirSOut":          250,
+    "defectsOut":       250,
     "synopsisOut":      1
 }
