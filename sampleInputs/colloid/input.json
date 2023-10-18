@@ -6,8 +6,8 @@
     "species":
     [
         {
-            "comment":      "For the density to be 20, must subtract the volume of the colloid",
-            "pop":          7435
+            "comment":      "The dens override will take the smaller volume fraction for the fluid into account",
+            "dens":         20
         }
     ],
     "debugOut":         3,

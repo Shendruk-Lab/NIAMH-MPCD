@@ -15,6 +15,11 @@ Channel flow
 
 .. include:: ChannelFlow/ChannelFlow.txt
 
+Colloid
+*******
+
+.. include:: Colloid/Colloid.txt
+
 Dumbbell swimmers
 *****************
 

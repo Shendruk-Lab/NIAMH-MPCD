@@ -1,0 +1,226 @@
+.. _Colloid:
+
+Channel Flow
+============
+
+This tutorial will demonstrate how to run a simple colloid in an isotropic fluid, in 2D geometries.
+The simulation will be run in a small 20x20 domain (for speed), with a colloid of radius 3, all within periodic boundary conditions.
+Colloids in MPCD are simulated through the use of a motile boundary.
+
+This tutorial is based on the input file found in MPCD/SampleInputs/colloid/input.json
+
+Input File
+==========
+
+::
+
+    {
+        "domain":           [20, 20],
+        "simSteps":         50000,
+        "comment":          "Isotropic fluid using Andersen MPCD",
+        "collOp":           2,
+        "species":
+        [
+            {
+                "comment":      "The dens override will take the smaller volume fraction for the fluid into account",
+                "dens":         20
+            }
+        ],
+        "debugOut":         3,
+        "flowOut":          1000,
+        "solidTrajOut":     1000,
+        "energyOut":        0,
+        "synopsisOut":      1,
+        "comment":          "Periodic boundary conditions on the domain",
+        "domainWalls":      1,
+        "BC":
+        [
+            {
+                "comment":      "The spherical colloid",
+                "phantom":      1,
+                "Q":            [10, 10, 0],
+                "aInv":         [1, 1, 0],
+                "P":            [2, 2, 2, 2],
+                "comment":      "Colloid radius",
+                "R":            3,
+                "DN":           0,
+                "MVN":          -1,
+                "MVT":          -1,
+                "comment":      "The colloid should be mobile, i.e. free to be displaced",
+                "dsplc":        1,
+                "mass":         565
+            }
+        ]
+    }
+
+
+Understanding the Script
+========================
+
+Here is the breakdown of the input script.
+
+::
+
+    {
+        "domain":           [20, 20],
+        "simSteps":         50000,
+        "comment":          "Isotropic fluid using Andersen MPCD",
+        "collOp":           2,
+
+We define a 2D system with a simulation domain of 20 by 20 MPCD units.
+We further tell the simulation to run for 50000 timesteps, and use the isotropic Andersen collision operator.
+
+:: 
+
+    "species":
+    [
+        {
+            "comment":      "The dens override will take the smaller volume fraction for the fluid into account",
+            "dens":         20
+        }
+    ],
+
+We declare one species of fluid, and specify a ``"dens"`` override of 20. 
+
+If instead you wished to use the ``"pop"`` keyword, your population would need to take into account the volume of the colloid manually.
+ie, 
+
+.. math::
+
+    \begin{align*}
+        \mathrm{pop} &= \rho V_\mathrm{domain} 
+        \\
+        &= \rho \times \left( \ell_x \times \ell_y - V_\mathrm {colloid} \right)
+        \\
+        &= \rho \times \left( 20 \times 20 - \pi \times 3^2 \right)
+    \end{align*}
+
+However, the ``"dens"`` override will take this smaller volume fraction into account by using a Monte-Carlo integrator. 
+
+.. note:: 
+    As the accessible volume is computed by a Monte-Carlo integrator, which is a stochastic method, the volume fraction will not exactly match the analytical :math:`V_\mathrm{domain}`.
+    It will, however, be close enough for regular usage.
+
+::
+
+    "debugOut":         3,
+    "flowOut":           1000,
+    "solidTrajOut":     1000,
+    "energyOut":        0,
+    "synopsisOut":      1,
+
+We then set outputs for the simulation. 
+Specifically, we set output of ``"flowOut"`` to every 1000 timesteps, to get flow field information, and ``"solidTrajOut"`` to get the trajectory information of our motile colloid every 1000 timesteps.
+We further enable synopsis dumping, and set a logging level of 3 with ``"debugOut"``.
+
+::
+
+    "comment":          "Periodic boundary conditions on the domain",
+    "domainWalls":      1,
+    "BC":
+    [
+        {
+            "comment":      "The spherical colloid",
+            "phantom":      1,
+            "Q":            [10, 10, 0],
+            "aInv":         [1, 1, 0],
+            "P":            [2, 2, 2, 2],
+            "comment":      "Colloid radius",
+            "R":            3,
+            "DN":           0,
+            "MVN":          -1,
+            "MVT":          -1,
+            "comment":      "The colloid should be mobile, i.e. free to be displaced",
+            "dsplc":        1,
+            "mass":         565
+        }
+    ]
+
+Finally, we configure boundary conditions.
+First, we set ``"domainWalls": 1`` to additively include periodic boundary conditions around our simulation domain.
+As this includes periodic boundary conditions for us, we only need to add a single boundary condition element to our input script: Namely, the motile colloid object itself. 
+
+The implementation of boundaries in MPCD is discussed in detail in **TODO: link to Louise's section**.
+As we have a solid boundary, and the boundary is expected to be off-latice, we need to enabled phantom particles.
+**TODO: finish explaining this block**
+
+::
+
+    }
+
+Finally, don't forget to properly close the input file with closing braces 
+
+Running
+=======
+
+**TODO: COPIED FROM KRISTIAN'S EXAMPLE. NEED TO ADAPT TO THIS TUTORIAL.**
+This script can be run with 
+
+::
+
+    /<directory>/MPCD/mpcd.out -i <directory>/MPCD/SampleInputs/ChannelFlow/input.json <directory>/MPCD/<OUTPUT>
+
+
+In the corresponding avVel.dat, you should now see how the velocity in the x direction is steadily increasing, the y velocity fluctuates around zero, and the z velocity is actually zero.
+
+::
+
+    *** For the Polymer Physics Research Group ***
+    ******** At the University of Ottawa *********
+
+    **********************************************
+    ************ Code begun Oct. 2008 ************
+    **********************************************
+
+    t        VcmX           VcmY            VcmZ            KBT             dVXX            dVXY            dVXZ            dVYX            dVYY            dVYZ            dVZX            dVZY            dVZZ    
+    0.00000e+00     3.45052e-01     6.58234e-03     0.00000e+00     1.06250e+00    -1.36458e-03    -1.05097e-03     0.00000e+00    -2.08302e-04    -4.56426e-04     0.00000e+00     0.00000e+00     0.00000e+00     0.00000e+00
+    1.00000e+00     3.50801e-01     6.23010e-03     0.00000e+00     1.07224e+00    -2.09023e-03    -6.09935e-04     0.00000e+00     1.00165e-04    -6.01067e-04     0.00000e+00     0.00000e+00     0.00000e+00     0.00000e+00
+    2.00000e+00     3.58123e-01     7.84703e-03     0.00000e+00     1.06892e+00    -9.59730e-04    -1.14724e-03     0.00000e+00    -4.05406e-04    -9.35703e-05     0.00000e+00     0.00000e+00     0.00000e+00     0.00000e+00
+    3.00000e+00     3.61650e-01     5.74061e-03     0.00000e+00     1.07228e+00    -1.77202e-03    -6.59328e-05     0.00000e+00    -1.45274e-04    -4.18955e-04     0.00000e+00     0.00000e+00     0.00000e+00     0.00000e+00
+    4.00000e+00     3.64406e-01     4.03414e-03     0.00000e+00     1.07902e+00    -1.26291e-03    -9.22894e-05     0.00000e+00    -4.18639e-04    -5.48575e-05     0.00000e+00     0.00000e+00     0.00000e+00     0.00000e+00
+    5.00000e+00     3.69803e-01     2.79431e-03     0.00000e+00     1.07395e+00    -1.42730e-03    -3.70481e-04     0.00000e+00    -7.55855e-04     2.63838e-04     0.00000e+00     0.00000e+00     0.00000e+00     0.00000e+00
+    6.00000e+00     3.75238e-01     2.96236e-03     0.00000e+00     1.08079e+00    -1.45695e-03    -1.83501e-04     0.00000e+00    -3.06386e-04    -2.01063e-04     0.00000e+00     0.00000e+00     0.00000e+00     0.00000e+00
+    7.00000e+00     3.78821e-01     2.94415e-03     0.00000e+00     1.08732e+00    -1.05142e-03     9.88574e-04     0.00000e+00    -2.51660e-04    -9.77584e-04     0.00000e+00     0.00000e+00     0.00000e+00     0.00000e+00
+    8.00000e+00     3.84917e-01     9.50202e-04     0.00000e+00     1.08471e+00    -1.54482e-03     3.56912e-04     0.00000e+00     1.67420e-04     7.57103e-05     0.00000e+00     0.00000e+00     0.00000e+00     0.00000e+00
+    9.00000e+00     3.89152e-01     2.32318e-03     0.00000e+00     1.08486e+00    -8.95644e-04    -1.13704e-03     0.00000e+00    -5.50255e-05    -6.15770e-05     0.00000e+00     0.00000e+00     0.00000e+00     0.00000e+00
+    1.00000e+01     3.93201e-01     2.29169e-03     0.00000e+00     1.09030e+00    -6.43542e-04    -4.24444e-04     0.00000e+00     9.03793e-05     3.57824e-04     0.00000e+00     0.00000e+00     0.00000e+00     0.00000e+00
+    1.10000e+01     3.94978e-01     1.55992e-03     0.00000e+00     1.09117e+00    -8.87784e-04    -1.78963e-04     0.00000e+00    -3.84145e-04    -3.38673e-04     0.00000e+00     0.00000e+00     0.00000e+00     0.00000e+00
+    1.20000e+01     4.01249e-01     2.80295e-03     0.00000e+00     1.08548e+00    -1.09625e-03     3.27938e-04     0.00000e+00     4.54421e-04     4.87806e-04     0.00000e+00     0.00000e+00     0.00000e+00     0.00000e+00
+    1.30000e+01     4.05286e-01     1.89601e-03     0.00000e+00     1.09531e+00    -5.48964e-04     1.05430e-03     0.00000e+00     6.45156e-04     3.93277e-04     0.00000e+00     0.00000e+00     0.00000e+00     0.00000e+00
+    1.40000e+01     4.09654e-01    -7.50545e-04     0.00000e+00     1.08849e+00    -1.11103e-03    -5.51446e-05     0.00000e+00    -1.43860e-04     1.35607e-03     0.00000e+00     0.00000e+00     0.00000e+00     0.00000e+00
+    1.50000e+01     4.17369e-01     3.10384e-03     0.00000e+00     1.10007e+00    -1.29882e-03    -2.52358e-05     0.00000e+00     7.78732e-05    -1.29354e-03     0.00000e+00     0.00000e+00     0.00000e+00     0.00000e+00
+    1.60000e+01     4.20780e-01     4.13124e-03     0.00000e+00     1.09703e+00    -1.30782e-03    -6.52589e-04     0.00000e+00    -2.80151e-04    -6.96605e-04     0.00000e+00     0.00000e+00     0.00000e+00     0.00000e+00
+    1.70000e+01     4.27041e-01     4.26768e-03     0.00000e+00     1.10565e+00    -1.21964e-03    -3.34156e-04     0.00000e+00    -4.56698e-04     9.94585e-04     0.00000e+00     0.00000e+00     0.00000e+00     0.00000e+00
+    1.80000e+01     4.31088e-01     5.74989e-04     0.00000e+00     1.10576e+00    -1.87260e-03    -5.52449e-04     0.00000e+00    -2.36001e-04    -7.48178e-04     0.00000e+00     0.00000e+00     0.00000e+00     0.00000e+00
+    1.90000e+01     4.35738e-01     4.21765e-04     0.00000e+00     1.11031e+00    -1.78792e-03     2.14343e-04     0.00000e+00    -5.56329e-05     1.08383e-03     0.00000e+00     0.00000e+00     0.00000e+00     0.00000e+00
+    2.00000e+01     4.41161e-01     1.74172e-03     0.00000e+00     1.11284e+00    -1.81910e-03     1.41829e-04     0.00000e+00     1.26697e-04     7.40635e-04     0.00000e+00     0.00000e+00     0.00000e+00     0.00000e+00
+    2.10000e+01     4.42280e-01    -2.21483e-03     0.00000e+00     1.11302e+00    -1.32765e-03     1.31480e-04     0.00000e+00     6.37553e-04    -2.38006e-04     0.00000e+00     0.00000e+00     0.00000e+00     0.00000e+00
+    2.20000e+01     4.49555e-01    -1.43127e-03     0.00000e+00     1.11267e+00    -1.65318e-03     1.10167e-03     0.00000e+00    -5.49391e-04    -1.41895e-03     0.00000e+00     0.00000e+00     0.00000e+00     0.00000e+00
+    2.30000e+01     4.50628e-01    -2.74851e-03     0.00000e+00     1.11249e+00    -1.24766e-03    -3.92778e-05     0.00000e+00    -9.47222e-06    -2.84050e-04     0.00000e+00     0.00000e+00     0.00000e+00     0.00000e+00
+    2.40000e+01     4.53632e-01    -1.77157e-03     0.00000e+00     1.11439e+00    -1.63530e-03     1.59648e-03     0.00000e+00    -2.99482e-04    -4.95892e-05     0.00000e+00     0.00000e+00     0.00000e+00     0.00000e+00
+    2.50000e+01     4.58302e-01    -5.70376e-03     0.00000e+00     1.11430e+00    -1.20376e-03     1.72172e-04     0.00000e+00     1.87628e-04     7.19723e-04     0.00000e+00     0.00000e+00     0.00000e+00     0.00000e+00
+    2.60000e+01     4.61396e-01    -4.98616e-03     0.00000e+00     1.12231e+00    -1.16975e-03    -1.59873e-04     0.00000e+00     2.64437e-04    -9.45790e-05     0.00000e+00     0.00000e+00     0.00000e+00     0.00000e+00
+    2.70000e+01     4.64587e-01    -5.77189e-03     0.00000e+00     1.12509e+00    -1.56520e-03     1.95114e-04     0.00000e+00     5.59956e-04    -3.00970e-04     0.00000e+00     0.00000e+00     0.00000e+00     0.00000e+00
+    2.80000e+01     4.69087e-01    -4.41537e-03     0.00000e+00     1.13043e+00    -2.29317e-03    -2.00406e-03     0.00000e+00     1.44941e-04     8.39970e-04     0.00000e+00     0.00000e+00     0.00000e+00     0.00000e+00
+    2.90000e+01     4.74573e-01    -2.69217e-03     0.00000e+00     1.12628e+00    -1.79209e-03     4.42318e-04     0.00000e+00    -1.18112e-04     3.04627e-04     0.00000e+00     0.00000e+00     0.00000e+00     0.00000e+00
+    3.00000e+01     4.77925e-01    -4.23853e-03     0.00000e+00     1.12965e+00    -1.45111e-03     9.28562e-04     0.00000e+00     1.72270e-06    -6.38259e-05     0.00000e+00     0.00000e+00     0.00000e+00     0.00000e+00
+    3.10000e+01     4.79560e-01    -3.47639e-03     0.00000e+00     1.13145e+00    -1.37447e-03     9.14254e-04     0.00000e+00     8.84702e-05    -4.45805e-05     0.00000e+00     0.00000e+00     0.00000e+00     0.00000e+00
+    3.20000e+01     4.84372e-01    -5.47304e-03     0.00000e+00     1.13747e+00    -1.96381e-03     7.72492e-04     0.00000e+00    -5.99433e-04    -3.39571e-04     0.00000e+00     0.00000e+00     0.00000e+00     0.00000e+00
+    3.30000e+01     4.86674e-01    -3.49428e-03     0.00000e+00     1.13735e+00    -1.75572e-03     1.45743e-03     0.00000e+00     3.37711e-04     2.79032e-04     0.00000e+00     0.00000e+00     0.00000e+00     0.00000e+00
+    3.40000e+01     4.89764e-01    -4.42566e-03     0.00000e+00     1.13214e+00    -1.82282e-03     2.39112e-04     0.00000e+00     4.84081e-04    -9.86585e-04     0.00000e+00     0.00000e+00     0.00000e+00     0.00000e+00
+    3.50000e+01     4.93684e-01    -3.45316e-04     0.00000e+00     1.13607e+00    -1.31257e-03     4.14919e-04     0.00000e+00    -3.79466e-04    -3.02127e-04     0.00000e+00     0.00000e+00     0.00000e+00     0.00000e+00
+    3.60000e+01     4.98918e-01    -3.24449e-03     0.00000e+00     1.14174e+00    -1.68669e-03    -6.06406e-04     0.00000e+00     2.23057e-04     1.53655e-03     0.00000e+00     0.00000e+00     0.00000e+00     0.00000e+00
+    3.70000e+01     5.03730e-01    -3.91437e-03     0.00000e+00     1.14826e+00    -1.55978e-03     2.02801e-04     0.00000e+00    -4.54704e-04     7.77137e-05     0.00000e+00     0.00000e+00     0.00000e+00     0.00000e+00
+    3.80000e+01     5.05736e-01    -1.28787e-03     0.00000e+00     1.15212e+00    -1.00495e-03    -4.49476e-04     0.00000e+00     6.18846e-05     2.28526e-03     0.00000e+00     0.00000e+00     0.00000e+00     0.00000e+00
+    3.90000e+01     5.09232e-01    -1.25548e-03     0.00000e+00     1.14257e+00    -2.55529e-03     1.39230e-03     0.00000e+00     1.50541e-04     2.21952e-04     0.00000e+00     0.00000e+00     0.00000e+00     0.00000e+00
+    4.00000e+01     5.13641e-01    -2.60856e-03     0.00000e+00     1.14785e+00    -2.13809e-03     9.84253e-04     0.00000e+00    -4.82504e-04    -4.77825e-04     0.00000e+00     0.00000e+00     0.00000e+00     0.00000e+00
+    4.10000e+01     5.16390e-01    -3.68310e-03     0.00000e+00     1.14975e+00    -2.36575e-03     5.30616e-04     0.00000e+00    -5.78192e-04     3.34780e-05     0.00000e+00     0.00000e+00     0.00000e+00     0.00000e+00
+    4.20000e+01     5.20077e-01     8.12596e-04     0.00000e+00     1.15349e+00    -1.62682e-03     4.44550e-04     0.00000e+00     1.29634e-04    -1.85622e-03     0.00000e+00     0.00000e+00     0.00000e+00     0.00000e+00
+    4.30000e+01     5.22265e-01     7.69079e-04     0.00000e+00     1.15929e+00    -2.23385e-03     2.27985e-03     0.00000e+00     3.18873e-04     6.56014e-04     0.00000e+00     0.00000e+00     0.00000e+00     0.00000e+00
+    4.40000e+01     5.23322e-01    -9.10584e-04     0.00000e+00     1.15748e+00    -1.69311e-03     1.13959e-03     0.00000e+00     5.14337e-04     3.15428e-04     0.00000e+00     0.00000e+00     0.00000e+00     0.00000e+00
+    4.50000e+01     5.29615e-01     8.41938e-04     0.00000e+00     1.16039e+00    -1.89173e-03     1.49322e-03     0.00000e+00    -3.85331e-04    -6.92088e-04     0.00000e+00     0.00000e+00     0.00000e+00     0.00000e+00
+    4.60000e+01     5.31556e-01     2.75160e-03     0.00000e+00     1.16471e+00    -1.43088e-03    -9.70971e-05     0.00000e+00    -2.91346e-04     3.56101e-05     0.00000e+00     0.00000e+00     0.00000e+00     0.00000e+00
+    4.70000e+01     5.34593e-01     2.12590e-05     0.00000e+00     1.16822e+00    -1.23542e-03    -2.41419e-04     0.00000e+00     3.24688e-04    -1.93997e-03     0.00000e+00     0.00000e+00     0.00000e+00     0.00000e+00
+    4.80000e+01     5.38447e-01    -5.89117e-04     0.00000e+00     1.16833e+00    -2.03582e-03    -2.16861e-03     0.00000e+00    -1.06117e-04    -9.34396e-04     0.00000e+00     0.00000e+00     0.00000e+00     0.00000e+00
+    4.90000e+01     5.36628e-01     6.32695e-04     0.00000e+00     1.17077e+00    -1.50439e-03     9.79270e-04     0.00000e+00     5.25894e-04    -4.26488e-04     0.00000e+00     0.00000e+00     0.00000e+00     0.00000e+00
+    5.00000e+01     5.39846e-01     1.96692e-03     0.00000e+00     1.16781e+00    -1.13051e-03     2.57739e-03     0.00000e+00     1.90012e-05     3.31045e-04     0.00000e+00     0.00000e+00     0.00000e+00     0.00000e+00
