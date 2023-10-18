@@ -1,22 +1,13 @@
-.. error:: 
-    TYLER's PE-PEEVE --> semicolons before equations then incorrect punctuation. 
-    Equations are part of sentences. Never, ever start with a semicolon. 
-    Then then need proper punction --- if followed by "where" then need a comma; if followed by a new sentence then need a period, etc.
-
 MPCD employ a square-shaped cell. The particles are represented as continuously moving points on a plane, following a continuous trajectory (off-lattice).
-
-
-.. error::
-    TYLER: Please add caption to figure. Also if have better quality picture, please add.
 
 .. figure:: VicsekMPCD/VicsekMPCD.jpg
     :alt: Logo
-    :scale: 100%
+    :scale: 50%
     :align: center
 
-    **CAPTION**
+    **An example of Vicsek particles in the 2D square system**
 
-Particle positions are being update as in :ref:`Streaming step <eq:stream>`. The positions of individual particles at time :math:`t + 1` are updated based on their current positions and velocities. Each particle moves in the direction of its velocity vector by a certain distance:
+Particle positions are being update as in :ref:`Streaming step <eq:stream>`. The positions of individual particles at time :math:`t + 1` are updated based on their current positions and velocities. Each particle moves in the direction of its velocity vector by a certain distance.
 
 .. math::
     :name: eq:positionVicsek
@@ -25,13 +16,13 @@ Particle positions are being update as in :ref:`Streaming step <eq:stream>`. The
 
 Where:
 
-- :math:`\vec{r}_i(t+\delta t)` is the position of particle :math:`i` at time :math:`t + \delta t`.
-- :math:`\vec{r}_i(t)` is the current position of particle :math:`i` at time :math:`t`.
-- :math:`\delta t` is the time step.
-- :math:`v_0` is the constant speed of the particle.
-- :math:`\vec{u}_i(t)` is the normalized velocity vector of particle :math:`i` at time :math:`t`.
+- :math:`\vec{r}_i(t+\delta t)` is the position of particle :math:`i` at time :math:`t + \delta t`;
+- :math:`\vec{r}_i(t)` is the current position of particle :math:`i` at time :math:`t`;
+- :math:`\delta t` is the time step;
+- :math:`v_0` is the constant speed of the particle;
+- :math:`\vec{u}_i(t)` is the normalized velocity vector of particle :math:`i` at time :math:`t`;
 
-Velocity Alignment are similar with the :ref:`collision step <eq:collision>`. The velocity of each particle at time :math:`t + 1` is updated by averaging the velocities of its neighbors within a specified radius, and then normalizing the resulting velocity vector:
+Velocity Alignment are similar with the :ref:`collision step <eq:collision>`. The velocity of each particle at time :math:`t + 1` is updated by averaging the velocities of its neighbors within a specified radius, and then normalizing the resulting velocity vector.
 
 .. math::
     :name: eq:velocityVicsek
@@ -40,13 +31,13 @@ Velocity Alignment are similar with the :ref:`collision step <eq:collision>`. Th
 
 Where:
 
-- :math:`\vec{u}_i(t+\delta t)` is the updated velocity vector of particle :math:`i` at time :math:`t + \delta t`.
-- :math:`N_c` is the number of neighbors within the cell :math:`c`.
-- :math:`\vec{u}_j(t)` is the velocity vector of the :math:`j`-th neighboring particle at time :math:`t`.
-- :math:`\eta` is a noise parameter that introduces random perturbations.
-- :math:`\delta \Theta` is a random angle drawn from a uniform distribution.
+- :math:`\vec{u}_i(t+\delta t)` is the updated velocity vector of particle :math:`i` at time :math:`t + \delta t`;
+- :math:`N_c` is the number of neighbors within the cell :math:`c`;
+- :math:`\vec{u}_j(t)` is the velocity vector of the :math:`j`-th neighboring particle at time :math:`t`;
+- :math:`\eta` is a noise parameter that introduces random perturbations;
+- :math:`\delta \Theta` is a random angle drawn from a uniform distribution;
 
-Example configuration for the Vicsek system. Let`s say we would have 100 by 100 square system
+Example configuration for the Vicsek system. Let`s say we would have 100 by 100 square system.
 
 input.json
 ::
@@ -66,7 +57,7 @@ In order to use standart Vicsek collision operator described above set collOp pa
     "collOp": 7,
 
 Let`s conigure one specie to have mass 1, activity value 0.5 and have random distribution.
-Activity value is used as noise in the next form :math:`\eta = 1.0 - act`
+Activity value is used as noise in the next form :math:`\eta = 1.0 - act`.
 
 ::
 
@@ -89,7 +80,7 @@ Let`s set gravity and magnetic fields to zero.
 ::
 
     "grav": [0.0, 0.0, 0.0],
-    "mag": [0.0, 0.0, 0.0],
+    "mag": [0.0, 0.0, 0.0]
 
 And this is enough in order to have classic vicsek experiment.
 
