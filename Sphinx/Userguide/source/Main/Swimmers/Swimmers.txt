@@ -16,7 +16,7 @@ To make the sum of forces on the fluid force-free, an opposite force to these tw
 
 
 .. image:: Swimmers/1.jpg
-   :scale: 70%
+    :align: center
 
 Besides that, the swimmer monomers are treated as other MD particles.
 
@@ -83,15 +83,15 @@ Size of excluded volume of the head/middle monomer part with other swimmers/MD p
 
     `epsSwim`       | double        | 1                  | Interaction energy
 
-Interaction strength of the Lennord Jones potential used for excluded volume interaction (Lennord-Jones potential).
+Interaction strength of the Lennord-Jones potential used for excluded volume interaction (Lennord-Jones potential).
 
 ::
 
     `qDistSwim`     | int           | 0                  | Initial distribution of swimmer positions
     `oDistSwim`     | int           | 0                  | Initial distribution of swimmer orientations
 
-These set the initial distribution of swimmer position (0=randomly placed within control volume, 1 Read from file, 2, Centre of controle volume) and swimmer orientation (0=random orientation, 1=x-aligned, 2=y-aligned, 3=z-algined, 4= 45 degrees angle. 5=randomly in XY-plane, 6 =randomly in XZ-plane, 7=randomly in YZ-plane, 
-8=Align all particles in the direction of origin towards positive right hand corner of any cartesian plane, 9=Align all particles in the direction of two oppositely charged defects.)
+These set the initial distribution of swimmer position (0: randomly placed within control volume, 1: Read from file, 2: Centre of controle volume) and swimmer orientation (0: random orientation, 1: x-aligned, 2: y-aligned, 3: z-algined, 4: 45 degrees angle. 5: randomly in XY-plane, 6: randomly in XZ-plane, 7: randomly in YZ-plane, 
+8: Align all particles in the direction of origin towards positive right hand corner of any cartesian plane, 9: Align all particles in the direction of two oppositely charged defects.)
 
 ::
 
@@ -122,10 +122,14 @@ Run and tumble parameters. In order to make swimmers run and tumble, set runTSwi
 These set the average run and tumble time (in MPCD timesteps) that the particle runs and tumbles respectively. 
 Run and tumble are stochastic processes, drawn from a stochastic exponential distribution.
 
-    `springShrinkSwim`| double        | 0.1                | How much the spring constant is shrunk when tumbling
-    `sizeShrinkSwim`| double        | 0.1                | How much do LJ sigma ro shrink when tumbling
+::
+
+    `springShrinkSwim`      | double        | 0.1                | How much the spring constant is shrunk when tumbling
+    `sizeShrinkSwim`        | double        | 0.1                | How much do LJ sigma ro shrink when tumbling
 
 Tumbling is implemented by reducing the sping size and particle size. For tumbling state, the spring is replaced with a Hookean spring.
+
+::
 
     `shrTSwim`      | double        | 2                  | Set time to shrink/ extend in units of MPCD timesteps dt (iterations, not MPCD time units)
 
