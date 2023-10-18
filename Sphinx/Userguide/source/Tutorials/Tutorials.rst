@@ -30,3 +30,8 @@ Dumbbell swimmers
 ******************
 
 .. include:: ActiveNematic/ActiveNematic.txt
+
+Flow Past a 'Square' Obstacle
+*****************************
+
+.. include:: FlowPastSquareObstacle/FlowPastSquareObstacle.txt

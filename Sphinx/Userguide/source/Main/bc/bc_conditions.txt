@@ -111,7 +111,7 @@ Commonly used boundary rules are:
    ::
 
     "comment":          "No slip BC",
-    "MVN":      1,
+    "MVN":      -1,
     "MVT":      -1,
 
 3. **Orientation**
