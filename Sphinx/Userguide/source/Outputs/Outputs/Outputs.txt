@@ -112,7 +112,6 @@ This creates file named defects. It contains the position of topological defects
     `swimQOut`      | int           | 0             | Swimmer positions
 
 This creates file named swimmers. It contains the position and velocity of all swimmers. It also contains if the particle is in the run, tumble, shring or extension phase.
-::
 
 ::
 
