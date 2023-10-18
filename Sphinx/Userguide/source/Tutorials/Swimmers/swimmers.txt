@@ -1,1 +1,146 @@
-This will explain how to use pushers/pullers, tune the size and weight, create point-like swimmers, turn on depletion interaction, general behaviour of MPCD dumbbell swimmers
+Swimmers
+========
+
+This tutorial shows how to generate a simple swimmer simulation in periodic boundary conditions.
+This tutorial is based on the input file found in MPCD/SampleInputs/swimmer/input.json
+
+Input File
+==========
+
+::
+
+    {
+        "debugOut":         3,
+        "domain":           [30, 30],
+        "simSteps":         2000,
+        "comment":          "Isotropic fluid using Andersen MPCD",
+        "collOp":           2,
+        "species":
+        [
+            {
+                "dens":         20
+            }
+        ],
+        "comment":          "Periodic boundary conditions on the domain",
+        "domainWalls":      1,
+        "comment":          "Dumb-dumbell swimmer",
+        "typeSwim":         2,
+        "comment":          "One swimmer",
+        "nSwim":            1,
+        "comment":          "Swimmer monomers have same mass as one mpcd cell of fluid particles",
+        "headMSwim":        20,
+        "midMSwim":         20,
+        "comment":          "Swimmer propulsive force",
+        "fsSwim":           20,
+        "comment":          "Dipole strength. dsSwim=1 --> pusher; dsSwim=-2 --> puller",
+        "dsSwim":           1,
+        "kSwim":            30,
+        "roSwim":           4,
+        "sigSwim":          4,
+        "epsSwim":          1,
+        "comment":          "Output options",
+        "flowOut":          50,
+        "avVelOut":         0,
+        "energyOut":        0,
+        "swimQOut":         50,
+        "swimOOut":         0,
+        "swimROut":         0,
+        "synopsisOut":      1
+    }
+
+Understanding the Script
+========================
+
+Here is the breakdown of the input script.
+
+::
+
+     {
+        "debugOut":         3,
+        "domain":           [30, 30],
+        "simSteps":         2000,
+        "comment":          "Isotropic fluid using Andersen MPCD",
+        "collOp":           2,
+
+We define how verbose we want the debugger to be (reasonably), we set the system size (30 by 30 in MPCD units),
+and we define for how long than the system will run and output.  We also define the collision operator for the MPCD fluid.
+In this case, we model an isotropic fluid, with the default collision operator: the :ref:`Andersen collision operator<Andersen>`.
+
+::
+
+    "species":
+    [
+          {
+              "dens":         20
+          }
+    ],
+    "comment":          "Periodic boundary conditions on the domain",
+    "domainWalls":      1,
+
+We say that every MPCD box should be initialised with 20 MPC particles, and we define the boundary conditions to be periodic. 
+
+::
+
+    "comment":          "Dumb-dumbell swimmer",
+    "typeSwim":         2,
+    "comment":          "One swimmer",
+    "nSwim":            1,
+    "comment":          "Swimmer monomers have same mass as one mpcd cell of fluid particles",
+    "headMSwim":        20,
+    "midMSwim":         20,
+    "comment":          "Swimmer propulsive force",
+    "fsSwim":           20,
+    "comment":          "Dipole strength. dsSwim=1 --> pusher; dsSwim=-2 --> puller",
+    "dsSwim":           1,
+    "kSwim":            30,
+    "roSwim":           4,
+    "sigSwim":          4,
+    "epsSwim":          1,
+
+We describe the swimmer population: we want there to be 1 (nswim=1) dumbbell swimmer (typeSwim=2), with both body mass and head mass of 
+20 (midMSwim = headMSwim = 20). The swimmer will swim with a force of 20 MPCD units (fsSwim=20), and it will be a pusher (dsSwim=1). 
+
+These parameters can be changed to have more swimmers, heavier swimmers, or stronger swimmers. The sample input swimmerPairInLC gives an example
+of two swimmers in a liquid crystal, and many other combinations are possible. Go wild!
+
+The two parts of the dumbbell swimmer will be connected with a spring of 30 MPCD units (kSwim=30) and equilibrium length 4 (roSwim=4). 
+They will repulse each other with a WCA interaction of radius 4 (sigSwim=4) and relative strength 1 in MPCD energy unit. See the :ref:`swimmer section <swimmers>` 
+for more details. 
+
+.. warning::
+    When changing those parameters, we recommend that the mass of the head and body of the swimmer be kept the same, and that the equilibrium length
+    of the FENE spring (roSwim) and the range of the WCA interaction (sigSwim) also be the same. If these two conditions are not respected,
+    the simulated objects will not be dumbbell swimmers as described in the  :ref:`swimmer section <swimmers>`.
+
+::
+
+    "comment":          "Output options",
+    "flowOut":          50,
+    "avVelOut":         0,
+    "energyOut":        0,
+    "swimQOut":         50,
+    "swimOOut":         0,
+    "swimROut":         0,
+    "synopsisOut":      1
+
+We now define what things we want to write out during the simulation (see the :ref:`output section<Outputs>` for details).
+We write out the flow field every 50 timesteps, and never the average velocity and energy of the system - it can be turned on.
+The position of the swimmers is printed every 50 timestep, but not the orientation or the run and tumble frequency.
+We ask for a synopsis file, but don't do checkpoint checks.
+
+::
+
+    }
+
+The end of the input file.
+
+Running
+=======
+
+This script can be run with 
+
+::
+
+    /<directory>/MPCD/mpcd.out -i <directory>/MPCD/SampleInputs/swimmer/input.json <directory>/MPCD/<OUTPUT>
+
+and its results can be visualised with swimmerTraj_fields2D.py or swimmerRefFrame_flow2D.py.

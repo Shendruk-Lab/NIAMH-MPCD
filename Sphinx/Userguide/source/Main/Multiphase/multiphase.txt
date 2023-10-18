@@ -1,6 +1,6 @@
 Multiphase fluids are implemented in this simulator by allowing for several species of particles with species-wide properties (mass, density, ...)
-to coexist and interact through a tuneable interaction. The theory behind this interaction is described :ref:`here <landauGinz>`, and the broad lines
-of the implementation in this algorithm are described in :ref:`the next section <MPImp>`.
+to coexist and interact through a tuneable interaction. The theory behind this interaction is described in the :ref:`free energy of a bimodal fluid <landauGinz>` 
+section, and the broad lines of the implementation in this algorithm are described in the :ref:`implementation in MPCD <MPImp>` section.
 
 .. _landauGinz:
 
@@ -21,10 +21,16 @@ coefficient [Cates2018]_. Minimising this free energy with the Euler-Lagrange eq
 Implementation in MPCD
 ======================
 
-Bimodal models have been simulated in MPCD before using super-cells: close-by cells are grouped together, and a kick is given to particles based
-on the gradient in compositional order between cells within the supercell [Eisenstecken2018]_. In this simulator, the surface of equilibrium 
-compositional order is found within each cell, and a kick is added on during the collision step [Koch2023]_. This surface is defined by a 
-quadratic equation, so that the gradient can be taken: this algorithm can therefore resolve surface tension effects up to the cell-length scale.
+To apply the equations of motion obtained through the previous paragraph, the value of compositional order must be calculated. In MPCD, 
+the compositional order at the scale of a cell consists of a series of Dirac delta distributions: each particle belongs to exactly one species.
+This means that computing the gradient in compositional order, which is essential for accurate surface tension simulation. Two ways to smooth
+this discrete distribution are presented below.
 
-This method still works for N>=2 fluid species by running the same algorithm for each pair of 
-species, and so a variety of multiphase fluids can be simulated.
+Bimodal models have been simulated in MPCD before using super-cells: close-by cells are grouped together, allowing for the compositional order
+to be calculated between cells within the supercell [Eisenstecken2018]_. The equations of motions derived from the relevant free energy can then
+be applied, and phase separation is achieved - but only to the scale of supercells.
+
+In this code, the compositional order parameter is estimated as a quadratic function. This allows for the gradient to be computed,
+while avoiding to capture two much of the MPCD noise in the phase separation dynamics. The contributions derived from the relevant free energy
+are superimposed on any given collision operators [Koch2023]_. This algorithm can therefore resolve surface tension effects up to the 
+cell-length scale. This method still works for N>=2 fluid species by running the same algorithm for each pair of species, and so a variety of multiphase fluids can be simulated.
