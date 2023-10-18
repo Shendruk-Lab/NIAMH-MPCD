@@ -13,9 +13,10 @@ The boundary velocity and angular velocity each have three contributions
     \vec{v}_{b}(t) = \sum_i^{N_{c*}} \left( \Delta \vec{v}_{b,i}^{\mathrm{vel}} + \Delta \vec{v}_{b,i}^\mathrm{ori} \right) + \sum_j^{N_{col*}} \Delta \vec{v}_{b,j}^{\mathrm{col}} \\
     \vec{\omega}_{b}(t) = \sum_i^{N_{c*}} \left( \Delta \vec{\omega}_{b,i}^{\mathrm{vel}} + \Delta \vec{\omega}_{b,i}^\mathrm{ori} \right) + \sum_j^{N_{col*}} \Delta \vec{\omega}_{b,j}^{\mathrm{col}}
 
-coming from increments in the boundaries' velocity due to to conserving impulse and angular impulse between each of :math:`N_{c*}\leq N` individual particles that have had applied velocity (:math:`\mathrm{vel}`) and orientation (:math:`\mathrm{ori}`) boundary conditions.
+coming from incremental contributions due to conserving impulse and angular impulse between each of :math:`N_{c*}\leq N` individual particles that have had applied velocity (:math:`\mathrm{vel}`) and orientation (:math:`\mathrm{ori}`) boundary conditions.
 In addition, boundaries may move into other boundaries. For each of the :math:`N_{col*}` overlapping boundaries, denoted by index :math:`j`, additional boundary rules must be applied to simulate boundary-boundary interactions.
 Like particles, these also enter as corrections to the boundaries :math:`\vec{v}_{b}(t)` and :math:`\vec{\omega}_{b}(t)`, through increments denoted by (:math:`\mathrm{col}`).
+Colloid-colloid interactions are treated as elastic collisions.
 
 .. warning::
     The current version only support mobile spherical colloids where :math:`\vec{A}(t) = \vec{A}(0)`.
@@ -23,24 +24,32 @@ Like particles, these also enter as corrections to the boundaries :math:`\vec{v}
 Motion from velocity rules
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-In section LINKSECTION when a particle interacts with a boundary, the velocity can be updated through the velocity shift :math:`D_{v,\hat{\nu}}` and multiplier operators :math:`M_{v,\hat{\nu}}` in the directions specified by :math:`\hat{\nu}` --- corresponding to a change in the particle's momentum (if any :math:`M_{v,\hat{\nu}}\neq 1` or :math:`D_{v,\hat{\nu}}\neq 0`).
+In section TODO when a particle interacts with a boundary, the velocity can be updated through the velocity shift :math:`D_{v,\hat{\nu}}` and multiplier operators :math:`M_{v,\hat{\nu}}` in the directions specified by :math:`\hat{\nu}` --- corresponding to a change in the particle's momentum (if any :math:`M_{v,\hat{\nu}}\neq 1` or :math:`D_{v,\hat{\nu}}\neq 0`).
 The change of momentum of the particle over the time-step interval :math:`\delta t` can be written in terms of the particle impulse :math:`\vec{J}_i`
 
-.. error::
-    TYLER: Multiple equations named "eq:impulse". I made them "eq:impulse1" etc. but should be renamed
-
 .. math::
-    :name: eq:impulse1
+    :name: eq:impulse
 
     \vec{p}_i(t+\delta t) - \vec{p}_i(t) = \vec{J}_i.
 
 If the boundary is static, then the impulse is absorbed by the boundary. However,
-if the boundary is mobile, then we assume impulse conservation between the particle and boundary.
+if the boundary is mobile, then we assume impulse conservation between the particle and boundary, :math:`\vec{J}_i+\vec{J}_b=0`.
+Where :math:`b` denotes the boundary index.
 
-HOW DOES THE IMPULSE GET CONSERVED, AND WRITE IN TERMS OF THE COEFFICIENT OF RESTITUTION
-SAY SOMETHING ABOUT PARTICLES THEMSELVES NOT HAVING ANGULAR VELOCITY
+In satisfying the impulse conservation, the correction to the colloid's velocity and angular velocity, due to the applied velocity boundary rules on particle :math:`i`, is
 
-NEED A PART AT THE END THAT SHOWS HOW THIS FINDS THE INCREMENT TO DELTA V^VEL AND DELTA L^VEL
+.. math::
+    :name: eq:impulsetocolloid
+
+    \Delta \vec{v}_{b,i}^{\mathrm{vel}} = I_b^{-1}\vec{J}_{b,\hat{n}} \\
+    \Delta \vec{\omega}_{b,i}^{\mathrm{vel}} = \vec{r}\times(I_b^{-1}\vec{J}_{b,\hat{t}})
+
+where :math:`\vec{J}_{b,\hat{n}}=(\vec{J}_b\cdot\hat{n})\hat{n}` is the normal component and :math:`\vec{J}_{b,\hat{t}}=\vec{J}_b-(\vec{J}_b\cdot\hat{n})\hat{n}` is the tangential component of the impulse.
+The inverse of the moment of inertia tensor is :math:`I_b^{-1}`. The vector from the centre of mass to the collision on the wall is :math:`\vec{r}`.
+
+.. warning::
+    The current version only support mobile spherical colloids where the local
+    surface normal and tangent projections of the impulse are sufficient for separating translational and rotational motion.
 
 Motion from orientation rules
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -49,7 +58,7 @@ The particle-boundary interactions can update the particle orientation through t
 The reorientation of particle :math:`i` corresponds to a rotational impulse :math:`\vec{\mathcal{T}}_i` due to a change in angular momentum over time interval :math:`\delta t`.
 
 .. math::
-    :name: eq:impulse2
+    :name: eq:angularimpulse
 
     \vec{\omega}_i(t+\delta t) - \vec{\omega}_i(t) = \vec{\mathcal{T}}_i.
 
@@ -59,7 +68,7 @@ Similar to the velocity rules, if the boundary is static, then the rotational im
 However, if the boundary is mobile, then we assume rotational impulse conservation between the particle and boundary.
 It is the rotational impulse that needs to be converted into boundary increments :math:`\Delta \vec{v}_{b,i}^\mathrm{ori}` and :math:`\Delta \vec{\omega}_{b,i}^\mathrm{ori}`.
 
-For our mobile colloid, EQUATION can be recast into a torque balance, through :math:`\mathcal{T}_i=\Gamma_i \delta t`
+For our mobile colloid, :ref:`(26) <eq:angularimpulse>` can be recast into a torque balance, through :math:`\mathcal{T}_i=\Gamma_i \delta t`
 
 .. math::
     :name: eq:torque
@@ -68,20 +77,21 @@ For our mobile colloid, EQUATION can be recast into a torque balance, through :m
 
 where :math:`\vec{\Gamma}_{b,i}` is the torque that is transferred to the colloid at the position of particle :math:`i`.
 
-For a particle with initial orientation :math:`\hat{u}_i` with an anchoring direction of :math:`\hat{\nu}`, the torque on the particle takes the form
+For a particle with initial orientation :math:`\hat{u}_i` with an anchoring axis :math:`\hat{\nu}`, the torque on the particle takes the form
 
 .. math::
     :name: eq:impulse3
 
     \vec{\Gamma}_i = \frac{\gamma_R}{\ell_u \delta t} \frac{M_{\nu}-M_{\perp}}{\sqrt{M_\nu^2 + M_\perp^2}}\left(\hat{u}_i \cdot \hat{\nu} \right)\left( \hat{u}_i \times \hat{\nu} \right)
 
-with :math:`\frac{M_{\nu}-M_{\perp}}{\sqrt{M_\nu^2 + M_\perp^2}}=1` since anchoring applies :math:`M_{\nu}=1` and :math:`M_{\perp}=0`.
+with :math:`\frac{M_{\nu}-M_{\perp}}{\sqrt{M_\nu^2 + M_\perp^2}}=1` when anchoring is fixed along :math:`\hat{\nu}` using :math:`M_{\nu}=1` and :math:`M_{\perp}=0`.
 
-The torque is only dependent on fixed simulation/material parameters and the relative alignment of :math:`\hat{u}_i` and :math:`\hat{\nu}`.
+The torque is only dependent on fixed simulation parameters and the relative alignment of :math:`\hat{u}_i` and :math:`\hat{\nu}`.
 Defining the alignment as :math:`\cos\theta_i = \hat{u}_i\cdot \hat{\nu}`, the torque :math:`\Gamma_i = \frac{\gamma_R}{\ell_u \delta t} \sin 2\theta`.
 The torque is odd under :math:`\Gamma_i(-\theta)=-\Gamma_i(\theta)`,
-which motivates that the torque transferred to the colloid can be treated as a virtual MPCD particle at the same point, oriented in the direction :math:`\hat{u}_{b,i}` that has :math:`-\theta`, and rotating in the opposite sense to align with :math:`\hat{\nu}`.
-This satisfies the torque conservation equation EQUATION.
+which motivates that the torque transferred to the colloid can be treated as a virtual MPCD particle at the same point,
+oriented in the direction :math:`\hat{u}_{b,i}` that has angle :math:`-\theta` relative to :math:`\hat{\nu}`, and rotates in the opposite sense to :math:`\hat{u}_i`.
+This construction satisfies the torque conservation equation :ref:`(27) <eq:torque>`.
 
 The torque :math:`\vec{\Gamma}_{b,i}` on the virtual particle, is converted into a force at the colloidal boundary by,
 
@@ -90,18 +100,22 @@ The torque :math:`\vec{\Gamma}_{b,i}` on the virtual particle, is converted into
 
     \vec{F}_{b,i} = \frac{\vec{\Gamma}_{b,i} \times \hat{u}_{b,i}}{\ell_u}
 
-where we have assumed :math:`\vec{\hat{u}}_{b,i}{\ell_u}` and :math:`\vec{F}_{b,i}` are orthogonal (OK AS THERE'S NO TRANSLATIONAL MOTION).
+where the above is only valid with the assumption :math:`\hat{u}_{b,i}` and :math:`\vec{F}_{b,i}` are orthogonal.
+This assumption is motivated by the anchoring reorientation being purely rotational motion around the pivot point, and hence no colinear contributions between the force and orientation :math:`\hat{u}_{b,i}\cdot\hat{F}_{b,i} = 0`.
 
-Note that the force is subject to the head-tail symmetry of the orientation :math:`\vec{\hat{u}}_{b,i}{\ell_u}`, SHOW F(-U) = -F(U), making the force direction ambiguous.
-We select the orientation/force that points into the boundary (since colloids will move away from large elastic stress build up rather than into it.)
+Since the orientation :math:`\hat{u}_{b,i}` is head-tail symmetric, the force has an ambiguous sign under :math:`\vec{F}(-\hat{u}_{b,i})=-\vec{F}(\hat{u}_{b,i})`.
+For this reason, the force is chosen to be oriented into the boundary, motivated by nematic colloids moving away from large elastic stress in reducing elastic deformation.
 
-.. error::
-    TYLER: CLEAN UP THE ABOVE TOMORROW
+The increments to the colloid's velocity and angular velocity are
 
-.. error::
-    TYLER: MAKE A NOTE ABOUT THAT THIS ONLY CURRENT WORKS FOR NU = NORMAL DIRECTION OUT OF THE COLLOID.
+.. math::
+    :name: eq:impulsetocolloid
 
-Motion from boundary-boundary interactions
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    \Delta \vec{v}_{b,i}^{\mathrm{ori}} = I_b^{-1} \vec{F}_{b,\hat{n}}\delta t \\
+    \Delta \vec{\omega}_{b,i}^{\mathrm{ori}} =  \vec{r}\times (I_b^{-1}\vec{F}_{b,\hat{t}}\delta t)
 
-TO DO TOMORROW
+where the vector from the centre of mass to the collision on the wall is :math:`\vec{r}`,
+:math:`\vec{F}_{b,\hat{n}}=(\vec{F}_b\cdot\hat{n})\hat{n}` is the normal component and :math:`\vec{F}_{b,\hat{t}}=\vec{F}_b-(\vec{F}_b\cdot\hat{n})\hat{n}` is the tangential component the force.
+
+.. warning::
+    The current version only support mobile spherical colloids with homeotropic anchoring (:math:`\hat{\nu}=\hat{n}`)
