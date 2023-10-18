@@ -1,0 +1,156 @@
+This tutorial will show how to simulate a 2D passive nematic liquid crystal starting in a disordered state (because of random initial orientations) under periodic boundary conditions. Because the simulation parameters lie within the nematic regime, the simulation will relax towards an ordered state via the anhilation of topological defects.
+
+Input file
+==========
+
+::
+
+    {
+        "comment":          "Square geometry",
+        "domain":           [50, 50],
+        "simSteps":         500,
+        "comment":          "No warmup, in order to capture the relaxation towards the ordered state",
+        "warmUp":           0,
+
+        "comment":          "Andersen MPCD preserving angular momentum",
+        "rTech":            3,
+        "comment":          "Liquid crystal mode turned on",
+        "lc":               1,
+
+        "species":
+        [
+            {
+                "dens":         20,
+                "comment":      "Random inital orientation",
+                "oDist":        0
+            }
+        ],
+
+        "comment":          "Periodic Boundary Contions",
+        "domainWalls":      1,
+
+
+        "comment":          "We output the director and scalar order parameter fields",
+        "dirSOut":          10,
+        "comment":          "We output the position, orientation and charge of topological defects, if present",
+        "defectsOut":       10,
+        "comment":          "Outputting summary of the parameters used in the simulation",
+        "synopsisOut":      1
+    }
+
+
+Understanding the Script
+========================
+
+Here is the breakdown of the input script.
+
+::
+
+    {
+        "comment":          "Square geometry",
+        "domain":           [50, 50],
+        "simSteps":         500,
+        "comment":          "No warmup, in order to capture the relaxation towards the ordered state",
+        "warmUp":           0,
+
+We define the system size (50 by 50 in MPCD simulation units), and define how long the system will actually run and output. Because we are interested in capturing the relaxation towards the ordered state, we do not run any warmup.
+
+
+:: 
+
+    "comment":          "Andersen MPCD preserving angular momentum",
+    "rTech":            3,
+    "comment":          "Liquid crystal mode turned on",
+    "lc":               1,
+
+
+
+We also define the collision operator for the MPCD fluid (in this case, we model a nematic liquid crystal, so we need an angular momentum preserving collision operator) and turn on the liquid crystal mode.
+
+.. note::
+
+    Since we did not input a specific value for the nematic :ref:`mean field potential <NematicSection>` :math:`U` (tag ``mfpot``), the solver will use its default value :math:`U=10`. For an average population of 20, this leaves the system within the ordered nematic state.
+
+
+::  
+
+    "species":
+    [
+        {
+            "dens":         20,
+            "comment":      "Random inital orientation",
+            "oDist":        0
+        }
+    ],
+
+We say that every MPCD box should be initialized with 20 MPC particles and specifying a random initial orientation for the MPC particles, which sets the system to be in an isotropic state.
+
+::
+
+    "comment":         "Periodic Boundary Contions",
+    "domainWalls":      1,
+
+We say that the system has periodic boundary conditions.
+
+
+::      
+
+    "comment":          "We output the director and scalar order parameter fields",
+    "dirSOut":          10,
+    "comment":          "We output the position, orientation and charge of topological defects, if present",
+    "defectsOut":       10,
+    "comment":          "Outputting summary of the parameters used in the simulation",
+    "synopsisOut":      1
+
+We specify our outputs. Since we are interested in the liquid crystal aspect of the simulation, we output the director and scalar order parameter fields (every 10 time steps), the list of topological defects, with their position, polarization and charge (every 10 time steps) and turn on the sysnopsis file, which summarizes the parameters used in the simulation.
+
+::
+
+    }
+
+The end of the input file
+
+
+Running the Script
+==================
+
+Running
+=======
+
+This script can be run with 
+
+::
+
+    /<directory>/MPCD/mpcd.out -i <directory>/MPCD/SampleInputs/passiveNem2D/input.json -o <directory>/MPCD/<OUTPUT>
+
+Output
+======
+
+In the corresponding ``defects.dat``, you should now see the number of topological defects at each time step, with a list of their positions, charge and angle.  As time increses, the number of topological defects goes down.
+
+
+:: 
+
+    t	 numDefects	 
+    QX		 QY		 charge		 angle
+    0.00	292
+    6.00000e+00	 1.50000e+00	-0.500	 2.09440e+00
+    1.45000e+01	 1.50000e+00	00.500	 6.28319e+00
+    1.78077e+01	 5.34615e+00	-0.500	 1.75606e-01
+    2.20000e+01	 1.50000e+00	-0.500	 2.09440e+00
+    2.90000e+01	 1.50000e+00	00.500	 6.28319e+00
+    4.08333e+01	 1.83333e+00	00.500	 3.97138e-01
+    4.35000e+01	 1.50000e+00	00.500	 6.28319e+00
+    4.55000e+01	 2.00000e+00	-0.500	 2.01015e+00
+    4.65000e+01	 1.50000e+00	00.500	 6.28319e+00
+    1.27308e+01	 4.73077e+00	00.500	 3.66033e+00
+    1.38333e+01	 3.16667e+00	-0.500	 1.40946e+00
+    3.45000e+01	 2.50000e+00	00.500	 3.30748e+00
+    3.65000e+01	 2.50000e+00	00.500	 1.39846e+00
+    4.80000e+01	 2.50000e+00	-0.500	 2.45724e-01
+    3.07143e+00	 4.21429e+00	-0.500	 2.79461e-02
+    1.85000e+01	 3.50000e+00	00.500	 3.67896e+00
+    2.10000e+01	 4.00000e+00	00.500	 4.13180e+00
+    2.45000e+01	 3.50000e+00	00.500	 3.03671e+00
+    2.65000e+01	 3.50000e+00	-0.500	 1.32055e-01
+
