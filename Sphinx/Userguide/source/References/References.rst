@@ -64,3 +64,7 @@ Bibliography
 .. [Schimming2022] Schimming & Viñals (2022). `Singularity identification for the characterization of topology, geometry, and motion of nematic disclination lines <https://pubs.rsc.org/en/content/articlelanding/2022/SM/D1SM01584B>`_. *Soft Matter*, 18.
 
 .. [Binder]     See https://en.wikipedia.org/wiki/Binder_parameter.
+
+.. [Wu2014] Wu and Qi(2014), `Advantages of a finite extensible nonlinear elastic potential in lattice Boltzmann simulations <https://scholarworks.wmich.edu/hilltopreview/vol7/iss1/10/>`_, The Hilltop Review, vol 7. 
+
+.. [Bulacu2013] Bulacu, *et al* (2013), `Improved angle potentials for coarse-grained molecular dynamics simulations <https://pubs.acs.org/doi/full/10.1021/ct400219n>`_, Journal of Chemical Theory and Computation, vol 9.

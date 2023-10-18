@@ -1,4 +1,4 @@
-Molecular Dynamics (MD) numerically integrates the classical equations of motion for a large number of particles that interact via a set of pair potentials. It is a common approach to simulate polymer dynamics. Polymer molecules are composed of a large number of equal repeat units called monomers which are connected linearly by bonds. The dynamics of the chain monomers is determined by Newtons’ equations of motion. These equations are integrated using the velocity Verlet algorithm.  The standard implementation scheme of this algorithm is to 
+Molecular Dynamics (MD) numerically integrates the classical equations of motion for a large number of particles that interact via a set of pair potentials [Slater2009]_. It is a common approach to simulate polymer dynamics. Polymer molecules are composed of a large number of equal repeat units called monomers which are connected linearly by bonds. The dynamics of the chain monomers is determined by Newtons’ equations of motion. These equations are integrated using the velocity Verlet algorithm.  The standard implementation scheme of this algorithm is to 
 
 #. calculate :math:`{\vec v}(t+1/2 {\Delta}t) = {\vec v}(t) + 1/2 {\vec a}(t){\Delta}t`.
 
@@ -16,9 +16,9 @@ This algorithm gives the particle’s velocity and position at the next time ste
 
     U_{\text{LJ}}(r_{ij}) = 4\epsilon \left[ \left(\frac{\sigma}{r_{ij}}\right)^{12} - \left(\frac{\sigma}{r_{ij}}\right)^6 \right],
 
-where :math:`r_{ij}` is the separation, :math:`\epsilon` is the well depth and :math:`\sigma` is the effective diameter of the pair of MD particles.
+where :math:`r_{ij}` is the separation between two monomers, :math:`\epsilon` is the well depth and :math:`\sigma` is the effective diameter of the pair of MD particles.
 
-- **Weeks-Chandler-Andersen (WCA) Potential**, :math:`U_{\text{WCA}}`: A purely repulsive, truncated form   of the LJ potential called the Weeks-Chandler-Andersen potential is commonly used as a coarse-grained interaction. The LJ potential is shifted and truncated at its minimum value so that it ends smoothly at a distance :math:`r_c`. The WCA potential can be written as
+- **Weeks-Chandler-Andersen (WCA) Potential**, :math:`U_{\text{WCA}}`: A purely repulsive, truncated form   of the LJ potential commonly used as a coarse-grained interaction. The LJ potential is shifted and truncated at its minimum value so that it ends smoothly at a distance :math:`r_c`. The WCA potential can be written as
 
 .. math::
 
@@ -34,7 +34,7 @@ where :math:`r_{ij}` is the separation, :math:`\epsilon` is the well depth and :
 
 where :math:`r_c = \sqrt[6]{2}\sigma`.
 
-- **Finitely Extensible Bonds**, :math:`U_{\text{FENE}}`: In any coarse-grained model of a polymer, adjacent MD beads must be connected together to form a chain of monomers. The use of harmonic potentials can lead to unphysical bond stretching effects. For this reason, a finitely extensible force with a hard limit on the bond length is utilized. The most common choice is the finitely extensible nonlinear elastic potential (FENE):
+- **Finitely Extensible Bonds**, :math:`U_{\text{FENE}}`: In any coarse-grained model of a polymer, adjacent MD beads must be connected together to form a chain of monomers. The use of harmonic potentials can lead to unphysical bond stretching effects. For this reason, a finitely extensible force with a hard limit on the bond length is utilized [Wu2014]_. The most common choice is the finitely extensible nonlinear elastic potential (FENE):
 
 .. math::
 
@@ -42,31 +42,64 @@ where :math:`r_c = \sqrt[6]{2}\sigma`.
     = -\frac{k_{\text{FENE}}}{2} {r_0}^2 \ln 
     \left( 1-\frac{{r_{ij}}^2}{{r_0}^2} \right),
 
-where :math:`k_{\text{FENE}}` is a spring constant representing the stiffness of the bond inresponse to stretching and :math:`r_0` is the equilibrium length of the bonds.
+where :math:`k_{\text{FENE}}` is a spring constant representing the stiffness of the bond in response to stretching and :math:`r_0` is the equilibrium length of the bonds.
 
-- **Bond Bending Potential**, :math:`U_{\text{bend}}`: This potential captures the stiffness of the polymer in response to bending force. There are several bending potentials including angular harmonic, cosine harmonic or cosine expansion. For instance angular harmonic is given by
+.. _Bending Potential:
 
-.. math::
-
-    U_{\text{bend}}(\theta _{ijk}) = \frac{k_{\text {bend}}}{2} (\theta _{ijk} - \vartheta)^2.
-
-The angle :math:`\theta_{ijk}` is the angle created by three consecutive monomers :math:`i, j` and :math:`k` and :math:`\vartheta` is the equilibrium angle. The parameter to modulate the bend stiffness is :math:`k_{\text{bend}}`
-
-- **Coulombic Potential**, :math:`U_{\text{coul}}`: The bare electrostatic interaction between pairs of particles is given by the Coulombic potential
-
-.. note::
-
-    The equation is going to be added
-
-- **Nematic Coupling Potential**, :math:`U_{\text{Nem}}`: This potential aligns the bonds of the polymer with the local nematic orientation. it works similar to the
+- **Bond Bending Potential**, :math:`U_{\text{Bend}}`: This potential captures the stiffness of the polymer in response to bending force. There are several bending potentials including angular harmonic, cosine harmonic or cosine expansion [Bulacu2013]_. For instance angular harmonic is given by
 
 .. math::
 
-    U_{\text{bend}}(\theta _{ijk}) = \frac{k_{\text {bend}}}{2} (\theta _{ijk} - \vartheta)^2.
+    U_{\text{Bend}}(\theta _{ijk}) = \frac{k_{\text {Bend}}}{2} (\theta _{ijk} - \vartheta)^2.
 
-.. note::
+The angle :math:`\theta_{ijk}` is the angle created by three consecutive monomers :math:`i, j` and :math:`k` and :math:`\vartheta` is the equilibrium angle. The parameter to modulate the bend stiffness is :math:`k_{\text{Bend}}` .
 
-    This will be changed
+- **Coulombic Potential**, :math:`U_{\text{Coul}}`: The bare electrostatic interaction between pairs of particles is given by the Coulombic potential
+
+.. math::
+
+    U_{\text{Coul}}(r_{ij}) = \frac{1}{4 \pi \epsilon_0 \epsilon_r} \frac{Q_i Q_j}{r_{ij}}
+
+where :math:`Q_i` and :math:`Q_j` are the *effective* charges on each particle after charge reduction due
+to counterion condensation. For mesoscopic simulations, :math:`\epsilon_0 \epsilon_r` is an effective dielectric constant that includes screening effects due to the medium. Condensation effects can be encapsulated in the Bjerum length
+
+.. math::
+
+        \lambda_B = \frac {e^2}{4 \pi \epsilon_0 \epsilon_r K_BT}
+
+
+The Bjerum length is the distance beyond which thermal energy is greater than electrostatic energy. In terms of the Bjerum length, Coulombic interactions can be written
+
+.. math::
+
+    U_{\text{Coul}}(r_{ij}) = K_BT \frac{Q_i Q_j}{r_{ij}} \frac{\lambda_B}{r_{ij}}
+
+The Coulombic interactions are long-range scaling like :math:`∼ r_{ij}^{−1}`. The long-range contributions are important and for this reason, inclusion of electrostatic effects can be computationally expensive. However, in a solvent electrostatic interactions are screened by the electric double layer and so it is not always necessary to use :math:`U_{\text{Coul}}`. Often a much shorter-ranged electrostatic interaction will suffice.
+
+- **Debye-Huckel Potential**, :math:`U_{\text{DH}}`: The electrostatic interactions are typically screened. The Debye-Huckel potential is the approximation for the electrostatic potential of a charged sphere. This electric potential is given in terms of the zeta-potential. Since MD monomers do not conveniently have a zeta-potential could be replaced with the effective charge on the :math:`i_{th}` monomer (of radius :math:`r = \frac {\sigma}{2}` ) \ie. :math:`Q_{\text{eff}} = 4 \pi \epsilon_0 \epsilon_r r \zeta (1+r/\lambda_{\text{D}})`. The Debye length, :math:`\lambda_{\text{D}}`, is the length scale beyond which Coulombic interactions are screened by the distribution of counterions. Then the potential between two spheres of effective charge :math:`{Q_i}^{eff}` and :math:`{Q_j}^{eff}` in the Huckel limit of :math:`\sigma/\lambda_{\text{D}} \ll 1` becomes
+
+.. math::
+
+    U_{\text{Coul}}(r_{ij}) \approx K_BT \frac{Q_i Q_j}{e^2} \frac{\lambda_B}{r_{ij}} \exp(\frac{-r_{ij}}{\lambda_{\text{D}}})
+
+
+- **Nematic Coupling Potential**, :math:`U_{\text{Nem}}`: This potential aligns each bond of the polymer connecting two consecutive monomers with the local nematic orientation. it works similarly to the :ref:`Bond Bending Potential <Bending Potential>` with one difference. The angle in this case is the angle beween the bond and the local nematic orientation.
+
+.. math::
+
+    U_{\text{Nem}}(\theta _{ijk}) = \frac{k_{\text {Nem}}}{2} (\theta - \vartheta)^2.
+
+where :math:`\vartheta` is the equilibrium angle which in this case is **zero**. The parameter to modulate the alignment strength is :math:`k_{\text{Nem}}`.
+
+.. list-table:: 
+    :header-rows: 0
+    :widths: 50
+    :align: center
+
+    * - .. figure:: MD/coupling.png
+            :width: 40%
+            :align: center
+    * - The coupling potential is an angular harmonic potential, :math:`U_{\text{Nem}} = \frac{1}{2}k_{\text{Nem}} \theta^2`, between tangent along the backbone of the polymer and the local nematic director, :math:`{\vec n}_{c}`.
 
 The dynamical behavior of macromolecules in solution is strongly affected or even dominated by hydrodynamic interactions. Mesoscale hydrodynamic simulations can be used to introduce hydrodynamic interactions to molecular dynamic (MD) simulations and consequently to provide a full characterization of the polymer dynamics [Holm2008]_. This coupling to the fluid can be done in two ways. Either the MD beads can be included in the MPCD algorithm or the MPCD particles can be included in the MD calculations.
 
@@ -89,8 +122,4 @@ The second coupling scheme is more accurately described as a hybrid MPCD/MD appr
 The number of MD steps between an MPCD step can be much smaller that in the MD-in-MPCD scheme.
 
 In both coupling schemes, the MD particles are typically given a mass :math:`m_{\text{MD}}` that is larger than the MPCD particles’ mass m in order to achieve efficient coupling.
-
-.. note::
-
-    reference will be added
 
