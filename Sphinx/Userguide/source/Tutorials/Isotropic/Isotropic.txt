@@ -24,6 +24,8 @@ Input File
         "simSteps":         1000,
         "comment":          "Number of times steps to perform prior to outputting data --- this allows the system to reach equilibrium or steady state",
         "warmUp":           0,
+        "comment":          "Streaming time step in MPCD time units",
+        "dt":               0.1,
         "comment":          "Isotropic fluid using Andersen MPCD",
         "collOp":           2,
         "comment":          "MPCD relies on generating random numbers. If need to repeat a simulation exactly can set random seed by hand. seed==0 generates a 'random' random seed",
@@ -33,16 +35,16 @@ Input File
         "species":
         [
             {
-                "comment":      "dens is an alternative to pop for setting the average cell density. A density of 20 particles per MPCD cell is standard",    
-                "dens":         20,
-                "comment":      "An equivalent to the above line is ''pop': 50000', which would be need system included unaccessible volume like colloid interiors",
+                "comment":      "pop sets the total number of particles of this type in the simulation. Given the system size this sets an average cell density of 20 particles per MPCD cell, which is is standard",
+                "pop":         50000,
+                "comment":      "An equivalent to the above line is ''dens': 20'",
                 "comment":      "Mass of particles",
                 "mass":         1,
                 "comment":      "Initial velocity distribution --- MPCD quickly thermalizes due to thermostate. 0==isorandom; 4==Gaussian dist",
                 "vDist":        0
             }
         ],
-        "comment":          "All the above species information is the DEFAULT --- therefore, extreneous and could have left out",
+        "comment":          "All the above species information is the DEFAULT --- therefore, extraneous and could have left out",
         "comment":          "BOUNDARY CONDITION INPUTS",
         "c":                "BCs are four periodic boundary conditions (PBC) at the edges of the system box",
         "BC":
@@ -101,7 +103,7 @@ Input File
             }
         ],
         "comment":          "The above is just PBCs and since this is a standard BC, all those lines could be replaced by just ``domainWalls':1' sets PBCs around the domain",
-        "comment":          "Furthermore, `domainWalls':1' is the default so even that is extreneous and could have left out",
+        "comment":          "Furthermore, `domainWalls':1' is the default so even that is extraneous and could have left out",
         "comment":          "OUTPUTS",
         "comment":          "There are very many things that can be outputted but you will never need all of the possible output, so specify what to output",
         "comment":          "ALWAYS output a synopsis file so that you can check if the simulation is really what you thought it was",
@@ -196,6 +198,13 @@ In the warmup phase, the simulation runs but results are not outputted, allowing
 
 ::
 
+        "dt":               0.1,
+
+The streaming time step ``"dt"`` in MPCD units (see :ref:`Derived units <derivedUnits>`). 
+Varying the streaming time, will modify the (see :ref:`transport coefficients <chapterVisc>`). 
+
+::
+
         "collOp":            2,
 
 To set the MPCD collision operator (see :ref:`Collision operators <chapterCollOp>`) one uses the tag ``"collOp"`` or ``"rTech"`` (which are aliases). 
@@ -229,13 +238,14 @@ Within ``"species"``, the particle properties and initializations are specified.
         "species":
         [
             {
-                "dens":         20,
+                "pop":         50000,
             }
         ],
 
-``"dens"`` is an alternative to ``"pop"`` for setting the average cell density. 
-Since the simulation volume is :math:`50\times50`, an equivalent is ``"pop": 50000``. 
+``"pop"`` sets the total number of particles of this species type in the simulation. 
+Since the simulation volume is :math:`50\times50`, this produces a density of ``20`` particles per cell. 
 A density of ``20`` particles per MPCD cell is a standard choice (earlier studies would previously use ``5``). 
+``"dens"`` is an alternative to ``"pop"`` for setting the average cell density (see :ref:`Overrides <Overrides>`). 
 
 ::
 
@@ -268,7 +278,7 @@ Typical choices are ``"vDist": 0`` for isotropically random and ``4`` for Gaussi
 Because this is the last argument within this `"species"`, there is no comma at the end of this line. 
 
 .. note::
-    All of the species arguments given above are the **DEFAULT**; therefore, they are all extreneous and could have been completely left out. 
+    All of the species arguments given above are the **DEFAULT**; therefore, they are all extraneous and could have been completely left out. 
 
 ::
 
@@ -383,11 +393,16 @@ The other three BCs are the same but must pass through appropriate points by set
 
 ::
 
-        "comment":          "OUTPUTS",
-        "comment":          "There are very many things that can be outputted but you will never need all of the possible output, so specify what to output",
-        "comment":          "ALWAYS output a synopsis file so that you can check if the simulation is really what you thought it was",
-        "comment":          "Synopsis file also includes info like the viscosity of the fluid based on input parameters",
         "synopsisOut":      1,
+
+The ``.json`` input file also sets the outputs. 
+There are many optional outputs things that can be outputted but you will never need all of the possible output, so specify what to output",
+"comment":          "ALWAYS output a synopsis file so that you can check if the simulation is really what you thought it was",
+"comment":          "Synopsis file also includes info like the viscosity of the fluid based on input parameters",
+
+
+::
+
         "comment":          "debugOut specifies how much information is writen to the terminal. When programming you might want lots, when running small, local, simulations you might want a little (like just writing the current time step; debugOut==3) but when running on a cluster/super computer you don't want any (debugOut==0)",
         "debugOut":         3,
         "comment":          "All other outputs are NOT outputted if zero. If not zero, then they output data at a frequency determined by their value",

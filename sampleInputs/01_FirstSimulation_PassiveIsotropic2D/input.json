@@ -6,6 +6,8 @@
     "simSteps":         1000,
     "comment":          "Number of times steps to perform prior to outputting data --- this allows the system to reach equilibrium or steady state",
     "warmUp":           0,
+    "comment":          "Streaming time step in MPCD time units",
+    "dt":               0.1,
     "comment":          "Isotropic fluid using Andersen MPCD",
     "collOp":            2,
     "comment":          "MPCD relies on generating random numbers. If need to repeat a simulation exactly can set random seed by hand. seed==0 generates a 'random' random seed",
@@ -15,8 +17,8 @@
     "species":
     [
         {
-            "comment":      "dens is an alternative to pop for setting the average cell density. A density of 20 particles per MPCD cell is standard",    
-            "POP":         50000,
+            "comment":      "pop sets the total number of particles of this type in the simulation. Given the system size this sets an average cell density of 20 particles per MPCD cell, which is is standard",
+            "pop":          50000,
             "comment":      "An equivalent to the above line is ''dens': 20'",
             "comment":      "Mass of particles",
             "mass":         1,
@@ -24,7 +26,7 @@
             "vDist":        0
         }
     ],
-    "comment":          "All the above species information is the DEFAULT --- therefore, extreneous and could have left out",
+    "comment":          "All the above species information is the DEFAULT --- therefore, extraneous and could have left out",
     "comment":          "BOUNDARY CONDITION INPUTS",
     "c":                "BCs are four periodic boundary conditions (PBC) at the edges of the system box",
     "BC":
@@ -83,7 +85,7 @@
         }
     ],
     "comment":          "The above is just PBCs and since this is a standard BC, all those lines could be replaced by just ``domainWalls':1' sets PBCs around the domain",
-    "comment":          "Furthermore, `domainWalls':1' is the default so even that is extreneous and could have left out",
+    "comment":          "Furthermore, `domainWalls':1' is the default so even that is extraneous and could have left out",
     "comment":          "OUTPUTS",
     "comment":          "There are very many things that can be outputted but you will never need all of the possible output, so specify what to output",
     "comment":          "ALWAYS output a synopsis file so that you can check if the simulation is really what you thought it was",
