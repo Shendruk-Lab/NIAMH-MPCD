@@ -43,7 +43,7 @@
             "comment":      "PBCs displace/shift/teleport the particles in the normal direction",
             "DN":           50,
             "comment":      "PBCs do NOT modify particle positions in the tangential direction",
-            "DN":           0,
+            "DT":           0,
             "comment":      "PBCs do NOT modify particle velocity in either the normal or tangential directions --- MVN=multiplicative factor in normal direction; MVT=multiplicative factor in tangential direction",
             "MVN":          1,
             "MVT":          1

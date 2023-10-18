@@ -61,7 +61,7 @@ Input File
                 "comment":      "PBCs displace/shift/teleport the particles in the normal direction",
                 "DN":           50,
                 "comment":      "PBCs do NOT modify particle positions in the tangential direction",
-                "DN":           0,
+                "DT":           0,
                 "comment":      "PBCs do NOT modify particle velocity in either the normal or tangential directions --- MVN=multiplicative factor in normal direction; MVT=multiplicative factor in tangential direction",
                 "MVN":          1,
                 "MVT":          1
@@ -305,20 +305,13 @@ The first BC is the left-hand PBC.
                 "R":            0,
             },
 
+As described in :ref:`Boundary conditions <chapterBC>`, boundaries are composed of (i) :ref:`surfaces <subsection_boundarysurfaces>` and (ii) :ref:`rules <subsection_boundaryrules>`. 
+The arguments above set the :ref:`boundary surface <subsection_boundarysurfaces>` for a planar surface:
 
-As described in :ref:`Boundary conditions <chapterBC>`, BCs are composed of (i) :ref:`boundary surface <subsection_boundarysurfaces>` and (ii) :ref:`boundary rules <subsection_boundaryrules>`. 
-The arguments above set
-
-
-
-"Position of BC", 
-"Q":            [0, 0, 0],
-"Direction/surface normal",
-"aInv":         [1, 0, 0],
-"Power on terms --- 1==plane, 2==sphere or ellipsoid, etc",
-"P":            [1, 1, 1, 1],
-"Constant term --- typically, radius for spheres",
-"R":            0,
+* Position vector ``"Q"``. Here, the left-hand PBC passes through the origin. 
+* Inverse of the surface normal ``"aInv"``. The inverse is used because it is more convienent for ellipses and similar surfaces, while equivalent to the normal itself for planes and spheres. Here, the left-hand BC has a surface normal pointing in the +x direction. The sign matters since particles on the positive side of a surface are in accessible space, while particles on the negative side will trigger the :ref:`boundary rules <subsection_boundaryrules>`. 
+* Power on the terms in the surface equation ``"P"`` for the x-, y- and z-components and the constant term. Powers of ``1`` correspond to a plane, ``2`` to a sphere or ellipsoid, etc... Here, the planar PBC has powers of ``1`` on all terms. 
+* The constant term ``"R"``, typically employed for the radius of spheres. Here, it is zero. 
 
 ::
 
@@ -331,22 +324,13 @@ The arguments above set
                 "MVT":          1
             },
 
-As described in :ref:`Boundary rules <subsection_boundaryrules>`
-"comment":      "PBCs displace/shift/teleport the particles in the normal direction",
-"DN":           50,
-"comment":      "PBCs do NOT modify particle positions in the tangential direction",
-"DN":           0,
-"comment":      "PBCs do NOT modify particle velocity in either the normal or tangential directions --- MVN=multiplicative factor in normal direction; MVT=multiplicative factor in tangential direction",
-"MVN":          1,
-"MVT":          1
+As described in :ref:`Boundary rules <subsection_boundaryrules>`, when a particle impinges on a boundary surface, a set of rules will be applied to the particle. 
 
-"PBCs displace/shift/teleport the particles in the normal direction",
-"DN":           50,
-                "comment":      "PBCs do NOT modify particle positions in the tangential direction",
-                "DN":           0,
-                "comment":      "PBCs do NOT modify particle velocity in either the normal or tangential directions --- MVN=multiplicative factor in normal direction; MVT=multiplicative factor in tangential direction",
-                "MVN":          1,
-                "MVT":          1
+* For PBCs, particle position is shifted in the normal direction as set by ``"DN"``. The value should match the system size in the normal direction, which in this case is ``50``. 
+* For PBCs, particle position is *not* shifted in the tangential direction and so ``"DT": 0``. 
+* Similarly, PBCs do not modify particle velocity; therefore, the multiplicative factors on the velocity are set to unity:
+    * ``"MVN"`` is the multiplicative factor in normal direction
+    * ``"MVT"`` is the multiplicative factor in tangential direction.
 
 ::
 
@@ -384,8 +368,21 @@ As described in :ref:`Boundary rules <subsection_boundaryrules>`
                 "MVT":          1
             }
         ],
-        "comment":          "The above is just PBCs and since this is a standard BC, all those lines could be replaced by just ``domainWalls':1' sets PBCs around the domain",
-        "comment":          "Furthermore, `adomainWalls':1' is the default so even that is extreneous and could have left out",
+
+The other three BCs are the same but must pass through appropriate points by setting ``"Q"`` and have surface normals that point in the correct (signed) directions by setting ``"aInv"``. 
+
+.. note::
+    There exists an :ref:`override <Overrides>` to conveniently set:
+
+    * PBCs 
+        * ``"domainWalls":1``
+    * impermeable, no-slip planar walls
+        * ``"domainWalls":0``
+    
+    which match the simulation domain size ``"domain"``. 
+
+::
+
         "comment":          "OUTPUTS",
         "comment":          "There are very many things that can be outputted but you will never need all of the possible output, so specify what to output",
         "comment":          "ALWAYS output a synopsis file so that you can check if the simulation is really what you thought it was",
