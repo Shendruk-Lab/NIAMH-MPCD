@@ -80,18 +80,20 @@ This will open a file explorer window in the current directory of your WSL insta
 An alternative method is to save files in a Windows directory easily accessible from a root drive, such as ``C:\\``. 
 These can be accessed within WSL by navigating to ``/mnt/c/`` (or whichever drive you saved the files to).
 
-Before continuing, ensure git is installed on your WSL instance by running
+Before continuing, ensure git and a compiler (such as gcc) is installed on your WSL instance by running
 
 .. code-block:: console
 
     git --version
+    gcc --version
 
-If not, it will need to be installed via your Linux distribution's package manager.
+If you recieve a warning about either git or gcc not being installed after running these commands, then you will need to install them via your Linux distribution's package manager.
 In Ubuntu, this will be done by running
 
 .. code-block:: console
 
     sudo apt install git
+    sudo apt install gcc
 
 Once installed, you can continue with the :ref:`InstallCommon` section.
 
