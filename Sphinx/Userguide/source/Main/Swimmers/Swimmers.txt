@@ -8,7 +8,7 @@ The hydrodynamical interaction of model shaped-anisotropic bacilliform are simul
 To model the bacilliform body of swimming microbes, an ADS model is proposed composed of two monomers (head and middle) simulating the body, subject to an explicit propulsion force applied in the dimer's polar axis. The two monomers are connected by a spring.  
 The surrounding MPCD fluid sees these monomers point-particles, but excluded volume with other swimmers/obstacles (Lennord-Jones potential) can be turned on (default) or off.
 
-The swimmers induce hydrodynamical forces on the surrounding MPCD fluid, which captures the far-flow field of swimming microbes.
+The swimmers can induce hydrodynamical forces on the surrounding MPCD fluid, which captures the far-flow field of swimming microbes.
 
 The swimmer has a self-propulsion force, which is applied split evenly between the head and middle monomer to induce self-propulsion. Simultaneously, the head and middle monomer exert an equal drag force on the MPCD particles in the box they inhabit.
 To make the sum of forces on the fluid force-free, an opposite force to these two drag forces is applied at a localized tail position. This induces the dipole force, which results in the far-flow field of swimming microbes. 
