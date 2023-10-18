@@ -155,3 +155,32 @@ In the corresponding ``defects.dat``, you should now see the number of topologic
     4.40000e+01	 2.60000e+01	-0.500	 1.29505e+00
     1.30000e+01	 4.10000e+01	00.500	 5.30896e+00
 
+.. warning::
+
+    The defect tracker is unable to detect defects that lie nearby a periodic boundary.
+    As such, this can end up in the output file reporting an odd number of topological defects.
+
+The figure below shows the defect unbinding process
+
+.. list-table:: 
+    :header-rows: 0
+    :align: center
+
+
+    * - .. image:: ./ActiveNematic/active.png
+            :width: 100%
+            :align: center
+    * - Time evolution of the oriented nematic. Initially the nematic is oriented along the     :math:`y`-axis. Active flows then cause a bending instability that emerges first as sinusoidal waves and ends up in active turbulence, with unbinded +1/2 and -1/2 topological defects (depicted by red and blue symbols respectively). The odd number of topological defects arises because some defect lie to close to the boundary and are not detected by the tracker.
+
+
+We can also visualize the active flows driving this instability 
+
+.. list-table:: 
+    :header-rows: 0
+    :align: center
+
+
+    * - .. image:: ./ActiveNematic/active_flow.png
+            :width: 100%
+            :align: center
+    * - Time evolution of the system's flow. When the system is ordered, there are no cohesive active flows and all flows come from the thermostat (i.e., they are stochastic). As the nematic starts to bend, active forces start to emerge, driving cohesive flows that, in turn, favour the bending of the nematic. When defects unbind, the system enters into turbulence. (Notice that the scale of the color bar changes at each time frame).
