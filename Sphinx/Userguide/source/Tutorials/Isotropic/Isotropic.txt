@@ -25,9 +25,9 @@ Input File
         "comment":          "Number of times steps to perform prior to outputting data --- this allows the system to reach equilibrium or steady state",
         "warmUp":           0,
         "comment":          "Isotropic fluid using Andersen MPCD",
-        "rTech":            2,
+        "collOp":           2,
         "comment":          "MPCD relies on generating random numbers. If need to repeat a simulation exactly can set random seed by hand. seed==0 generates a 'random' random seed",
-        "seed":            0,
+        "seed":             0,
         "comment":          "FLUID PARTICLE SPECIES INPUTS",
         "comment":          "All the information regarding the chemical species --- can have multiple species but commonly just one species",
         "species":
@@ -101,7 +101,7 @@ Input File
             }
         ],
         "comment":          "The above is just PBCs and since this is a standard BC, all those lines could be replaced by just ``domainWalls':1' sets PBCs around the domain",
-        "comment":          "Furthermore, `adomainWalls':1' is the default so even that is extreneous and could have left out",
+        "comment":          "Furthermore, `domainWalls':1' is the default so even that is extreneous and could have left out",
         "comment":          "OUTPUTS",
         "comment":          "There are very many things that can be outputted but you will never need all of the possible output, so specify what to output",
         "comment":          "ALWAYS output a synopsis file so that you can check if the simulation is really what you thought it was",
@@ -138,6 +138,9 @@ Understanding the Script
 ========================
 
 In this first script, many options are being included for the purpose of introducing them --- in future tutorials and when users create their own scripts, often default values will be used and so the arguments can be left out. 
+
+.. warning::
+    This tutorial goes through this basic input script line-by-line to explain each argument. 
 
 Here is the breakdown of the input script. 
 
@@ -179,6 +182,7 @@ A 3D simulation of a :math:`50\times50\times50` domain would instead set
         "simSteps":         1000,
 
 The number of simulations steps tells the simulation how many iterations to loop over. 
+This value should be an integer. 
 
 .. note:: 
     ``"simSteps"`` is in iterations/steps, **not the time in MPCD units** τ (see :ref:`Derived units <derivedUnits>`). 
@@ -192,10 +196,11 @@ In the warmup phase, the simulation runs but results are not outputted, allowing
 
 ::
 
-        "rTech":            2,
+        "collOp":            2,
 
-Set the MPCD collision operator (see :ref:`Collision operators <chapterCollOp>`) one uses the tag ``"rTech"`` or ``"collOp"`` (which are aliases). 
-By choosing ``2`` here, the collision operator is being set to the basic Andersen thermostatted operator (see :ref:Andersen-thermostatted MPCD `<Andersen>`). 
+To set the MPCD collision operator (see :ref:`Collision operators <chapterCollOp>`) one uses the tag ``"collOp"`` or ``"rTech"`` (which are aliases). 
+By choosing ``2`` here, the collision operator is being set to the basic Andersen thermostatted operator (see :ref:`Andersen-thermostatted MPCD <Andersen>`). 
+Many other options are available, including :ref:`SRD <SRD>` (``"collOp": 0`` or ``1``), :ref:`angular-conserving Andersen thermostatted MPCD <Andersen>` (``"collOp": 3``) and :ref:`others <chapterCollOp>`. 
 
 ::
 
@@ -208,44 +213,143 @@ The seed used by a simulation is written to ``synopsis.dat`` (see :ref:`Outputs 
 
 ::
 
-        "comment":          "FLUID PARTICLE SPECIES INPUTS",
-        "comment":          "All the information regarding the chemical species --- can have multiple species but commonly just one species",
         "species":
         [
             {
-                "comment":      "dens is an alternative to pop for setting the average cell density. A density of 20 particles per MPCD cell is standard",    
+                <arguments>
+            }
+        ],
+
+To set the particle properties (see :ref:`Particle properties <chapterParticles>`) and initializations (see :ref:`Initialization <chapterInit>`), the particles are divided into species. 
+For multiphase flows (see :ref:`Multiphase <chapter10>`), the simulation can include multiple species, but typically only a single fluid species is required. 
+Within ``"species"``, the particle properties and initializations are specified. 
+
+::
+
+        "species":
+        [
+            {
                 "dens":         20,
-                "comment":      "An equivalent to the above line is ''pop': 50000', which would be need system included unaccessible volume like colloid interiors",
-                "comment":      "Mass of particles",
+            }
+        ],
+
+``"dens"`` is an alternative to ``"pop"`` for setting the average cell density. 
+Since the simulation volume is :math:`50\times50`, an equivalent is ``"pop": 50000``. 
+A density of ``20`` particles per MPCD cell is a standard choice (earlier studies would previously use ``5``). 
+
+::
+
+        "species":
+        [
+            {
                 "mass":         1,
-                "comment":      "Initial velocity distribution --- MPCD quickly thermalizes due to thermostate. 0==isorandom; 4==Gaussian dist",
+            }
+        ],
+
+The mass of individual MPCD particles is set by ``"mass"``. 
+
+.. warning:: 
+    The MPCD particle mass is a **fundamental unit** (see :ref:`Fundamental units <set_values>`). 
+    Like thermal energy :math:`k_\text{B}T` and cell size :math:`a`, mass should *always* be set to unity. 
+    However, to allow :ref:`multiphase fluids <chapter10>` to have different material properties it is technically allowed to vary. 
+
+::
+
+        "species":
+        [
+            {
                 "vDist":        0
             }
         ],
-        "comment":          "All the above species information is the DEFAULT --- therefore, extreneous and could have left out",
-        "comment":          "BOUNDARY CONDITION INPUTS",
-        "c":                "BCs are four periodic boundary conditions (PBC) at the edges of the system box",
+
+In addition to setting the properties of the species, the initializations are also set here. 
+MPCD quickly thermalizes and so the choice for the initial velocity distribution should have little consequence. 
+Typical choices are ``"vDist": 0`` for isotropically random and ``4`` for Gaussian distributions of the components. 
+Because this is the last argument within this `"species"`, there is no comma at the end of this line. 
+
+.. note::
+    All of the species arguments given above are the **DEFAULT**; therefore, they are all extreneous and could have been completely left out. 
+
+::
+
         "BC":
         [
             {
-                "c":            "Left PBC",
+                <arguments for first BC>
+            },
+            {
+                <arguments for 2nd BC>
+            },
+            {
+                <arguments for 3rd BC>
+            },
+            {
+                <arguments for 4th BC>
+            }
+        ],
+
+In this example, there are four boundary conditions (BC), each given as an element of the array set by the argument ``"BC"``. 
+Boundary coditions must always be set to contain the domain (though overrides exist for convienence, see :ref:`Overrides <Overrides>`). 
+In this case, four periodic boundary conditions (PBC) are set at the edges of the domain. 
+The first BC is the left-hand PBC. 
+
+::
+
+        "BC":
+        [
+            {
                 "phantom":      0,
-                "comment":      "Position of BC",
                 "Q":            [0, 0, 0],
-                "comment":      "Direction/surface normal",
                 "aInv":         [1, 0, 0],
-                "comment":      "Power on terms --- 1==plane, 2==sphere or ellipsoid, etc",
                 "P":            [1, 1, 1, 1],
-                "comment":      "Constant term --- typically, radius for spheres",
                 "R":            0,
-                "comment":      "PBCs displace/shift/teleport the particles in the normal direction",
+            },
+
+
+As described in :ref:`Boundary conditions <chapterBC>`, BCs are composed of (i) :ref:`boundary surface <subsection_boundarysurfaces>` and (ii) :ref:`boundary rules <subsection_boundaryrules>`. 
+The arguments above set
+
+
+
+"Position of BC", 
+"Q":            [0, 0, 0],
+"Direction/surface normal",
+"aInv":         [1, 0, 0],
+"Power on terms --- 1==plane, 2==sphere or ellipsoid, etc",
+"P":            [1, 1, 1, 1],
+"Constant term --- typically, radius for spheres",
+"R":            0,
+
+::
+
+        "BC":
+        [
+            {
                 "DN":           50,
+                "DN":           0,
+                "MVN":          1,
+                "MVT":          1
+            },
+
+As described in :ref:`Boundary rules <subsection_boundaryrules>`
+"comment":      "PBCs displace/shift/teleport the particles in the normal direction",
+"DN":           50,
+"comment":      "PBCs do NOT modify particle positions in the tangential direction",
+"DN":           0,
+"comment":      "PBCs do NOT modify particle velocity in either the normal or tangential directions --- MVN=multiplicative factor in normal direction; MVT=multiplicative factor in tangential direction",
+"MVN":          1,
+"MVT":          1
+
+"PBCs displace/shift/teleport the particles in the normal direction",
+"DN":           50,
                 "comment":      "PBCs do NOT modify particle positions in the tangential direction",
                 "DN":           0,
                 "comment":      "PBCs do NOT modify particle velocity in either the normal or tangential directions --- MVN=multiplicative factor in normal direction; MVT=multiplicative factor in tangential direction",
                 "MVN":          1,
                 "MVT":          1
-            },
+
+::
+
             {
                 "c":            "Right PBC",
                 "phantom":      0,

@@ -1,0 +1,11 @@
+
+OVERRIDES
+
+* dens --- override pop
+* domainWalls  --- NOT override
+1 PBCs
+0 impermeable, no-slip
+ADDITIVE (??)
+* "homeotropic" 1 OVERRIDE MUN and MUT
+* "planar" 1  OVERRIDE MUN and MUT
+* Checkpoint timer out. In Checkpointing Override check
