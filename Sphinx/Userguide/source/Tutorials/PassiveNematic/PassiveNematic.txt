@@ -154,3 +154,14 @@ In the corresponding ``defects.dat``, you should now see the number of topologic
     2.45000e+01	 3.50000e+00	00.500	 3.03671e+00
     2.65000e+01	 3.50000e+00	-0.500	 1.32055e-01
 
+The figure below shows relaxation of the nematic towards an ordered state
+
+.. list-table:: 
+    :header-rows: 0
+    :align: center
+
+
+    * - .. image:: ./PassiveNematic/passive.png
+            :width: 100%
+            :align: center
+    * - Time evolution of nematic liquid crystal. Initially the nematic is in a disordered state. Since this state is energetically costly, with a high number of +1/2 and -1/2 topological defects (depicted by red and blue symbols respectively), the nematic relaxes towards an ordered state. It does so b y anhilating pais of defects with opposite charge.
