@@ -47,4 +47,6 @@ A screenshot of a typical frame of the resulting movie is shown below.
     :alt: Logo
     :scale: 50%
     :align: center
+
+    A typical frame of account movie produced by this script.
     
