@@ -1,0 +1,104 @@
+Flow past 'square' obstacle
+===========================
+
+This tutorial shows how to generate an isotropic simulation in periodic boundary conditions past a square-like object, 
+with gravity turned on in the x-direction. We cannot implement an actual square-shaped object, so instead we use a squircle, essentially a 
+higher order version of a sphere. See the :ref:`squircle section <Squircle>` for more details.
+This tutorial is based on the input file found in MPCD/SampleInputs/flowPastSquareObstacle/input.json
+
+Input File
+==========
+::
+
+    {
+        "domain":           [200, 100],
+        "warmUp":           1000,
+        "simSteps":         1000,
+        "comment":          "Isotropic fluid using Andersen MPCD",
+        "collOp":           2,
+        "grav":             [0.002, 0, 0],
+        "mag":              [0, 0, 0],
+        "species":
+        [
+            {
+                "comment":      "For the density to be 20, must subtract the volume of the obstacle",
+                "pop":         398000
+            }
+        ],
+        "debugOut":         3,
+        "flowOut":          100,
+        "pressureOut":      0,
+        "avVelOut":         10,
+        "energyOut":        10,
+        "synopsisOut":      1,
+        "checkpointOut":    0,
+        "comment":          "Periodic boundary conditions on the domain",
+        "domainWalls":      1,
+        "BC":
+        [
+            {
+                "comment":      "A fixed squircle obstacle with impermeable, no-slip BCs",
+                "phantom":      1,
+                "Q":            [100, 50, 0],
+                "aInv":         [1, 1, 0],
+                "P":            [8, 8, 1, 8],
+                "R":            10,
+                "DN":           0,
+                "MVN":          -1,
+                "MVT":          -1
+            }
+        ]
+    }
+
+Understanding the Script
+========================
+
+To understand most of the input script, see the tutorials above. In particular it is very similar to :ref:`isotropic fluid input file<Isoptropic>`.
+The important differences are below.
+
+::
+
+    "grav":             [0.002, 0, 0],
+
+This line turns on gravity in the x-direction, with an intensity of 0.002 force density in MPCD unit.
+
+::
+
+    [
+            {
+                "comment":      "For the density to be 20, must subtract the volume of the obstacle",
+                "pop":         398000
+            }
+    ],
+
+Instead of djkdsnjkdd
+
+::
+
+     "BC":
+        [
+            {
+                "comment":      "A fixed squircle obstacle with impermeable, no-slip BCs",
+                "phantom":      1,
+                "Q":            [100, 50, 0],
+                "aInv":         [1, 1, 0],
+                "P":            [8, 8, 1, 8],
+                "R":            10,
+                "DN":           0,
+                "MVN":          -1,
+                "MVT":          -1
+            }
+        ]
+
+The squircle
+
+Running
+=======
+
+This script can be run with 
+
+::
+
+    /<directory>/MPCD/mpcd.out -i <directory>/MPCD/SampleInputs/flowPastSquareObstacle/input.json <directory>/MPCD/<OUTPUT>
+
+and its results can be visualised with flowFieldAnimated.py.

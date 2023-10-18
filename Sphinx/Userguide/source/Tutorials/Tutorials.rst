@@ -40,3 +40,8 @@ Dumbbell swimmers
 ***********
 
 .. include:: 3DCylinder.txt
+
+Flow Past a 'Square' Obstacle
+*****************************
+
+.. include:: FlowPastSquareObstacle/FlowPastSquareObstacle.txt

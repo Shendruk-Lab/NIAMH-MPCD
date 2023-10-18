@@ -65,6 +65,7 @@ gives output
 
 The output may vary depending on script, but will always be the most up-to-date description of the script's arguments.
 
+.. _ConsistentArguments:
 Consistent arguments
 ====================
 

@@ -1,1 +1,45 @@
-swimmerRefFrame_flow2D
+Purpose
+=======
+
+This script produces a plot of the average flow field around a dumb dumbbell swimmer. The swimmer is always centered in the final plot, and there is
+the possibility to rotate it so that the averaging is always done with respect to swimmer orientation. An animation can be produced of the unaveraged process.
+
+Command to run
+==============
+
+::
+
+    python3 analysisScripts/swimmerRefFrame_flow2D.py dataname inputname start finish avdim rotAx --qx [qx] --qy [qy] -a [a] -m [m] -k [k]
+
+Most arguments are described in the :ref:`consistent arguments <ConsistentArguments>` section. The only ones that are not are rotax, qx, qy, and m: they are described below.
+Arguments preceded by - or -- are optional.
+
+- ``rotAx``
+    Select wether to only center the swimmer (0) in the plot or to also rotate it so that it lies along the x axis (1).
+- ``m`` 
+    Select whether to make an animation or just produce an image averaged over the length of the simulation.
+- ``qx`` 
+    Only show every qx arrow in x. Set to 1 by default.
+- ``qy`` 
+    Only show every qy arrow in y. Set to 1 by default.
+
+Outputted files
+===============
+
+A pdf image called swimmerVelField_refFrameRotated_av.pdf or swimmerVelField_RefFrameCentred_av.pdf depending on the value of rotAx.
+If -m is set to 1, a movie called swimmerVelField_refFrameRotated_animation.mp4 or swimmerVelField_RefFrameCentred_animation is also produced.
+If -k is set to 1, every frame of the movie will be kept as a png file.
+
+Plots of typical centered and rotated outputs are shown below.
+
+.. list-table:: 
+    :header-rows: 0
+    :widths: 50 50
+    :align: center
+
+    * - .. image:: swimmerAnalysisImages/SwimmerCentered.png
+            :width: 95%
+            :align: center
+      - .. image:: swimmerAnalysisImages/SwimmerRotated.png
+            :width: 95%
+            :align: center
