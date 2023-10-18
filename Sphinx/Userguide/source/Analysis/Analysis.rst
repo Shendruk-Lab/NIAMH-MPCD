@@ -14,6 +14,7 @@ Examples of their usage can be found in :ref:`the tutorials section <tutorials>`
     These analysis scripts are provided primarily to quickly verify simulation output for first time users, and to give an example of how to parse MPCD's output files.
     Users are expected to develop their own analysis scripts appropriate for their own purposes.
 
+.. _CommonArgument:
 Common
 ******
 

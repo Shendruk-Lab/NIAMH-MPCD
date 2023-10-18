@@ -1,1 +1,26 @@
-swimmerTraj_fields2D
+Command to run
+==============
+
+::
+
+    python3 analysisScripts/swimmerTraj_fields2D.py dataname inputname start finish qx qy avdim [fieldtype] -a -k
+
+Most arguments are described in the :ref:`common <CommonArgument>` section. The only one that is not is fieldtype. 
+
+.. code-block:: console
+
+    fieldtype              Select which field to average. Can take three possible values: 'vel' for the velocity field, 'vort' for the vorticity field, or 'nem' for the nematic field.
+
+Outputted files
+===============
+
+A video called swimmerVelField_animation.mp4, swimmerVorField_animation.mp4, or swimmerDirField_animation.mp4 will be outputted, depending on which
+argument was given for 'fieldtype'. If -k is set to 1, every frame of the movie will be kept as a png file.
+
+A screenshot of a typical movie is shown below.
+
+.. figure:: swimmerAnalysisImages/SwimmerFlow.png
+    :alt: Logo
+    :scale: 35%
+    :align: center
+    
