@@ -13,17 +13,14 @@ The swimmers induce hydrodynamical forces on the surrounding MPCD fluid, which c
 The swimmer has a self-propulsion force, which is applied split evenly between the head and middle monomer to induce self-propulsion. Simultaneously, the head and middle monomer exert an equal drag force on the MPCD particles in the box they inhabit.
 To make the sum of forces on the fluid force-free, an opposite force to these two drag forces is applied at a localized tail position. This induces the dipole force, which results in the far-flow field of swimming microbes. 
 
-.. error::
-    TYLER: Please add caption to figure. Also if have better quality picture, please add.
 
-.. figure:: Swimmers/swimmerSchematic.jpg
+.. figure:: Swimmers/swimmerschematic1.jpg
     :alt: Logo
-    :scale: 150%
+    :scale: 50%
     :align: center
 
-.. image:: Swimmers/1.jpg
-    :align: center
-
+    Schematic of Dumbbell swimmer. it contains two monomers (head and middle) connected with a FENE spring. The two monomers exert drag forces on their surrounding fluid, while at a localized tail position away from the middle
+    an opposite but equal force to these drag forces (the total propulsion force) is also applied on the surrounding fluid. This results in a dipolar far flow field. 
 Besides that, the swimmer monomers are treated as other MD particles.
 
 Swimmers are included in the code by adding the following input script into the input file
@@ -47,6 +44,8 @@ Swimmers can have the following additional interactions:
 
 Input Guide
 -----------
+
+The following inputs are necesarry to define a swimmer are their defaults are not set to zero.
 
 ::
 
@@ -105,6 +104,12 @@ These set the initial distribution of swimmer position (0: randomly placed withi
     `midMSwim`      | int           | 20                 | Mass of middle monomer
 
 Mass of swimmer. You want this to be around the density of the fluid. 
+
+Extra input
+-----------
+
+The following inputs are expansions on the ADS model. Hence, their default input parameters are set to zero.
+
 
 ::
 
