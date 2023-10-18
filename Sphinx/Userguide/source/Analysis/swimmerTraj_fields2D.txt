@@ -11,7 +11,7 @@ Command to run
 
     python3 analysisScripts/swimmerTraj_fields2D.py [dataname] [inputname] [start] [finish] [avdim] [fieldtype] --qx [qx] --qy [qy] -a [a] -k [k]
 
-Most arguments are described in the :ref:`consistent arguments <ConsistentArguments>` section. The only ones that are not are fieldtype, qx, and qy`: they are described below.
+Most arguments are described in the :ref:`consistent arguments <ConsistentArguments>` section. The only ones that are not are fieldtype, qx, and qy: they are described below.
 Arguments preceded by - or -- are optional.
 
 - ``fieldtype`` 
