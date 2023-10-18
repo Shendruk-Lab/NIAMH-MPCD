@@ -5,7 +5,7 @@ For this algorithm, boundary conditions are applied directly to fluid particles 
 
 The following steps are required:
 
-- Defining the surfaces
+- Surface definitions
 - Boundary condition rules
 
 These two processes can model a wide variety of confining systems, including open systems (through periodic boundary conditions), channels and confinement in complex environments.

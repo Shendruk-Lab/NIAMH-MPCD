@@ -5,25 +5,24 @@ There are multiple forms of implemented surfaces, which can be combined (non-zer
 Standard surfaces
 -----------------
 
-Standard surfaces have the basic form,
-
-.. error::
-  TYLER: Nearly all equations named "eq:surface". Gave numbers. Give better names.
+Standard surfaces have the form,
 
 .. math::
-    :name: eq:surface1
+    :name: eq:surface
 
-    S(\vec{x})=[A_x\left(x-Q_x\right)]^{p_x} + [A_y\left(y-Q_y\right)]^{p_y} + [A_z\left(z-Q_z\right)]^{p_z} - R^{p_R} = 0
+    S^S(\vec{x})=[A_x\left(x-Q_x\right)]^{p_x} + [A_y\left(y-Q_y\right)]^{p_y} + [A_z\left(z-Q_z\right)]^{p_z} - R^{p_R} = 0
 
-where the surface parameters represent DESCRIBE A, Q and R. Writing surfaces in this way is versatile and enables following surfaces to be created
+where the surface parameters represent the surface position's :math:`\vec{Q}=(Q_x,Q_y,Q_z)`,
+surface coefficient's :math:`\vec{A}=(A_x,A_y,A_z)`, surface power's :math:`(p_x,p_y,p_z,p_R)` and radius :math:`R`.
+Writing surfaces in this way is versatile and enables following surfaces to be created
 
-1. Plane
+1. **Plane**
 
   To construct a plane, set :math:`p_x=p_y=p_z=p_R=1`,
   :math:`Q_x=Q_y=Q_z=0` and :math:`R=d` to give the surface equation
 
   .. math::
-      :name: eq:surface2
+      :name: eq:surfaceplane1
 
       S(\vec{x})= A_x x + A_y y + A_z z  - d = 0
 
@@ -31,7 +30,7 @@ where the surface parameters represent DESCRIBE A, Q and R. Writing surfaces in 
   Alternatively, can write the surface equation with :math:`R=0` so that
 
   .. math::
-      :name: eq:surface3
+      :name: eq:surfaceplane2
 
       S(\vec{x})= A_x (x-Q_x) + A_y(y-Q_y) + A_z (z-Q_z) = 0
 
@@ -44,13 +43,18 @@ where the surface parameters represent DESCRIBE A, Q and R. Writing surfaces in 
 
      CAPTION
 
-2. Sphere
+  EXAMPLE OF USE
 
-  To construct a sphere, :math:`p_x=p_y=p_z=p_R=2` and
-  :math:`A_x=A_y=A_z=1` to give the surface equation
+  HOW CAN CONSTRUCT CONFINING WALLS IN A SYSTEM
+  MENTION THE DEFAULT AND LINK IN PBC
+
+2. **Sphere**
+
+  To construct a sphere, :math:`p_x=p_y=p_z=p_R=2`,
+  :math:`A_x=A_y=A_z=1` and :math:`R\neq1` to give the surface equation
 
   .. math::
-      :name: eq:surface4
+      :name: eq:surfacesphere
 
       S(\vec{x})= \left(x-Q_x\right)^2 + \left(y-Q_y\right)^2 + \left(z-Q_z\right)^2  - R^2 = 0
 
@@ -63,13 +67,15 @@ where the surface parameters represent DESCRIBE A, Q and R. Writing surfaces in 
 
      CAPTION
 
-3. Ellipsoid
+  EXAMPLE OF USE
+
+3. **Ellipsoid**
 
   To construct an ellipsoid, :math:`p_x=p_y=p_z=p_R=2` and
   :math:`A_x=\frac{1}{a}, A_z=\frac{1}{b}, A_z=\frac{1}{c}` and :math:`R=1` to give the surface equation
 
   .. math::
-      :name: eq:surface5
+      :name: eq:surfaceellipsoid
 
       S(\vec{x})= \left(\frac{x-Q_x}{a}\right)^2 + \left(\frac{y-Q_y}{b}\right)^2 + \left(\frac{z-Q_z}{c}\right)^2  - 1 = 0
 
@@ -82,16 +88,18 @@ where the surface parameters represent DESCRIBE A, Q and R. Writing surfaces in 
 
      CAPTION
 
-4. Cylinder
+  EXAMPLE OF USE
+
+4. **Cylinder**
 
   A cylinder aligned along :math:`\hat{e}_z` can be constructed using :math:`p_x=p_y=p_R=2`, :math:`A_x=A_y=1, A_z=0` and :math:`R\neq 0`.
 
   .. math::
-      :name: eq:cylinder
+      :name: eq:surfacecylinder
 
       S(\vec{x})= \left(x-Q_x\right)^2 + \left(y-Q_y\right)^2 - R^2 = 0
 
-  Describing an cylinder centred at :math:`\vec{Q} = (Q_x,Q_y)` on the :math:`XY` plane with radius :math:`R`.
+  Describing an cylinder centred at :math:`\vec{Q} = (Q_x,Q_y)` on the :math:`xy` plane with radius :math:`R`.
 
   .. figure:: BC/bc_images/Cylinder.png
      :alt: Logo
@@ -100,14 +108,16 @@ where the surface parameters represent DESCRIBE A, Q and R. Writing surfaces in 
 
      CAPTION
 
+  EXAMPLE OF USE
 
-5. Squircle
+
+5. **Squircle**
 
   A squircle is a surface that is intermediate between a sphere and a cube.
   The construction of a squircle has :math:`p_x=p_y=p_z=p_R=4` and :math:`A_x=A_y=A_z=1`
 
   .. math::
-      :name: eq:surface6
+      :name: eq:surfacesquircle
 
       S(\vec{x})= \left(x-Q_x\right)^4 + \left(y-Q_y\right)^4 + \left(z-Q_z\right)^4  - R^4 = 0
 
@@ -118,16 +128,19 @@ where the surface parameters represent DESCRIBE A, Q and R. Writing surfaces in 
      :scale: 30%
      :align: center
 
-     Figure caption
+     CAPTION
 
-6. Superellipsoid
+  EXAMPLE OF USE
 
-  A superellipse is a closed surface that resembles an ellipse, ..., but with different shape.
+6. **Superellipsoid**
+
+  A superellipse is a closed surface that resembles an ellipse, featuring a semi-major axis and semi-minor axis, but with different shape.
   The construction of a superellipse has :math:`p_x=p_y=p_z=p_R=n` and
-  :math:`A_x=\frac{1}{a}, A_z=\frac{1}{b}, A_z=\frac{1}{c}` and :math:`R=1`
+  :math:`A_x=\frac{1}{a}, A_z=\frac{1}{b}, A_z=\frac{1}{c}` and :math:`R=1`.
+  A super ellipsoid provide an increasingly closer approximation to a cuboid for large positive :math:`n`.
 
   .. math::
-      :name: eq:surface7
+      :name: eq:surfacesuperellipsoid
 
       S(\vec{x})= \left(\frac{x-Q_x}{a}\right)^n + \left(\frac{y-Q_y}{b}\right)^n + \left(\frac{z-Q_z}{c}\right)^n  - 1 = 0
 
@@ -136,37 +149,155 @@ where the surface parameters represent DESCRIBE A, Q and R. Writing surfaces in 
      :scale: 30%
      :align: center
 
-     Figure caption
+     CAPTION
 
-  Make a comment about the superellipsoid making a closer approximation to a sphere for large positive n
-  Show when n is smaller than 1.
 
 Additional surface forms
 ------------------------
 
-Other implemented surfaces include (wavy wall stuff) and (other equations)
+MPCD boundaries are versatile and many possible surface geometries can be implemented.
+Two other types of in-built surfaces include wavy surfaces,
+and boundaries with higher rotational symmetries.
 
-The modulated surfaces take the surface equations
+Wavy surfaces
+^^^^^^^^^^^^^
+
+WAVYPLANES, WAVYSPHERES and WAVYCYLINDERS can be created with surface equations :math:`S(\vec{x})=S^S(\vec{x})+S^W(\vec{x})`, combining standard surfaces :math:`S^{S}(\vec{x})` with a wavy component :math:`S^{W}(\vec{x})`.
+For a surface indexed by :math:`b`, wavy surfaces are implemented with the form
 
 .. math::
     :name: eq:surfacewavy
 
-    S^{\mathrm{W}}(\vec{x})= B_{b,0}\cos(B_{b,1}S_{b,1})\cos(B_{b,2}S_{b,2})
+    S^{W}_b(\vec{x})= B_{b,0}\cos(B_{b,1}S_{b,1}(\vec{x}))\cos(B_{b,2}S_{b,2}(\vec{x}))
+
+where :math:`B_{b,0}` is a modulation amplitude, :math:`B_{b,1}` and :math:`B_{b,2}`
+are modulation frequencies, and :math:`S_{b,1}` and :math:`S_{b,2}` define the orientation of the modulation.
+By setting one of :math:`B_{b,1}` and :math:`B_{b,2}` to zero, surfaces can be given waves in one axis (corrugated),
+while when both frequencies are non-zero, surfaces take on double modulated surfaces.
+
+Depending on the combined standard surface :math:`S^{S}(\vec{x})`,
+the orientation equations :math:`S_{b,1}(\vec{x})` and :math:`S_{b,2}(\vec{x})` are given different forms, as outlined below.
+
+1. **Wavy planes**
+
+  .. math::
+      :name: eq:planewavyS1
+
+      S_{b,1}(\vec{x})= \frac{A_x x - A_y y}{\sqrt{A_x^2+ A_y^2}} \\
+      S_{b,2}(\vec{x})= \frac{A_x A_z x + A_y A_z y - (A_x^2 + A_y^2) z}{\sqrt{A_x^4 + A_y^4 + 2 A_x^2 A_z^2 + 2 A_y^2 A_z^2 + 2 A_x^2 A_y^2}}
+
+  .. list-table::
+      :header-rows: 0
+      :widths: 20 20
+      :align: center
+
+      * - .. image:: BC/bc_images/WavyPlane.png
+              :width: 95%
+              :align: center
+
+        - .. image:: BC/bc_images/EggPlane.png
+              :width: 95%
+              :align: center
+
+  .. First caption
+  .. CORRUGATED PLANE
+  .. ONE OF B1 OR B2 NEQ 0?
+  .. + NORMAL PLANE EQUATION
+
+  .. Second caption
+  .. EGGCARTON PLANE
+  .. B1 = B2 NEQ 0
+  .. + NORMAL PLANE EQUATION
+
+
+2. **Wavy spheres**
+  .. math::
+      :name: eq:spherewavyS1
+
+      \tan S_{b,1}(\vec{x})= \frac{A_y y - Q_y}{A_x x - Q_x} \\
+      \tan S_{b,2}(\vec{x})= \frac{\sqrt{A_x^2(x-Q_x)^2 + A_y^2(y-Q_y)^2}}{A_z(z-Q_z)}
+
+  .. list-table::
+      :header-rows: 0
+      :widths: 30 30 30
+      :align: center
+
+      * - .. image:: BC/bc_images/LatitudeSphere.png
+              :width: 95%
+              :align: center
+
+        - .. image:: BC/bc_images/LongitudinalSphere.png
+              :width: 95%
+              :align: center
+
+        - .. image:: BC/bc_images/eggCartonSphere.png
+              :width: 95%
+              :align: center
+
+  .. First caption
+  .. LATTITUDE IF B1 = 0, B2 NEQ 0
+  .. B0 = 0.2
+  .. B1 = 0
+  .. B2 = 10
+  .. AX=AY=AZ=1
+  .. QX=QY=QZ=0
+  .. + NORMAL SPHERE EQUATION
+
+  .. Second caption
+  .. LONGITUDINAL IF B1 NEQ 0, B2 = 0
+  .. B0 = 0.2
+  .. B1 = 10
+  .. B2 = 0
+  .. AX=AY=AZ=1
+  .. QX=QY=QZ=0
+  .. + NORMAL SPHERE EQUATION
+
+  .. Third caption
+  .. EGGCARTON IF B1 NEQ 0, B2 NEQ 0
+  .. B0 = 0.2
+  .. B1 = 10
+  .. B2 = 10
+  .. AX=AY=AZ=1
+  .. QX=QY=QZ=0
+  .. + NORMAL SPHERE EQUATION
+
+3. **Wavy cylinders**
+  If :math:`A_x=0`, :math:`(i,j,k)=(x,y,z)`
+
+  If :math:`A_y=0`, :math:`(i,j,k)=(y,z,x)`
+
+  If :math:`A_z=0`, :math:`(i,j,k)=(z,x,y)`
+
+  .. math::
+      :name: eq:spherewavyS1
+
+      \tan S_{b,1}(\vec{x})= \frac{A_k x_k - Q_k}{A_j x_j - Q_j} \\
+      \tan S_{b,2}(\vec{x})= \frac{\sqrt{A_j^2(x_j-Q_j)^2 + A_k^2(x_k-Q_k)^2}}{A_i(x_i-Q_i)}
+
+
+  .. list-table::
+      :header-rows: 0
+      :widths: 30 30 30
+      :align: center
+
+      * - .. image:: BC/bc_images/LatitudeCylinder.png
+              :width: 95%
+              :align: center
+        - .. image:: BC/bc_images/LongitudinalCylinder.png
+              :width: 95%
+              :align: center
+        - .. image:: BC/bc_images/eggCartonCylinder.png
+              :width: 95%
+              :align: center
+
+Higher rotational surfaces
+^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+NEEDS TO BE WRITTEN UP
+
+REFERENCE THIS https://bsapubs.onlinelibrary.wiley.com/doi/epdf/10.3732/ajb.90.3.333
 
 I NEED TO EXPLAIN WHATS IMPLEMENTED FOR B, S
-
-EXAMPLES
-
-PICTURES
-
-Other types
-
-.. math::
-    :name: eq:surface8
-
-    S(\vec{x})= other
-
-WHERE ARE THESE EQUATIONS?
 
 EXAMPLES
 

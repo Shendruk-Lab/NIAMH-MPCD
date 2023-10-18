@@ -18,24 +18,32 @@ For a particle :math:`i` with position :math:`\vec{x}_i` this condition is
 Boundary conditions are only applied to a particle when the position is exactly on the surface,
 which requires tracing back the particle's position :math:`\vec{x}_i^*` to where :math:`S(\vec{x}_i^*) = 0`
 at time :math:`t^*` where :math:`0<t^*<\delta t`.
+Following boundary rules, the particle resumes streaming for the remaining time :math:`\delta t-t^*`.
 
-Boundary rules
---------------
+Boundary operators
+------------------
 
 Boundary rules are operators on a particle's position, velocity or orientation properties.
 
-For a property :math:`f_i (t)`, the rules have the following form
+For a property :math:`\vec{f}_i (t)`, the rules have the following form
 
 .. math::
-    :name: eq:bcoperators
+    :name: eq:bcoperators1
 
-    f_i(t>t^*) = D_{f,\hat{\nu}} + M_{f,\hat{\nu}} f_i(t<t^*)
+    \vec{f}_i(t>t^*) \: \text{+=} \: D_{f,\hat{\nu}}\hat{\nu}
 
-NEED TO SHOW THAT THERES ACTUALLY A SUM
+.. math::
+    :name: eq:bcoperators2
 
-where :math:`f_i(t<t^*)` and :math:`f_i(t>t^*)` are the properties before and after the boundary rules are applied,
-:math:`D_{f,\hat{\nu}}` is a shift in direction :math:`\hat{\nu}`
-and :math:`M_{f,\hat{\nu}}` is a multiplier of the PROJECTION components of :math:`f_i(t<t^*)` in direction :math:`\hat{\nu}`.
+    \vec{f}_i(t>t^*) \: \text{+=} \: M_{f,\hat{\nu}} (\hat{\nu}\cdot\vec{f}_i(t<t^*)) \hat{\nu}
+
+where :math:`\hat{\nu}` are implemented as each of the cartesian axes :math:`\hat{x},\hat{y},\hat{z}`, the local surface normal :math:`\hat{n}` and the local surface tangent :math:`\hat{t}`.
+The properties before and after the boundary rules are applied are :math:`\vec{f}_i(t<t^*)` and :math:`\vec{f}_i(t>t^*)`.
+The shift operator EQUATION is an additive shift on vector :math:`\vec{f}_i` in direction :math:`\hat{\nu}` with magnitude :math:`D_{f,\hat{\nu}}`.
+and :math:`M_{f,\hat{\nu}}` is a multiplier of the projection of components :math:`\vec{f}_i(t<t^*)` in direction :math:`\hat{\nu}`.
+
+WRITE SOMEWHERE THAT THE TANGENT IS NU = (1-NORMAL).
+PLEASE CAN SOMEONE CHECK THIS.
 
 Examples
 ^^^^^^^^
@@ -52,7 +60,14 @@ Commonly used boundary rules are:
   They simulate open systems. In order to achieve periodicity,
   a planar boundary surface are created with :math:`D_{x,\hat{n}}=L` as a shift equivalent to the system dimension.
 
-  PICTURE
+  .. figure:: BC/bc_images/PBCschematic.png
+     :alt: Logo
+     :scale: 15%
+     :align: center
+
+     CAPTION
+
+  EXAMPLE OF USE
 
 2. **Velocity**
 
@@ -63,8 +78,14 @@ Commonly used boundary rules are:
   The normal component of the velocity is reversed :math:`M_{v,\hat{n}} = -1`,
   while the tangential component is unchanged :math:`M_{v,\hat{t}} = 1`.
 
-  PICTURE
+  .. figure:: BC/bc_images/perfectslip.png
+     :alt: Logo
+     :scale: 20%
+     :align: center
 
+     CAPTION
+
+  EXAMPLE OF USE
 
   **No slip**
 
@@ -72,7 +93,14 @@ Commonly used boundary rules are:
   Achieving no-slip utilises *bounce-back* boundary rules to the velocity,
   reversing the normal and tangential component of the velocity so that :math:`M_{v,\hat{n}} = M_{v,\hat{t}} = -1`.
 
-  PICTURE
+  .. figure:: BC/bc_images/noslip.png
+     :alt: Logo
+     :scale: 20%
+     :align: center
+
+     CAPTION
+
+  EXAMPLE OF USE
 
 3. **Orientation**
 
@@ -84,13 +112,27 @@ or tangential with the boundary (planar).
 
   Alignment normal to the boundary requires :math:`M_{v,\hat{n}} = 1` and :math:`M_{v,\hat{t}} = 0`.
 
-  PICTURE
+  .. figure:: BC/bc_images/homeotropic.png
+     :alt: Logo
+     :scale: 20%
+     :align: center
+
+     CAPTION
+
+  EXAMPLE OF USE
 
   **Planar**
 
   Alignment tangential to the boundary requires :math:`M_{v,\hat{n}} = 0` and :math:`M_{v,\hat{t}} = 1`.
 
-  PICTURE
+  .. figure:: BC/bc_images/planar.png
+     :alt: Logo
+     :scale: 20%
+     :align: center
+
+     CAPTION
+
+  EXAMPLE OF USE
 
 TALK ABOUT THE ANCHORING TORQUE BEING EITHER DISSIPATED WITH THE BOUNDARY OR CONSERVED.
 LINK TO BENJAMINS SECTION
