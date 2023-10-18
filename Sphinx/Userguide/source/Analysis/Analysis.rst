@@ -14,7 +14,6 @@ Examples of their usage can be found in :ref:`the tutorials section <tutorials>`
     These analysis scripts are provided primarily to quickly verify simulation output for first time users, and to give an example of how to parse MPCD's output files.
     Users are expected to develop their own analysis scripts appropriate for their own purposes.
 
-.. _CommonArgument:
 Common
 ******
 
@@ -66,6 +65,7 @@ gives output
 
 The output may vary depending on script, but will always be the most up-to-date description of the script's arguments.
 
+.. _ConsistentArguments:
 Consistent arguments
 ====================
 

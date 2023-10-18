@@ -1,15 +1,25 @@
+Purpose
+=======
+
+This script produces a movie following the trajectory of swimmers and plots the fields in the fluid around them. This field can
+be a velocity field, a vorticity field, or a nematic field.
+
 Command to run
 ==============
 
 ::
 
-    python3 analysisScripts/swimmerTraj_fields2D.py dataname inputname start finish qx qy avdim [fieldtype] -a -k
+    python3 analysisScripts/swimmerTraj_fields2D.py [dataname] [inputname] [start] [finish] [avdim] [fieldtype] --qx [qx] --qy [qy] -a [a] -k [k]
 
-Most arguments are described in the :ref:`common <CommonArgument>` section. The only one that is not is fieldtype. 
+Most arguments are described in the :ref:`consistent arguments <ConsistentArguments>` section. The only ones that are not are fieldtype, qx, and qy`: they are described below.
+Arguments preceded by - or -- are optional.
 
-.. code-block:: console
-
-    fieldtype              Select which field to average. Can take three possible values: 'vel' for the velocity field, 'vort' for the vorticity field, or 'nem' for the nematic field.
+- ``fieldtype`` 
+    Select which field to average. Can take three possible values: 'vel' for the velocity field, 'vort' for the vorticity field, or 'nem' for the nematic field.
+- ``qx`` 
+    Only show every qx arrow in x. Set to 1 by default.
+- ``qy`` 
+    Only show every qy arrow in y. Set to 1 by default.
 
 Outputted files
 ===============
