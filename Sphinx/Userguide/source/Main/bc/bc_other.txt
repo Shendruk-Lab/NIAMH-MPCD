@@ -1,0 +1,25 @@
+Thermal boundary conditions
+---------------------------
+
+MPCD boundaries are able interact with the particles in natural physical way.
+Depending on the collision type of the boundary
+
+.. code-block:: console
+
+    "BC":
+    [
+        {
+            "colType":
+        }
+    ]
+
+::
+
+    colType: 
+    0 - Respects all conservation laws by impact analysis.
+    1 - Rule based collisions at the surface.
+    2 - Probabilistic reflections at the surface.
+
+If we have collision type 2 for boundaries - particles will draw random velocities from a thermal distribution.
+All the interactions are based on KBT value. Tangential value of the velocity of the particle is being drawn from Maxwell-Boltzmann distribution.
+And the normal value is being drawn from Rayleigh distribution.
