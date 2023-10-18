@@ -13,7 +13,7 @@ In this section, we describe the various families of collision operators availab
 
 Stochastic rotation dynamics
 ============================
-The original implementation of MPCD is known as Stochastic Rotation Dynamics (SRD) **TODO: cite**.
+The original implementation of MPCD is known as Stochastic Rotation Dynamics (SRD) [Gompper2009]_.
 Translating to modern terminology, SRD's collision operator :math:`\vec\Xi` choses a random axis, around which it performs
 a rotation through an angle :math:`\theta`. This is done by conservating energy, preserving isotropy and the Maxwell Boltzmann velocity distribution in the continuum limit.
 This random rotation is what gives its this MPCD variant its name: Stochastic Rotation Dynamics (SRD). 
@@ -43,7 +43,35 @@ Being a 3D rotation tensor, :math:`\Omega_\theta` is defined as
     \end{align}
 in which the vector :math:`\hat{n} = [n_x, n_y, n_z]` defines a unit vector representing the axis of rotation.
 
-**TODO: SRD schematic from Tyler's thesis**
+A visual description of the algorithmic implementation of the SRD collision operator is shown below.
+
+.. list-table:: 
+    :header-rows: 0
+    :widths: 50 50 50
+    :align: center
+
+    * - .. image:: ./CollisionOperators/SRD1.png
+            :width: 95%
+            :align: center
+      - .. image:: ./CollisionOperators/SRD2.png
+            :width: 95%
+            :align: center
+      - .. image:: ./CollisionOperators/SRD3.png
+            :width: 95%
+            :align: center
+    * - **(a)** Bin MPCD particles into cells.
+      - **(b)** Calculate the center of mass velocity :math:`\vec{v}^\mathrm{cm}` of the cell.
+      - **(c)** For each MPCD particle, calculate the difference from :math:`\vec{v}^\mathrm{cm}`.
+    * - .. image:: ./CollisionOperators/SRD4.png
+            :width: 95%
+            :align: center
+      - .. image:: ./CollisionOperators/SRD5.png
+            :width: 95%
+            :align: center 
+      - 
+    * - **(d)** For each MPCD particle, generate a random unit vector :math:`\hat{n}^\mathrm{ran}`.
+      - **(e)** Rotate each difference about :math:`\hat{n}^\mathrm{ran}` by :math:`\theta`.
+      - 
 
 The version of SRD in where :math:`\hat{n}` is chosen from the unit sphere is implemented with a keycode of ``0``. 
 To use it add the following to your input ``.json`` file:
@@ -75,7 +103,7 @@ While SRD is sufficient for some applications, it is not without its drawbacks:
 Following other mesoscale simulation techniques, such as DPD, where a thermostat is included intrinsically as part of the simulation technique, thermostats have been incoroporated into MPCD collision operators.
 That is, :math:`\vec\Xi` acts both as the collision operator and a local thermostat for the cell, such that no velocity rescaling techniques are necessary.
 
-The primary thermostatted collision operator in this simulator is the Andersen thermostatted collision operator **TODO: cite**, defined as
+The primary thermostatted collision operator in this simulator is the Andersen thermostatted collision operator [Gompper2009]_, defined as
 
 .. math:: 
     :name: eq:AndersenOp
@@ -154,16 +182,14 @@ To use it, add the following to your input ``.json`` file:
 .. note:: 
     The angular-conserving Andersen thermostatted collision operator is the basis used for the :ref:`Nematic MPCD <chapter8>` algorithm.
 
-.. _Vicsek:
-
-Vicsek MPCD
-===========
-**TODO: Olek has been writing this. Chate Vicsek should be in here too I guess**
-
 .. _ActiveNematic:
 
 Active nematic MPCD
 ===================
+
+.. error:
+    Tim's note: This is going to get spliced into Benjamin's nematic section!
+
 .. warning:: 
     The Active-nematic MPCD algorithm relies on liquid crystal mode being enabled. See the section on :ref:`Nematic MPCD <chapter8>` for more information.
 
@@ -173,7 +199,7 @@ Active nematic MPCD
 
         "lc": 1
 
-The simulator also has the capability to simulate active-nematic fluids **TODO: cite Tim**.
+The simulator also has the capability to simulate active-nematic fluids [Kozhukhov2022]_.
 This builds on the :ref:`Nematic MPCD collision operator <eq:NematicCollision>`, henceforth referred to as :math:`\vec\Xi^\mathrm{N}`.
 
 The fundamental requirement for a nematic to be turned into an active-nematic is the presence of local force dipoles. 
@@ -217,7 +243,7 @@ Mathematically, this collision operation is expressed as:
         \frac{\kappa_i}{m_i} - \langle \frac{\kappa_j}{m_j} \rangle_C
     \right)
 
-where :math:`\kappa_i=\pm1` represent whether a particle is forward or backward of the plane **TODO: cite**.
+where :math:`\kappa_i=\pm1` represent whether a particle is forward or backward of the plane [Kozhukhov2022]_.
 
 The magnitude of the kicks, ie the active energy input :math:`\alpha_C`, has 4 different formulations:
 
@@ -236,7 +262,7 @@ These are described in the sub-sections below.
 Active-sum
 ----------
 
-Active-Sum is the simplest formulation, and is akin to a "particle-carried activity" **TODO: cite**.
+Active-Sum is the simplest formulation, and is akin to a "particle-carried activity" [Kozhukhov2022]_.
 The activity of every particle within the cell is summed, and a kick of this magnitude is then applied to every particle. ie:
 
 .. math::
@@ -254,7 +280,7 @@ This is implemented with a keycode of ``16``, and can be used by adding the foll
 Active-average
 --------------
 
-In contrast to active-sum, with "particle-carried activity", active-average instead has "cell-carried activity" **TODO: cite**.
+In contrast to active-sum, with "particle-carried activity", active-average instead has "cell-carried activity" [Kozhukhov2023]_.
 Mathematicaly, the sum of particle activities within a cell is averaged, which is then applied as an active force magnitude to every particle. 
 ie:
 
@@ -262,7 +288,7 @@ ie:
 
     \alpha_C^\mathrm{Av} = \frac{1}{N_C} \sum_j^{N_C} \alpha_j
 
-This leads to smaller active forces than active-sum, resulting in less severe density fluctuations while still maintaining active nematic scaling laws **TODO: cite**.
+This leads to smaller active forces than active-sum, resulting in less severe density fluctuations while still maintaining active nematic scaling laws [Kozhukhov2023]_.
 
 This is implemented with a keycode of ``17``, and can be used by adding the following to your input ``.json`` file:
 
@@ -275,7 +301,7 @@ This is implemented with a keycode of ``17``, and can be used by adding the foll
 Sigmoidally modulated active-nematic MPCD
 -----------------------------------------
 
-In an effort to reduce the density fluctuations seen in Active-Sum and Active-Average, the code implements a density modulated active-nematic MPCD algorithm **TODO: cite**.
+In an effort to reduce the density fluctuations seen in Active-Sum and Active-Average, the code implements a density modulated active-nematic MPCD algorithm [Kozhukhov2023]_.
 A sigmoidally shaped modulation function is used
 
 .. math:: 
@@ -296,7 +322,15 @@ This is controlled by two parameters:
 
 These are configured with species-based parameters ``"sigPos"`` and ``"sigWidth"`` in the input ``.json`` respectively.
 
-**TODO: show figure of modulation function**
+.. list-table:: 
+    :header-rows: 0
+    :align: center
+
+    * - .. image:: ./CollisionOperators/ANModulationFn.png
+            :width: 95%
+            :align: center
+    * - A demonstration of the sigmoidal modulation function :math:`\mathcal{S}_C(\rho_C; \sigma_p, \sigma_w)`.
+        Here, :math:`\langle\rho_C\rangle=5` for illustration purposes, with :math:`\sigma_p=1` and :math:`\sigma_w=1`.
 
 This modulation function is then applied to each cells active force magnitude, giving two new formulations:
 
