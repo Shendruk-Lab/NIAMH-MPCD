@@ -1,1 +1,50 @@
-topochargeField2Danimated
+One of the key features of liquid crystals is the existence of topological defects, which are singularities in the director field.
+An option to get these in MPCD is to output topological charge fields, which are scalar fields that are zero everywhere except where defects are detected. 
+
+.. warning::
+    Topological charge fields can only be dumped from MPCD in 2D, and likewise this script only works in 2D.
+
+A method to visualise these fields is to use this script. 
+
+Command to run
+==============
+
+::
+
+    python3 analysisScripts/topochargeField2Danimated.py [directorData] [topoData] [inputname] [start] [finish] [avdim] --qx [qx] -- qy [qy] -c [length] -d [defect length] -a [aspect ratio] -k [keep frames]
+
+Most arguments are described in the :ref:`common <ConsistentArguments>` section. The exceptions are as follows:
+
+- ``directorData``:
+    Path to a director field data file. 
+    Should be ``directorfield.dat``.
+- ``topoData``:
+    Path to a topological field data file. 
+    Should be `topochargefield.dat`.
+- ``qx``:
+    (Optional, default ``1``) 
+    How frequently to draw director arrows in the x direction.
+- ``qy``:
+    (Optional, default ``1``) 
+    How frequently to draw director arrows in the y direction.
+- ``length``:
+    (Optional, default ``0.5``) 
+    Length of the director lines.
+- ``defect length``:
+    (Optional, default ``1.5``) 
+    Length of the lines used to draw defects.
+    Recommended to be ~3x larger than the director lines.
+
+Outputted files
+===============
+
+A video called 2Dcharge_animation.mp4. 
+If ``-k`` is set to 1, then every frame of the movie will be kept as a png file titled ``frameNNNN.png``.
+
+A screenshot of a typical frame of the resulting movie is shown below.
+
+.. figure:: topochargefield.png
+    :alt: Logo
+    :scale: 50%
+    :align: center
+    

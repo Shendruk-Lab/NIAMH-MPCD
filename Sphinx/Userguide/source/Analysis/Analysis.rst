@@ -93,6 +93,7 @@ The following arguments are (generally) consistent between scripts:
 - ``-k``/ ``--keepFrames`` 
     (Optional, default ``0``)
     When producing frames for a movie, whether to keep the frames or delete them after the movie is produced.
+    Set to ``1`` to keep the frames, and ``0`` to delete frames.
 
 density2Danimated.py 
 ********************
