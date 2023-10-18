@@ -22,7 +22,7 @@ Cell properties
 Collision operators
 *******************
 
-.. include:: CollisionOperators/CollisionOperators.rst
+.. include:: CollisionOperators/CollisionOperators.txt
 
 .. _chapterInit:
 
