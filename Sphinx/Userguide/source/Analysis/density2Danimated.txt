@@ -1,1 +1,39 @@
-density2Danimated
+Purpose
+=======
+
+The 'density2Danimated' Python script is designed to create an animated 2D density plot from input data that represents 
+the density of particles in the system. This script is a valuable tool for visualizing and analyzing spatial distribution 
+patterns, and how they evolve over time.
+
+Command to run
+==============
+::
+
+    python3 analysisScripts/density2Danimated.py [dataname] [inputname] [start] [finish] [sliceDim] [sliceIndex] --myAspect [myAspect] --keepFrames [keepFrames] --normalise [normalise] --savePDF [savePDF] --defectData [defectData]
+
+Most arguments are described in the :ref:`consistent arguments <ConsistentArguments>` section, except sliceDim, sliceIndex and normalise
+Arguments preceded by -- are optional.
+
+.. code-block:: console
+
+    ``sliceDim``
+    Dimension to 'slice' over for averaging. For example, for xy plane most likely we would use 'z' paramter.
+
+    ``sliceIndex``
+    Index of the plane to be sliced for averaging. Set the number of frames to skip between. If you want all frames to be plotted set 0.
+
+    ``normalise``
+    Normalise the colourbar on the right side.
+
+Outputted files
+===============
+A video called 2Ddens_z0.mp4 will be outputted. If --savePDF is set to 1, every frame of the movie will be kept as a pdf file.
+And if --keepFrames is set to one the .png frames won`t be deleted.
+A screenshot of a typical movie is shown below.
+
+.. figure:: density2DAnimated.jpg
+    :alt: Logo
+    :scale: 50%
+    :align: center
+
+    **Density plot of Vicsek system in strong gravity**

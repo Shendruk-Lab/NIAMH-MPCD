@@ -26,4 +26,7 @@ Liquids inside or outside boundaries
 
 Other
 =====
+
+.. include:: BC/bc_other.txt
+
 Thermal boundaries, and whatever the other non-momentum conserving interaction is.
