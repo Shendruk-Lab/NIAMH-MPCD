@@ -6,8 +6,8 @@ Surfaces
 
 .. include:: BC/bc_surfaces.txt
 
-Boundary conditions
-===================
+Boundary rules
+==============
 
 .. include:: BC/bc_conditions.txt
 
