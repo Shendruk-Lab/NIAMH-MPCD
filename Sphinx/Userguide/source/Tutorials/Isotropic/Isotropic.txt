@@ -113,15 +113,15 @@ Input File
         "debugOut":         3,
         "comment":          "All other outputs are NOT outputted if zero. If not zero, then they output data at a frequency determined by their value",
         "comment":          "Checkpointing dumps ALL simulation information so that the simulation can be restarted from a fail point. Only use for big, important simulations",
-        "checkpointOut":    0,
+        "checkpointOut":    999,
         "comment":          "Output the average velocity every 10 iterations",
         "avVelOut":         10,
         "comment":          "Contributions to energy",
         "energyOut":        10,
         "comment":          "Standard deviation of density",
         "densSDOut":        10,
-        "comment":          "Flow field --- notice that fields are much large data files than global values",
-        "flowOut":          50,
+        "comment":          "Instantaneous flow field --- notice that fields are much large data files than global values",
+        "velOut":           50,
         "comment":          "Pressure field",
         "pressureOut":      0,
         "comment":          "Histogram of velocities",
@@ -396,28 +396,50 @@ The other three BCs are the same but must pass through appropriate points by set
         "synopsisOut":      1,
 
 The ``.json`` input file also sets the outputs. 
-There are many optional outputs things that can be outputted but you will never need all of the possible output, so specify what to output",
-"comment":          "ALWAYS output a synopsis file so that you can check if the simulation is really what you thought it was",
-"comment":          "Synopsis file also includes info like the viscosity of the fluid based on input parameters",
-
+There are many optional outputs things that can be outputted but one should never output all possible outputs. 
+However, one option that should always be outputted is the synopsis file. 
+This little text file reports all the inputs the code has used, as well as summary information about the simulation. 
+The ``synopsis.dat`` file allows users to directly check if the simulation is really what was intended. 
 
 ::
 
-        "comment":          "debugOut specifies how much information is writen to the terminal. When programming you might want lots, when running small, local, simulations you might want a little (like just writing the current time step; debugOut==3) but when running on a cluster/super computer you don't want any (debugOut==0)",
         "debugOut":         3,
-        "comment":          "All other outputs are NOT outputted if zero. If not zero, then they output data at a frequency determined by their value",
-        "comment":          "Checkpointing dumps ALL simulation information so that the simulation can be restarted from a fail point. Only use for big, important simulations",
-        "checkpointOut":    0,
-        "comment":          "Output the average velocity every 10 iterations",
+
+``"debugOut"`` specifies the verbosity with which information is writen to the terminal. 
+When running small local simulations, one might want a little (such as the current time step; ``''debugOut": 3``) but when generating data for long simulations or running on a cluster, one might not want any (``''debugOut": 0``)
+
+::
+
+        "checkpointOut":    999,
+
+All outputting up to this point, use flags, while all other outputs are **not** outputted if zero and outputted at a frequency determined by their value numerical value. 
+For example, the simulation is :ref:`checkpointed <Checkpointing>` every 999 iterations/steps. 
+These are given in iterations, not in MPCD time units. 
+
+Checkpointing dumps *all* simulation information so that the simulation can be restarted from a fail point. 
+Checkpointing should be used sparingly since writing this data takes computational time and the resulting checkpoint files are large. 
+This is only recommended for simulations that will take substantially longer than a week. 
+
+::
+
         "avVelOut":         10,
-        "comment":          "Contributions to energy",
         "energyOut":        10,
-        "comment":          "Standard deviation of density",
         "densSDOut":        10,
-        "comment":          "Flow field --- notice that fields are much large data files than global values",
-        "flowOut":          50,
-        "comment":          "Pressure field",
+
+These three arguments output the average velocity ``"avVelOut"``, contributions to energy ``"energyOut"`` and Standard deviation of density ``"densSDOut"`` every 10 iterations". 
+
+::
+
+        "velOut":          50,
         "pressureOut":      0,
+
+These two arguments output two instantaneous fields: the instantaneous velocity field ``"velOut"`` and the pressure field ``"pressureOut"``. 
+
+.. note::
+    Fields are much large data files than global values and so one should choose the output rate appropriately. 
+
+::
+
         "comment":          "Histogram of velocities",
         "histVelOut":       100,
         "comment":          "Histogram of speed",

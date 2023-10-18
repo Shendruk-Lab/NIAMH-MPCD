@@ -95,7 +95,7 @@
     "debugOut":         3,
     "comment":          "All other outputs are NOT outputted if zero. If not zero, then they output data at a frequency determined by their value",
     "comment":          "Checkpointing dumps ALL simulation information so that the simulation can be restarted from a fail point. Only use for big, important simulations",
-    "checkpointOut":    0,
+    "checkpointOut":    999,
     "comment":          "Output the average velocity every 10 iterations",
     "avVelOut":         10,
     "comment":          "Contributions to energy",
