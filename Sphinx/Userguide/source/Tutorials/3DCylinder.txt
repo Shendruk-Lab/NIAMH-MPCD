@@ -106,6 +106,7 @@ We don't write out the energy in this example, but that can be turned on. We als
             ..
         }
     ]
+
 Now we define BC. (See Boundary Conditions for more details) Remember, that this needs to be between [].
 
 ::
