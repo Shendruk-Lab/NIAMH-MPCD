@@ -33,7 +33,7 @@ Input File
         "flowOut":          20,
         "energyOut":        0,
         "synopsisOut":      1,
-        "comment":          "BC for a cylinder with two ends and impermeable, perfect-slip walls",
+        "comment":          "BC for a cylinder with two periodic ends and impermeable perfect-slip walls",
         "BC":
         [
             {
