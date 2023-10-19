@@ -8,6 +8,7 @@
 # ----------------------------------------------------------------------------------------------------
 #
 # parameter:	randomSeed		= 0
+# parameter:    warmupMD        = 0
 #
 # parameter:	unitCells	 	= (30,10,10)
 # parameter:	lattice		 	= LATT_BULK
