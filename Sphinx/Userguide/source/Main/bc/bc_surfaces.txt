@@ -53,7 +53,7 @@ Boundary properties can be created inside the input, using
 
       S(\vec{x})= A_x (x-Q_x) + A_y(y-Q_y) + A_z (z-Q_z) = 0
 
-  with the perpendicular distance from the original as :math:`A \cdot Q = d`.
+  with the perpendicular distance from the origin as :math:`A \cdot Q = d`.
 
   .. figure:: BC/bc_images/Plane.png
      :alt: Logo
@@ -240,7 +240,7 @@ The wavy surfaces can be used in the input scripts as
 ::
 
   {
-    "comment":      "Wavy BC",
+    "comment":              "Wavy BC",
     Wavy  [B0,B1,B2]        "B0 = amplitube, B1,B2 = wave frequencies"
   }
 
@@ -254,7 +254,7 @@ the orientation equations :math:`S_{b,1}(\vec{x})` and :math:`S_{b,2}(\vec{x})` 
   .. math::
       :name: eq:planewavyS1
 
-      S_{b,1}(\vec{x}) &= \frac{A_x x - A_y y}{\sqrt{A_x^2+ A_y^2}} \\
+      S_{b,1}(\vec{x}) &= \frac{A_y x - A_x y}{\sqrt{A_x^2+ A_y^2}} \\
       S_{b,2}(\vec{x}) &= \frac{A_x A_z x + A_y A_z y - (A_x^2 + A_y^2) z}{\sqrt{A_x^4 + A_y^4 + 2 A_x^2 A_z^2 + 2 A_y^2 A_z^2 + 2 A_x^2 A_y^2}}
 
   where :math:`S_{b,1}` generates longitudinal waves (number set by the frequency :math:`B_{b,1}`) and :math:`S_{b,2}(\vec{x})` creates latitudinal waves (number set by the frequency :math:`B_{b,2}\neq0`).
@@ -274,9 +274,16 @@ the orientation equations :math:`S_{b,1}(\vec{x})` and :math:`S_{b,2}(\vec{x})` 
               :width: 95%
               :align: center
 
-      * - .. Corrugated plane for either :math:`B_{b,1}\neq 0` or :math:`B_{b,2}\neq 0`.
+      * - Corrugated plane for either :math:`B_{b,1}\neq 0` or :math:`B_{b,2}\neq 0`.
 
-          .. Egg carton plane for both :math:`B_{b,1}\neq 0` and :math:`B_{b,2}\neq 0`.
+          *This example has* :math:`B_{b,0} = 0.2`, :math:`B_{b,1} = 10`, :math:`B_{b,2} = 0`
+          *and* :math:`\vec{A}=(0,1,0)`, *to define a plane with normal in* :math:`\hat{y}` *that has transverse modulation in* :math:`\hat{x}` *direction with amplitude* :math:`0.2`.
+
+        - Egg carton plane for both :math:`B_{b,1}\neq 0` and :math:`B_{b,2}\neq 0`.
+
+          *This example has* :math:`B_{b,0} = 0.2`, :math:`B_{b,1} = 10`, :math:`B_{b,2} = 10`
+          *and* :math:`\vec{A}=(0,1,0)`, *to define a plane with normal in* :math:`\hat{y}` *that has transverse modulation in* :math:`\hat{x}` *and* :math:`\hat{z}` *direction with amplitude* :math:`0.2`.
+
 
 2. **Wavy spheres**
 
@@ -311,11 +318,22 @@ the orientation equations :math:`S_{b,1}(\vec{x})` and :math:`S_{b,2}(\vec{x})` 
               :width: 95%
               :align: center
 
-      * - .. Latitudinal waves for :math:`B_{b,1} = 0` and :math:`B_{b,2}\neq 0`.
+      * - Latitudinal waves for :math:`B_{b,1} = 0` and :math:`B_{b,2}\neq 0`.
 
-          .. Longitudinal waves for :math:`B_{b,1} \neq 0` and :math:`B_{b,2} = 0`.
+          *This example has* :math:`B_{b,0} = 0.2`, :math:`B_{b,1} = 0`, :math:`B_{b,2} = 10`
+          *and* :math:`\vec{A}=(1,1,1)`, *to define a sphere that has latitudinal modulation with amplitude* :math:`0.2`.
 
-          .. Egg carton waves for :math:`B_{b,1} \neq 0` and :math:`B_{b,2} \neq 0`
+        - Longitudinal waves for :math:`B_{b,1} \neq 0` and :math:`B_{b,2} = 0`.
+
+          *This example has* :math:`B_{b,0} = 0.2`, :math:`B_{b,1} = 10`, :math:`B_{b,2} = 0`
+          *and* :math:`\vec{A}=(1,1,1)`, *to define a sphere that has longitudinal modulation with amplitude* :math:`0.2`.
+
+        - Egg carton waves for :math:`B_{b,1} \neq 0` and :math:`B_{b,2} \neq 0`.
+
+          *This example has* :math:`B_{b,0} = 0.2`, :math:`B_{b,1} = 10`, :math:`B_{b,2} = 10`
+          *and* :math:`\vec{A}=(1,1,1)`, *to define a sphere that has both latitudinal and longitudinal modulation with amplitude* :math:`0.2`.
+
+
 
 3. **Wavy cylinders**
 
@@ -335,7 +353,7 @@ the orientation equations :math:`S_{b,1}(\vec{x})` and :math:`S_{b,2}(\vec{x})` 
       \tan S_{b,1}(\vec{x}) &= \frac{A_k x_k - Q_k}{A_j x_j - Q_j} \\
       \tan S_{b,2}(\vec{x}) &= \frac{\sqrt{A_j^2(x_j-Q_j)^2 + A_k^2(x_k-Q_k)^2}}{A_i(x_i-Q_i)}
 
-  The accompanying standard surface :math:`S^S(\vec{x})`, defining the :ref:`cylinder<eq:surfacecylinder>`, has the following form under the cylic axes,
+  The accompanying standard surface :math:`S^S(\vec{x})`, defining the :ref:`cylinder<eq:surfacecylinder>`, has the following form under the cyclic axes,
 
   .. math::
 
@@ -358,8 +376,17 @@ the orientation equations :math:`S_{b,1}(\vec{x})` and :math:`S_{b,2}(\vec{x})` 
               :width: 95%
               :align: center
 
-      * - .. Latitudinal waves on cylinder for :math:`B_{b,1} = 0` and :math:`B_{b,2} \neq 0`..
+      * - .. Latitudinal waves on cylinder for :math:`B_{b,1} = 0` and :math:`B_{b,2} \neq 0`.
 
-          .. Longitudinal waves on cylinder for :math:`B_{b,1} \neq 0` and :math:`B_{b,2} = 0`.
+        *This example has* :math:`B_{b,0} = 0.2`, :math:`B_{b,1} = 0`, :math:`B_{b,2} = 10`
+        *and* :math:`\vec{A}=(1,1,0)`, *to define a cylinder that has latitudinal modulation with amplitude* :math:`0.2`.
 
-          .. Egg-carton waves on cylinder for :math:`B_{b,1} \neq 0` and :math:`B_{b,2} \neq 0`.
+        - Longitudinal waves on cylinder for :math:`B_{b,1} \neq 0` and :math:`B_{b,2} = 0`.
+
+        *This example has* :math:`B_{b,0} = 0.2`, :math:`B_{b,1} = 10`, :math:`B_{b,2} = 0`
+        *and* :math:`\vec{A}=(1,1,0)`, *to define a cylinder that has longitudinal modulation with amplitude* :math:`0.2`.
+
+        - Egg-carton waves on cylinder for :math:`B_{b,1} \neq 0` and :math:`B_{b,2} \neq 0`.
+
+        *This example has* :math:`B_{b,0} = 0.2`, :math:`B_{b,1} = 10`, :math:`B_{b,2} = 10`
+        *and* :math:`\vec{A}=(1,1,0)`, *to define a cylinder that has both latitudinal and longitudinal modulation with amplitude* :math:`0.2`.

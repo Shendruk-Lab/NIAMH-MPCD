@@ -179,8 +179,8 @@ or tangential with the boundary (planar).
   ::
 
     "comment":          "Homeotropic anchoring",
-    "MVN":      1,
-    "MVT":      0,
+    "MUN":      1,
+    "MUT":      0,
 
   **Planar**
 
@@ -196,8 +196,8 @@ or tangential with the boundary (planar).
   ::
 
     "comment":           "Planar anchoring",
-    "MVN":      0,
-    "MVT":      1,
+    "MUN":      0,
+    "MUT":      1,
 
 Boundary corrections
 --------------------
