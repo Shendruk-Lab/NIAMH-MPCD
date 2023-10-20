@@ -181,8 +181,6 @@ Input File
 Understanding the Scripts
 =========================
 
-.. _2Dpolymer.json:
-
 input.json
 ----------
 
@@ -197,7 +195,7 @@ Here is the breakdown of the input script.
         "collOp":           21,
         "lc":               1,
 
-We first define the system size (:math:`50 \times 50` in MPCd units). Then it is specified how long the simulation will run and output data. The sigmoidal sum active collision operator is uset to create active nematic fluid. For more details please check :ref:`active nematic MPCD <ActiveNematic:>`. In order to have anisotropic fluid the ``lc`` is set to 1.
+We first define the system size (:math:`50 \times 50` in MPCd units). Then it is specified how long the simulation will run and output data. The sigmoidal sum active collision operator is uset to create active nematic fluid. For more details please check :ref:`active nematic MPCD <ActiveNematic>`. In order to have anisotropic fluid the ``lc`` is set to 1.
 
 Now it is time to declare the path of the polymer input file that is the ``md.inp``. For more details about how MD is coupled to MPCD please take a look at the :ref:`MD <chapter11>` section. To keep the MD simulation stable, during one MPCD streaming step ``"stepsMD"`` number of MD time steps are run.
 
