@@ -1,6 +1,6 @@
 All boundaries are defined by an implicit surface equation :math:`S(\vec{x})=0`,
 where :math:`\vec{x}= (x,y,z)` are points on the surface.
-There are multiple forms of implemented surfaces, which can be combined (non-zero surface parameters) or removed (setting surface parameters to zero).
+There are multiple forms of implemented surfaces, which can be combined (setting non-zero surface parameters) or removed (setting surface parameters to zero).
 
 Standard surfaces
 -----------------
@@ -14,7 +14,26 @@ Standard surfaces have the form,
 
 where the surface parameters represent the surface position's :math:`\vec{Q}=(Q_x,Q_y,Q_z)`,
 surface coefficient's :math:`\vec{A}=(A_x,A_y,A_z)`, surface power's :math:`(p_x,p_y,p_z,p_R)` and radius :math:`R`.
-Writing surfaces in this way is versatile and enables following surfaces to be created
+Writing surfaces in this way is versatile and enables :ref:`planes<eq:surfaceplane1>`, :ref:`spheres<eq:surfacesphere>`, :ref:`ellipsoids<eq:surfaceellipsoid>`, :ref:`cylinders<eq:surfacecylinder>`, :ref:`squircles<eq:surfacesquircle>` and :ref:`superellipsoids<eq:surfacesuperellipsoid>` to be created
+
+Boundary properties can be created inside the input, using
+
+::
+
+  "BC":
+  [
+    {
+      "comment":      "Boundary properties",
+      "Q":            [Qx, Qy, Qz],
+      "aInv":         [Ax, Ay, Az],
+      "P":            [px, py, pz, pR],
+      "R":            R
+    }
+  ],
+
+.. note::
+  2D surfaces can be defined using the same surface parameters as 3D.
+  These are slices of 3D surfaces in the :math:`xy` plane, where :math:`z=0`.
 
 1. **Plane**
 
@@ -41,16 +60,16 @@ Writing surfaces in this way is versatile and enables following surfaces to be c
      :scale: 30%
      :align: center
 
-     CAPTION
+  An example input for a plane with the normal :math:`\hat{n}=(0,1,0)`, located at a distance :math:`L_y` from the origin,
 
   ::
 
     {
       "comment":      "Plane BC",
       "Q":            [0, 0, 0],
-      "aInv":         [1, 0, 0],
+      "aInv":         [0, 1, 0],
       "P":            [1, 1, 1, 1],
-      "R":            distance of plane from origin in direction by aInv (here the x direction),
+      "R":            Ly
     }
 
 2. **Sphere**
@@ -70,7 +89,7 @@ Writing surfaces in this way is versatile and enables following surfaces to be c
      :scale: 30%
      :align: center
 
-     CAPTION
+  An example input for a sphere with the centre coordinate :math:`\vec{Q}=(Q_x,Q_y,Q_z)` can be constructed with the input parameters:
 
   ::
 
@@ -79,7 +98,7 @@ Writing surfaces in this way is versatile and enables following surfaces to be c
       "Q":            [Qx, Qy, Qz],
       "aInv":         [1, 1, 1],
       "P":            [2, 2, 2, 2],
-      "R":            radius of sphere,
+      "R":            radius of sphere
     }
 
 3. **Ellipsoid**
@@ -99,8 +118,7 @@ Writing surfaces in this way is versatile and enables following surfaces to be c
      :scale: 30%
      :align: center
 
-     CAPTION
-
+  An example ellipsoid input,
   ::
 
     {
@@ -108,7 +126,7 @@ Writing surfaces in this way is versatile and enables following surfaces to be c
       "Q":            [Qx, Qy, Qz],
       "aInv":         [1/a, 1/b, 1/c],
       "P":            [2, 2, 2, 2],
-      "R":            1,
+      "R":            1
     }
 
 4. **Cylinder**
@@ -127,8 +145,7 @@ Writing surfaces in this way is versatile and enables following surfaces to be c
      :scale: 30%
      :align: center
 
-     CAPTION
-
+  An example cylinder input,
   ::
 
     {
@@ -136,7 +153,7 @@ Writing surfaces in this way is versatile and enables following surfaces to be c
       "Q":            [Qx, Qy, Qz],
       "aInv":         [1, 1, 0],
       "P":            [2, 2, 2, 2],
-      "R":            radius of cylinder,
+      "R":            radius of cylinder
     }
 
 
@@ -157,8 +174,8 @@ Writing surfaces in this way is versatile and enables following surfaces to be c
      :scale: 30%
      :align: center
 
-     CAPTION
 
+  An example squircle input,
   ::
 
     {
@@ -166,7 +183,7 @@ Writing surfaces in this way is versatile and enables following surfaces to be c
       "Q":            [Qx, Qy, Qz],
       "aInv":         [1, 1, 1],
       "P":            [4, 4, 4, 4],
-      "R":            Minor radius,
+      "R":            Minor radius
     }
 
 6. **Superellipsoid**
@@ -186,7 +203,7 @@ Writing surfaces in this way is versatile and enables following surfaces to be c
      :scale: 30%
      :align: center
 
-     CAPTION
+  An example superellipsoid input,
   ::
 
     {
@@ -197,7 +214,6 @@ Writing surfaces in this way is versatile and enables following surfaces to be c
       "R":            1,
     }
 
-
 Additional surface forms
 ------------------------
 
@@ -206,7 +222,7 @@ MPCD boundaries are versatile and many possible surface geometries can be implem
 Wavy surfaces
 ^^^^^^^^^^^^^
 
-Modulated planes, spheres and cylinders can be created with surface equations :math:`S(\vec{x})=S^S(\vec{x})+S^W(\vec{x})`, combining standard surfaces :math:`S^{S}(\vec{x})` with a wavy component :math:`S^{W}(\vec{x})`.
+Modulated planes, spheres and cylinders can be created with surface equations :math:`S(\vec{x})=S^S(\vec{x})+S^W(\vec{x})`, combining standard surfaces :math:`S^{S}(\vec{x})` with a wavy component :math:`S^{W}(\vec{x})` [Wamsler2023]_.
 For a surface indexed by :math:`b`, wavy surfaces are implemented with the form
 
 .. math::
@@ -219,16 +235,31 @@ are modulation frequencies, and :math:`S_{b,1}` and :math:`S_{b,2}` define the o
 By setting one of :math:`B_{b,1}` and :math:`B_{b,2}` to zero, surfaces can be given waves in one axis (corrugated),
 while when both frequencies are non-zero, surfaces take on double modulated surfaces.
 
-Depending on the combined standard surface :math:`S^{S}(\vec{x})`,
+The wavy surfaces can be used in the input scripts as
+
+::
+
+  {
+    "comment":      "Wavy BC",
+    Wavy  [B0,B1,B2]        "B0 = amplitube, B1,B2 = wave frequencies"
+  }
+
+Depending on the combined :ref:`standard surface<eq:surface>` :math:`S^{S}(\vec{x})`,
 the orientation equations :math:`S_{b,1}(\vec{x})` and :math:`S_{b,2}(\vec{x})` are given different forms, as outlined below.
 
 1. **Wavy planes**
 
+  For wavy planes, the orientation functions take the form
+
   .. math::
       :name: eq:planewavyS1
 
-      S_{b,1}(\vec{x})= \frac{A_x x - A_y y}{\sqrt{A_x^2+ A_y^2}} \\
-      S_{b,2}(\vec{x})= \frac{A_x A_z x + A_y A_z y - (A_x^2 + A_y^2) z}{\sqrt{A_x^4 + A_y^4 + 2 A_x^2 A_z^2 + 2 A_y^2 A_z^2 + 2 A_x^2 A_y^2}}
+      S_{b,1}(\vec{x}) &= \frac{A_x x - A_y y}{\sqrt{A_x^2+ A_y^2}} \\
+      S_{b,2}(\vec{x}) &= \frac{A_x A_z x + A_y A_z y - (A_x^2 + A_y^2) z}{\sqrt{A_x^4 + A_y^4 + 2 A_x^2 A_z^2 + 2 A_y^2 A_z^2 + 2 A_x^2 A_y^2}}
+
+  where :math:`S_{b,1}` generates longitudinal waves (number set by the frequency :math:`B_{b,1}`) and :math:`S_{b,2}(\vec{x})` creates latitudinal waves (number set by the frequency :math:`B_{b,2}\neq0`).
+
+  The accompanying standard surface :math:`S^S(\vec{x})`, defines the :ref:`plane<eq:surfaceplane1>`.
 
   .. list-table::
       :header-rows: 0
@@ -243,23 +274,25 @@ the orientation equations :math:`S_{b,1}(\vec{x})` and :math:`S_{b,2}(\vec{x})` 
               :width: 95%
               :align: center
 
-  .. First caption
-  .. CORRUGATED PLANE
-  .. ONE OF B1 OR B2 NEQ 0?
-  .. + NORMAL PLANE EQUATION
+      * - .. Corrugated plane for either :math:`B_{b,1}\neq 0` or :math:`B_{b,2}\neq 0`.
 
-  .. Second caption
-  .. EGGCARTON PLANE
-  .. B1 = B2 NEQ 0
-  .. + NORMAL PLANE EQUATION
-
+          .. Egg carton plane for both :math:`B_{b,1}\neq 0` and :math:`B_{b,2}\neq 0`.
 
 2. **Wavy spheres**
+
+  For wavy spheres, the orientation functions take the form
+
   .. math::
       :name: eq:spherewavyS1
 
-      \tan S_{b,1}(\vec{x})= \frac{A_y y - Q_y}{A_x x - Q_x} \\
-      \tan S_{b,2}(\vec{x})= \frac{\sqrt{A_x^2(x-Q_x)^2 + A_y^2(y-Q_y)^2}}{A_z(z-Q_z)}
+      \tan S_{b,1}(\vec{x}) &= \frac{A_y y - Q_y}{A_x x - Q_x} \\
+      \tan S_{b,2}(\vec{x}) &= \frac{\sqrt{A_x^2(x-Q_x)^2 + A_y^2(y-Q_y)^2}}{A_z(z-Q_z)}
+
+  where :math:`S_{b,1}` generates longitudinal waves (number set by the frequency :math:`B_{b,1}`) and :math:`S_{b,2}(\vec{x})` creates latitudinal waves (number set by the frequency :math:`B_{b,2}\neq0`).
+
+  .. The number of waves defined by :math:`S_{b,1}(\vec{x})` corresponds to the number as one moves around a longitudinal 2 pi circuit, and likewise for latitude.
+
+  The accompanying standard surface :math:`S^S(\vec{x})`, defines the :ref:`sphere<eq:surfacesphere>`.
 
   .. list-table::
       :header-rows: 0
@@ -278,46 +311,35 @@ the orientation equations :math:`S_{b,1}(\vec{x})` and :math:`S_{b,2}(\vec{x})` 
               :width: 95%
               :align: center
 
-  .. First caption
-  .. LATTITUDE IF B1 = 0, B2 NEQ 0
-  .. B0 = 0.2
-  .. B1 = 0
-  .. B2 = 10
-  .. AX=AY=AZ=1
-  .. QX=QY=QZ=0
-  .. + NORMAL SPHERE EQUATION
+      * - .. Latitudinal waves for :math:`B_{b,1} = 0` and :math:`B_{b,2}\neq 0`.
 
-  .. Second caption
-  .. LONGITUDINAL IF B1 NEQ 0, B2 = 0
-  .. B0 = 0.2
-  .. B1 = 10
-  .. B2 = 0
-  .. AX=AY=AZ=1
-  .. QX=QY=QZ=0
-  .. + NORMAL SPHERE EQUATION
+          .. Longitudinal waves for :math:`B_{b,1} \neq 0` and :math:`B_{b,2} = 0`.
 
-  .. Third caption
-  .. EGGCARTON IF B1 NEQ 0, B2 NEQ 0
-  .. B0 = 0.2
-  .. B1 = 10
-  .. B2 = 10
-  .. AX=AY=AZ=1
-  .. QX=QY=QZ=0
-  .. + NORMAL SPHERE EQUATION
+          .. Egg carton waves for :math:`B_{b,1} \neq 0` and :math:`B_{b,2} \neq 0`
 
 3. **Wavy cylinders**
-  If :math:`A_x=0`, :math:`(i,j,k)=(x,y,z)`
 
-  If :math:`A_y=0`, :math:`(i,j,k)=(y,z,x)`
+  The two orientation functions :math:`S_{b,1}(\vec{x})` and :math:`S_{b,2}(\vec{x})` have cylic properties with respect to cylinder orientation along the cartesian direction :math:`\hat{x},\hat{y},\hat{z}`.
 
-  If :math:`A_z=0`, :math:`(i,j,k)=(z,x,y)`
+  If the cylinder is oriented in the
+
+  * :math:`\hat{x}`-direction, then :math:`A_x=0` and :math:`(i,j,k)=(x,y,z)`
+  * :math:`\hat{y}`-direction, then :math:`A_y=0` and :math:`(i,j,k)=(y,z,x)`
+  * :math:`\hat{z}`-direction, then :math:`A_z=0` and :math:`(i,j,k)=(z,x,y)`
+
+  The orientation functions then take the form,
 
   .. math::
       :name: eq:spherewavyS1
 
-      \tan S_{b,1}(\vec{x})= \frac{A_k x_k - Q_k}{A_j x_j - Q_j} \\
-      \tan S_{b,2}(\vec{x})= \frac{\sqrt{A_j^2(x_j-Q_j)^2 + A_k^2(x_k-Q_k)^2}}{A_i(x_i-Q_i)}
+      \tan S_{b,1}(\vec{x}) &= \frac{A_k x_k - Q_k}{A_j x_j - Q_j} \\
+      \tan S_{b,2}(\vec{x}) &= \frac{\sqrt{A_j^2(x_j-Q_j)^2 + A_k^2(x_k-Q_k)^2}}{A_i(x_i-Q_i)}
 
+  The accompanying standard surface :math:`S^S(\vec{x})`, defining the :ref:`cylinder<eq:surfacecylinder>`, has the following form under the cylic axes,
+
+  .. math::
+
+      S^S(\vec{x}) = \left(x_j-Q_j \right )^2 + \left(x_k-Q_k \right)^2 - R^2 = 0
 
   .. list-table::
       :header-rows: 0
@@ -327,9 +349,17 @@ the orientation equations :math:`S_{b,1}(\vec{x})` and :math:`S_{b,2}(\vec{x})` 
       * - .. image:: BC/bc_images/LatitudeCylinder.png
               :width: 95%
               :align: center
+
         - .. image:: BC/bc_images/LongitudinalCylinder.png
               :width: 95%
               :align: center
+
         - .. image:: BC/bc_images/eggCartonCylinder.png
               :width: 95%
               :align: center
+
+      * - .. Latitudinal waves on cylinder for :math:`B_{b,1} = 0` and :math:`B_{b,2} \neq 0`..
+
+          .. Longitudinal waves on cylinder for :math:`B_{b,1} \neq 0` and :math:`B_{b,2} = 0`.
+
+          .. Egg-carton waves on cylinder for :math:`B_{b,1} \neq 0` and :math:`B_{b,2} \neq 0`.
