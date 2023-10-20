@@ -10,7 +10,7 @@
 # parameter:	randomSeed		= 0
 # parameter:    warmupMD        = 0
 #
-# parameter:	unitCells	 	= (10,10,0)
+# parameter:	unitCells	 	= (20,20,0)
 # parameter:	lattice		 	= LATT_BULK
 # parameter:	rCut			= CUTOFF_WCA
 # parameter:	sigma_lj		= 1.0

@@ -1,0 +1,207 @@
+This tutorial will show how to run a 2D nematic MPCD simulation in which several polymers are embedded. It is  
+
+* anisotropic nematic fluid
+* in 2D
+* several polymers
+* periodic boundary condition
+
+This tutorial is based on the input files found in ``MPCD/SampleInputs/Manypolymers/{input.json,md.inp}``. 
+
+Input File
+==========
+
+.. collapse:: input.json
+
+    ::
+
+        {
+            "domain":           [20, 20],
+            "simSteps":         2000,
+            "comment":          "Nematic fluid using Andersen MPCD",
+            "collOp":           2,
+            "lc":               1,
+            "comment":          "Location of the MD input file",
+            "mdIn":             "md.inp",
+            "comment":          "Number of MD steps per MPCD step",
+            "stepsMD":          50,
+            "species":
+            [
+                {
+                    "dens":         20
+                }
+            ],
+            "debugOut":         3,
+            "dirSOut":          100,
+            "synopsisOut":      1
+        }
+
+.. collapse:: md.inp
+
+    ::
+
+        # ====================================================================================================
+        #  MD parameter input file
+        # ====================================================================================================
+        #
+        #
+        # ----------------------------------------------------------------------------------------------------
+        # system characteristics:
+        # ----------------------------------------------------------------------------------------------------
+        #
+        # parameter:	randomSeed		= 0
+        # parameter:    warmupMD        = 0
+        #
+        # parameter:	unitCells	 	= (20,20,0)
+        # parameter:	lattice		 	= LATT_BULK
+        # parameter:	rCut			= CUTOFF_WCA
+        # parameter:	sigma_lj		= 1.0
+        # parameter:	rNebrShell	 	= 0.3
+        # parameter:	dt		 	= 0.002
+        #
+        # parameter:	geometry	 	= GEOM_BULK
+        # parameter:	wallThickness		= 1 (in unit cells)
+        #
+        # parameter:	bjerrum		 	= 0
+        # parameter:	lambda_D		= 0
+        # parameter:	rCutCoul	 	= 0
+        # parameter:	condenseCriteria		= 0
+        #
+        # parameter:	kFene			= 120.0
+        # parameter:	r0Fene			= 1.5
+        # parameter:	kSqu				= 0.0
+        # parameter:	kBend				= 5.0
+        # parameter:	kNemMPC			= 50.0
+        #
+        # parameter:	overlapMin		= 0.1
+        # parameter:	overlapMinMonomer	= 0.9
+        #
+        # parameter:	drRelax			= 0
+        # parameter:	stepRelax		= 0
+        #
+        #
+        # ----------------------------------------------------------------------------------------------------
+        # particle types:
+        # ----------------------------------------------------------------------------------------------------
+        #
+        # parameter:	atomType	 	= (TYPE_WALL, 	TYPE_FLUID, 	TYPE_MONOMER)
+        # parameter:	atomMass	 	= (10, 			1,				10)
+        # parameter:	rhoType			= (1.0,			0,			0)
+        # parameter:	atomAnchor	 	= (1, 			0,				0)
+        # parameter:	atomSpring	 	= (300, 		0,				300)
+        #
+        #
+        # ----------------------------------------------------------------------------------------------------
+        # charge sets:
+        # ----------------------------------------------------------------------------------------------------
+        #
+        # parameter:	qLayout			= (LAYOUT_SURFACE, 	LAYOUT_FLUID,	LAYOUT_FLUID,	LAYOUT_FLUID)
+        # parameter:	qDensityKind		= (SURFACE,			SURFACE,		VOLUME,			VOLUME)
+        # parameter:	qDensity		= (0.,				0.,			0.,			0.)
+        # parameter:	qSpread			= (0.6,				0,				0,				0)
+        # parameter:	qNumber			= (0,				0,				0, 				0)
+        # parameter:	qCharge			= (-1,				1,				1, 				-1)
+        #
+        #
+        # ----------------------------------------------------------------------------------------------------
+        # polymer sets:
+        # ----------------------------------------------------------------------------------------------------
+        #
+        # parameter:	polyLayout		= (LAYOUT_FLUID)
+        # parameter:	polyAtomType		= (TYPE_MONOMER)
+        # parameter:	polyDensityKind		= (SURFACE)
+        # parameter:	polyDensity		= (0.0)
+        # parameter:	polySpread		= (0.0)
+        # parameter:	monoCharge		= (0)
+        # parameter:	polyM			= (4)
+        # parameter:	polyN			= (5)
+        #
+        #
+        # ---------------------------------------------------------------------------------------------------
+        # simulation phases:
+        # ----------------------------------------------------------------------------------------------------
+        #
+        # parameter:	phaseName	 	=     	Equilibration,	Production
+        # parameter:	nStep		 	= (0, 	50000,			5000000)
+        #
+        #
+        # ----------------------------------------------------------------------------------------------------
+        # external field:
+        # ----------------------------------------------------------------------------------------------------
+        #
+        # parameter:	Efield		 	= (0,   0.0, 				0.0)
+        #
+        #
+        # ----------------------------------------------------------------------------------------------------
+        # temperature:
+        # ----------------------------------------------------------------------------------------------------
+        #
+        # parameter:	kT		 	= (0,   1.0, 			1.0)
+        # parameter:	groupThermRescale	= (0, 	GROUP_FLUID,		GROUP_FLUID)
+        # parameter:	stepThermRescale	= (0, 	100, 			100)
+        # parameter:	groupThermDPD		= (0,	GROUP_FLUID,	GROUP_FLUID)
+        # parameter: 	eta					= (0,   1.5, 			1.5)
+        #
+        #
+        # ----------------------------------------------------------------------------------------------------
+        # step counters:
+        # ----------------------------------------------------------------------------------------------------
+        #
+        # parameter:	stepAvg		 	= (0, 	5000, 			5000)
+        # parameter:	stepHistCollect 	= (0,	5000, 			5000)
+        # parameter:	stepHistPrint 		= (0,	5000, 			5000)
+        # parameter:	stepSceneSlow	 	= (0, 	5000, 			5000)
+        # parameter:	stepSceneFast	 	= (0, 	5000, 			5000)
+        # parameter:	stepCheckpoint		= (0,   0,				0)
+        #
+        #
+        # ====================================================================================================
+        # end-header
+
+Understanding the Scripts
+=========================
+
+input.json
+----------
+
+Here we have used the same input.json that is used in :ref:`2D polymer example <2Dpolymer>`. To understand the json input file please read :ref:`2D polymer json input <2Dpolymer.json>`.
+
+md.inp
+------
+
+In order to have for instance four polymers in our system we can use the same md input file used in the :ref:`2D polymer example <2Dpolymer>` but the following parameters should be changed:
+
+In ``# polymer sets:``
+
+::
+
+    # parameter:	polyLayout		= (LAYOUT_FLUID)
+
+Among the available initial conformation for polymer, only ``LAYOUT_FLUID`` can be used in the case of many polymers. It is becuase the other options including ``LAYOUT_U``, ``LAYOUT_RODX`` and ``LAYOUT_RODY`` are positioned in the center of control volume.
+
+The available initial conformations:
+
+* ``LAYOUT_FLUID`` is a self avoiding random walk that is randomly located in the control volume.
+
+* ``LAYOUT_U`` is a U shaped polymer in the center of the control volume.
+
+* ``LAYOUT_RODX`` is a rod polymer along x direction in the center of the control volume.
+
+* ``LAYOUT_RODY`` is a rod polymer along y direction in the center of the control volume.
+
+::
+
+    # parameter:	polyM			= (4)
+    # parameter:	polyN			= (5)
+
+These two parameters set the number of polymers and number of monomers per polymer respectively. So here, we have 4 polymers each of which has 5 monomers.
+
+To understand the md input file please read :ref:`2D polymer md input <2Dpolymer.inp>`.
+
+Running
+=======
+
+This script can be run with 
+
+::
+
+    /<directory>/MPCD/mpcd.out -i <directory>/MPCD/SampleInputs/Manypolymers/input.json <directory>/MPCD/Manypolymers/<OUTPUT>

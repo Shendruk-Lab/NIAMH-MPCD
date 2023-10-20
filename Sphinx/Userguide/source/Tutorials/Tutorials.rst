@@ -46,6 +46,8 @@ Flow Past a 'Square' Obstacle
 
 .. include:: FlowPastSquareObstacle/FlowPastSquareObstacle.txt
 
+.. _2Dpolymer:
+
 2D polymer
 **********
 

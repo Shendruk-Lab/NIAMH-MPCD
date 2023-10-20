@@ -1,5 +1,5 @@
 {
-    "domain":           [10, 10],
+    "domain":           [20, 20],
     "dt":               0.1,
     "simSteps":         2000,
     "rFrame":           1,
