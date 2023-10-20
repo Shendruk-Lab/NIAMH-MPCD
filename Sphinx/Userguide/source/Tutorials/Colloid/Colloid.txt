@@ -1,11 +1,11 @@
-.. _Colloid:
 
-Channel Flow
-============
+
+Diffusing Colloid
+=================
 
 This tutorial will demonstrate how to run a simple colloid in an isotropic fluid, in 2D geometries.
-The simulation will be run in a small 20x20 domain (for speed), with a colloid of radius 3, all within periodic boundary conditions.
-Colloids in MPCD are simulated through the use of a motile boundary.
+The simulation will be run in a small :math:`20\times20` domain (for speed), with a colloid of radius `3`, all within periodic boundary conditions.
+Colloids in MPCD are simulated through the use of a motile boundary. 
 
 This tutorial is based on the input file found in MPCD/SampleInputs/colloid/input.json
 

@@ -24,6 +24,8 @@ Channel flow
 
 .. include:: ChannelFlow/ChannelFlow.txt
 
+.. _Colloid:
+
 Colloid
 *******
 
