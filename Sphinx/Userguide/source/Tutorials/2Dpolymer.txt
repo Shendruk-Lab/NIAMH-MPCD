@@ -5,7 +5,7 @@ This tutorial will show how to run a 2D nematic MPCD simulation in which a polym
 * one polymer
 * periodic boundary condition
 
-This tutorial is based on the input file found in ``MPCD/SampleInputs/md2D/{input.json,md.inp}``. 
+This tutorial is based on the input files found in ``MPCD/SampleInputs/md2D/{input.json,md.inp}``. 
 
 Input File
 ==========
@@ -279,18 +279,14 @@ In ``# polymer sets:``
 
     # parameter:	polyLayout		= (LAYOUT_U)
 
-Sets the initial conformation of the polymer (for more options please check the ``md/mdtypes.h`` in MPCD directory).
+Sets the initial conformation of the polymer (for more options please check the ``md/mdtypes.h`` in MPCD directory). In this case we put a U shaped polymer in the center of the control volume.
 
 ::
 
     # parameter:	polyM			= (1)
     # parameter:	polyN			= (10)
 
-These two parameters set the number of polymers and number of monomers per polymer respectively.
-
-.. note::
-
-    ``polyM`` controls the number of polymers. So for a system with many polymers change this parameter. 
+These two parameters set the number of polymers and number of monomers per polymer respectively.  
 
 ::
 
