@@ -1,0 +1,42 @@
+{
+    "domain":           [50, 50],
+    "simSteps":         1000,
+    "warmUp":           0,
+    "comment":          "Collision operator 21 is an active nematic collision operator",
+    "collOp":           21,
+    "lc":               1,
+    "mdIn":             "md.inp",
+    "stepsMD":          50,
+    "species":
+    [
+        {
+            "dens":         20,
+            "qDist":        0,
+            "vDist":        0,
+            "oDist":        1,
+            "act":          0.08,
+            "sigWidth":     0.1,
+            "sigPos":       0.5
+        }
+    ],
+    "BC":
+    [
+        {
+            "comment":      "A fixed rectangular squircle obstacle with impermeable, no-slip BCs to form the wall and pore",
+            "phantom":      1,
+            "Q":            [25, 0, 0],
+            "aInv":         [1, 11, 0],
+            "P":            [8, 8, 8, 8],
+            "R":            2,
+            "DN":           0,
+            "MVN":          -1,
+            "MVT":          -1,
+            "MUN":          0,
+            "MUT":          1
+        }
+    ],
+    "debugOut":         3,
+    "flowOut":          50,
+    "dirSOut":          50,
+    "synopsisOut":      1
+}
