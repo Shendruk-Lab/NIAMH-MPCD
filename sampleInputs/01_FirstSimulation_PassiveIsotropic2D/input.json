@@ -114,6 +114,6 @@
     "histNOut":         100,
     "comment":          "Velocity-velocity autocorrelation function --- autocorrelation functions are costly to calculate so beware of including",
     "velCorrOut":       100,
-    "comment":          "Velocity-velocity autocorrelation function",
+    "comment":          "Density-density autocorrelation function",
     "densCorrOut":      100
 }

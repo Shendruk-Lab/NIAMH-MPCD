@@ -132,9 +132,21 @@ Input File
         "histNOut":         100,
         "comment":          "Velocity-velocity autocorrelation function --- autocorrelation functions are costly to calculate so beware of including",
         "velCorrOut":       100,
-        "comment":          "Velocity-velocity autocorrelation function",
+        "comment":          "Density-density autocorrelation function",
         "densCorrOut":      100
     }
+
+
+Running
+=======
+
+This script can be run with 
+
+::
+
+    /<code-directory>/MPCD/mpcd.out -i <code-directory>/MPCD/SampleInputs/01_FirstSimulation_PassiveIsotropic2D/input.json <output-directory>/MPCD/<OUTPUT>
+
+
 
 Understanding the Script
 ========================
@@ -151,7 +163,7 @@ Here is the breakdown of the input script.
     {
         "comment":          "SIMULATION-SCALE INPUTS",
 
-The input arguments must all be contained between curly brackets ``{}``. 
+The input arguments must all be contained between curly brackets ``{}`` --- The first line is the opening bracket. 
 Arguments are given in quotation marks ``""``, followed by a colon ``:`` then the argument and concluded with a comma ``,`` to indicate that an subsequent argument will follow. 
 ``"comment"`` is an example tag, which allows users to comment their input scripts, for their own reference. 
 If a given argument does not exist then the simulation will exit and give the warning
@@ -318,6 +330,7 @@ The first BC is the left-hand PBC.
 As described in :ref:`Boundary conditions <chapterBC>`, boundaries are composed of (i) :ref:`surfaces <subsection_boundarysurfaces>` and (ii) :ref:`rules <subsection_boundaryrules>`. 
 The arguments above set the :ref:`boundary surface <subsection_boundarysurfaces>` for a planar surface:
 
+* No phantom particles are required for PBCs. 
 * Position vector ``"Q"``. Here, the left-hand PBC passes through the origin. 
 * Inverse of the surface normal ``"aInv"``. The inverse is used because it is more convienent for ellipses and similar surfaces, while equivalent to the normal itself for planes and spheres. Here, the left-hand BC has a surface normal pointing in the +x direction. The sign matters since particles on the positive side of a surface are in accessible space, while particles on the negative side will trigger the :ref:`boundary rules <subsection_boundaryrules>`. 
 * Power on the terms in the surface equation ``"P"`` for the x-, y- and z-components and the constant term. Powers of ``1`` correspond to a plane, ``2`` to a sphere or ellipsoid, etc... Here, the planar PBC has powers of ``1`` on all terms. 
@@ -436,18 +449,37 @@ These three arguments output the average velocity ``"avVelOut"``, contributions 
 These two arguments output two instantaneous fields: the instantaneous velocity field ``"velOut"`` and the pressure field ``"pressureOut"``. 
 
 .. note::
-    Fields are much large data files than global values and so one should choose the output rate appropriately. 
+    Fields are much larger data files than global values and so one should choose the output rate appropriately. 
 
 ::
 
-        "comment":          "Histogram of velocities",
         "histVelOut":       100,
-        "comment":          "Histogram of speed",
         "histSpeedOut":     100,
-        "comment":          "Histogram of number of particles per cell",
         "histNOut":         100,
-        "comment":          "Velocity-velocity autocorrelation function --- autocorrelation functions are costly to calculate so beware of including",
+
+Histograms can be outputted as well. 
+Here, the velocity ``"histVelOut"``, speed ``"histSpeedOut"`` and density ``"histNOut"`` are output every 100 time steps. 
+
+.. note::
+    The distribution of instantaneous values for the 100th step are outputted (non-cumulative). 
+    Therefore, the instantaneous range will vary slightly between output times and the ranges must be merged to produce a time averaged distribution. 
+    One example of doing this for scalar values is available in ``/analysisScripts/probDistScalar.py`` and for vector values in ``/analysisScripts/probDistVector.py``
+
+::
+
         "velCorrOut":       100,
-        "comment":          "Velocity-velocity autocorrelation function",
         "densCorrOut":      100
+
+A variety of **spatial** autocorrelation functions can be out putted. Here, the velocity-velocity and density-densioty spatial autocorrelation functions are output every 100 time steps.
+Autocorrelation functions are relatively costly to calculate so beware of outputting these overly frequently. 
+
+.. note::
+    Spatial correlation functions are build into the code but temporal correlation functions are not, because the code does not preserve past states. 
+    Users must calculate temporal correlation functions from outputted data using their own analysis routines. 
+
+::
+
     }
+
+Finally, the closing bracket for the arguments must end the file. 
+Also note there should be no comma after the final argument (in this example ``"densCorrOut": 100``)
