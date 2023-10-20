@@ -19,9 +19,9 @@ Input File
     {
         "comment":          "SIMULATION-SCALE INPUTS",
         "comment":          "Small, square geometry --- Regardless of boundary conditions, you need to specify the simulation box size",
-        "domain":           [50, 50],
+        "domain":           [30, 30],
         "comment":          "Number of simulation steps to perform in the simulation --- this is in iterations; not MPCD time units",
-        "simSteps":         1000,
+        "simSteps":         2000,
         "comment":          "Number of times steps to perform prior to outputting data --- this allows the system to reach equilibrium or steady state",
         "warmUp":           0,
         "comment":          "Streaming time step in MPCD time units",
@@ -36,7 +36,7 @@ Input File
         [
             {
                 "comment":      "pop sets the total number of particles of this type in the simulation. Given the system size this sets an average cell density of 20 particles per MPCD cell, which is is standard",
-                "pop":         50000,
+                "pop":         18000,
                 "comment":      "An equivalent to the above line is ''dens': 20'",
                 "comment":      "Mass of particles",
                 "mass":         1,
@@ -177,15 +177,21 @@ Comments can be left using the tags ``"comment"``, ``"c"``, ``"//"``, or ``"#"``
 
 ::
 
-        "domain":           [50, 50],
+        "domain":           [30, 30],
 
-The domain is set to :math:`50\times50`. 
+The domain is set to :math:`30\times30`. 
 The dimensionality is determined to be 2D from the length of the domain array. 
-A 3D simulation of a :math:`50\times50\times50` domain would instead set 
+A 3D simulation of a :math:`30\times30\times30` domain would instead set 
 
 ::
 
-        "domain":           [50, 50, 50],
+        "domain":           [30, 30, 30],
+
+A 2D rectangular system of :math:`30\times120` domain would instead set 
+
+::
+
+        "domain":           [30, 120],
 
 .. note:: 
     Setting the domain for the simulation **does not** set the boundary conditions. 
@@ -193,7 +199,7 @@ A 3D simulation of a :math:`50\times50\times50` domain would instead set
 
 ::
 
-        "simSteps":         1000,
+        "simSteps":         2000,
 
 The number of simulations steps tells the simulation how many iterations to loop over. 
 This value should be an integer. 
@@ -250,12 +256,12 @@ Within ``"species"``, the particle properties and initializations are specified.
         "species":
         [
             {
-                "pop":         50000,
+                "pop":         18000,
             }
         ],
 
 ``"pop"`` sets the total number of particles of this species type in the simulation. 
-Since the simulation volume is :math:`50\times50`, this produces a density of ``20`` particles per cell. 
+Since the simulation volume is :math:`30\times30`, this produces a density of ``20`` particles per cell. 
 A density of ``20`` particles per MPCD cell is a standard choice (earlier studies would previously use ``5``). 
 ``"dens"`` is an alternative to ``"pop"`` for setting the average cell density (see :ref:`Overrides <Overrides>`). 
 

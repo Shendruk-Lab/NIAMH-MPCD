@@ -6,9 +6,18 @@ Tutorials
 .. _Isoptropic:
 
 First simulation
-************
+****************
 
 .. include:: Isotropic/Isotropic.txt
+
+
+.. _Overrides:
+
+Overrides
+*********
+
+.. include:: Overrides/Overrides.txt
+
 
 Channel flow
 ************

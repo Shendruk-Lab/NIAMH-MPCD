@@ -1,0 +1,27 @@
+{
+    "comment":          "SIMULATION-SCALE INPUTS",
+    "domain":           [30, 30],
+    "simSteps":         2000,
+    "comment":          "FLUID PARTICLE SPECIES INPUTS",
+    "species":
+    [
+        {
+            "comment":      "''dens'' overides the ''pop'' argument to set the desired number density",
+            "dens":         20
+        }
+    ],
+    "comment":          "BOUNDARY CONDITION INPUTS",
+    "comment":          "''domainWalls'' overrides the ''BC'' to set periodic boundary conditions at all edges of the system (additional BCs can be added after)",
+    "domainWalls":      1,
+    "comment":          "OUTPUTS",
+    "checkpointOut":    1,
+    "checkpointTimerOut":    0.0056,
+    "avVelOut":         10,
+    "energyOut":        10,
+    "densSDOut":        10,
+    "flowOut":          50,
+    "histSpeedOut":     100,
+    "histNOut":         100,
+    "velCorrOut":       100,
+    "densCorrOut":      100
+}
