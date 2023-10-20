@@ -50,3 +50,8 @@ Flow Past a 'Square' Obstacle
 **********
 
 .. include:: 2Dpolymer.txt
+
+Many polymers
+*************
+
+.. include:: Manypolymer2D.txt
