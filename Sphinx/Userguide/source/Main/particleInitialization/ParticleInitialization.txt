@@ -1,13 +1,13 @@
 .. _ParticleInitialization:
 
-.. _QDIST:
-
 The fluid is determined in the input ``.json`` file and all relevant values need to be declared there.
 
 Basic fluid
 ===========
 
 Any fluid solved with MPC particles needs to have the following properties initialized. 
+
+.. _QDIST:
 
 Position
 --------
@@ -128,9 +128,6 @@ A friction coefficient to control hydrodynamics. in other words to go from wet t
 
   The default value is 0. 
 
-.. _LEN:
-
-
 Nematic fluid
 =============
 
@@ -223,7 +220,6 @@ odist specifies how the direction of this species' particles is initialised. The
 
 .. _RFC:
 
-
 Rotational friction coefficient
 -------------------------------
 
@@ -285,6 +281,8 @@ It is the susceptibility of the director to a magnetic field. To set it, add the
 
   The default value is 0.001.
 
+.. _LEN:
+
 Length
 ------
 
@@ -312,7 +310,9 @@ To set it, add the following to your input ``.json`` file:
 
 .. note::
 
-  The default value is 0.05.
+  - The default value is 0.05.
+  
+  - The turbulence regime for extensile and contractile are not the same.
 
 .. _SIG:
 
@@ -335,8 +335,6 @@ Local activity modulators
 
   - The default values are 1.0 for both parameters.
 
-  - The turbulence regime for extensile and contractile are not the same.
-
 .. _MINACTRATIO:
 
 Ratio of active particles
@@ -352,12 +350,43 @@ Activity could be applied to a proportion of particles in the cell, the **Minimu
 
   The default value is 0.
 
-.. _MATRIX:
 
 Multiphase
 ==========
 
-The MPC particles can also be of different species to induce multi-phases. HOW DO I ACTIVATE THIS?
+The MPC particles can also be of different species to induce multi-phases. In order to introduce different species with different properties to the system, ``"species"`` array in the ``.json`` file gets several elements. The number of elements is equal to the number of species. for instance if there are two species with different activities the following changes should be applied 
+
+.. code-block:: console 
+
+    "species":
+    [
+      {
+        ...
+        ...
+        ...
+        "act":          0.08
+      },
+      {
+        ...
+        ...
+        ...
+        "act":          0.03
+      }
+    ],
+
+.. note::
+
+  - Other properties mentioned earlier in this section should be initialized for each species based on the required properties, otherwise the default values would be given.
+
+  - In our code up to ten different species are supported.
+
+  .. _MAXSPECI:
+
+  .. code-block:: console
+
+      # define MAXSPECI 10
+
+.. _MATRIX:
 
 Interaction matrix
 ------------------
@@ -371,15 +400,5 @@ Each species has a different interaction with all other species in a multiphase 
 .. note::
   
   It **Must** be of the same length as the number of species. Default will autopopulate with 0s, [0,...].
-
-
-In our code up to ten different species are supported.
-
-.. _MAXSPECI:
-
-.. code-block:: console
-
-    # define MAXSPECI 10
-
 
   
