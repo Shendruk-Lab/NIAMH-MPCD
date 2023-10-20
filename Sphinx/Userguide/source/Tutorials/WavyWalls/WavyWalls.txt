@@ -1,0 +1,414 @@
+
+This tutorial demonstrates simulates a complex geometry confining a 2D active nematic fluid within a channel with periodic boundaries in the x-direction. 
+The confining channel walls are wavy sinusoids. 
+Additionally there are fixed circular obstacles between each maximum/minimum pair of the wavy walls. 
+
+This tutorial is based on the input file found in ``MPCD/SampleInputs/wavyWalls/input.json``.
+
+Input File
+==========
+
+::
+
+    {
+        "domain":[100,25],
+        "simSteps": 100000,
+        "warmUp": 0,
+        "rFrame": 0,
+        "comment":"Active nematic fluid",
+        "lc":1,
+        "mfpot":10,
+        "collOp":17,
+        "species":
+        [
+            {
+                "mass":         1,
+                "dens":         20,
+                "qDist":        0,
+                "vDist":        0,
+                "oDist":        1,
+                "interMatr":    [0],
+                "rfc":          0.01,
+                "len":          0.007,
+                "tumble":       2,
+                "shearSusc":    0.5,
+                "magnSusc":     0.001,
+                "act":          0.05,
+                "damp":         0
+            }
+        ],
+        "BC":
+        [
+            {
+                "comment":"Bottom wall",
+                "phantom":1,
+                "aInv":[0,1,0],
+                "P":[1,1,1,1],
+                "R":0,
+                "DN":0,
+                "MVN":-1,
+                "MVT":-1,
+                "MUN":0,
+                "MUT":1
+            },
+            {
+                "comment":"Top wall",
+                "phantom":1,
+                "aInv":[0,-1,0],
+                "P":[1,1,1,1],
+                "R":-25,
+                "DN":0,
+                "MVN":-1,
+                "MVT":-1,
+                "MUN":0,
+                "MUT":1
+            },
+            {
+                "comment":"Wavy bottom wall",
+                "phantom":1,
+                "aInv":[0,1,0],
+                "P":[1,1,1,1],
+                "Q":[0,5,0],
+                "R":0,
+                "DN":0,
+                "MVN":-1,
+                "MVT":-1,
+                "MUN":0,
+                "MUT":1,
+                "wavy":[5,0.31415,0]
+            },
+            {
+                "comment":"Wavy top wall",
+                "phantom":1,
+                "aInv":[0,-1,0],
+                "P":[1,1,1,1],
+                "Q":[0,20,0],
+                "R":0,
+                "DN":0,
+                "MVN":-1,
+                "MVT":-1,
+                "MUN":0,
+                "MUT":1,
+                "wavy":[5,0.31415,0]
+            },
+            {
+                "comment":"First fixed circular pillar",
+                "phantom":1,
+                "aInv":[1,1,1],
+                "P":[2,2,2,2],
+                "Q":[0,12.5,0],
+                "R":6,    
+                "DN":0,
+                "MVN":-1,
+                "MVT":-1,
+                "MUN":1,
+                "MUT":1,
+                "mass":3534.3,
+                "dsplc":0
+            },
+            {
+                "comment":"Second fixed circular pillar",
+                "phantom":1,
+                "aInv":[1,1,1],
+                "P":[2,2,2,2],
+                "Q":[20,12.5,0],
+                "R":6,    
+                "DN":0,
+                "MVN":-1,
+                "MVT":-1,
+                "MUN":1,
+                "MUT":1,
+                "mass":3534.3,
+                "dsplc":0
+            },
+            {
+                "comment":"Third fixed circular pillar",
+                "phantom":1,
+                "aInv":[1,1,1],
+                "P":[2,2,2,2],
+                "Q":[40,12.5,0],
+                "R":6,    
+                "DN":0,
+                "MVN":-1,
+                "MVT":-1,
+                "MUN":1,
+                "MUT":1,
+                "mass":3534.3,
+                "dsplc":0
+            },
+            {        
+                "comment":"Fourth fixed circular pillar",
+                "phantom":1,
+                "aInv":[1,1,1],
+                "P":[2,2,2,2],
+                "Q":[60,12.5,0],
+                "R":6,    
+                "DN":0,
+                "MVN":-1,
+                "MVT":-1,
+                "MUN":1,
+                "MUT":1,
+                "mass":3534.3,
+                "dsplc":0
+            },
+            {
+                "comment":"Fifth fixed circular pillar",
+                "phantom":1,
+                "aInv":[1,1,1],
+                "P":[2,2,2,2],
+                "Q":[80,12.5,0],
+                "R":6,    
+                "DN":0,
+                "MVN":-1,
+                "MVT":-1,
+                "MUN":1,
+                "MUT":1,
+                "mass":3534.3,
+                "dsplc":0
+            },
+            {
+                "comment":"Left periodic boundary condition",
+                "phantom":0,
+                "aInv":[1,0,0],
+                "P":[1,1,1,1],
+                "R":0,
+                "DN":100,
+                "MVN":1,
+                "MVT":1,
+                "MUN":1,
+                "MUT":1
+            },
+            {
+                "comment":"Right periodic boundary condition",
+                "phantom":0,
+                "aInv":[-1,0,0],
+                "P":[1,1,1,1],
+                "R":-100,
+                "DN":100,
+                "MVN":1,
+                "MVT":1,
+                "MUN":1,
+                "MUT":1
+            }
+        ],
+        "flowOut":10,
+        "dirSOut":10,
+        "coarseOut":10,
+        "debugOut":3,
+        "histVortOut":10,
+        "histVelOut":10,
+        "vortCorrOut":10,
+        "velCorrOut":10,
+        "topoFieldOut":10
+    }
+
+Running
+=======
+
+This script can be run with 
+
+::
+
+    /<code-directory>/MPCD/mpcd.out -i <code-directory>/MPCD/SampleInputs/02_cleanerFirstSimulation/input.json <output-directory>/MPCD/<OUTPUT>
+
+
+
+Understanding the Script
+========================
+
+Here is the breakdown of the input script. 
+
+::
+
+        "domain":[100,25],
+        "simSteps": 100000,
+        "warmUp": 0,
+
+A rectangular domain that is four times as long in the x-direction as the y-direction is used. 
+The simulation runs for :math`10^{5}` iterations without a warmup phase. 
+
+::
+
+        "lc":1,
+        "mfpot":10,
+        "collOp":17,
+
+An active nematic fluid is simulated (see the tutorial on :ref:`2D Active Nematics <actNem>`). 
+
+::
+
+        "species":
+        [
+            {
+                "mass":         1,
+                "dens":         20,
+                "qDist":        0,
+                "vDist":        0,
+                "oDist":        1,
+                "interMatr":    [0],
+                "rfc":          0.01,
+                "len":          0.007,
+                "tumble":       2,
+                "shearSusc":    0.5,
+                "magnSusc":     0.001,
+                "act":          0.05,
+                "damp":         0
+            }
+        ],
+
+Typical particle properies are used, with an activity of ``"act": 0.05``. 
+
+::
+
+        "BC":
+        [
+            {
+                "comment":"Bottom wall",
+                "phantom":1,
+                "aInv":[0,1,0],
+                "P":[1,1,1,1],
+                "R":0,
+                "DN":0,
+                "MVN":-1,
+                "MVT":-1,
+                "MUN":0,
+                "MUT":1
+            },
+            {
+                "comment":"Top wall",
+                "phantom":1,
+                "aInv":[0,-1,0],
+                "P":[1,1,1,1],
+                "R":-25,
+                "DN":0,
+                "MVN":-1,
+                "MVT":-1,
+                "MUN":0,
+                "MUT":1
+            },
+
+This simulation puts a two impermeable/no-slip walls above and below the wavy walls (these are extraneous and unneeded). 
+
+::
+
+            {
+                "comment":"Wavy bottom wall",
+                "phantom":1,
+                "aInv":[0,1,0],
+                "P":[1,1,1,1],
+                "Q":[0,5,0],
+                "R":0,
+                "DN":0,
+                "MVN":-1,
+                "MVT":-1,
+                "MUN":0,
+                "MUT":1,
+                "wavy":[5,0.31415,0]
+            },
+            {
+                "comment":"Wavy top wall",
+                "phantom":1,
+                "aInv":[0,-1,0],
+                "P":[1,1,1,1],
+                "Q":[0,20,0],
+                "R":0,
+                "DN":0,
+                "MVN":-1,
+                "MVT":-1,
+                "MUN":0,
+                "MUT":1,
+                "wavy":[5,0.31415,0]
+            },
+
+Two wavy channel walls are set.
+The first is set near the bottom of the domain at ``"Q":[0,5,0]`` (pointing up ``"aInv":[0,1,0],``) and the second at the top ``"Q":[0,20,0]`` (pointing down ``"aInv":[0,-1,0],``). 
+These each have have an amplitude of 5 and a wavelength of 10 as seen from ``"wavy":[5,0.31415,0]`` (see **XXX**). 
+
+.. error::
+    Tyler CHECK THIS!!! and cite Wavy surfaces section once can add tag without screwing up others. 
+
+::
+
+            {
+                "comment":"First fixed circular pillar",
+                "phantom":1,
+                "aInv":[1,1,1],
+                "P":[2,2,2,2],
+                "Q":[0,12.5,0],
+                "R":6,    
+                "DN":0,
+                "MVN":-1,
+                "MVT":-1,
+                "MUN":1,
+                "MUT":1,
+                "mass":3534.3,
+                "dsplc":0
+            },
+            {
+                "comment":"Second fixed circular pillar",
+                ...
+            },
+            {
+                "comment":"Third fixed circular pillar",
+                ...
+            },
+            {        
+                "comment":"Fourth fixed circular pillar",
+                ...
+            },
+            {
+                "comment":"Fifth fixed circular pillar",
+                ...
+            },
+
+Five impermeable/no-slip circular obstacles are placed in the wavy channel. 
+All five are identical except their location. 
+Their radius is ``"R":6`` and they are fixed in place ``"dsplc":0``. 
+The nematic anchoring to their surfaces is free (``"MUN":1`` and ``"MUT":1``). 
+
+::
+
+            {
+                "comment":"Left periodic boundary condition",
+                "phantom":0,
+                "aInv":[1,0,0],
+                "P":[1,1,1,1],
+                "R":0,
+                "DN":100,
+                "MVN":1,
+                "MVT":1,
+                "MUN":1,
+                "MUT":1
+            },
+            {
+                "comment":"Right periodic boundary condition",
+                "phantom":0,
+                "aInv":[-1,0,0],
+                "P":[1,1,1,1],
+                "R":-100,
+                "DN":100,
+                "MVN":1,
+                "MVT":1,
+                "MUN":1,
+                "MUT":1
+            }
+        ],
+
+Finally, periodic boundary conditions (PBC) must be placed at the end of the channel in the x-direciton. 
+``"DN":100`` matches the domain size in the x-direction and the velocity and nematic-orientation of particles are not changed when they pass through the PBC. 
+The right-hand PBC sets ``"R":-100``, rather than ``"Q":[100,0,0]``, which would have been equivalent. 
+
+::
+
+        "flowOut":10,
+        "dirSOut":10,
+        "coarseOut":10,
+        "debugOut":3,
+        "histVortOut":10,
+        "histVelOut":10,
+        "vortCorrOut":10,
+        "velCorrOut":10,
+        "topoFieldOut":10
+    }
+
+Lastly, the desired resulting data is outputted and the curly bracket is closed. 

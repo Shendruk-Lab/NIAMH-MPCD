@@ -56,3 +56,10 @@ Flow Past a 'Square' Obstacle
 *****************************
 
 .. include:: FlowPastSquareObstacle/FlowPastSquareObstacle.txt
+
+.. _WavyWalls:
+
+Wavy Walls
+*****************************
+
+.. include:: WavyWalls/WavyWalls.txt
