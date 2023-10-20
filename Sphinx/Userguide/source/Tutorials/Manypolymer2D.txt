@@ -195,7 +195,7 @@ The available initial conformations:
 
 These two parameters set the number of polymers and number of monomers per polymer respectively. So here, we have 4 polymers each of which has 5 monomers.
 
-To understand the md input file please read :ref:`2D polymer md input <2Dpolymer.inp>`.
+To understand the whole md input file please read :ref:`2D polymer md input <2Dpolymer.inp>`.
 
 Running
 =======
