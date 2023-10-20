@@ -116,21 +116,18 @@ Now we define BC. (See Boundary Conditions for more details) Remember, that this
 
 Since particles are transferring momentum to the walls.
 
-Before going into details lets see how a cylinder could be defined. The following equation can be adapted to define a 3D cylinder.
+Now lets see how a cylinder could be defined. Standard surfaces have the form,
 
 .. _shape:
 
 .. math::
 
-    a(x - x_c )^p + b(y - y_c )^p + c(z - z_c )^p = r^p
+    S^S(\vec{x})=[A_x\left(x-Q_x\right)]^{p_x} + [A_y\left(y-Q_y\right)]^{p_y} + [A_z\left(z-Q_z\right)]^{p_z} - R^{p_R} = 0
 
-For example, for a cylinder that is along the x axis (its base circle C lying in the yz-plane), and is centered at :math:`(0, y_c, z_c)` and has radius :math:`r`, it changes to  
+where the surface parameters represent the surface position's :math:`\vec{Q}=(Q_x,Q_y,Q_z)`,
+surface coefficient's :math:`\vec{A}=(A_x,A_y,A_z)`, surface power's :math:`(p_x,p_y,p_z,p_R)` and radius :math:`R`.
 
-.. math::
-
-    (y - y_c )^2 + (z - z_c )^2 = r^2
-
-So now we need to define the base circle of our cylinder and its radius. Q is the coordinates of the center of this base circle that lies in the yz-plane , R is the radius and P is the power in the :ref:`aforementioned equation <shape>`. And `aInv = [a,b,c]`.
+For this example, the cylinder is along the x axis meaning its base circle is lying in the yz-plane, so  :math:`\vec{Q}=(0,Q_y,Q_z)`, surface power's :math:`(2,2,2,2)` , :math:`\vec{A}=(0,1,1)` and  radius :math:`R`.
 
 ::
 
@@ -138,6 +135,10 @@ So now we need to define the base circle of our cylinder and its radius. Q is th
             "aInv":         [0, 1, 1],
             "P":            [2, 2, 2, 2],
             "R":            4,
+
+.. note::
+
+    For a thorough explanation about different surfaces please check :ref:`Standard surfaces <subsection_boundarysurfaces>`.
 
 The next part deals with how the velocity of particles changhes when they collide with the walls of the cylinder. In this case to creat the perfect slip boundary conditions just the normal component is reversed.
 
