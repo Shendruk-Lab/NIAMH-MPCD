@@ -1,0 +1,388 @@
+This tutorial will show how to run a polymer translocation simulation . It is  
+
+* active nematic fluid
+* in 2D
+* one polymer
+* periodic boundary condition, with a wall in the middle on which there is a pore. 
+
+This tutorial is based on the input files found in ``MPCD/SampleInputs/polymerTranslocation/{input.json,md.inp}``. 
+
+Input File
+==========
+
+.. collapse:: input.json
+
+    ::
+
+        {
+            "domain":           [50, 50],
+            "simSteps":         1000,
+            "warmUp":           0,
+            "comment":          "Collision operator 21 is an active nematic collision operator",
+            "collOp":           21,
+            "lc":               1,
+            "mdIn":             "md.inp",
+            "stepsMD":          50,
+            "species":
+            [
+                {
+                    "dens":         20,
+                    "qDist":        0,
+                    "vDist":        0,
+                    "oDist":        1,
+                    "act":          0.08,
+                    "sigWidth":     0.1,
+                    "sigPos":       0.5
+                }
+            ],
+            "BC":
+            [
+                {
+                    "comment":      "A fixed rectangular squircle obstacle with impermeable, no-slip BCs to form the wall and pore",
+                    "phantom":      1,
+                    "Q":            [25, 0, 0],
+                    "aInv":         [1, 11, 0],
+                    "P":            [8, 8, 8, 8],
+                    "R":            2,
+                    "MVN":          -1,
+                    "MVT":          -1,
+                    "MUN":          0,
+                    "MUT":          1
+                }
+            ],
+            "debugOut":         3,
+            "flowOut":          50,
+            "dirSOut":          50,
+            "synopsisOut":      1
+        }    
+  
+.. collapse:: md.inp
+
+    ::
+
+        # ====================================================================================================
+        #  MD parameter input file
+        # ====================================================================================================
+        #
+        #
+        # ----------------------------------------------------------------------------------------------------
+        # system characteristics:
+        # ----------------------------------------------------------------------------------------------------
+        #
+        # parameter:	randomSeed		= 0
+        # parameter:    warmupMD        = 0
+        #
+        # parameter:	unitCells	 	= (50,50,0)
+        # parameter:	lattice		 	= LATT_BULK
+        # parameter:	rCut			= CUTOFF_WCA
+        # parameter:	sigma_lj		= 1.0
+        # parameter:	rNebrShell	 	= 0.3
+        # parameter:	dt		 	= 0.002
+        #
+        # parameter:	geometry	 	= GEOM_BULK
+        # parameter:	wallThickness		= 1 (in unit cells)
+        #
+        # parameter:	bjerrum		 	= 0
+        # parameter:	lambda_D		= 0
+        # parameter:	rCutCoul	 	= 0
+        # parameter:	condenseCriteria		= 0
+        #
+        # parameter:	kFene			= 120.0
+        # parameter:	r0Fene			= 1.5
+        # parameter:	kSqu				= 0.0
+        # parameter:	kBend				= 0.0
+        # parameter:	kNemMPC			= 0.0
+        #
+        # parameter:	overlapMin		= 0.1
+        # parameter:	overlapMinMonomer	= 0.9
+        #
+        # parameter:	drRelax			= 0
+        # parameter:	stepRelax		= 0
+        #
+        #
+        # ----------------------------------------------------------------------------------------------------
+        # particle types:
+        # ----------------------------------------------------------------------------------------------------
+        #
+        # parameter:	atomType	 	= (TYPE_WALL, 	TYPE_FLUID, 	TYPE_MONOMER)
+        # parameter:	atomMass	 	= (10, 			1,				10)
+        # parameter:	rhoType			= (1.0,			0,			0)
+        # parameter:	atomAnchor	 	= (1, 			0,				0)
+        # parameter:	atomSpring	 	= (300, 		0,				300)
+        #
+        #
+        # ----------------------------------------------------------------------------------------------------
+        # charge sets:
+        # ----------------------------------------------------------------------------------------------------
+        #
+        # parameter:	qLayout			= (LAYOUT_SURFACE, 	LAYOUT_FLUID,	LAYOUT_FLUID,	LAYOUT_FLUID)
+        # parameter:	qDensityKind		= (SURFACE,			SURFACE,		VOLUME,			VOLUME)
+        # parameter:	qDensity		= (0.,				0.,			0.,			0.)
+        # parameter:	qSpread			= (0.6,				0,				0,				0)
+        # parameter:	qNumber			= (0,				0,				0, 				0)
+        # parameter:	qCharge			= (-1,				1,				1, 				-1)
+        #
+        #
+        # ----------------------------------------------------------------------------------------------------
+        # polymer sets:
+        # ----------------------------------------------------------------------------------------------------
+        #
+        # parameter:	polyLayout		= (LAYOUT_ROD)
+        # parameter:	polyAtomType		= (TYPE_MONOMER)
+        # parameter:	polyDensityKind		= (SURFACE)
+        # parameter:	polyDensity		= (0.0)
+        # parameter:	polySpread		= (0.0)
+        # parameter:	monoCharge		= (0)
+        # parameter:	polyM			= (1)
+        # parameter:	polyN			= (35)
+        #
+        #
+        # ---------------------------------------------------------------------------------------------------
+        # simulation phases:
+        # ----------------------------------------------------------------------------------------------------
+        #
+        # parameter:	phaseName	 	=     	Equilibration,	Production
+        # parameter:	nStep		 	= (0, 	50000,			5000000)
+        #
+        #
+        # ----------------------------------------------------------------------------------------------------
+        # external field:
+        # ----------------------------------------------------------------------------------------------------
+        #
+        # parameter:	Efield		 	= (0,   0.0, 				0.0)
+        #
+        #
+        # ----------------------------------------------------------------------------------------------------
+        # temperature:
+        # ----------------------------------------------------------------------------------------------------
+        #
+        # parameter:	kT		 	= (0,   1.0, 			1.0)
+        # parameter:	groupThermRescale	= (0, 	GROUP_FLUID,		GROUP_FLUID)
+        # parameter:	stepThermRescale	= (0, 	100, 			100)
+        # parameter:	groupThermDPD		= (0,	GROUP_FLUID,	GROUP_FLUID)
+        # parameter: 	eta					= (0,   1.5, 			1.5)
+        #
+        #
+        # ----------------------------------------------------------------------------------------------------
+        # step counters:
+        # ----------------------------------------------------------------------------------------------------
+        #
+        # parameter:	stepAvg		 	= (0, 	2500, 			2500)
+        # parameter:	stepHistCollect 	= (0,	2500, 			2500)
+        # parameter:	stepHistPrint 		= (0,	2500, 			2500)
+        # parameter:	stepSceneSlow	 	= (0, 	2500, 			2500)
+        # parameter:	stepSceneFast	 	= (0, 	2500, 			2500)
+        # parameter:	stepCheckpoint		= (0,   0,				0)
+        #
+        #
+        # ====================================================================================================
+        # end-header
+
+Understanding the Scripts
+=========================
+
+input.json
+----------
+
+Here is the breakdown of the input script.
+
+::
+
+    {
+        "domain":           [50, 50],
+        "simSteps":         1000,
+        "comment":          "Collision operator 21 is an active nematic collision operator",
+        "collOp":           21,
+        "lc":               1,
+
+We first define the system size (:math:`50 \times 50` in MPCd units). Then it is specified how long the simulation will run and output data. The sigmoidal sum active collision operator is uset to create active nematic fluid. For more details please check :ref:`active nematic MPCD <ActiveNematic>`. In order to have anisotropic fluid the ``lc`` is set to 1.
+
+Now it is time to declare the path of the polymer input file that is the ``md.inp``. For more details about how MD is coupled to MPCD please take a look at the :ref:`MD <chapter11>` section. To keep the MD simulation stable, during one MPCD streaming step ``"stepsMD"`` number of MD time steps are run.
+
+::
+
+    "comment":          "Location of the MD input file",
+    "mdIn":             "md.inp",
+    "comment":          "Number of MD steps per MPCD step",
+    "stepsMD":          50,
+
+::
+
+    "species":
+    [
+          {
+            "dens":         20,
+            "qDist":        0,
+            "vDist":        0,
+            "oDist":        1,
+            "act":          0.08,
+            "sigWidth":     0.1,
+            "sigPos":       0.5
+          }
+    ],
+
+We say that every MPCD box should be initialized with 20 MPCD particles. Nematogens are placed randomly and freely within the control volume. Their velocities are drawn from a uniformly random distribution and all are along X axis. Activity is introduced as extensile force dipoles (positive value) with strength ``0.08`` (for more options please check :ref:`Initialization <ParticleInitialization>`). Then the modultion parameters are set (for more options please check :ref:`Local activity modulators <Modulators>`) .
+
+::
+
+    "comment":          "BC for a cylinder with two ends and impermeable perfect-slip walls",
+    "BC":
+    [
+        {
+            ..
+        }
+    ]
+
+Now we define BC. (See Boundary Conditions for more details) Remember, that this needs to be between [].
+
+::
+
+    "phantom":      1,
+
+
+
+Now lets see how a wall with a pore in the middle of it can be created. For this purpose we can use a fixed rectangular super ellipse obstacle. The construction of a super ellipse has :math:`p_x=p_y=p_z=p_R=n` and
+:math:`A_x=\frac{1}{a}, A_z=\frac{1}{b}, A_z=\frac{1}{c}` and radius :math:`R`. Where the surface position's :math:`\vec{Q}=(Q_x,Q_y,Q_z)`.
+
+.. math::
+
+    S(\vec{x})= \left(\frac{x-Q_x}{a}\right)^n + \left(\frac{y-Q_y}{b}\right)^n + \left(\frac{z-Q_z}{c}\right)^n  - 1 = 0
+
+.. note ::
+
+    A super ellipsoid provide an increasingly closer approximation to a cuboid for large positive :math:`n`.
+
+    For a thorough explanation about different surfaces please check :ref:`Standard surfaces <subsection_boundarysurfaces>`.
+
+::
+
+    "Q":            [25, 0, 0],
+    "aInv":         [1, 11, 0],
+    "P":            [8, 8, 8, 8],
+    "R":            2,
+
+In the following we set the no-slip BCs and planar anchoring. 
+
+::
+
+    "MVN":          -1,
+    "MVT":          -1,
+    "MUN":          0,
+    "MUT":          1
+
+We now define what things we want to write out during the simulation (see output for details). We use debugOut level 3. We write out the velocity and the director field every 50 timesteps. We also include a synopsis file.
+
+::
+
+    "debugOut":         3,
+    "flowOut":          50,
+    "dirSOut":          50,
+    "synopsisOut":      1
+
+The end of the input file.
+
+::
+
+    }
+
+md.inp
+------
+
+Here is the breakdown of the important parts of the input script that you can modify (the parts that are not explained are set values that should not be changed unless you need fundamental changes)
+
+::
+
+    # parameter:    warmupMD        = 0
+
+The MPCD simualtion can have a warm up time during which the algorithm runs but there is no output. If there is a warm up time for MPCD, it can be chosen whether to run the MD during that warm up time or not.
+
+.. note::
+
+    if MD runs during warmup time, it outputs data.
+
+::
+
+    # parameter:	unitCells	 	= (50,50,0)
+
+The system size for MD is **always** declared through a 3D array, in this case the zero third component means it is a 2D simulation.
+
+::
+
+    # parameter:	dt		 	= 0.002
+
+Here we define the MD time step in units of MPCD time step. As mentioned earlier in :ref:`here <MDstep>` each MPCD is divided into ``"stepsMD"`` number of MD time steps. And since :math:`\delta t = 0.1`, :math:`\text{d}t = \delta t / \text{stepsMD} = 0.1/50 = 0.002`.
+
+::
+
+    # parameter:	bjerrum		 	= 0
+    # parameter:	lambda_D		= 0
+    # parameter:	rCutCoul	 	= 0
+    # parameter:	condenseCriteria		= 0
+
+If the electrostatic forces are needed these prameters should be given a value. For more details please check :ref:`Coulombic Potential <Coulombic>` and :ref:`Debye-Huckel <Debye-Huckel>` sections.
+
+::
+
+    # parameter:	kFene			= 120.0
+    # parameter:	r0Fene			= 1.5
+    # parameter:	kSqu				= 0.0
+    # parameter:	kBend				= 0.0
+    # parameter:	kNemMPC			= 0.0
+
+Here we define ``kFene`` that is a spring constant representing the stiffness of the bonds in response to stretching and ``r0Fene`` that is the maximum length of the bonds connecting two monomers (for more details check :ref:`Finitely Extensible Bonds <FENE>`). ``kSqu`` is the spring constant for a radial squeezing force to force polymer into longitudinal configuartion, here we set it to zero. ``kBend`` is the parameter to modulate the bending stiffness of the polymer (it introduces a persistence lentgh to polymer, for more details check :ref:`Bond Bending Potential <Bending Potential>`). In this case the polymer is flexible. And finally ``kNemMPC`` which is the parameter to modulate the strength of the alignment torque that nemtaic orientation applies to the polymer backbone (:ref:`Nematic Coupling Potential <Coupling Potential>`). Here there is no coupling to the director field , hence polymer is just coupled to the velocity field.
+
+
+::
+
+    # parameter:	atomMass	 	= (10, 			1,				10)
+
+The third number specifies the mass of monomers in units of MPCD particle mass, so here each monomer is ten times heavier than MPCD particles. 
+
+In ``# charge sets:`` the parameters related to the charge o monomers for electrostatic forces are entered. Here, the next two lines define that there is no electrostatic force since there is no charge.
+
+::
+
+    # parameter:	qDensity		= (0.,				0.,			0.,			0.)
+    # parameter:	qNumber			= (0,				0,				0, 				0)
+
+In ``# polymer sets:``
+
+::
+
+    # parameter:	polyLayout		= (LAYOUT_RODX)
+
+Sets the initial conformation of the polymer (for more options please check the ``md/mdtypes.h`` in MPCD directory). In this case we put a rod polymer along x axis in the center of the control volume.
+
+::
+
+    # parameter:	polyM			= (1)
+    # parameter:	polyN			= (35)
+
+These two parameters set the number of polymers and number of monomers per polymer respectively.  
+
+::
+
+    # parameter:	nStep		 	= (0, 	50000,			5000000)
+
+
+What one should be very careful about in ``# simulation phases:``  is the last number for ``nStep`` becuase it is the maximum time step beyond which no data will be outputed from MD side and the number is in units of MD. for instance in this example, we have 2000 MPCD streaming step and each are 50 MD steps, so nStep should be at least :math:`1000 \times 50`.
+
+::
+
+    # parameter:	stepAvg		 	    = (0, 	2500, 			2500)
+    # parameter:	stepHistCollect 	= (0,	2500, 			2500)
+    # parameter:	stepHistPrint 		= (0,	2500, 			2500)
+    # parameter:	stepSceneSlow	 	= (0, 	2500, 			2500)
+    # parameter:	stepSceneFast	 	= (0, 	2500, 			2500)
+
+
+Numbers in ``step counters`` section are the frequency of outputing the MD data. MD data is not very expensive, storagevise, in comparison with field outputs in MPCD. So you can output more frequently than MPCD or if you want the same number of outputs as MPCD , multiply the frequency of MPCD output by ``stepsMD``. Here, it is :math:`50 \times 50 = 2500`.
+
+Running
+=======
+
+This script can be run with 
+
+::
+
+    /<directory>/MPCD/mpcd.out -i <directory>/MPCD/SampleInputs/polymerTranslocation/input.json <directory>/MPCD/polymerTranslocation/<OUTPUT>

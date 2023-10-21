@@ -39,6 +39,8 @@ where :math:`r_{ij}` is the separation between two monomers, :math:`\epsilon` is
 
 where :math:`r_c = \sqrt[6]{2}\sigma`.
 
+.. _FENE:
+
 - **Finitely Extensible Bonds**, :math:`U_{\text{FENE}}`: In any coarse-grained model of a polymer, adjacent MD beads must be connected together to form a chain of monomers. The use of harmonic potentials can lead to unphysical bond stretching effects. For this reason, a finitely extensible force with a hard limit on the bond length is utilized [Wu2014]_. The most common choice is the finitely extensible nonlinear elastic potential (FENE):
 
 .. math::
@@ -47,7 +49,7 @@ where :math:`r_c = \sqrt[6]{2}\sigma`.
     = -\frac{k_{\text{FENE}}}{2} {r_0}^2 \ln 
     \left( 1-\frac{{r_{ij}}^2}{{r_0}^2} \right),
 
-where :math:`k_{\text{FENE}}` is a spring constant representing the stiffness of the bond in response to stretching and :math:`r_0` is the equilibrium length of the bonds.
+where :math:`k_{\text{FENE}}` is a spring constant representing the stiffness of the bond in response to stretching and :math:`r_0` is the maximum length of the bonds.
 
 .. _Bending Potential:
 
@@ -57,7 +59,9 @@ where :math:`k_{\text{FENE}}` is a spring constant representing the stiffness of
 
     U_{\text{Bend}}(\theta _{ijk}) = \frac{k_{\text {Bend}}}{2} (\theta _{ijk} - \vartheta)^2.
 
-The angle :math:`\theta_{ijk}` is the angle created by three consecutive monomers :math:`i, j` and :math:`k` and :math:`\vartheta` is the equilibrium angle. The parameter to modulate the bend stiffness is :math:`k_{\text{Bend}}` .
+The angle :math:`\theta_{ijk}` is the angle created by three consecutive monomers :math:`i, j` and :math:`k` and :math:`\vartheta` is the equilibrium angle. The parameter to modulate the bending stiffness is :math:`k_{\text{Bend}}` .
+
+.. _Coulombic:
 
 - **Coulombic Potential**, :math:`U_{\text{Coul}}`: The bare electrostatic interaction between pairs of particles is given by the Coulombic potential
 
@@ -80,6 +84,8 @@ The Bjerum length is the distance beyond which thermal energy is greater than el
     U_{\text{Coul}}(r_{ij}) = K_BT \frac{Q_i Q_j}{r_{ij}} \frac{\lambda_B}{r_{ij}}
 
 The Coulombic interactions are long-range scaling like :math:`∼ r_{ij}^{−1}`. The long-range contributions are important and for this reason, inclusion of electrostatic effects can be computationally expensive. However, in a solvent electrostatic interactions are screened by the electric double layer and so it is not always necessary to use :math:`U_{\text{Coul}}`. Often a much shorter-ranged electrostatic interaction will suffice.
+
+.. _Debye-Huckel:
 
 - **Debye-Huckel Potential**, :math:`U_{\text{DH}}`: The electrostatic interactions are typically screened. The Debye-Huckel potential is the approximation for the electrostatic potential of a charged sphere. This electric potential is given in terms of the zeta-potential. Since MD monomers do not conveniently have a zeta-potential could be replaced with the effective charge on the :math:`i_{th}` monomer (of radius :math:`r = \frac {\sigma}{2}` ) \ie. :math:`Q_{\text{eff}} = 4 \pi \epsilon_0 \epsilon_r r \zeta (1+r/\lambda_{\text{D}})`. The Debye length, :math:`\lambda_{\text{D}}`, is the length scale beyond which Coulombic interactions are screened by the distribution of counterions. Then the potential between two spheres of effective charge :math:`{Q_i}^{eff}` and :math:`{Q_j}^{eff}` in the Huckel limit of :math:`\sigma/\lambda_{\text{D}} \ll 1` becomes
 

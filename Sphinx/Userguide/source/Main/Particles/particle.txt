@@ -1,36 +1,33 @@
 
-MPCD fluid is made of point-like particles and these particles could belong to different species with different properties. The main properties are including :ref:`position <position>`, :ref:`velocity <velocity>` and :ref:`mass <mass>`. Moreover, if the MPCD is used to simulate nematic fluid :ref:`orientation <orientation>` plays an important role.
+MPCD fluid is made of point-like particles and based on the fluid type they have different properties.
+
+Basic fluid
+===========
+
+Any fluid solved with MPC particles has the following properties and they should be initialized in the input ``.json`` file.
 
 .. _position:
 
 Position
-========
+--------
 
-Each particle has a position vector, :math:`{\vec x}_i`, pointing to its position in the control volume. Add the following to your input ``.json`` file:
-
-.. code-block:: console 
-
-    "qdist":    <value>,
+Each particle has a position vector, :math:`{\vec x}_i`, pointing to its position in the control volume.
 
 Available options can be found in the :ref:`position initialization <QDIST>`.
 
 .. _velocity:
 
 Velocity
-========
+--------
 
-Each particle has a velocity vector, :math:`{\vec v}_i`. Add the following to your input ``.json`` file:
-
-.. code-block:: console 
-
-    "vdist":    <value>,
+Each particle has a velocity vector, :math:`{\vec v}_i`.
 
 Available options can be found in the :ref:`velocity initialization <QDIST>`.
 
 .. _mass:
 
 Mass
-====
+----
 
 Each MPCD particle is assigned a mass specifing its contribution in the velocity collision step, when its momentum is exchanged with other particles belonging to the same cell. To set it, add the following to your input ``.json`` file: 
 
@@ -38,12 +35,34 @@ Each MPCD particle is assigned a mass specifing its contribution in the velocity
 
       "mass":   <value>,
 
-More details can be found in :ref:`mass initialization <MASSInitialization>`.
+.. note::
+
+    The default value = 1 and it should be **always** be 1 for at least one species since it sets the mass scale .
+
+.. _Population:
+
+Population
+----------
+
+It is the total population of the particles of this species. For more details check :ref:`population initialization <POP>` . 
+
+.. _Damping:
+
+Damping coefficient
+-------------------
+
+A damping coefficient to control hydrodynamics in other words to go from wet to dry that could be :math:`[0,1]`. For more details check :ref:`Damping initialization <DAMP>` .
+
+
+Nematic fluid
+=============
+
+The MPC particles can be given nematic orientational symmetry. In that case they have the following properties and they should be initialized in the input ``.json`` file.
 
 .. _orientation:
 
 Orientation
-===========
+-----------
 
 Each MPCD particle is assigned an orientation :math:`{\vec u}_i` contributing to tensor order parameter of the cell
 
@@ -51,122 +70,52 @@ Each MPCD particle is assigned an orientation :math:`{\vec u}_i` contributing to
 
   Q_c = {\frac {1}{d-1}} < d {\vec u}_i {\vec u}_i - {\hat 1}>_{N_c}
 
-For a nematic fluid, the largest eigenvalue of this tensor order is the local scalar order parameter, :math:`S_c`, of the cell and the local director, :math:`n_c`, is parallel to the corresponding eigenvector. To set it, add the following to your input ``.json`` file:
-
-  .. code-block:: console
-
-      "odist":    <value>,
+For a nematic fluid, the largest eigenvalue of this tensor order is the local scalar order parameter, :math:`S_c`, of the cell and the local director, :math:`n_c`, is parallel to the corresponding eigenvector.
 
 More details can be found in :ref:`orientation initialization <ODIST>`.
-
-There are also other properties:
-
-- :ref:`Population <Population>`
-
-- :ref:`Rotational friction coefficient <RotationFriction>`
-
-- :ref:`Tumbling parameter <Tumbling>`
-
-- :ref:`Shear susceptibility <ShearSus>`
-
-- :ref:`Magnetic susceptibility <MagSus>`
-
-- :ref:`Damping coefficient <Damping>`
-
-- :ref:`Length <Length>`
-
-- :ref:`Activity <Activity>`
-
-- :ref:`Local activity modulators <Modulators>`
-
-- :ref:`Ratio of active particles <ActRatio>`:
-
-- :ref:`Interaction matrix <Interaction>`
-
-.. _Population:
-
-Population
-==========
-
-It is the total population of the particles of this species. To set it, add the following to your input ``.json`` file: 
-
-.. code-block:: console 
-
-    "pop":    <value>, 
-
-For more details check :ref:`population initialization <POP>` . 
 
 .. _RotationFriction:
 
 Rotational friction coefficient
-===============================
+-------------------------------
 
 Rotational friction coefficient of this species.
 
-The angular drift velocity :math:`{\omega} = d{\theta}/dt` in response to an external torque :math:`{\Gamma}` is s given by :math:`{\omega} = {\Gamma}/f_r` where :math:`f_r` is the rotational drag coefficient. To set it, add the following to your input ``.json`` file: 
-
-.. code-block:: console 
-
-    "rfc":    <value>, 
+The angular drift velocity :math:`{\omega} = d{\theta}/dt` in response to an external torque :math:`{\Gamma}` is s given by :math:`{\omega} = {\Gamma}/f_r` where :math:`f_r` is the rotational drag coefficient.
 
 For more details check :ref:`friction initialization <RFC>` . 
 
 .. _Tumbling:
 
 Tumbling parameter
-==================
+------------------
 
-Coupling between the director and fluid flow is crucial for reproducing nematohydrodynamics since flows can rotate the nematogens just as it can rotate any rodlike, or elongated object. The director profile is not only rotated by the flow, but can also align when subject to a shear. The tumbling parameter specifiec how the nematogens response to a shear, if it is ≥ 1 the director field aligns with the flow - such LCs are known as “flow-aligning” , if it is < 1 the director field rotates in the flow continuously – such LCs are known as “flow-tumbling” [Shendruk2015]_ . To set it, add the following to your input ``.json`` file:
-
-.. code-block:: console 
-
-    "tumble":    <value>, 
+Coupling between the director and fluid flow is crucial for reproducing nematohydrodynamics since flows can rotate the nematogens just as it can rotate any rodlike, or elongated object. The director profile is not only rotated by the flow, but can also align when subject to a shear. The tumbling parameter specifiec how the nematogens response to a shear, if it is ≥ 1 the director field aligns with the flow - such LCs are known as “flow-aligning” , if it is < 1 the director field rotates in the flow continuously – such LCs are known as “flow-tumbling” [Shendruk2015]_ .
 
 For more details check :ref:`Tumbling initialization <TUMBLE>` . 
 
 .. _ShearSus:
 
 Shear susceptibility
-====================
+--------------------
 
-It is the susceptibility of the director to shear. Based on theory it is always 1 but practically a heuristic shear coupling coefficient should exit, that tunes the alignment relaxation time relative to :math:`{\delta} t`. For the rotation of an individual prolate particle subject to shear flow, CHIHI = 1. When the shear coupling coefficient is set to zero there is no coupling of the director to the velocity field. To set it, add the following to your input ``.json`` file:
-
-.. code-block:: console 
-
-    "shearSusc":    <value>, 
+It is the susceptibility of the director to shear. Based on theory it is always 1 but practically a heuristic shear coupling coefficient should exit, that tunes the alignment relaxation time relative to :math:`{\delta} t`. For the rotation of an individual prolate particle subject to shear flow, CHIHI = 1. When the shear coupling coefficient is set to zero there is no coupling of the director to the velocity field.
 
 For more details check :ref:`Shear initialization <CHIHI>` . 
 
 .. _MagSus:
 
 Magnetic susceptibility
-=======================
+-----------------------
 
-It is the susceptibility of the director to a magnetic field by which it is only rotated. The magnitude of the torque applied to the nematogen is proportional to :math:`chia {\times} ({\vec u} {\cdot} {\vec H})` in which the :math:`{\vec u}` is the particle's orientation and :math:`{\vec H}` is the magnetic field. To set it, add the following to your input ``.json`` file:
-
-.. code-block:: console 
-
-    "magSusc":    <value>, 
+It is the susceptibility of the director to a magnetic field by which it is only rotated. The magnitude of the torque applied to the nematogen is proportional to :math:`chia {\times} ({\vec u} {\cdot} {\vec H})` in which the :math:`{\vec u}` is the particle's orientation and :math:`{\vec H}` is the magnetic field. 
 
 For more details check :ref:`Magnetic initialization <CHIA>` .
-
-.. _Damping:
-
-Damping coefficient
-===================
-
-A damping coefficient to control hydrodynamics in other words to go from wet to dry that could be :math:`[0,1]`. To set it, add the following to your input ``.json`` file:
-
-.. code-block:: console 
-
-    "damp":    <value>, 
-
-For more details check :ref:`Damping initialization <DAMP>` .
 
 .. _Length:
 
 Length
-======
+------
 
 It is the effective length of the nematogens in order to couple the torque on MPCD particle into force on boundaries.
 
@@ -191,74 +140,50 @@ Here we assume that the force is perpendicular to the particle, :math:`{\vec r} 
  
 which means the smaller the length of the particle the stronger the force and the longer the particle the weaker the force.
 
-To set it, add the following to your input ``.json`` file:
-
-.. code-block:: console 
-
-    "len":    <value>, 
-
 For more details check :ref:`Length initialization <LEN>` .
 
 .. _Activity:
 
 Activity
-========
+--------
 
 The force dipole density acting on nematogens in the direction of the local cell director :math:`{\vec n}_c`. 
 
 To make MPCD active, an intrinsically out-of-equilibrium term must be included in the collision operation. To have a MPCD algorithm that conserves momentum (wet) in the active fluids, energy is injected to the fluid constituents in the collision opertaor not momentum. To do so, active stress is introduced to fluid in the form of force dipole density acting on nematogens. This force dipole can be extensile or contractile [Kozhukhov2022]_.
-
-To set it, add the following to your input ``.json`` file:
-
-.. code-block:: console 
-
-    "act":    <value>, 
 
 For more details check :ref:`Activity initialization <ACT>` .
 
 .. _Modulators:
 
 Local activity modulators
-=========================
+-------------------------
 
 There are two parameters :math:`{\sigma}_p` and :math:`{\sigma}_w` used to modulate the local activity as a function of density [Kozhukhov2023]_ .
 
-:math:`{\sigma}_w` represents how fast should the modulation fall-off as a function of density , should be > 0, ideally around 0.4. To set it, add the following to your input ``.json`` file: 
-
-.. code-block:: console 
-
-    "sigWidth":    <value>,
-
-:math:`{\sigma}_p` is a measure of when modulation should begin, should be in a range 0 to 2, ideally around 0.5. To set it, add the following to your input ``.json`` file:
-
-.. code-block:: console 
-
-    "sigPos":    <value>,
+:math:`{\sigma}_w` represents how fast should the modulation fall-off as a function of density. :math:`{\sigma}_p` is a measure of when modulation should begin.
 
 For more details check :ref:`Modulators initialization <SIG>` .
 
 .. _ActRatio:
 
 Ratio of active particles
-=========================
+-------------------------
 
-Activity could be applied to a proportion of particles in the cell, the **Minimum** of which is this parameter.  To set it, add the following to your input ``.json`` file:
-
-.. code-block:: console 
-
-    "minActRatio":    <value>,
+Activity could be applied to a proportion of particles in the cell, the **Minimum** of which is this parameter.
 
 For more details check :ref:`Active ratio initialization <MINACTRATIO>` .
+
+
+Multiphase
+==========
+
+The MPC particles could belong to different species to induce multi-phases.
 
 .. _Interaction:
 
 Interaction matrix
-==================
+------------------
 
-Each species has a different interaction with all other species in a multiphase fluids and this matrix specifies how ther interact. To set it, add the following to your input ``.json`` file:
-
-.. code-block:: console 
-
-    "interMatr":    <value>,
+Each species has a different interaction with all other species in a multiphase fluids and this matrix specifies how ther interact.
 
 For more details check :ref:`Interaction matrix initialization <MATRIX>` .

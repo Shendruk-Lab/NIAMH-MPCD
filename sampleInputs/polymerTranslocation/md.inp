@@ -8,9 +8,8 @@
 # ----------------------------------------------------------------------------------------------------
 #
 # parameter:	randomSeed		= 0
-# parameter:    warmupMD        = 0
 #
-# parameter:	unitCells	 	= (20,20,0)
+# parameter:	unitCells	 	= (50,50,0)
 # parameter:	lattice		 	= LATT_BULK
 # parameter:	rCut			= CUTOFF_WCA
 # parameter:	sigma_lj		= 1.0
@@ -28,8 +27,8 @@
 # parameter:	kFene			= 120.0
 # parameter:	r0Fene			= 1.5
 # parameter:	kSqu				= 0.0
-# parameter:	kBend				= 5.0
-# parameter:	kNemMPC			= 50.0
+# parameter:	kBend				= 0.0
+# parameter:	kNemMPC			= 0.0
 #
 # parameter:	overlapMin		= 0.1
 # parameter:	overlapMinMonomer	= 0.9
@@ -65,14 +64,14 @@
 # polymer sets:
 # ----------------------------------------------------------------------------------------------------
 #
-# parameter:	polyLayout		= (LAYOUT_U)
+# parameter:	polyLayout		= (LAYOUT_RODX)
 # parameter:	polyAtomType		= (TYPE_MONOMER)
 # parameter:	polyDensityKind		= (SURFACE)
 # parameter:	polyDensity		= (0.0)
 # parameter:	polySpread		= (0.0)
 # parameter:	monoCharge		= (0)
 # parameter:	polyM			= (1)
-# parameter:	polyN			= (10)
+# parameter:	polyN			= (35)
 #
 #
 # ---------------------------------------------------------------------------------------------------
@@ -105,11 +104,11 @@
 # step counters:
 # ----------------------------------------------------------------------------------------------------
 #
-# parameter:	stepAvg		 	= (0, 	5000, 			5000)
-# parameter:	stepHistCollect 	= (0,	5000, 			5000)
-# parameter:	stepHistPrint 		= (0,	5000, 			5000)
-# parameter:	stepSceneSlow	 	= (0, 	5000, 			5000)
-# parameter:	stepSceneFast	 	= (0, 	5000, 			5000)
+# parameter:	stepAvg		 	= (0, 	2500, 			2500)
+# parameter:	stepHistCollect 	= (0,	2500, 			2500)
+# parameter:	stepHistPrint 		= (0,	2500, 			2500)
+# parameter:	stepSceneSlow	 	= (0, 	2500, 			2500)
+# parameter:	stepSceneFast	 	= (0, 	2500, 			2500)
 # parameter:	stepCheckpoint		= (0,   0,				0)
 #
 #

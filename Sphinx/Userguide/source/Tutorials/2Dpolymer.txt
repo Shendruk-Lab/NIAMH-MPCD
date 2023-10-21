@@ -1,0 +1,320 @@
+This tutorial will show how to run a 2D nematic MPCD simulation in which a polymer is embedded. It is  
+
+* anisotropic nematic fluid
+* in 2D
+* one polymer
+* periodic boundary condition
+
+This tutorial is based on the input files found in ``MPCD/SampleInputs/md2D/{input.json,md.inp}``. 
+
+Input File
+==========
+
+.. collapse:: input.json
+
+    ::
+
+        {
+            "domain":           [20, 20],
+            "simSteps":         2000,
+            "comment":          "Nematic fluid using Andersen MPCD",
+            "collOp":           2,
+            "lc":               1,
+            "comment":          "Location of the MD input file",
+            "mdIn":             "md.inp",
+            "comment":          "Number of MD steps per MPCD step",
+            "stepsMD":          50,
+            "species":
+            [
+                {
+                    "dens":         20
+                }
+            ],
+            "debugOut":         3,
+            "dirSOut":          100,
+            "synopsisOut":      1
+        }
+
+.. collapse:: md.inp
+
+    ::
+
+        # ====================================================================================================
+        #  MD parameter input file
+        # ====================================================================================================
+        #
+        #
+        # ----------------------------------------------------------------------------------------------------
+        # system characteristics:
+        # ----------------------------------------------------------------------------------------------------
+        #
+        # parameter:	randomSeed		= 0
+        # parameter:    warmupMD        = 0
+        #
+        # parameter:	unitCells	 	= (20,20,0)
+        # parameter:	lattice		 	= LATT_BULK
+        # parameter:	rCut			= CUTOFF_WCA
+        # parameter:	sigma_lj		= 1.0
+        # parameter:	rNebrShell	 	= 0.3
+        # parameter:	dt		 	= 0.002
+        #
+        # parameter:	geometry	 	= GEOM_BULK
+        # parameter:	wallThickness		= 1 (in unit cells)
+        #
+        # parameter:	bjerrum		 	= 0
+        # parameter:	lambda_D		= 0
+        # parameter:	rCutCoul	 	= 0
+        # parameter:	condenseCriteria		= 0
+        #
+        # parameter:	kFene			= 120.0
+        # parameter:	r0Fene			= 1.5
+        # parameter:	kSqu				= 0.0
+        # parameter:	kBend				= 5.0
+        # parameter:	kNemMPC			= 50.0
+        #
+        # parameter:	overlapMin		= 0.1
+        # parameter:	overlapMinMonomer	= 0.9
+        #
+        # parameter:	drRelax			= 0
+        # parameter:	stepRelax		= 0
+        #
+        #
+        # ----------------------------------------------------------------------------------------------------
+        # particle types:
+        # ----------------------------------------------------------------------------------------------------
+        #
+        # parameter:	atomType	 	= (TYPE_WALL, 	TYPE_FLUID, 	TYPE_MONOMER)
+        # parameter:	atomMass	 	= (10, 			1,				10)
+        # parameter:	rhoType			= (1.0,			0,			0)
+        # parameter:	atomAnchor	 	= (1, 			0,				0)
+        # parameter:	atomSpring	 	= (300, 		0,				300)
+        #
+        #
+        # ----------------------------------------------------------------------------------------------------
+        # charge sets:
+        # ----------------------------------------------------------------------------------------------------
+        #
+        # parameter:	qLayout			= (LAYOUT_SURFACE, 	LAYOUT_FLUID,	LAYOUT_FLUID,	LAYOUT_FLUID)
+        # parameter:	qDensityKind		= (SURFACE,			SURFACE,		VOLUME,			VOLUME)
+        # parameter:	qDensity		= (0.,				0.,			0.,			0.)
+        # parameter:	qSpread			= (0.6,				0,				0,				0)
+        # parameter:	qNumber			= (0,				0,				0, 				0)
+        # parameter:	qCharge			= (-1,				1,				1, 				-1)
+        #
+        #
+        # ----------------------------------------------------------------------------------------------------
+        # polymer sets:
+        # ----------------------------------------------------------------------------------------------------
+        #
+        # parameter:	polyLayout		= (LAYOUT_U)
+        # parameter:	polyAtomType		= (TYPE_MONOMER)
+        # parameter:	polyDensityKind		= (SURFACE)
+        # parameter:	polyDensity		= (0.0)
+        # parameter:	polySpread		= (0.0)
+        # parameter:	monoCharge		= (0)
+        # parameter:	polyM			= (1)
+        # parameter:	polyN			= (10)
+        #
+        #
+        # ---------------------------------------------------------------------------------------------------
+        # simulation phases:
+        # ----------------------------------------------------------------------------------------------------
+        #
+        # parameter:	phaseName	 	=     	Equilibration,	Production
+        # parameter:	nStep		 	= (0, 	50000,			5000000)
+        #
+        #
+        # ----------------------------------------------------------------------------------------------------
+        # external field:
+        # ----------------------------------------------------------------------------------------------------
+        #
+        # parameter:	Efield		 	= (0,   0.0, 				0.0)
+        #
+        #
+        # ----------------------------------------------------------------------------------------------------
+        # temperature:
+        # ----------------------------------------------------------------------------------------------------
+        #
+        # parameter:	kT		 	= (0,   1.0, 			1.0)
+        # parameter:	groupThermRescale	= (0, 	GROUP_FLUID,		GROUP_FLUID)
+        # parameter:	stepThermRescale	= (0, 	100, 			100)
+        # parameter:	groupThermDPD		= (0,	GROUP_FLUID,	GROUP_FLUID)
+        # parameter: 	eta					= (0,   1.5, 			1.5)
+        #
+        #
+        # ----------------------------------------------------------------------------------------------------
+        # step counters:
+        # ----------------------------------------------------------------------------------------------------
+        #
+        # parameter:	stepAvg		 	= (0, 	5000, 			5000)
+        # parameter:	stepHistCollect 	= (0,	5000, 			5000)
+        # parameter:	stepHistPrint 		= (0,	5000, 			5000)
+        # parameter:	stepSceneSlow	 	= (0, 	5000, 			5000)
+        # parameter:	stepSceneFast	 	= (0, 	5000, 			5000)
+        # parameter:	stepCheckpoint		= (0,   0,				0)
+        #
+        #
+        # ====================================================================================================
+        # end-header
+
+Understanding the Scripts
+=========================
+
+.. _2Dpolymer.json:
+
+input.json
+----------
+
+Here is the breakdown of the input script.
+
+::
+
+    {
+        "domain":           [20, 20],
+        "simSteps":         2000,
+        "comment":          "Nematic fluid using Andersen MPCD",
+        "collOp":           2,
+        "lc":               1,
+
+
+We first define the system size (:math:`20 \times 20` in MPCd units). Then it is specified how long the simulation will run and output data. The Andersen collision operator is used to simulate the fluid and in order to have anisotropic fluid the ``lc`` is set to 1.
+
+Now it is time to declare the path of the polymer input file that is the ``md.inp``. For more details about how MD is coupled to MPCD please take a look at the :ref:`MD <chapter11>` section. To briefly explain, Polymer monomers are included in the velocity collision operator and during the streaming time step of MPCD , a molecular dynamics algorithm is responsible to update position and velocity of monomers. To keep the MD simulation stable, during one MPCD streaming step ``"stepsMD"`` number of MD time steps are run.
+
+.. _MDstep:
+
+::
+
+    "comment":          "Location of the MD input file",
+    "mdIn":             "md.inp",
+    "comment":          "Number of MD steps per MPCD step",
+    "stepsMD":          50,
+
+::
+
+    "species":
+    [
+          {
+              "dens":         20
+          }
+    ],
+
+We say that every MPCD box should be initialized with 20 MPCD particles. 
+
+::
+
+    "debugOut":         3,
+    "dirSOut":          100,
+    "synopsisOut":      1
+
+We now define what things we want to write out during the simulation (see output for details). We use debugOut level 3. We write out the director field every 100 timesteps. We also include a synopsis file.
+
+The end of the input file.
+
+::
+
+    }
+
+.. _2Dpolymer.inp:
+
+md.inp
+------
+
+Here is the breakdown of the important parts of the input script that you can modify (the parts that are not explained are set values that should not be changed unless you need fundamental changes)
+
+::
+
+    # parameter:    warmupMD        = 0
+
+The MPCD simualtion can have a warm up time during which the algorithm runs but there is no output. If there is a warm up time for MPCD, it can be chosen whether to run the MD during that warm up time or not.
+
+.. note::
+
+    if MD runs during warmup time, it outputs data.
+
+::
+
+    # parameter:	unitCells	 	= (20,20,0)
+
+The system size for MD is **always** declared through a 3D array, in this case the zero third component means it is a 2D simulation.
+
+::
+
+    # parameter:	dt		 	= 0.002
+
+Here we define the MD time step in units of MPCD time step. As mentioned earlier in :ref:`here <MDstep>` each MPCD is divided into ``"stepsMD"`` number of MD time steps. And since :math:`\delta t = 0.1`, :math:`\text{d}t = \delta t / \text{stepsMD} = 0.1/50 = 0.002`.
+
+::
+
+    # parameter:	bjerrum		 	= 0
+    # parameter:	lambda_D		= 0
+    # parameter:	rCutCoul	 	= 0
+    # parameter:	condenseCriteria		= 0
+
+If the electrostatic forces are needed these prameters should be given a value. For more details please check :ref:`Coulombic Potential <Coulombic>` and :ref:`Debye-Huckel <Debye-Huckel>` sections.
+
+::
+
+    # parameter:	kFene			= 120.0
+    # parameter:	r0Fene			= 1.5
+    # parameter:	kSqu				= 0.0
+    # parameter:	kBend				= 5.0
+    # parameter:	kNemMPC			= 50.0
+
+Here we define ``kFene`` that is a spring constant representing the stiffness of the bonds in response to stretching and ``r0Fene`` that is the maximum length of the bonds connecting two monomers (for more details check :ref:`Finitely Extensible Bonds <FENE>`). ``kSqu`` is the spring constant for a radial squeezing force to force polymer into longitudinal configuartion, here we set it to zero. ``kBend`` is the parameter to modulate the bending stiffness of the polymer (it introduces a persistence lentgh to polymer, for more details check :ref:`Bond Bending Potential <Bending Potential>`). And finally ``kNemMPC`` which is the parameter to modulate the strength of the alignment torque that nemtaic orientation applies to the polymer backbone (:ref:`Nematic Coupling Potential <Coupling Potential>`). 
+
+
+::
+
+    # parameter:	atomMass	 	= (10, 			1,				10)
+
+The third number specifies the mass of monomers in units of MPCD particle mass, so here each monomer is ten times heavier than MPCD particles. 
+
+In ``# charge sets:`` the parameters related to the charge o monomers for electrostatic forces are entered. Here, the next two lines define that there is no electrostatic force since there is no charge.
+
+::
+
+    # parameter:	qDensity		= (0.,				0.,			0.,			0.)
+    # parameter:	qNumber			= (0,				0,				0, 				0)
+
+In ``# polymer sets:``
+
+::
+
+    # parameter:	polyLayout		= (LAYOUT_U)
+
+Sets the initial conformation of the polymer (for more options please check the ``md/mdtypes.h`` in MPCD directory). In this case we put a U shaped polymer in the center of the control volume.
+
+::
+
+    # parameter:	polyM			= (1)
+    # parameter:	polyN			= (10)
+
+These two parameters set the number of polymers and number of monomers per polymer respectively.  
+
+::
+
+    # parameter:	nStep		 	= (0, 	50000,			5000000)
+
+
+What one should be very careful about in ``# simulation phases:``  is the last number for ``nStep`` becuase it is the maximum time step beyond which no data will be outputed from MD side and the number is in units of MD. for instance in this example, we have 2000 MPCD streaming step and each are 50 MD steps, so nStep should be at least :math:`2000 \times 50`.
+
+::
+
+    # parameter:	stepAvg		 	    = (0, 	5000, 			5000)
+    # parameter:	stepHistCollect 	= (0,	5000, 			5000)
+    # parameter:	stepHistPrint 		= (0,	5000, 			5000)
+    # parameter:	stepSceneSlow	 	= (0, 	5000, 			5000)
+    # parameter:	stepSceneFast	 	= (0, 	5000, 			5000)
+
+
+Numbers in ``step counters`` section are the frequency of outputing the MD data. MD data is not very expensive, storagevise, in comparison with field outputs in MPCD. So you can output more frequently than MPCD or if you want the same number of outputs as MPCD , multiply the frequency of MPCD output by ``stepsMD``. Here, it is :math:`100 \times 50 = 5000`.
+
+Running
+=======
+
+This script can be run with 
+
+::
+
+    /<directory>/MPCD/mpcd.out -i <directory>/MPCD/SampleInputs/md2D/input.json <directory>/MPCD/3DCylinder/<OUTPUT>

@@ -57,6 +57,23 @@ Flow Past a 'Square' Obstacle
 
 .. include:: FlowPastSquareObstacle/FlowPastSquareObstacle.txt
 
+.. _2Dpolymer:
+
+2D polymer
+**********
+
+.. include:: 2Dpolymer.txt
+
+Many polymers
+*************
+
+.. include:: Manypolymer2D.txt
+
+Polymer translocation
+*********************
+
+.. include:: polymerTranslocation.txt
+
 .. _WavyWalls:
 
 Wavy Walls

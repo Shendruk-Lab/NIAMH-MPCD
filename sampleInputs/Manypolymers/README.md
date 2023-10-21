@@ -1,0 +1,1 @@
+Simulates  several 2D polymers in suspended in a nematic fluid with periodic boundary conditions.

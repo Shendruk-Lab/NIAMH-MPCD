@@ -65,14 +65,14 @@
 # polymer sets:
 # ----------------------------------------------------------------------------------------------------
 #
-# parameter:	polyLayout		= (LAYOUT_U)
+# parameter:	polyLayout		= (LAYOUT_FLUID)
 # parameter:	polyAtomType		= (TYPE_MONOMER)
 # parameter:	polyDensityKind		= (SURFACE)
 # parameter:	polyDensity		= (0.0)
 # parameter:	polySpread		= (0.0)
 # parameter:	monoCharge		= (0)
-# parameter:	polyM			= (1)
-# parameter:	polyN			= (10)
+# parameter:	polyM			= (4)
+# parameter:	polyN			= (5)
 #
 #
 # ---------------------------------------------------------------------------------------------------
