@@ -71,7 +71,8 @@ This line turns on gravity in the x-direction, with an intensity of 0.002 force 
             }
     ],
 
-Instead of djkdsnjkdd
+Instead of using the density, we have to use the population jSON tag, calculating a density of 20 particles for the MPCD cells in the domain that
+are not covered by the colloid object.
 
 ::
 
@@ -90,7 +91,8 @@ Instead of djkdsnjkdd
             }
         ]
 
-The squircle
+The squircle: see the :ref:`squircle section <Squircle>` for more details. It is placed at position (100,50) within a 200 by 100 domain size ("Q"=[100,50,0] 
+with "domain"=[200,100]), with a minor radius of 10 ("R"=10). The boundary conditions are no-slip ("MVN"="MVT"=-1) and non-periodic ("DN"=0).
 
 Running
 =======

@@ -139,7 +139,7 @@ Writing surfaces in this way is versatile and enables following surfaces to be c
       "R":            radius of cylinder,
     }
 
-
+.. _Squircle:
 5. **Squircle**
 
   A squircle is a surface that is intermediate between a sphere and a cube.
