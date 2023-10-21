@@ -5,13 +5,13 @@ Bibliography
 
 .. [Gompper2009] Gompper, Ihle, Kroll & Winkler (2009). `Multi-Particle Collision Dynamics: A Particle-Based Mesoscale Simulation Approach to the Hydrodynamics of Complex Fluids <https://link.springer.com/chapter/10.1007/978-3-540-87706-6_1>`_. In *Advanced Computer Simulation Approaches for Soft Matter Sciences III. Advances in Polymer Science*, 221.
 
-.. [Kapral2008] Kapral (2008). `Multiparticle Collision Dynamics: Simulation of Complex Systems on Mesoscales <https://onlinelibrary.wiley.com/doi/10.1002/9780470371572.ch2>`_. In *Advances in Chemical Physics*. 
+.. [Kapral2008] Kapral (2008). `Multiparticle Collision Dynamics: Simulation of Complex Systems on Mesoscales <https://onlinelibrary.wiley.com/doi/10.1002/9780470371572.ch2>`_. In *Advances in Chemical Physics*.
 
-.. [Yeomans2006] Yeomans (2006). `Mesoscale Simulations: Lattice Boltzmann and Particle Algorithms <https://www.sciencedirect.com/science/article/pii/S0378437106004067>`_. *Physica A: Statistical Mechanics and its Applications*, 369 (1). 
+.. [Yeomans2006] Yeomans (2006). `Mesoscale Simulations: Lattice Boltzmann and Particle Algorithms <https://www.sciencedirect.com/science/article/pii/S0378437106004067>`_. *Physica A: Statistical Mechanics and its Applications*, 369 (1).
 
 .. [Howard2019] Howard, Nikoubashman & Palmer (2019). `Modeling Hydrodynamic Interactions in Soft Materials with Multiparticle Collision Dynamics <https://www.sciencedirect.com/science/article/pii/S2211339819300024>`_. *Current Opinion in Chemical Engineering*, 23.
 
-.. [Slater2009] Slater, *et al* (2009), `Modeling the Separation of Macromolecules <https://doi.org/10.1002/elps.200800673>`_. *Electrophoresis*, 30. 
+.. [Slater2009] Slater, *et al* (2009), `Modeling the Separation of Macromolecules <https://doi.org/10.1002/elps.200800673>`_. *Electrophoresis*, 30.
 
 .. [Aidun2010] Aidun & Clausen (2010), `Lattice-Boltzmann Method for Complex Flows <https://doi.org/10.1146/annurev-fluid-121108-145519>`_. *Annual Review of Fluid Mechanics*, 42.
 
@@ -29,7 +29,7 @@ Bibliography
 
 .. [Kozhukhov2023] Kozhukhov, Loewe, Shendruk(2023), in Prep.
 
-.. [Ihle2003] Ihle & Kroll (2003), `Stochastic Rotation Dynamics. I. Formalism, Galilean Invariance, and Green-Kubo Relations <https://journals.aps.org/pre/abstract/10.1103/PhysRevE.67.066705>`_. *Physical Review E*, 67 (066705). 
+.. [Ihle2003] Ihle & Kroll (2003), `Stochastic Rotation Dynamics. I. Formalism, Galilean Invariance, and Green-Kubo Relations <https://journals.aps.org/pre/abstract/10.1103/PhysRevE.67.066705>`_. *Physical Review E*, 67 (066705).
 
 .. [Götze2007] Götze, Noguchi & Gompper (2007), `Relevance of angular momentum conservation in mesoscale hydrodynamics simulations <http://link.aps.org/abstract/PRE/v76/e046705>`_. *Physical Review E*, 76 (4).
 
@@ -43,13 +43,13 @@ Bibliography
 
 .. [Noguchi2007] Noguchi, Kikuchi & Gompper (2007), `Particle-based mesoscale hydrodynamic techniques <https://iopscience.iop.org/article/10.1209/0295-5075/78/10005/meta?casa_token=sXX_dnYQW_sAAAAA:WO-lXx-9tc5xxFXs-xInaSIQTS5-q20qVYmTlnkkU10BVnK-9uQcaatW6u7l7oMv1VOrvV5I-Mm52p39asvlBvvKcm4>`_. EPL (Europhysics Letters), 78(1):10005.
 
-.. [Ali2004] Ali, Marenduzzo & Yeomans (2004), `Dynamics of Polymer Packaging <https://doi.org/10.1063/1.1798052>`_. *The Journal of Chemical Physics*, 121. 
+.. [Ali2004] Ali, Marenduzzo & Yeomans (2004), `Dynamics of Polymer Packaging <https://doi.org/10.1063/1.1798052>`_. *The Journal of Chemical Physics*, 121.
 
 .. [Archer1995] Archer & Larson (1995), `A molecular theory of flow alignment and tumbling <https://doi.org/10.1063/1.470269>`_, *The Journal of Chemical Physics*, 103.
 
 .. [Holm2009] Dunweg, Kremer, Holm, Binder, Curro, Frenkel, Grest, Heine, Hünenberger, MacDowell, Müller, & Paul. (Eds.). (2009). Advanced computer simulation approaches for soft matter sciences III. Springer Science & Business Media.
 
-.. [Vicsek1995] Vicsek, Czirók, Ben-Jacob, Cohen & Shochet (1995), `Novel type of phase transition in a system of self-driven particles <http://dx.doi.org/10.1103/PhysRevLett.75.1226>`_, *Physical Review Letters*, 75 (6). 
+.. [Vicsek1995] Vicsek, Czirók, Ben-Jacob, Cohen & Shochet (1995), `Novel type of phase transition in a system of self-driven particles <http://dx.doi.org/10.1103/PhysRevLett.75.1226>`_, *Physical Review Letters*, 75 (6).
 
 .. [Cates2018] Cates & Tjhung (2018), `Theories of binary fluid mixtures: from phase-separation kinetics to active emulsions <https://www.cambridge.org/core/journals/journal-of-fluid-mechanics/article/theories-of-binary-fluid-mixtures-from-phaseseparation-kinetics-to-active-emulsions/5BD133CB20D89F47E724D77C296FEF80>`_. *Journal of Fluid Mechanics*, 836.
 
@@ -65,6 +65,16 @@ Bibliography
 
 .. [Binder]     See https://en.wikipedia.org/wiki/Binder_parameter.
 
-.. [Wu2014] Wu and Qi(2014), `Advantages of a finite extensible nonlinear elastic potential in lattice Boltzmann simulations <https://scholarworks.wmich.edu/hilltopreview/vol7/iss1/10/>`_, The Hilltop Review, vol 7. 
+.. [Wu2014] Wu and Qi(2014), `Advantages of a finite extensible nonlinear elastic potential in lattice Boltzmann simulations <https://scholarworks.wmich.edu/hilltopreview/vol7/iss1/10/>`_, The Hilltop Review, vol 7.
 
 .. [Bulacu2013] Bulacu, *et al* (2013), `Improved angle potentials for coarse-grained molecular dynamics simulations <https://pubs.acs.org/doi/full/10.1021/ct400219n>`_, Journal of Chemical Theory and Computation, vol 9.
+
+.. [Head2023] Head, Marenduzzo & Shendruk (2023), in Prep.
+
+.. [Wamsler2023] Wamsler, Head & Shendruk (2023), in Prep.
+
+.. [Allahyarov2002] Allahyarov & Gompper (2002), `Mesoscopic solvent simulations: Multiparticle-collision dynamics of three-dimensional flows` *Physical Review E* 66(3):036702
+
+.. [Lamura2001] Lamura, Burkhardt & G. Gompper (2001), `Semiflexible polymer in a uniform force field in two dimensions` *Physical Review E* 64(6):061801
+
+.. [Lamura2002] Lamura, Burkhardt & G. Gompper (2002), `Numerical study of the flow around a cylinder using multi-particle collision dynamics` *The European Physical Journal E - Soft Matter* 9(5):477-485

@@ -18,13 +18,23 @@ In addition, boundaries may move into other boundaries. For each of the :math:`N
 Like particles, these also enter as corrections to the boundaries :math:`\vec{v}_{b}(t)` and :math:`\vec{\omega}_{b}(t)`, through increments denoted by (:math:`\mathrm{col}`).
 Colloid-colloid interactions are treated as elastic collisions.
 
+Boundaries are enabled to be mobile by setting ``"dsplc" = 1`` in the boundary input.
+
+::
+
+    "BC":
+        [
+            "dsplc":    1,
+        ]
+
+
 .. warning::
     The current version only support mobile spherical colloids where :math:`\vec{A}(t) = \vec{A}(0)`.
 
 Motion from velocity rules
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-In section TODO when a particle interacts with a boundary, the velocity can be updated through the velocity shift :math:`D_{v,\hat{\nu}}` and multiplier operators :math:`M_{v,\hat{\nu}}` in the directions specified by :math:`\hat{\nu}` --- corresponding to a change in the particle's momentum (if any :math:`M_{v,\hat{\nu}}\neq 1` or :math:`D_{v,\hat{\nu}}\neq 0`).
+When :ref:`boundary rules <subsection_boundaryrules>` are applied to a particle, the velocity can be updated through the velocity shift :math:`D_{v,\hat{\nu}}` and multiplier operators :math:`M_{v,\hat{\nu}}` in the directions specified by :math:`\hat{\nu}` --- corresponding to a change in the particle's momentum (if any :math:`M_{v,\hat{\nu}}\neq 1` or :math:`D_{v,\hat{\nu}}\neq 0`).
 The change of momentum of the particle over the time-step interval :math:`\delta t` can be written in terms of the particle impulse :math:`\vec{J}_i`
 
 .. math::
@@ -66,12 +76,12 @@ The equation has a pivot point defined at the particle position on the boundary.
 
 Similar to the velocity rules, if the boundary is static, then the rotational impulse is absorbed by the boundary.
 However, if the boundary is mobile, then we assume rotational impulse conservation between the particle and boundary.
-It is the rotational impulse that needs to be converted into boundary increments :math:`\Delta \vec{v}_{b,i}^\mathrm{ori}` and :math:`\Delta \vec{\omega}_{b,i}^\mathrm{ori}`.
+It is the rotational impulse that needs to be converted into boundary increments :math:`\Delta \vec{v}_{b,i}^\mathrm{ori}` and :math:`\Delta \vec{\omega}_{b,i}^\mathrm{ori}` [Head2023]_.
 
-For our mobile colloid, :ref:`(26) <eq:angularimpulse>` can be recast into a torque balance, through :math:`\mathcal{T}_i=\Gamma_i \delta t`
+For our mobile colloid, :ref:`rotational impulse conservation <eq:angularimpulse>` can be recast into a torque balance, through :math:`\vec{\mathcal{T}}_i=\vec{\Gamma}_i \delta t`
 
 .. math::
-    :name: eq:torque
+    :name: eq:torqueconservation
 
     \vec{\Gamma}_i + \vec{\Gamma}_{b,i} = 0
 
@@ -84,14 +94,16 @@ For a particle with initial orientation :math:`\hat{u}_i` with an anchoring axis
 
     \vec{\Gamma}_i = \frac{\gamma_R}{\ell_u \delta t} \frac{M_{\nu}-M_{\perp}}{\sqrt{M_\nu^2 + M_\perp^2}}\left(\hat{u}_i \cdot \hat{\nu} \right)\left( \hat{u}_i \times \hat{\nu} \right)
 
-with :math:`\frac{M_{\nu}-M_{\perp}}{\sqrt{M_\nu^2 + M_\perp^2}}=1` when anchoring is fixed along :math:`\hat{\nu}` using :math:`M_{\nu}=1` and :math:`M_{\perp}=0`.
+with :math:`\frac{M_{\nu}-M_{\perp}}{\sqrt{M_\nu^2 + M_\perp^2}}=1` when anchoring is fixed along :math:`\hat{\nu}` using :math:`M_{\nu}=1` and :math:`M_{\perp}=0` (the multiplier perpendicular to :math:`M_{\nu}`).
 
 The torque is only dependent on fixed simulation parameters and the relative alignment of :math:`\hat{u}_i` and :math:`\hat{\nu}`.
 Defining the alignment as :math:`\cos\theta_i = \hat{u}_i\cdot \hat{\nu}`, the torque :math:`\Gamma_i = \frac{\gamma_R}{\ell_u \delta t} \sin 2\theta`.
 The torque is odd under :math:`\Gamma_i(-\theta)=-\Gamma_i(\theta)`,
 which motivates that the torque transferred to the colloid can be treated as a virtual MPCD particle at the same point,
 oriented in the direction :math:`\hat{u}_{b,i}` that has angle :math:`-\theta` relative to :math:`\hat{\nu}`, and rotates in the opposite sense to :math:`\hat{u}_i`.
-This construction satisfies the torque conservation equation :ref:`(27) <eq:torque>`.
+This construction satisfies the :ref:`torque conservation equation <eq:torqueconservation>`.
+
+
 
 The torque :math:`\vec{\Gamma}_{b,i}` on the virtual particle, is converted into a force at the colloidal boundary by,
 
@@ -101,6 +113,7 @@ The torque :math:`\vec{\Gamma}_{b,i}` on the virtual particle, is converted into
     \vec{F}_{b,i} = \frac{\vec{\Gamma}_{b,i} \times \hat{u}_{b,i}}{\ell_u}
 
 where the above is only valid with the assumption :math:`\hat{u}_{b,i}` and :math:`\vec{F}_{b,i}` are orthogonal.
+The parameter :math:`\ell_u` has units of length, and is the effective length of the rod ``len``.
 This assumption is motivated by the anchoring reorientation being purely rotational motion around the pivot point, and hence no colinear contributions between the force and orientation :math:`\hat{u}_{b,i}\cdot\hat{F}_{b,i} = 0`.
 
 Since the orientation :math:`\hat{u}_{b,i}` is head-tail symmetric, the force has an ambiguous sign under :math:`\vec{F}(-\hat{u}_{b,i})=-\vec{F}(\hat{u}_{b,i})`.
