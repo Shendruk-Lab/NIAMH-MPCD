@@ -1,9 +1,9 @@
 {
     "comment":          "SIMULATION-SCALE INPUTS",
     "comment":          "Small, square geometry --- Regardless of boundary conditions, you need to specify the simulation box size",
-    "domain":           [50, 50],
+    "domain":           [30, 30],
     "comment":          "Number of simulation steps to perform in the simulation --- this is in iterations; not MPCD time units",
-    "simSteps":         1000,
+    "simSteps":         2000,
     "comment":          "Number of times steps to perform prior to outputting data --- this allows the system to reach equilibrium or steady state",
     "warmUp":           0,
     "comment":          "Streaming time step in MPCD time units",
@@ -18,7 +18,7 @@
     [
         {
             "comment":      "pop sets the total number of particles of this type in the simulation. Given the system size this sets an average cell density of 20 particles per MPCD cell, which is is standard",
-            "pop":          50000,
+            "pop":          18000,
             "comment":      "An equivalent to the above line is ''dens': 20'",
             "comment":      "Mass of particles",
             "mass":         1,
@@ -114,6 +114,6 @@
     "histNOut":         100,
     "comment":          "Velocity-velocity autocorrelation function --- autocorrelation functions are costly to calculate so beware of including",
     "velCorrOut":       100,
-    "comment":          "Velocity-velocity autocorrelation function",
+    "comment":          "Density-density autocorrelation function",
     "densCorrOut":      100
 }

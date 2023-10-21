@@ -1,11 +1,124 @@
 
-OVERRIDES
+This tutorial repeats the same simulation as :ref:`First simulation <Isoptropic>` **but** uses a much cleaner input file, that utilizes *defaults* and *overrides* for clarity. 
+Users' actual input files are expected to more frequently look like the file used here. 
 
-* dens --- override pop
-* domainWalls  --- NOT override
-1 PBCs
-0 impermeable, no-slip
-ADDITIVE (??)
-* "homeotropic" 1 OVERRIDE MUN and MUT
-* "planar" 1  OVERRIDE MUN and MUT
-* Checkpoint timer out. In Checkpointing Override check
+This tutorial is based on the input file found in ``MPCD/SampleInputs/02_cleanerFirstSimulation/input.json``.
+
+Input File
+==========
+
+::
+
+    {
+        "comment":          "SIMULATION-SCALE INPUTS",
+        "domain":           [30, 30],
+        "simSteps":         2000,
+        "comment":          "FLUID PARTICLE SPECIES INPUTS",
+        "species":
+        [
+            {
+                "comment":      "''dens'' overides the ''pop'' argument to set the desired number density",
+                "dens":         20
+            }
+        ],
+        "comment":          "BOUNDARY CONDITION INPUTS",
+        "comment":          "''domainWalls'' overrides the ''BC'' to set periodic boundary conditions at all edges of the system (additional BCs can be added after)",
+        "domainWalls":      1,
+        "comment":          "OUTPUTS",
+        "checkpointOut":    1,
+        "checkpointTimerOut":    0.0056,
+        "avVelOut":         10,
+        "energyOut":        10,
+        "densSDOut":        10,
+        "flowOut":          50,
+        "histSpeedOut":     100,
+        "histNOut":         100,
+        "velCorrOut":       100,
+        "densCorrOut":      100
+    }
+
+
+Running
+=======
+
+This script can be run with 
+
+::
+
+    /<code-directory>/MPCD/mpcd.out -i <code-directory>/MPCD/SampleInputs/02_cleanerFirstSimulation/input.json <output-directory>/MPCD/<OUTPUT>
+
+
+
+Understanding the Script
+========================
+
+Here is the breakdown of the input script. 
+
+::
+
+    {
+        "domain":           [30, 30],
+        "simSteps":         2000,
+
+The input arguments are contained between curly brackets ``{}`` --- The first line is the opening bracket. 
+The system wide inputs set here are ``"domain"`` and ``"simSteps"``. 
+All other arguments take their default values (an isotropic fluid using the :ref:``basic Andersen-thermostatted collision operator <Andersen>``). 
+In fact, even the ``"domain"`` and ``"simSteps"`` are set to their default values but users are always expected to run larger and longer simulations when doing research. 
+
+::
+
+        "species":
+        [
+            {
+                "comment":      "''dens'' overides the ''pop'' argument to set the desired number density",
+                "dens":         20
+            }
+        ],
+
+Next are the fluid particle properties. 
+This is a single species with all default values. 
+Except the ``"dens"`` **override** argument is used to set the average number of MPCD particles per accessible MPCD cell rather than the total population. 
+Here the number density is set to ``20``. 
+
+::
+
+        "domainWalls":      1,
+    }
+
+Next the boundary conditions are set. 
+In this example, simple periodic boundary conditions are required and therefore an override can be employed. 
+``"domainWalls": 1`` creates four periodic boundaries around the domain in 2D and six in 3D. 
+If one wishes to run a simulation inside impermeable/no-slip walls, then ``"domainWalls": 0`` can override the boundaries. 
+All other boundaries/geometries must be created boundary-surface-by-boundary-surface. 
+
+.. note:: 
+    Additional boundaries can be added **after** the ``"domainWalls"`` override. 
+    In this way, solid obstacles or mobile colloids can be suspended within the domain with PBCs or impermeable/no-slip BCs. 
+
+::
+
+        "checkpointOut":    1,
+        "checkpointTimerOut":    0.0056,
+
+Rather than setting the checkpointing to a number of iterations (here set to every time step), ``"checkpointTimerOut"`` overwrites it to output based on a timer, outputting with a period of the value in hours. 
+Here ``0.0056`` hours is about every 20 seconds. 
+This is an extremely small value that should never be used in practice. 
+Rather checkpointing should be used for long simulations that last for longer than a week in order to backup the simulation and offer a point for restarting it (so ``"checkpointTimerOut"`` should be comparable to ``100``.)
+
+.. warning::
+    ``"checkpointOut"`` must be non-zero in the input script and then ``"checkpointTimerOut"`` must override its value. 
+
+::
+
+        "avVelOut":         10,
+        "energyOut":        10,
+        "densSDOut":        10,
+        "flowOut":          50,
+        "histSpeedOut":     100,
+        "histNOut":         100,
+        "velCorrOut":       100,
+        "densCorrOut":      100
+    }
+
+Finally the output is specified. 
+The default output is ``0`` (meaning that the quantity is not outputted) for all outputs, except ``"synopsisOut"``, which should always be outputted. 

@@ -6,14 +6,25 @@ Tutorials
 .. _Isoptropic:
 
 First simulation
-************
+****************
 
 .. include:: Isotropic/Isotropic.txt
+
+
+.. _Overrides:
+
+Overrides
+*********
+
+.. include:: Overrides/Overrides.txt
+
 
 Channel flow
 ************
 
 .. include:: ChannelFlow/ChannelFlow.txt
+
+.. _Colloid:
 
 Colloid
 *******
@@ -45,3 +56,10 @@ Flow Past a 'Square' Obstacle
 *****************************
 
 .. include:: FlowPastSquareObstacle/FlowPastSquareObstacle.txt
+
+.. _WavyWalls:
+
+Wavy Walls
+*****************************
+
+.. include:: WavyWalls/WavyWalls.txt
