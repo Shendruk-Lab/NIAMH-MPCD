@@ -36,11 +36,14 @@ Dumbbell swimmers
 
 .. include:: Swimmers/swimmers.txt
 
+.. _nemLC:
 
 2D Passive Nematic
 ******************
 
 .. include:: PassiveNematic/PassiveNematic.txt
+
+.. _actNem:
 
 2D Active Nematic
 ******************
