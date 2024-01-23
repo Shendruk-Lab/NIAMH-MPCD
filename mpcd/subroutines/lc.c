@@ -1310,15 +1310,14 @@ void oriBC( particleMPC *pp,spec *SP,bc *WALL,double n[] ) {
             //Combine normal and tangential components
             for (i = 0; i < DIM; i++) pp->U[i] = UN[i] + UT[i];
 
-            if (dotprod(U0, pp->U, DIM) < 0.0) {
-                for (i = 0; i < DIM; i++) pp->U[i] *= -1.0;
-            }
-
             //For measuring K_bend in a pure bend geometry, we want to surpress the z-hat orientation
             pp->U[0] *= WALL->MUxyz[0];
             if (DIM >= _2D) pp->U[1] *= WALL->MUxyz[1];
             if (DIM >= _3D) pp->U[2] *= WALL->MUxyz[2];
         }
+    }
+    if (dotprod(U0, pp->U, DIM) < 0.0) {  // pick final orientation that results in smallest angle change
+        for (i = 0; i < DIM; i++) pp->U[i] *= -1.0;
     }
 
 	// Make sure U0 and U are unit vectors
