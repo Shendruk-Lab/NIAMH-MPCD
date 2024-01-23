@@ -1418,6 +1418,10 @@ void torqueLCBC( bc *WALL,double n[], double U0[], double torqueMPC[],double rod
 	// 3. Direction of force that the colloid provides to the MPCD (to make it rotate)
 
 	crossprod( torqueMPC, U0, f_hat);  // <- this is the problem!!!
+    // force to be inwards
+    if (dotprod(f_hat, n, _3D) > 0.0) {
+        for (i=0; i<_3D; i++) f_hat[i] *= -1.0;
+    }
     /*
      * TODO:
      * IDEA
