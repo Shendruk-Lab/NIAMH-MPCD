@@ -1309,6 +1309,11 @@ void oriBC( particleMPC *pp,spec *SP,bc *WALL,double n[] ) {
             }
             //Combine normal and tangential components
             for (i = 0; i < DIM; i++) pp->U[i] = UN[i] + UT[i];
+
+            if (dotprod(U0, pp->U, DIM) < 0.0) {
+                for (i = 0; i < DIM; i++) pp->U[i] *= -1.0;
+            }
+
             //For measuring K_bend in a pure bend geometry, we want to surpress the z-hat orientation
             pp->U[0] *= WALL->MUxyz[0];
             if (DIM >= _2D) pp->U[1] *= WALL->MUxyz[1];
@@ -1413,7 +1418,14 @@ void torqueLCBC( bc *WALL,double n[], double U0[], double torqueMPC[],double rod
 
 	// 3. Direction of force that the colloid provides to the MPCD (to make it rotate)
 
-	crossprod( torqueMPC, U0, f_hat);
+	crossprod( torqueMPC, U0, f_hat);  // <- this is the problem!!!
+    /*
+     * TODO:
+     * IDEA
+     * flip f_hat depending on the position of the MPCD particle relative to the colloid?
+     *
+     * force is perpendicular to the torque
+     */
 	norm( f_hat,_3D);
 
 	// 2. MPCD particle anchoring torque: split into magnitude and unit vector.
