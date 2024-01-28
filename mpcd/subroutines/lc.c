@@ -1262,6 +1262,7 @@ double binderCumulant( cell ***CL,int L,int LC ) {
 ///
 void oriBC( particleMPC *pp,spec *SP,bc *WALL,double n[] ) {
 	double UN[_3D],UT[_3D],U0[_3D];
+    double janInterp = 0.0; // janus interpolation parameter. 0.0 is homeotropic, 1.0 is planar
 	double angleAnch;
 	double torque[_3D],r[_3D];			//Torque on MPCD particle --- Not REALLY torque ( angular impulse but time step falls out)
 	int i;
@@ -1294,27 +1295,26 @@ void oriBC( particleMPC *pp,spec *SP,bc *WALL,double n[] ) {
 	}
 
 	//Transform the orientation
-    if (WALL->ENABLEJANUS) { // Janus boundaries override the default anchoring controls
-        applyJanusAnchoring(pp, WALL, UN, UT);
+    if (WALL->ENABLEJANUS) {
+        // Get janus orientation components then apply to particle
+        janInterp = getJanusAnchoringInterp(pp, WALL);
+        for (i = 0; i < DIM; i++) pp->U[i] = (1 - janInterp) * UN[i] + janInterp * UT[i];
+    } else if (feq(WALL->MUN, 0.0) && feq(WALL->MUT, 0.0)) {
+        //Addition in cartesian coordinates
+        for (i = 0; i < DIM; i++) pp->U[i] = WALL->DUxyz[i];
     } else {
-        // if not Janus, do typical orientation changes
-        if (feq(WALL->MUN, 0.0) && feq(WALL->MUT, 0.0)) {
-            //Addition in cartesian coordinates
-            for (i = 0; i < DIM; i++) pp->U[i] = WALL->DUxyz[i];
-        } else {
-            //Multiplication wrt surface normal
-            for (i = 0; i < DIM; i++) {
-                UN[i] *= WALL->MUN;
-                UT[i] *= WALL->MUT;
-            }
-            //Combine normal and tangential components
-            for (i = 0; i < DIM; i++) pp->U[i] = UN[i] + UT[i];
-
-            //For measuring K_bend in a pure bend geometry, we want to surpress the z-hat orientation
-            pp->U[0] *= WALL->MUxyz[0];
-            if (DIM >= _2D) pp->U[1] *= WALL->MUxyz[1];
-            if (DIM >= _3D) pp->U[2] *= WALL->MUxyz[2];
+        //Multiplication wrt surface normal
+        for (i = 0; i < DIM; i++) {
+            UN[i] *= WALL->MUN;
+            UT[i] *= WALL->MUT;
         }
+        //Combine normal and tangential components
+        for (i = 0; i < DIM; i++) pp->U[i] = UN[i] + UT[i];
+
+        //For measuring K_bend in a pure bend geometry, we want to surpress the z-hat orientation
+        pp->U[0] *= WALL->MUxyz[0];
+        if (DIM >= _2D) pp->U[1] *= WALL->MUxyz[1];
+        if (DIM >= _3D) pp->U[2] *= WALL->MUxyz[2];
     }
     if (dotprod(U0, pp->U, DIM) < 0.0) {  // pick final orientation that results in smallest angle change
         for (i = 0; i < DIM; i++) pp->U[i] *= -1.0;
@@ -1333,30 +1333,47 @@ void oriBC( particleMPC *pp,spec *SP,bc *WALL,double n[] ) {
 
 	//Apply torque to BC
 	if( WALL->DSPLC ) {
-		double u0dotu;
 		//Zero
 		for( i=0; i<_3D; i++ ) {
 			torque[i]=0.0;
 		}
 
-		// Calculate angle between initial and final orientation (angleAnch)
-		u0dotu = dotprod(U0, pp->U, _3D);
-		if (u0dotu >=1.0){
-			angleAnch = 0.0; //colloids are crashing without this
-		}
-		if (u0dotu < 1.0){
-			angleAnch = acos(u0dotu); // making sure u0dotu is less than one or the angle blows up
-		}
+        if (WALL->ENABLEJANUS)
+        { // janus requires a different torque computation. See eqn 13, L Head, Y Fosado, et al., 2024
+            double u0dotn, magOri;
+            u0dotn = dotprod(U0, n, _3D);
 
-		// Calculating torque on MPCD particle
-		crossprod(U0, pp->U, torque);
-		norm(torque, _3D); // getting just the direction of torque here
+            crossprod(U0, n, torque); // torque direction specified by cross of U0 and n
 
-		for (i=0; i<_3D; i++){
-			// Multiply unit vector by magnitude.  Now this is torque = (rotational friction coefficient) * (angular velocity). Note: anglar velocity is just the angle.
-			torque[i] *= angleAnch;
-			torque[i] *= ((SP+pp->SPID)->RFC);
-		}
+            magOri = sqrt((1-janInterp)*(1-janInterp) + janInterp*janInterp); // rescaling factor
+            for (i = 0; i < _3D; i++) {
+                // Multiply unit vector by magnitude of torque
+                torque[i] *= 1 - 2*janInterp; // interpolation factor
+                torque[i] *= magOri; // rescaling
+                torque[i] *= u0dotn; // dot prod
+                torque[i] *= ((SP + pp->SPID)->RFC); // rotational friction
+            }
+        } else { // otherwise compute regular anchoring
+            double u0dotu;
+            // Calculate angle between initial and final orientation (angleAnch)
+            u0dotu = dotprod(U0, pp->U, _3D);
+            if (u0dotu >= 1.0) {
+                angleAnch = 0.0; //colloids are crashing without this
+            }
+            if (u0dotu < 1.0) {
+                angleAnch = acos(u0dotu); // making sure u0dotu is less than one or the angle blows up
+            }
+
+            // Calculating torque on MPCD particle
+            crossprod(U0, pp->U, torque);
+            norm(torque, _3D); // getting just the direction of torque here
+
+            for (i = 0; i < _3D; i++) {
+                // Multiply unit vector by magnitude.  Now this is torque = (rotational friction coefficient) * (angular velocity). Note: anglar velocity is just the angle.
+                torque[i] *= angleAnch;
+                torque[i] *= ((SP + pp->SPID)->RFC);
+            }
+        }
 
 		// Vector between collision point and CM
 		for( i=0; i<DIM; i++ ) r[i] = -WALL->Q[i] + pp->Q[i];
@@ -1422,13 +1439,6 @@ void torqueLCBC( bc *WALL,double n[], double U0[], double torqueMPC[],double rod
     if (dotprod(f_hat, n, _3D) > 0.0) {
         for (i=0; i<_3D; i++) f_hat[i] *= -1.0;
     }
-    /*
-     * TODO:
-     * IDEA
-     * flip f_hat depending on the position of the MPCD particle relative to the colloid?
-     *
-     * force is perpendicular to the torque
-     */
 	norm( f_hat,_3D);
 
 	// 2. MPCD particle anchoring torque: split into magnitude and unit vector.
@@ -1456,7 +1466,10 @@ void torqueLCBC( bc *WALL,double n[], double U0[], double torqueMPC[],double rod
 	// Force vectors
 	for( i=0; i<_3D; i++ ){
 		force_n[i] = forceN*n[i];
-		force_t[i] = -1.*forceT*t_hat[i]; // see also forceT. Without -1, we have found the tangential component of the force on MPC particle, but this tangential component is in the opposite direction to the colloid tangential force.
+        // Without -1, we have found the tangential component of the force on MPC particle, but this tangential
+        //      component is in the opposite direction to the colloid tangential force.
+		force_t[i] = -1.*forceT*t_hat[i]; // see also forceT.
+        //TODO: this needs to be "tangent of "easy" axis, so u\cdot n, u=U0, n=normal (per louise)
 	}
 
 	#ifdef DBG

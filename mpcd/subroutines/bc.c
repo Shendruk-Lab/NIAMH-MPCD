@@ -1857,9 +1857,9 @@ float getPolarAngleFromSurface( particleMPC *pp, bc *WALL) {
     double crossVec[_3D] = {0.0};
 
     // get orientation vector of wall, using the angles of the wall O about the x,y,z axes
-    wallOri[0] = sin(WALL->O[0]);
-    wallOri[1] = cos(WALL->O[1])*cos(WALL->O[0]);
-    wallOri[2] = sin(WALL->O[1])*cos(WALL->O[0]);
+    wallOri[0] = cos(WALL->O[1])*cos(WALL->O[2]);
+    wallOri[1] = sin(WALL->O[0])*sin(WALL->O[1])*cos(WALL->O[2]) + cos(WALL->O[0])*sin(WALL->O[2]);
+    wallOri[2] = -cos(WALL->O[0])*sin(WALL->O[1])*cos(WALL->O[2]) + sin(WALL->O[0])*sin(WALL->O[2]);
 
     // compute direction vector from wall CoM to particle
     for (i = 0; i < _3D; i++) collisionVec[i] = pp->Q[i] - WALL->Q[i];
@@ -1873,46 +1873,43 @@ float getPolarAngleFromSurface( particleMPC *pp, bc *WALL) {
 }
 
 ///
-/// @brief Applies a Janus anchoring condition to a particle.
+/// @brief Computes the interpolation factor for anchoring of a Janus colloid.
 ///
-/// Applies Janus-like anchoring to a particle colliding with a boundary. This will always assume that the "head" (ie,
-/// the side of the wall pointing in the direction of it's orientation) has homeotropic boundary conditions, and the
-/// "tail" is planar.
+/// Computes the interpolation factor between normal and tangential orientations for a particle makes under Janus
+/// anchoring conditions. This will always assume that the "head" (ie, the side of the wall pointing in the direction
+/// of it's orientation) has planar boundary conditions, such that the boundary orientation is akin to a +1/2 defect.
 ///
 /// @param pp The particle colliding with the wall
 /// @param WALL The wall that the particle is colliding with
-/// @param UN The normal to the surface of the wall
-/// @param UT The tangent to the surface of the wall
+/// @return The interpolation factor between homeotropic and planar anchoring [0, 1]. 1 indicates planar.
 ///
-void applyJanusAnchoring( particleMPC *pp, bc *WALL, double UN[_3D], double UT[_3D]) {
-    int i = 0;
+double getJanusAnchoringInterp( particleMPC *pp, bc *WALL) {
     double theta, interpolationFactor = 0.0; // interpolation factor: 0 = homeotropic, 1 = planar
 
-    double thetaH1 = pi/2.0 - WALL->JANDELTA; // limit of when transition from homeo begins to occur
-    double thetaP1 = pi/2.0 + WALL->JANDELTA; // limit of when transition from homeo ends and planar begins
-    double thetaP2 = 3.0*pi/2.0 - WALL->JANDELTA; // limit of when transition from planar begins to occur
-    double thetaH2 = 3.0*pi/2.0 + WALL->JANDELTA; // limit of when transition from planar ends and homeo begins
+    double thetaH1 = pi/2.0 - WALL->JANDELTA; // limit of when transition from planar begins to occur
+    double thetaP1 = pi/2.0 + WALL->JANDELTA; // limit of when transition from planar ends and homeo begins
+    double thetaP2 = 3.0*pi/2.0 - WALL->JANDELTA; // limit of when transition from homeo begins to occur
+    double thetaH2 = 3.0*pi/2.0 + WALL->JANDELTA; // limit of when transition from homeo ends and planar begins again
 
     theta = getPolarAngleFromSurface(pp, WALL); // get angle between wall and particle
 
     // Compute necessary interpolation factor depending on angle
     if (theta < thetaH1) {
-        // homeotropic
-        interpolationFactor = 0.0;
-    } else if (theta < thetaP1) {
-        // transition from homeo to planar
-        interpolationFactor = (theta - thetaH1) / (thetaP1 - thetaH1); // 0 for homeo, 1 for planar
-    } else if (theta < thetaP2) {
         // planar
         interpolationFactor = 1.0;
-    } else if (theta < thetaH2) {
+    } else if (theta < thetaP1) {
         // transition from planar to homeo
-        interpolationFactor = 1 - (theta - thetaP2) / (thetaH2 - thetaP2);
-    } else {
-        // homeotropic
+        interpolationFactor = 1 - (theta - thetaH1) / (thetaP1 - thetaH1);
+    } else if (theta < thetaP2) {
+        // homeo
         interpolationFactor = 0.0;
+    } else if (theta < thetaH2) {
+        // transition from homeo to planar
+        interpolationFactor = (theta - thetaP2) / (thetaH2 - thetaP2);
+    } else {
+        // planar
+        interpolationFactor = 1.0;
     }
 
-    // apply boundary condition to the particle at the end
-    for (i = 0; i < DIM; i++) pp->U[i] = (1 - interpolationFactor) * UN[i] + interpolationFactor * UT[i];
+    return interpolationFactor;
 }
