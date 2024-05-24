@@ -1,7 +1,7 @@
 {
     "debugOut":         3,
-    "domain":           [30, 30],
-    "simSteps":         2000,
+    "domain":           [50, 50],
+    "simSteps":         20000,
     "comment":          "Isotropic fluid using Andersen MPCD",
     "collOp":           2,
     "species":
@@ -15,7 +15,7 @@
     "comment":          "Dumb-dumbell swimmer",
     "typeSwim":         2,
     "comment":          "One swimmer",
-    "nSwim":            1,
+    "nSwim":            2,
     "comment":          "Swimmer monomers have same mass as one mpcd cell of fluid particles",
     "headMSwim":        20,
     "midMSwim":         20,
@@ -29,7 +29,9 @@
     "epsSwim":          1,
     "comment":          "Output options",
     "flowOut":          50,
+    "velOut":           50,
     "avVelOut":         0,
+    "swFlowOut":        50,
     "energyOut":        0,
     "swimQOut":         50,
     "swimOOut":         0,

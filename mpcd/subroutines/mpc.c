@@ -246,6 +246,90 @@ void sumFLOW( cell ***CL ) {
 }
 
 /// 
+/// @brief This routine calculates the rolling-average local flow in each cell, centered around the first swimmer.
+///
+/// The function loops over all cells and adds the current (pre-calculated) local velocity (in `DIM` dimensions) of each cell to a running sum.
+/// The sum will become a time-window-averaged flow velocity and will be outputted by swflowout().  
+/// This is done by hijacking the cell structure: the local velocity in question does not correspond to the cell where SWFLOW is stored, but to the cell which holds the same position in a grid centered around the first swimmer.
+/// This results in some cells receiving more information than others: this is corrected by SWFLOW[3].
+/// @param CL All of the MPCD cells.
+/// @param sw The first swimmer's information.
+/// @param ss The global information of the swimmers.
+/// @see swflowout()
+///
+void sumSWFLOW( cell ***CL, swimmer *sw , specSwimmer *ss) {
+	int a,b,c,d,w;
+	double i,j,k,i2,j2,k2;
+	int I,J,K;
+	double ori[3]={0.0,0.0,0.0},center[3]={0.0,0.0,0.0},finalOrientation[3]={1.0,0.0,0.0};
+	double rotMatrix[3][3]={{0.0,0.0,0.0},{0.0,0.0,0.0},{0.0,0.0,0.0}};
+
+	// Find the orientation of the first swimmer, and the necessary translation to place its hydrodynamic center at the point (0,0,0)
+	for (d=0;d<3; d++) 
+	{
+		ori[d]=sw[0].H.Q[d]-sw[0].M.Q[d];
+		if (ori[d]>0.5*XYZ[d]) ori[d]=ori[d]-XYZ[d];
+		else if (ori[d]<-0.5*XYZ[d]) ori[d]=ori[d]+XYZ[d];
+		center[d]=0.25*sw[0].M.Q[d]+0.25*sw[0].H.Q[d]-0.5*(sw[0].M.Q[d]-ori[d]*ss->DS);
+		center[d]=sw[0].M.Q[d]-ori[d]*ss->DS;
+		center[d]=0.5*XYZ[d]-center[d];
+	}
+
+	// Find the matrix that places the swimmer's orientation along the x axis
+	norm(ori,_3D);
+	findRotationMatrix( rotMatrix, ori, finalOrientation);
+
+	// Translates and rewraps, then stores the translated velocity field in the last three slots in SWFLOW (SWFLOW[4],SWFLOW[5],SWFLOW[6]).
+	for( a=0; a<XYZ[0]; a++ ) for( b=0; b<XYZ[1]; b++ ) for( c=0; c<XYZ[2]; c++ ) {
+
+		i=a+center[0];j=b+center[1];k=c+center[2];
+
+		if (i>=XYZ[0]) i-=XYZ[0];
+		if (i<0) i+=XYZ[0];
+		if (j>=XYZ[1]) j-=XYZ[1];
+		if (j<0) j+=XYZ[1];
+		if (k>=XYZ[2]) k-=XYZ[2];
+		if (k<0) k+=XYZ[2];
+		I=(int)i;J=(int)j;K=(int)k;
+
+		for (d=0;d<DIM;d++){
+			w=d+4;
+			CL[I][J][K].SWFLOW[w]=CL[a][b][c].VCM[d];
+		}
+	}
+
+	// Rotating and rewrapping the cell indices, before rotating the velocity vectors themselves
+	for( a=0; a<XYZ[0]; a++ ) for( b=0; b<XYZ[1]; b++ ) for( c=0; c<XYZ[2]; c++ ) {
+
+		for (d=0;d<3; d++) center[d]=XYZ[d]*0.5;
+
+		i2=a-center[0];j2=b-center[1];k2=c-center[2];		
+		i=rotMatrix[0][0]*i2+rotMatrix[0][1]*j2+rotMatrix[0][2]*k2+center[0];
+		j=rotMatrix[1][0]*i2+rotMatrix[1][1]*j2+rotMatrix[1][2]*k2+center[1];
+		k=rotMatrix[2][0]*i2+rotMatrix[2][1]*j2+rotMatrix[2][2]*k2+center[2];
+
+		// Rewrapping
+		while (i>=XYZ[0])i=i-XYZ[0];
+		while (i<0)i=i+XYZ[0];
+		while (j>=XYZ[1])j=j-XYZ[1];
+		while (j<0)j=j+XYZ[1];
+		while (k>=XYZ[2])k=k-XYZ[2];
+		while (k<0)k=k+XYZ[2];
+
+		I=(int)i;J=(int)j;K=(int)k;
+
+		for ( d=0; d<DIM; d++ )
+		{
+			w=d+4;
+			CL[I][J][K].SWFLOW[0] += CL[a][b][c].SWFLOW[w]*rotMatrix[0][d];
+			CL[I][J][K].SWFLOW[1] += CL[a][b][c].SWFLOW[w]*rotMatrix[1][d];
+			CL[I][J][K].SWFLOW[2] += CL[a][b][c].SWFLOW[w]*rotMatrix[2][d];
+		}
+		CL[I][J][K].SWFLOW[3] += 1.0; // Counter that keeps track of how many time each grid point corresponds to another grid point.
+	}
+}
+
+/// 
 /// @brief This routine adds the effect of phantom MPCD particles to the centre of mass. 
 /// 
 /// Then this routine operates (to fill cell up with ghost particles, or apply strong anchoring). 
@@ -1421,7 +1505,7 @@ void andersenROT( cell *CL,spec *SP,specSwimmer SS,double KBT,double *CLQ,int ou
 		if( outP ) calcPressureColl_preColl( relQP[i],dp[i],tmpc,CLQ );
 		for( j=0; j<DIM; j++ ) RV[i][j] = genrand_gaussMB( KBT,MASS );
 		for( j=0; j<DIM; j++ ) RS[j] += MASS*RV[i][j];
-		for( j=0; j<DIM; j++ ) DV[i][j] = ((SP+id)->DAMP)*(CL->VCM[j])/((double)CL->POP);
+		for( j=0; j<DIM; j++ ) DV[i][j] = ((SP+id)->DAMP)*(CL->VCM[j]);
 		tmpc = tmpc->next;
 		i++;
 	}
@@ -4716,10 +4800,13 @@ void timestep(cell ***CL, particleMPC *SRDparticles, spec SP[], bc WALL[], simpt
 	/* ****************************************** */
 	/* ********** SAVE SOME PROPERTIES ********** */
 	/* ****************************************** */
-		//Build the flow profile by summing over everytime step and averaging after FLOWOUT iterations
-	if( outFlags.FLOWOUT>=OUT && !in.warmupSteps) {
+	//Build the flow profile by summing over everytime step and averaging after FLOWOUT or SWFLOWOUT iterations
+	if( (outFlags.FLOWOUT>=OUT || outFlags.SWFLOWOUT>=OUT) && !in.warmupSteps ) {
 		localFLOW( CL,SP );
-		sumFLOW( CL );
+		//The 'lab frame' flowout
+		if( outFlags.FLOWOUT>=OUT ) sumFLOW( CL );
+		//The first swimmer 'frame' averaged swflowout
+		if( outFlags.SWFLOWOUT>=OUT && NS>0 ) sumSWFLOW( CL, swimmers,SS);
 	}
 }
 

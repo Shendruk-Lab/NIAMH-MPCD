@@ -281,6 +281,7 @@ typedef struct cell {
 	double VCM[3];		        ///< Centre of mass velocity of the cell.
 	double DIR[3];		        ///< Director of the cell (average orientation).
 	double FLOW[3];		        ///< Centre of mass velocity of the cell averaged over FLOWOUT time steps.
+	double SWFLOW[7];			///< Centre of mass velocity of the cell in the first swimmer's reference frame, averaged over SWFLOWOUT time steps using its fourth element as a counter.
 	double Ps[3][3];		    ///< Streaming part of the local instantaneous stress tensor.
 	double Pc[3][3];		    ///< Collisional part of the local instantaneous stress tensor.
 
@@ -295,7 +296,7 @@ typedef struct cell {
 /// All output files are stored within this struct, used as a container for simple passing to functions.
 ///
 typedef struct outputFilesList {
-	FILE *fcoarse,*fflow,*fvel,*fenergy,*fenergyfield,*fenneighbours;
+	FILE *fcoarse,*fflow,*fvel,*fswflow,*fenergy,*fenergyfield,*fenneighbours;
 	FILE *fsynopsis,*favvel,*favori,*forder,*forderQ,*forderQK,*favs,*fdensSTD,*fchckpnt,*fenstrophy,*fmultiphase,*fpressure;
 	FILE *fcorrVV,*fcorrNN,*fcorrWW,*fcorrDD,*fcorrSS,*fcorrPP,*fbinder;
 	FILE *fhistVel,*fhistSpeed,*fhistVort,*fhistEnstr,*fhistDir,*fhistS,*fhistDens;
@@ -320,8 +321,9 @@ typedef struct outputFlagsList {
 	int COAROUT;				///< Flag for if coarse grain is outputted --- json `'coarseOut'`.
 	int AVVELOUT;				///< Flag for if total average velocity is outputted --- json `'avVelOut'`.
 	int AVORIOUT;				///< Flag for if total average orientation is outputted --- json `'avOriOut'`.
-	int FLOWOUT;				///< Flag for if the flow field is outputted --- json `'flowOut'`.
-	int VELOUT;				    ///< Flag for if the velocity field is outputted --- json `'velOut'`.
+	int FLOWOUT;				///< Flag for if the running-average flow field is outputted --- json `'flowOut'`.
+	int VELOUT;				    ///< Flag for if the instantaneous velocity field is outputted --- json `'velOut'`.
+	int SWFLOWOUT;				///< Flag for if the running-average flow field in 0th swimmer's reference frame is outputted --- json `'swFlowOut'`.
 	int HISTVELOUT;             ///< Flag for if the velocity distribution is outputted --- json `'histVelOut'`.
     int HISTSPEEDOUT;           ///< Flag for if the speed distribution is outputted --- json `'histSpeedOut'`.
     int HISTVORTOUT;            ///< Flag for if the vorticity distribution is outputted --- json `'histVortOut'`.

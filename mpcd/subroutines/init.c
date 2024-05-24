@@ -394,14 +394,30 @@ void openflow( FILE **f,char dir[],char fname[],char ext[] ) {
 /// This function initializes the velocity field output file.
 /// It opens it up for writing and reading while formatting it with its header.
 ///
+/// @param f Return pointer to the vel field output file being opened.
+/// @param dir Path to the directory of the vel field output file.
+/// @param fname Name of the vel field output file.
+/// @param ext Extension of the vel field output file.
+///
+void openvel( FILE **f,char dir[],char fname[],char ext[] ) {
+    openBasic( f,dir,fname,ext );
+    flowheader( *f );
+}
+
+///
+/// @brief Function that initializes the flow field around the swimmer's reference frame output file.
+///
+/// This function initializes the flow field output file.
+/// It opens it up for writing and reading while formatting it with its header.
+///
 /// @param f Return pointer to the flow field output file being opened.
 /// @param dir Path to the directory of the flow field output file.
 /// @param fname Name of the flow field output file.
 /// @param ext Extension of the flow field output file.
 ///
-void openvel( FILE **f,char dir[],char fname[],char ext[] ) {
-    openBasic( f,dir,fname,ext );
-    flowheader( *f );
+void openswflow( FILE **f,char dir[],char fname[],char ext[] ) {
+	openBasic( f,dir,fname,ext );
+	flowheader( *f );
 }
 
 ///
@@ -1060,6 +1076,7 @@ void zeroHISTSCALAR( int HIST[BINS] ) {
 /// This includes: population, mass, scalar order parameter, center of mass, velocity of center
 /// of mass, flow velocity, director, velocity gradient tensor, moment of inertia, streaming and
 /// collisional parts of the stress tensor.
+/// This should only be used in the beginning.
 /// Pointers to the first SRD, MD and swimmer particles are set to NULL.
 ///
 /// @param CL Return pointer to the cell list being zeroed.
@@ -1763,8 +1780,8 @@ void checkSim( FILE *fsynopsis,int SYNOUT,inputList in,spec *SP,bc *WALL,specSwi
 		if(SYNOUT == OUT) fprintf(fsynopsis,"Warning: The swimmers grow (smaller rotational diffusion) during tumble phase rather than shrink (sizeShrink=%lf).\n",SS.sizeShrink);
 	}
 	if( feq(SS.DS,0.0) ) {
-		printf("Warning: The swimmers' dipole strength is zero so they do not geneate dipolar flow.\n");
-		if(SYNOUT == OUT) fprintf(fsynopsis,"Warning: The swimmers' dipole strength is zero so they do not geneate dipolar flow.\n");
+		printf("Warning: The swimmers' dipole strength is zero so they do not generate dipolar flow.\n");
+		if(SYNOUT == OUT) fprintf(fsynopsis,"Warning: The swimmers' dipole strength is zero so they do not generate dipolar flow.\n");
 	}
 	if( !feq(fabs(SS.TS),0.0) && DIM<_3D ) {
 		printf("Warning: The swimmers' rotlet dipole strength is non-zero but the simulation is 2D so no rotlet possible.\n");
@@ -1805,6 +1822,7 @@ void initOutput( char op[],outputFlagsList *outFlag,outputFilesList *outFile,inp
 	char fileenstrophy[]="avEnstrophy";
 	char fileflow[]="flowfield";
 	char filevel[]="velfield";
+	char fileswflow[]="swimmerflowfield";
 	char filesolids[]="solidtraj";
 	char filetopo[]="topochargefield";
 	char filedefect[]="defects";
@@ -1850,6 +1868,10 @@ void initOutput( char op[],outputFlagsList *outFlag,outputFilesList *outFile,inp
 		outFlag->CNNOUT=0;
 		outFlag->CSSOUT=0;
 	}
+	//Make no swimmerflowfield.dat if there's no swimmer
+	if(NS==0) {
+		outFlag->SWFLOWOUT=0;
+	}
 	//Initialize the detailed output files
 	if( (outFlag->TRAJOUT)>=OUT ) for(i=0;i<NSPECI;i++) if(SP[i].POP>=1) opendetails( i,outFile->fdetail,op,fileprefix,filesuffix,fileextension );
 	//Initialize the course grained output file
@@ -1872,6 +1894,8 @@ void initOutput( char op[],outputFlagsList *outFlag,outputFilesList *outFile,inp
 	//Initialize the flow and velocity field output files
 	if( (outFlag->FLOWOUT)>=OUT ) openflow( &(outFile->fflow),op,fileflow,fileextension );
 	if( (outFlag->VELOUT)>=OUT ) openvel( &(outFile->fvel),op,filevel,fileextension );
+	//Initialize the flowfield around the first swimmer
+	if( (outFlag->SWFLOWOUT)>=OUT ) openswflow( &(outFile->fswflow),op,fileswflow,fileextension );
 	//Initialize the distribution output files
 	if( (outFlag->HISTVELOUT)>=OUT ) openhistVel( &(outFile->fhistVel),op,filehistVel,fileextension );
 	if( (outFlag->HISTSPEEDOUT)>=OUT ) openhistSpeed( &(outFile->fhistSpeed),op,filehistSpeed,fileextension );
@@ -1926,6 +1950,8 @@ void initOutput( char op[],outputFlagsList *outFlag,outputFilesList *outFile,inp
 		fprintf(outFile->fsynopsis,"\tGlobal Average velocity:\t%d\n",outFlag->AVVELOUT);
 		fprintf(outFile->fsynopsis,"\tGlobal Orientation direction:\t%d\n",outFlag->AVORIOUT);
 		fprintf(outFile->fsynopsis,"\tFlow:\t\t%d\n",outFlag->FLOWOUT);
+		fprintf(outFile->fsynopsis,"\tInstantaneous velocity:\t\t%d\n",outFlag->VELOUT);
+		fprintf(outFile->fsynopsis,"\tFlow around first swimmer:\t\t%d\n",outFlag->SWFLOWOUT);
 		fprintf(outFile->fsynopsis,"\tPrint distributions:\n");
 		fprintf(outFile->fsynopsis,"\t\tVel: %d\n\t\tSpeed: %d\n\t\tVorticity: %d\n\t\tEnstrophy: %d\n\t\tDirector: %d\n\t\tScalar order parameter: %d\n\t\tDensity: %d\n",outFlag->HISTVELOUT,outFlag->HISTSPEEDOUT,outFlag->HISTVORTOUT,outFlag->HISTENSTROUT,outFlag->HISTDIROUT,outFlag->HISTSOUT,outFlag->HISTNOUT);
 		fprintf(outFile->fsynopsis,"\tGlobal average scalar order parameter:\t%d\n",outFlag->AVSOUT);

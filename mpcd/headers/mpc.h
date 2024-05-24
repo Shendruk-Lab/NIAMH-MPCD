@@ -76,6 +76,7 @@ double localTEMP( cell CL,spec *SP,specSwimmer specS );
 int localPOP( cell CL );
 void localPROP( cell ***CL,spec *SP,specSwimmer specS,int RTECH,int LC );
 void sumFLOW( cell ***CL );
+void sumSWFLOW( cell ***CL, swimmer *sw, specSwimmer *ss);
 void localFLOW( cell ***CL,spec *SP );
 void localCM( cell *CL,spec *SP,specSwimmer specS );
 void localCM_SRD( cell CL,spec *SP,double r_cm[] );

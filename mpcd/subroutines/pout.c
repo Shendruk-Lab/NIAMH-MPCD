@@ -1577,6 +1577,7 @@ void stateinput( inputList in,spec SP[],bc WALL[],specSwimmer SS,outputFlagsList
 		fprintf( fsynopsis,"Print coarse data every %i time steps\n",out.COAROUT );
 		fprintf( fsynopsis,"Print flow data: %i\n",out.FLOWOUT );
         fprintf( fsynopsis,"Print velocity data: %i\n",out.VELOUT );
+		fprintf( fsynopsis,"Print flow around first swimmer data: %i\n",out.SWFLOWOUT );
 		fprintf( fsynopsis,"Print averaged flow data: %i\n",out.AVVELOUT );
 		fprintf( fsynopsis,"Print averaged orientation data: %i\n",out.AVORIOUT );
 		fprintf( fsynopsis,"Print energy data: %i\n",out.ENOUT );
@@ -2131,6 +2132,38 @@ void velout( FILE *fout,cell ***CL, double t) {
 #ifdef FFLSH
     fflush(fout);
 #endif
+}
+
+///
+/// @brief Outputs flow field around the first swimmer, with a 'hijack' method described in sumSWFLOW().
+///
+/// This function computes the average of the centre-of-mass velocity of located at each grid position relative to the first swimmer.
+/// Depending on swimmer orientation, cells will contain more or less information, especially at the corners: a weight is given to counter this effect.
+/// The centre of mass velocities and averages are printed to the output file.
+///
+/// @param fout This is a pointer to the output .dat file name to be produced.
+/// @param CL This is a pointer to the co-ordinates and cell of each particle.
+/// @param interval This is the time interval used for normalisation.
+/// @param t This is the time step.
+/// @see outputResults()
+/// @see sumSWFLOW()
+///
+void swflowout( FILE *fout,cell ***CL,int interval, double t) {
+	int h,i,j,k;
+	double av[_3D];
+	for( i=0; i<_3D; i++ ) av[i] = 0.0;
+
+	for( i=0; i<XYZ[0]; i++ ) for( j=0; j<XYZ[1]; j++ ) for( k=0; k<XYZ[2]; k++ ) {
+		if (CL[i][j][k].SWFLOW[3]>0.0) for( h=0; h<DIM; h++ ) av[h] = CL[i][j][k].SWFLOW[h]/CL[i][j][k].SWFLOW[3];		//Normalize the sum to get the average, with weights contained in SWFLOW[3]
+		else for( h=0; h<DIM; h++ ) av[h] = 0.0;
+		fprintf( fout,"%12.5e\t", t); // print time
+		fprintf( fout, "%5d\t%5d\t%5d\t",i,j,k );
+		fprintf( fout, "%12.5e\t%12.5e\t%12.5e\n",av[0],av[1],av[2] );
+		for( h=0; h<7; h++ ) CL[i][j][k].SWFLOW[h] = 0.0;		//Reset sum
+	}
+	#ifdef FFLSH
+		fflush(fout);
+	#endif
 }
 
 ///
@@ -2689,7 +2722,7 @@ void checkpoint(FILE *fout, inputList in, spec *SP, particleMPC *pSRD, int MD_mo
 	fprintf( fout,"%lf %lf %lf %lf %lf %lf\n", theoryGl.MFP, theoryGl.VISC, theoryGl.THERMD, theoryGl.SDIFF, theoryGl.SPEEDOFSOUND, theoryGl.sumM );
 
 	//Output variables
-	fprintf( fout,"%d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d\n",DBUG,outFlag.TRAJOUT,outFlag.printSP,outFlag.COAROUT,outFlag.FLOWOUT,outFlag.VELOUT,outFlag.AVVELOUT,outFlag.AVORIOUT,outFlag.ORDEROUT,outFlag.QTENSOUT,outFlag.QKOUT,outFlag.AVSOUT,outFlag.SOLOUT,outFlag.ENOUT,outFlag.ENFIELDOUT,outFlag.ENNEIGHBOURS,outFlag.ENSTROPHYOUT,outFlag.DENSOUT,outFlag.CVVOUT,outFlag.CNNOUT,outFlag.CWWOUT,outFlag.CDDOUT,outFlag.CSSOUT,outFlag.CPPOUT,outFlag.BINDER,outFlag.BINDERBIN,outFlag.SYNOUT,outFlag.CHCKPNT,outFlag.CHCKPNTrcvr );
+	fprintf( fout,"%d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d\n",DBUG,outFlag.TRAJOUT,outFlag.printSP,outFlag.COAROUT,outFlag.FLOWOUT,outFlag.VELOUT,outFlag.SWFLOWOUT,outFlag.AVVELOUT,outFlag.AVORIOUT,outFlag.ORDEROUT,outFlag.QTENSOUT,outFlag.QKOUT,outFlag.AVSOUT,outFlag.SOLOUT,outFlag.ENOUT,outFlag.ENFIELDOUT,outFlag.ENNEIGHBOURS,outFlag.ENSTROPHYOUT,outFlag.DENSOUT,outFlag.CVVOUT,outFlag.CNNOUT,outFlag.CWWOUT,outFlag.CDDOUT,outFlag.CSSOUT,outFlag.CPPOUT,outFlag.BINDER,outFlag.BINDERBIN,outFlag.SYNOUT,outFlag.CHCKPNT,outFlag.CHCKPNTrcvr );
 	fprintf( fout,"%d %d\n",outFlag.SPOUT,outFlag.PRESOUT );
 	fprintf( fout,"%d %d %d %d %d %d %d\n",outFlag.HISTVELOUT,outFlag.HISTSPEEDOUT,outFlag.HISTVORTOUT,outFlag.HISTENSTROUT,outFlag.HISTDIROUT,outFlag.HISTSOUT,outFlag.HISTNOUT );
 	fprintf( fout,"%d %d %d %d %d\n",outFlag.ENERGYSPECTOUT,outFlag.ENSTROPHYSPECTOUT,outFlag.TOPOOUT,outFlag.DEFECTOUT,outFlag.DISCLINOUT );
@@ -3031,6 +3064,7 @@ void outputResults(cell ***CL, particleMPC *SRDparticles, spec SP[], bc WALL[], 
 	if(outFlag.printSP>0) if( outFlag.TRAJOUT>=OUT  && runtime%outFlag.TRAJOUT==0 ) coordout( outFiles.fdetail,outFlag.printSP,time_now,SRDparticles,SP );
 	if( outFlag.FLOWOUT>=OUT && runtime%outFlag.FLOWOUT==0 ) flowout( outFiles.fflow,CL,outFlag.FLOWOUT, time_now);
 	if( outFlag.VELOUT>=OUT && runtime%outFlag.VELOUT==0 ) velout( outFiles.fvel, CL, time_now);
+	if( outFlag.SWFLOWOUT>=OUT && runtime%outFlag.SWFLOWOUT==0 && runtime!=0) swflowout( outFiles.fswflow,CL,outFlag.SWFLOWOUT, time_now);
 	if( outFlag.COAROUT>=OUT && runtime%outFlag.COAROUT==0 ) coarseout( outFiles.fcoarse,time_now,CL );
 	if(in.LC!=ISOF) if( outFlag.ORDEROUT>=OUT && runtime%outFlag.ORDEROUT==0 ) orderout( outFiles.forder,time_now,CL,in.LC );
 	if(in.LC!=ISOF) if( outFlag.QTENSOUT>=OUT && runtime%outFlag.QTENSOUT==0 ) orderQout( outFiles.forderQ,time_now,CL,in.LC );
@@ -3244,6 +3278,7 @@ void closeOutputFiles( spec *SP,bc WALL[],outputFlagsList outFlag,outputFilesLis
 	if( outFlag.ENSTROPHYOUT>=OUT ) fclose( outFiles.fenstrophy );
 	if( outFlag.FLOWOUT>=OUT ) fclose( outFiles.fflow );
 	if( outFlag.VELOUT>=OUT ) fclose( outFiles.fvel );
+	if( outFlag.SWFLOWOUT>=OUT ) fclose( outFiles.fswflow);
 	if( outFlag.ENOUT>=OUT ) fclose( outFiles.fenergy );
 	if( outFlag.ENFIELDOUT>=OUT ) fclose( outFiles.fenergyfield );
 	if( outFlag.ENNEIGHBOURS>=OUT ) fclose( outFiles.fenneighbours );
@@ -3289,7 +3324,7 @@ int writeOutput( int t,outputFlagsList f,int RFRAME,int zeroNetMom ) {
 		return 1;
 	}
 	//Fields
-	else if( ( f.FLOWOUT>=OUT && t%f.FLOWOUT==0 ) || ( f.VELOUT>=OUT && t%f.VELOUT==0 ) || ( f.COAROUT>=OUT && t%f.COAROUT==0 ) || ( f.ENFIELDOUT>=OUT && t%f.ENFIELDOUT==0 ) || ( f.ORDEROUT && t%f.ORDEROUT==0 ) || ( f.QTENSOUT && t%f.QTENSOUT==0 ) || ( f.TOPOOUT && t%f.TOPOOUT==0 ) || ( f.DEFECTOUT && t%f.DEFECTOUT==0 ) || ( f.DISCLINOUT && t%f.DISCLINOUT==0 ) || ( f.SPOUT && t%f.SPOUT==0 ) || ( f.PRESOUT && t%f.PRESOUT==0 ) ) {
+	else if( ( f.FLOWOUT>=OUT && t%f.FLOWOUT==0 ) || ( f.VELOUT>=OUT && t%f.VELOUT==0 ) || ( f.SWFLOWOUT>=OUT && t%f.SWFLOWOUT==0 ) || ( f.COAROUT>=OUT && t%f.COAROUT==0 ) || ( f.ENFIELDOUT>=OUT && t%f.ENFIELDOUT==0 ) || ( f.ORDEROUT && t%f.ORDEROUT==0 ) || ( f.QTENSOUT && t%f.QTENSOUT==0 ) || ( f.TOPOOUT && t%f.TOPOOUT==0 ) || ( f.DEFECTOUT && t%f.DEFECTOUT==0 ) || ( f.DISCLINOUT && t%f.DISCLINOUT==0 ) || ( f.SPOUT && t%f.SPOUT==0 ) || ( f.PRESOUT && t%f.PRESOUT==0 ) ) {
 		return 1;
 	}
 	//Correlation functions

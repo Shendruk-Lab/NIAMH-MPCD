@@ -716,7 +716,7 @@ void readchckpnt(char fpath[], inputList *in, spec **SP, particleMPC **pSRD, cel
 	else printf("Warning: Failed to read global theoretical predictions.\n");
 
 	//Read output
-	if(fscanf( finput,"%d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d",&DBUG, &(out->TRAJOUT), &(out->printSP), &(out->COAROUT), &(out->FLOWOUT), &(out->VELOUT), &(out->AVVELOUT), &(out->AVORIOUT), &(out->ORDEROUT), &(out->QTENSOUT), &(out->QKOUT), &(out->AVSOUT), &(out->SOLOUT), &(out->ENOUT), &(out->ENFIELDOUT), &(out->ENNEIGHBOURS), &(out->ENSTROPHYOUT), &(out->DENSOUT), &(out->CVVOUT), &(out->CNNOUT), &(out->CWWOUT), &(out->CDDOUT), &(out->CSSOUT), &(out->CPPOUT), &(out->BINDER), &(out->BINDERBIN), &(out->SYNOUT), &(out->CHCKPNT), &(out->CHCKPNTrcvr) ));
+	if(fscanf( finput,"%d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d",&DBUG, &(out->TRAJOUT), &(out->printSP), &(out->COAROUT), &(out->FLOWOUT), &(out->VELOUT), &(out->SWFLOWOUT), &(out->AVVELOUT), &(out->AVORIOUT), &(out->ORDEROUT), &(out->QTENSOUT), &(out->QKOUT), &(out->AVSOUT), &(out->SOLOUT), &(out->ENOUT), &(out->ENFIELDOUT), &(out->ENNEIGHBOURS), &(out->ENSTROPHYOUT), &(out->DENSOUT), &(out->CVVOUT), &(out->CNNOUT), &(out->CWWOUT), &(out->CDDOUT), &(out->CSSOUT), &(out->CPPOUT), &(out->BINDER), &(out->BINDERBIN), &(out->SYNOUT), &(out->CHCKPNT), &(out->CHCKPNTrcvr) ));
 	else printf("Warning: Failed to read output.\n");
 	if(fscanf( finput,"%d %d",&(out->SPOUT), &(out->PRESOUT) ));
 	else printf("Warning: Failed to read output.\n");
@@ -1111,9 +1111,168 @@ void readJson( char fpath[], inputList *in, spec **SP, kinTheory **theory, parti
 	} else MDmode = mdCoupleMode; // otherwise set MD to correct coupling mode to enable it
 
 	in->stepsMD = getJObjInt(jObj, "stepsMD", 20, jsonTagList); // stepsMD
-    in->MFPLAYERH = getJObjInt(jObj, "mfpLayerH", 0, jsonTagList); // mfpLayerH
+	in->MFPLAYERH = getJObjInt(jObj, "mfpLayerH", 0, jsonTagList); // mfpLayerH
 
-	// 2. Boundaries ///////////////////////////////////////////////////////////
+	// 2. Species //////////////////////////////////////////////////////////////
+	// scroll up to void readin() to see better descriptions & definitions for these
+
+	cJSON *arrSpecies = NULL;
+	getCJsonArray(jObj, &arrSpecies, "species", jsonTagList, arrayList, 1);
+	if(arrSpecies != NULL){ // if this can be found in the json
+		NSPECI = cJSON_GetArraySize(arrSpecies); // get the number of species
+
+		//Allocate the needed amount of memory for the species SP
+		(*SP) = (spec*) malloc( NSPECI * sizeof( spec ) );
+		for (i = 0; i < NSPECI; i++) { // loop through the species
+			cJSON *objElem = cJSON_GetArrayItem(arrSpecies, i); // get the species object
+
+			// now get first set of primitives
+			(*SP+i)->MASS = getJObjDou(objElem, "mass", 1.0, jsonTagList); // mass
+
+			// handle population related overrides
+			double cellDens = getJObjDou(objElem, "dens", -1, jsonTagList);
+			if (cellDens < 0){ // if cellDens is invalid
+				(*SP+i)->POP = getJObjInt(objElem, "pop", XYZ[0]*XYZ[1]*XYZ[2]*20, jsonTagList); // pop
+			} else { // otherwise, set population using per cell density
+				(*SP+i)->POP = XYZ[0]*XYZ[1]*XYZ[2]*cellDens;
+			}
+
+			(*SP+i)->QDIST = getJObjInt(objElem, "qDist", 0, jsonTagList); // qDist
+			(*SP+i)->VDIST = getJObjInt(objElem, "vDist", 0, jsonTagList); // vDist
+			(*SP+i)->ODIST = getJObjInt(objElem, "oDist", 2, jsonTagList); // oDist
+
+			//Read the binary fluid interaction matrix for this species with all other species
+			cJSON *arrBFM = NULL;
+			getCJsonArray(jObj, &arrBFM, "interMatr", jsonTagList, arrayList, 0);
+			if (arrBFM != NULL) { // if grav has been found then....
+				if (cJSON_GetArraySize(arrBFM) != NSPECI) { // check dimensionality is valid
+					printf("Error: Interaction matrices must have columns of length equal to the number of species.\n");
+					exit(EXIT_FAILURE);
+				}
+
+				for (j = 0; j < NSPECI; j++) { // get the value
+					(*SP+i)->M[j] = cJSON_GetArrayItem(arrBFM, j)->valuedouble;
+				}
+			} else {
+				for (j = 0; j < NSPECI; j++) { // get the value
+					(*SP+i)->M[j] = 0;
+				}
+			}
+
+			// get second set of primitives
+			(*SP+i)->RFC = getJObjDou(objElem, "rfc", 0.01, jsonTagList); // rfCoef
+			(*SP+i)->LEN = getJObjDou(objElem, "len", 0.007, jsonTagList); // len
+			(*SP+i)->TUMBLE = getJObjDou(objElem, "tumble", 2.0, jsonTagList); // tumble
+			(*SP+i)->CHIHI = getJObjDou(objElem, "shearSusc", 0.5, jsonTagList); // chiHi
+			(*SP+i)->CHIA = getJObjDou(objElem, "magnSusc", 0.001, jsonTagList); // chiA
+			(*SP+i)->ACT = getJObjDou(objElem, "act", 0.05, jsonTagList); // act
+			(*SP+i)->SIGWIDTH = getJObjDou(objElem, "sigWidth", 1, jsonTagList); // sigWidth
+			// error check, is SIGWIDTH 0?
+			if ((*SP+i)->SIGWIDTH == 0) {
+				printf("Error: SIGWIDTH cannot be 0.\n");
+				exit(EXIT_FAILURE);
+			}
+			(*SP+i)->SIGPOS = getJObjDou(objElem, "sigPos", (*SP+i)->SIGWIDTH, jsonTagList); // sigPos
+			(*SP+i)->MINACTRATIO = getJObjDou(objElem, "minActRatio", 0.0, jsonTagList); // minActRatio
+			(*SP+i)->DAMP = getJObjDou(objElem, "damp", 0.0, jsonTagList); // damp
+		}
+	} else { // if nothing found in the JSON then fallback to the default
+		// setting up a single species with default parameters
+		//		note this is just copied from the above code w lines changed
+		NSPECI = 1;
+
+		(*SP) = (spec*) malloc( NSPECI * sizeof( spec ) );
+		for (i = 0; i < NSPECI; i++) { // loop through the species
+			// now get first set of primitives
+			(*SP+i)->MASS = 1; // mass
+			(*SP+i)->POP = XYZ[0]*XYZ[1]*XYZ[2]*20; // pop
+			(*SP+i)->QDIST = 0; // qDist
+			(*SP+i)->VDIST = 0; // vDist
+			(*SP+i)->ODIST = 2; // oDist
+			for (j = 0; j < NSPECI; j++) { // interaction matrix
+				(*SP+i)->M[j] = 0;
+			}
+			(*SP+i)->RFC = 0.01; // rfCoef
+			(*SP+i)->LEN = 0.007; // len
+			(*SP+i)->TUMBLE = 2; // tumble
+			(*SP+i)->CHIHI = 0.5; // chiHi
+			(*SP+i)->CHIA = 0.001; // chiA
+			(*SP+i)->ACT = 0.05; // act
+			(*SP+i)->SIGWIDTH = 1; // sigwidth
+			(*SP+i)->SIGPOS = 1; // sigpos
+			(*SP+i)->MINACTRATIO = 0.0; // minActRatio
+			(*SP+i)->DAMP = 0; // damp
+		}
+	}
+
+	//Total Number of particleMPCs
+	GPOP = 0;
+	for( i=0; i<NSPECI; i++ ) GPOP += (*SP+i)->POP;
+	(*pSRD) = (particleMPC*) malloc( GPOP * sizeof( particleMPC ) );
+
+	//Allocate memory for the cells
+	//Allocate rows (x first)
+	*CL = (cell***) malloc( XYZ_P1[0] * sizeof( cell** ) );
+	//For each x-element allocate the y columns
+	for( i=0; i<XYZ_P1[0]; i++ ) {
+		(*CL)[i] = (cell**) malloc( XYZ_P1[1] * sizeof( cell* ) );
+		//For each y-element allocate the z columns
+		for( j=0; j<XYZ_P1[1]; j++ ) {
+			(*CL)[i][j] = (cell*) malloc( XYZ_P1[2] * sizeof( cell ) );
+		}
+	}
+
+	// 3. Printcom /////////////////////////////////////////////////////////////
+	// scroll up to void readpc() to see better descriptions & definitions for these
+
+	DBUG = getJObjInt(jObj, "debugOut", 3, jsonTagList); // dbug
+	out->TRAJOUT = getJObjInt(jObj, "trajOut", 0, jsonTagList); // trajOut
+	out->printSP = getJObjInt(jObj, "trajSpecOut", 0, jsonTagList); // printSP
+	out->COAROUT = getJObjInt(jObj, "coarseOut", 0, jsonTagList); // coarOut
+	out->FLOWOUT = getJObjInt(jObj, "flowOut", 0, jsonTagList); // flowOut
+	out->VELOUT = getJObjInt(jObj, "velOut", 0, jsonTagList); // velOut
+	out->SWFLOWOUT = getJObjInt(jObj, "swFlowOut", 0, jsonTagList); // swFlowOut
+	out->AVVELOUT = getJObjInt(jObj, "avVelOut", 0, jsonTagList); // avVelOut
+	out->ORDEROUT = getJObjInt(jObj, "dirSOut", 0, jsonTagList); // orderOut
+	out->QTENSOUT = getJObjInt(jObj, "qTensOut", 0, jsonTagList); // qTensOut
+	out->QKOUT = getJObjInt(jObj, "qkTensOut", 0, jsonTagList); // qKOut
+	out->ENFIELDOUT = getJObjInt(jObj, "oriEnOut", 0, jsonTagList); // enFieldOut
+	out->SPOUT = getJObjInt(jObj, "colourOut", 0, jsonTagList); // spOut
+	out->PRESOUT = getJObjInt(jObj, "pressureOut", 0, jsonTagList); // presOut
+	out->ENNEIGHBOURS = getJObjInt(jObj, "neighbourEnOut", 0, jsonTagList); // enNeighbours
+	out->AVSOUT = getJObjInt(jObj, "avSOut", 0, jsonTagList); // avSOut
+	out->DENSOUT = getJObjInt(jObj, "densSDOut", 0, jsonTagList); // densOut
+	out->ENSTROPHYOUT = getJObjInt(jObj, "enstrophyOut", 0, jsonTagList); // enStrophOut
+	out->HISTVELOUT = getJObjInt(jObj, "histVelOut", 0, jsonTagList); // histVelOut
+	out->HISTSPEEDOUT = getJObjInt(jObj, "histSpeedOut", 0, jsonTagList); // histSpeedOut
+	out->HISTVORTOUT = getJObjInt(jObj, "histVortOut", 0, jsonTagList); // histVortOut
+	out->HISTENSTROUT = getJObjInt(jObj, "histEnsOut", 0, jsonTagList); // histEnstrophyOut
+	out->HISTDIROUT = getJObjInt(jObj, "histDirOut", 0, jsonTagList); // histDirOut
+	out->HISTSOUT = getJObjInt(jObj, "histSOut", 0, jsonTagList); // histSOut
+	out->HISTNOUT = getJObjInt(jObj, "histNOut", 0, jsonTagList); // histNOut
+	out->SOLOUT = getJObjInt(jObj, "solidTrajOut", 0, jsonTagList); // solOut
+	out->TOPOOUT = getJObjInt(jObj, "topoFieldOut", 0, jsonTagList); // topoOut
+	out->DEFECTOUT = getJObjInt(jObj, "defectsOut", 0, jsonTagList); // defectOut
+	out->DISCLINOUT = getJObjInt(jObj, "disclinOut", 0, jsonTagList); // disclinationTensorFieldOut
+	out->ENOUT = getJObjInt(jObj, "energyOut", 0, jsonTagList); // enOut
+	out->CVVOUT = getJObjInt(jObj, "velCorrOut", 0, jsonTagList); // cvvOut
+	out->CNNOUT = getJObjInt(jObj, "dirCorrOut", 0, jsonTagList); // cnnOut
+	out->CWWOUT = getJObjInt(jObj, "vortCorrOut", 0, jsonTagList); // cwwOut
+	out->CDDOUT = getJObjInt(jObj, "densCorrOut", 0, jsonTagList); // cddOut
+	out->CSSOUT = getJObjInt(jObj, "orderCorrOut", 0, jsonTagList); // cssOut
+	out->CPPOUT = getJObjInt(jObj, "phaseCorrOut", 0, jsonTagList); // cppOut
+	out->ENERGYSPECTOUT = getJObjInt(jObj, "energySpecOut", 0, jsonTagList); // energySpectOut
+	out->ENSTROPHYSPECTOUT = getJObjInt(jObj, "enstrophySpecOut", 0, jsonTagList); // enstrophySpectOut
+	out->BINDER = getJObjInt(jObj, "binderOut", 0, jsonTagList); // binderOut
+	out->BINDERBIN = getJObjInt(jObj, "binderBin", 0, jsonTagList); // binderBinOut
+	out->SWOUT = getJObjInt(jObj, "swimQOut", 0, jsonTagList); // swOut
+	out->SWORIOUT = getJObjInt(jObj, "swimOOut", 0, jsonTagList); // swOriOut
+    const char* swimROutTags[2] = {"swimROut", "swimRTOut"}; // possible tags for collision operator
+    out->RTOUT = getJObjIntMultiple(jObj, swimROutTags, 2, 0, jsonTagList); // RTECH
+	out->SYNOUT = getJObjInt(jObj, "synopsisOut", 1, jsonTagList); // swSynOut
+	out->CHCKPNT = getJObjInt(jObj, "checkpointOut", 0, jsonTagList); // chkpntOut
+
+	// 3. Boundaries ///////////////////////////////////////////////////////////
 	// scroll up to void bcin() to see better descriptions & definitions for these
 
 	cJSON *arrBC = NULL;
