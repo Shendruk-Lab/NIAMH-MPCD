@@ -56,6 +56,7 @@
 simptr SetupSimulation (int argc, char *argv[])
 //================================================================================
 {
+
 	simptr 		sim;
 	simoptions	options;
 
@@ -98,7 +99,6 @@ simptr SetupSimulation (int argc, char *argv[])
 
 		// setup the simulation parameters
 		SetupParameters (sim);
-
 
 		// setup simulation world
 		SetupNewWorld (sim);
@@ -226,6 +226,10 @@ void SetupParameters (simptr sim)
 				INTG_PARAM (sim, qCharge),
 				INTG_PARAM (sim, qNumber),
 
+				// dipoles
+				INTG_PARAM (sim, dChunks),
+				REAL_PARAM (sim, dStrength),
+
 				// data collection
 				INTG_PARAM (sim, nStep),
 				INTG_PARAM (sim, stepAvg),
@@ -290,8 +294,11 @@ void SetupNewWorld (simptr sim)
 
 	// set label, working directory, and data files
 	SetSimLabel	(sim->label, sim->pid);
+
 	SetWorkingDir  (sim->outputDir, sim->label);
+
 	SetupDataFiles (sim);
+
 
 	// report
 	LOG ("--------------------------------------------------------------\n");
@@ -364,37 +371,29 @@ void SetupNewWorld (simptr sim)
 
 	// setup step counter lists
 	SetupStepCounters (sim);
-
 	// setup particles
 	SetupParticles (sim);
-
 	// setup particle lists
 	SetupPolymerList  (sim);
 	SetupChargeList   (sim);
-// 	SetupNeighborList (sim);
+	// SetupNeighborList (sim);
 	SetupAnchorList   (sim);
 	SetupFeneList	  (sim);
 	SetupBendList	  (sim);
-
 	// setup groups
 	SetupGroups (sim);
-
 	// setup measurements
 	SetupMeasurements (sim);
-
 	// jiggle and relax particle positions
-//	JiggleParticles (sim);
+	// JiggleParticles (sim);
 	RelaxParticles  (sim);
-
 	// set simulation time
 	sim->tNow = 0;
 
 	// start simulation phase
 	SimulationPhaseReset (sim);
-
 	// print initial scenes
 	VMDPrint (sim, sim->scenes);
-
 	// report
 	LOG ("Simulation is ready to start\n");
 	LOG ("--------------------------------------------------------------\n");
@@ -431,7 +430,8 @@ void SetupCheckpointWorld (simptr sim)
 	// setup particle lists
 	SetupPolymerList  (sim);
 	SetupChargeList   (sim);
-// 	SetupNeighborList (sim);
+	//SetupDipoleList   (sim);
+	//SetupNeighborList (sim);
 	SetupAnchorList   (sim);
 	SetupFeneList	  (sim);
 	SetupBendList	  (sim);
@@ -537,6 +537,9 @@ void SetupParticles (simptr sim)
 
 	// initialize particle velocities
 	InitVelocities (sim);
+
+	// initialize dipoles
+	InitDipoles (sim);
 
 	// report
 	LOG ("Particle initialization complete\n");
@@ -1701,6 +1704,67 @@ void InitCharges (simptr sim)
 }
 
 
+/// Initializes dipoles. Extensile or contractile dipoles are attributed 
+/// according to the number of chunks provided, and the dipole type/sign of the
+/// first chunk/monomer (i.e. positive or negative)
+///
+/// @param		sim a pointer to a simulation structure 
+/// @return 	void 
+
+//================================================================================
+void InitDipoles (simptr sim)
+//================================================================================
+{
+	int			n, nn, i, nAtom, nPolymer, nMonomer, lenChunk, checker, maxN;
+	particleMD	*atom;
+	real 		dStrength;
+	int 		dChunks;
+	
+	// local sim variables
+	atom  = sim->atom.items;
+	nAtom = sim->atom.n;
+	dStrength = sim->dStrength;
+	dChunks = sim->dChunks;
+
+	// number of monomers, and need to consider multiple polymer chains
+	nMonomer = sim->polyN[0];
+	nPolymer = sim->polyM[0];
+	
+	// report
+	LOG ("Initializing particle dipoles\n");
+
+	// number of monomers per chunk
+	lenChunk = nMonomer / dChunks;
+	maxN = lenChunk * dChunks;
+	if (dChunks>nAtom){
+		printf("You have asked for more chunks than there are atoms! \nI am going to crash!\n");
+	}
+	
+	// set dipoles according to whether extensile or contractile chunk
+	for (i=0; i<nPolymer; i++){
+		nn = i*nMonomer;
+		for (n=nn; n<nn+nMonomer; n++) {
+			checker = (n/lenChunk)%2;	// for whether even or odd chunk
+			// any remainders will have strength zero dipole
+		
+			if (n < maxN) {
+				// if an "even" chunk
+				if (checker == 0) {
+					atom[n].dipole = dStrength;
+				}	
+				// if n "odd" chunk then other type of dipole
+				else {
+					atom[n].dipole = -dStrength;
+				}
+			}
+			else {
+				atom[n].dipole = 0.f;
+			}
+		}
+	}
+}
+
+
 /// Initializes the velocities of all the particles. Each particle is given
 /// the mean velocity (set by the temperature) in a random direction. There
 /// is 3*n-3 degrees of freedom (because the total momentum is conserved) so
@@ -2195,7 +2259,6 @@ void SetupMeasurements (simptr sim)
 
 	// reset properties accumulators
 	AccumProperties (sim, ACTION_RESET);
-
 	// setup measurement related lists
 	SetupHistograms (sim);
 // 	SetupScenes		(sim);
@@ -2944,24 +3007,20 @@ particleMD *GrowUChain (simptr sim, int type, int layout, int n, particleMD *p0,
 			// new monomer location
 			if (p0) {
 				if (n > ((sim->polyN[0] + 1)/2)) { // before turn
-					printf("before\n");
 					p1.rx = p0->rx + sim->r0Fene/1.5;
 					p1.ry = p0->ry;
 					p1.rz = p0->rz;
 				}
 				else if (n == ((sim->polyN[0] + 1)/2)) { // turn1
-					printf("turn1\n");
 					p1.rx = p0->rx + sim->r0Fene*sqrt(3.0)/3.0;
 					p1.ry = p0->ry - sim->r0Fene/3.0;
 					p1.rz = p0->rz;
 				}
 				else if (n == (((sim->polyN[0] + 1)/2) - 1)) { // turn2
-					printf("turn2\n");
 					p1.rx = p0->rx - sim->r0Fene*sqrt(3.0)/3.0;
 					p1.ry = p0->ry - sim->r0Fene/3.0;
 					p1.rz = p0->rz;
 				} else { // after turn
-					printf("after\n");
 					p1.rx = p0->rx - sim->r0Fene/1.5;
 					p1.ry = p0->ry;
 					p1.rz = p0->rz;

@@ -35,11 +35,9 @@ void SetupVMD (simptr sim)
 
 	// include additioinal user histogram definitions
 	#include "mdvmddef.h"
-
 	// setup scene stream pointers and function pointers
 	VMDSetupFiles (sim);
 	VMDSetupFuncs (sim);
-
 	// report
 	s = sim->scenes;
 	while (s) {

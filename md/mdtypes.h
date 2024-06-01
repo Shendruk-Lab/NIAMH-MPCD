@@ -256,6 +256,7 @@ typedef struct particleMD {				// a particle					double		 float
     int		group;						// group bit field					 4		 	 4
     real  	wx, wy, wz;					// real world position				24			12
     real  	Tfx, Tfy, Tfz, Tdivf;		// for configurational temp.		32			16
+    real    dipole;                     // dipole magnitude, with sign       8           4 (?)
     int		pad[7];						// memory padding					28			28
     int		object;						// object id (for viewer)			 4			 4
     struct  particleMD *prev, *next;		// previous and next monomer		 8			 8
@@ -533,7 +534,7 @@ typedef struct simulation {		 		// a simulation
     int			polyM[PS];				///< number of polymer chains
     int			polyN[PS];				///< number of monomers per chain
 	real			monoCharge[PS];			///< charge of each monomer
-
+    
 	// charges
 	int			qLayout[QS];  			///< where to put the charges (e.g., SURFACE, TYPE_FLUID, ...)
 	int			qDensityKind[QS];		///< kind of density provided (e.g., BULK, SURFACE, ...)
@@ -541,6 +542,10 @@ typedef struct simulation {		 		// a simulation
 	real		qSpread[QS];			///< spacing factor for SURFACE charges
 	int			qCharge[QS];			///< the charge in units of the elementary charge
 	int			qNumber[QS];			///< the number of charges to put (will be compounded with density)
+
+    // dipoles
+    int         dChunks;                ///< number of alternating dipole 'chunks' per polymer
+    real        dStrength;              ///< dipole strength of each monomer, with sign for extensile or contractile
 
 	// layout quantities
     int			nPore;					///< number of sites in capillary pore

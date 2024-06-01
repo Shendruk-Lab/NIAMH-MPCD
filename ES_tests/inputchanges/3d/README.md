@@ -1,0 +1,1 @@
+Simulates a single 3D polymer in suspended in a nematic fluid all confined within an impermeable tube with perfect-slip boundary conditions on the velocity and planar anchoring on the nematic director of radius 4 aligned in the x-direction.

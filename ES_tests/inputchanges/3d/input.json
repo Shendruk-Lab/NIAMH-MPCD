@@ -1,0 +1,55 @@
+{
+    "domain":           [30, 10, 10],
+    "dt":               0.1,
+    "simSteps":         2000,
+    "comment":          "Nematic fluid using Andersen MPCD",
+    "collOp":           2,
+    "lc":               1,
+    "mfpot":            10,
+    "comment":          "Location of the MD input file",
+    "mdIn":             "md.inp",
+    "comment":          "Number of MD steps per MPCD step",
+    "stepsMD":          50,
+    "species":
+    [
+        {
+            "pop":         30159
+        }
+    ],
+    "debugOut":         3,
+    "flowOut":          0,
+    "dirSOut":          100,
+    "avSOut":           100,
+    "topoFieldOut":     0,
+    "synopsisOut":      1,
+    "checkpointOut":    0,
+    "comment":          "Periodic boundary conditions",
+    "domainWalls":      1,
+    "comment":          "Impermeable, perfect slip, planar-anchored tube",
+    "BC":
+    [
+        {
+            "colType":      1,
+            "phantom":      0,
+            "comment":      "Location of the tube centre",
+            "Q":            [0, 5, 5],
+            "comment":      "Tube orientations",
+            "aInv":         [0, 1, 1],
+            "P":            [2, 2, 2, 2],
+            "comment":      "Tube radius",
+            "R":            4,
+            "DN":           0,
+            "DT":           0,
+            "comment":      "Perfect slip",
+            "MVN":          -1,
+            "MVT":          1,
+            "comment":      "Planar anchoring",
+            "MUN":          0,
+            "MUT":          1,
+            "comment":      "Fixed in place",
+            "dsplc":        0,
+            "comment":      "Fluid inside tube (rather than outside)",
+            "inv":          1
+        }
+    ]
+}    

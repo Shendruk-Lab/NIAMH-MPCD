@@ -1,0 +1,118 @@
+# ====================================================================================================
+#  MD parameter input file
+# ====================================================================================================
+#
+#
+# ----------------------------------------------------------------------------------------------------
+# system characteristics:
+# ----------------------------------------------------------------------------------------------------
+#
+# parameter:	randomSeed		= 0
+#
+# parameter:	unitCells	 	= (30,10,10)
+# parameter:	lattice		 	= LATT_BULK
+# parameter:	rCut			= CUTOFF_WCA
+# parameter:	sigma_lj		= 1.0
+# parameter:	rNebrShell	 	= 0.3
+# parameter:	dt		 	= 0.002
+#
+# parameter:	geometry	 	= GEOM_CYLINDER
+# parameter:	wallThickness		= 1 (in unit cells)
+#
+# parameter:	bjerrum		 	= 0
+# parameter:	lambda_D		= 0
+# parameter:	rCutCoul	 	= 0
+# parameter:	condenseCriteria		= 0
+#
+# parameter:	kFene			= 120.0
+# parameter:	r0Fene			= 1.5
+# parameter:	kSqu				= 0.0
+# parameter:	kBend				= 5.0
+# parameter:	kNemMPC			= 50.0
+#
+# parameter:	overlapMin		= 0.1
+# parameter:	overlapMinMonomer	= 0.9
+#
+# parameter:	drRelax			= 0
+# parameter:	stepRelax		= 0
+#
+# parameter:    dStrength       = 1.5
+# parameter:    dChunks         = 3
+#
+# ----------------------------------------------------------------------------------------------------
+# particle types:
+# ----------------------------------------------------------------------------------------------------
+#
+# parameter:	atomType	 	= (TYPE_WALL, 	TYPE_FLUID, 	TYPE_MONOMER)
+# parameter:	atomMass	 	= (10, 			1,				10)
+# parameter:	rhoType			= (1.0,			0,			0)
+# parameter:	atomAnchor	 	= (1, 			0,				0)
+# parameter:	atomSpring	 	= (300, 		0,				300)
+#
+#
+# ----------------------------------------------------------------------------------------------------
+# charge sets:
+# ----------------------------------------------------------------------------------------------------
+#
+# parameter:	qLayout			= (LAYOUT_SURFACE, 	LAYOUT_FLUID,	LAYOUT_FLUID,	LAYOUT_FLUID)
+# parameter:	qDensityKind		= (SURFACE,			SURFACE,		VOLUME,			VOLUME)
+# parameter:	qDensity		= (0.,				0.,			0.,			0.)
+# parameter:	qSpread			= (0.6,				0,				0,				0)
+# parameter:	qNumber			= (0,				0,				0, 				0)
+# parameter:	qCharge			= (-1,				1,				1, 				-1)
+#
+#
+# ----------------------------------------------------------------------------------------------------
+# polymer sets:
+# ----------------------------------------------------------------------------------------------------
+#
+# parameter:	polyLayout		= (LAYOUT_FLUID)
+# parameter:	polyAtomType		= (TYPE_MONOMER)
+# parameter:	polyDensityKind		= (SURFACE)
+# parameter:	polyDensity		= (0.0)
+# parameter:	polySpread		= (0.0)
+# parameter:	monoCharge		= (0)
+# parameter:	polyM			= (1)
+# parameter:	polyN			= (6)
+#
+#
+# ---------------------------------------------------------------------------------------------------
+# simulation phases:
+# ----------------------------------------------------------------------------------------------------
+#
+# parameter:	phaseName	 	=     	Equilibration,	Production
+# parameter:	nStep		 	= (0, 	50000,			600000000)
+#
+#
+# ----------------------------------------------------------------------------------------------------
+# external field:
+# ----------------------------------------------------------------------------------------------------
+#
+# parameter:	Efield		 	= (0,   0.0, 				0.0)
+#
+#
+# ----------------------------------------------------------------------------------------------------
+# temperature:
+# ----------------------------------------------------------------------------------------------------
+#
+# parameter:	kT		 	= (0,   1.0, 			1.0)
+# parameter:	groupThermRescale	= (0, 	GROUP_FLUID,		GROUP_FLUID)
+# parameter:	stepThermRescale	= (0, 	100, 			100)
+# parameter:	groupThermDPD		= (0,	GROUP_FLUID,	GROUP_FLUID)
+# parameter: 	eta					= (0,   1.5, 			1.5)
+#
+#
+# ----------------------------------------------------------------------------------------------------
+# step counters:
+# ----------------------------------------------------------------------------------------------------
+#
+# parameter:	stepAvg		 	= (0, 	5000, 			5000)
+# parameter:	stepHistCollect 	= (0,	0, 			0)
+# parameter:	stepHistPrint 		= (0,	0, 			0)
+# parameter:	stepSceneSlow	 	= (0, 	5000, 			5000)
+# parameter:	stepSceneFast	 	= (0, 	5000, 			5000)
+# parameter:	stepCheckpoint		= (0,   0,				0)
+#
+#
+# ====================================================================================================
+# end-header

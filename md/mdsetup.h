@@ -28,6 +28,7 @@ void 			InitCapillaryRadius			(simptr sim);
 void 			InitCapillaryPore			(simptr sim);
 void 			InitPolymers 				(simptr sim);
 void    		InitCharges					(simptr sim);
+void            InitDipoles                 (simptr sim);
 void 			InitVelocities				(simptr sim);
 void 			SetupLayoutLists 			(simptr sim);
 void 			SetupPolymerList 			(simptr sim);

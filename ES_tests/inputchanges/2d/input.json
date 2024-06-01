@@ -1,0 +1,31 @@
+{
+    "domain":           [10, 10],
+    "dt":               0.1,
+    "simSteps":         2000,
+    "rFrame":           1,
+    "comment":          "Nematic fluid using Andersen MPCD",
+    "collOp":           2,
+    "lc":               1,
+    "mfpot":            10,
+    "seed":             0,
+    "comment":          "Location of the MD input file",
+    "mdIn":             "md.inp",
+    "comment":          "Number of MD steps per MPCD step",
+    "stepsMD":          50,
+    "comment":          "Periodic boundary conditions",
+    "domainWalls":      1,
+    "species":
+    [
+        {
+            "dens":         20
+        }
+    ],
+    "debugOut":         3,
+    "flowOut":          0,
+    "dirSOut":          100,
+    "densSDOut":        0,
+    "topoFieldOut":     0,
+    "energyOut":        0,
+    "synopsisOut":      1,
+    "checkpointOut":    0
+}

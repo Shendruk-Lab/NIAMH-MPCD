@@ -7,6 +7,7 @@
 """
 
 from pylab import *
+from mpl_toolkits.mplot3d import Axes3D
 from subprocess import call
 import sys
 import os

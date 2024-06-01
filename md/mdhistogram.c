@@ -59,7 +59,6 @@ void SetupHistograms (simptr sim)
 
 	// include additioinal user histogram definitions
 	#include "mdhistogramdef.h"
-
 	// setup histogram stream pointers and function pointers
 	HistogramSetupFiles (sim);
 	HistogramSetupFuncs (sim);
