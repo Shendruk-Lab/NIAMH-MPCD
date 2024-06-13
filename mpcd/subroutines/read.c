@@ -931,14 +931,6 @@ void readarg( int argc, char* argv[], char ip[],char op[], int *inMode ) {
 /// however, there are some tags that are essential for a boundary to function. This method checks to ensure that these
 /// tags are present in a given BC object.
 ///
-/// The list of necessary tags is as follows:
-/// - `"aInv"`
-/// - `"P"`
-/// - `"R"`
-/// - `"DN"`
-/// - `"MVN"`
-/// - `"MVT"`
-///
 /// @param bc cJSON object containing the boundary condition to be checked.
 /// @return 1 if valid, 0 if not.
 ///
@@ -1160,11 +1152,11 @@ void readJson( char fpath[], inputList *in, spec **SP, kinTheory **theory, parti
 			cJSON *objElem = cJSON_GetArrayItem(arrBC, i); // get the BC object
 			bc *currWall = (*WALL + i); // get the pointer to the BC we want to write to
 
-			// Do a check if the necessary parameters are present
-			if (!checkBC(objElem)){
-				printf("Error: BC %d is missing essential parameters\n", i);
-				exit(EXIT_FAILURE);
-			}
+			// Do a check if the necessary parameters are present --- Tyler doesn't think these are necessary. This is up to users
+			// if (!checkBC(objElem)){
+			// 	printf("Error: BC %d is missing essential parameters\n", i);
+			// 	exit(EXIT_FAILURE);
+			// }
 
 			// parse through first set of primitives
 			currWall->SURFMODE = getJObjInt(objElem, "surfMode", 0, jsonTagList); // surface mode
@@ -1252,7 +1244,6 @@ void readJson( char fpath[], inputList *in, spec **SP, kinTheory **theory, parti
 					printf("Error: G must be 3D.\n");
 					exit(EXIT_FAILURE);
 				}
-
 				for (j = 0; j < _3D; j++) { // get the value
 					currWall->G[j] = cJSON_GetArrayItem(arrG, j)->valuedouble;
 				}
@@ -1263,7 +1254,6 @@ void readJson( char fpath[], inputList *in, spec **SP, kinTheory **theory, parti
 			}
 
 			// Read the arguments for SURFMODE==TRAD_SURF
-			// aInv array - NECESSARY
 			cJSON *arrAInv = NULL;
 			getCJsonArray(objElem, &arrAInv, "aInv", jsonTagList, arrayList, 0);
 			if (arrAInv != NULL) { // if grav has been found then....
@@ -1277,8 +1267,13 @@ void readJson( char fpath[], inputList *in, spec **SP, kinTheory **theory, parti
 					else currWall->A[j] = 0.0;
 				}
 			} else {
-				printf("Error: Could not find aInv in BC %d.\n", i);
-				exit(EXIT_FAILURE);
+				printf("Warning: Could not find A in BC %d. Setting to sphere\n", i);
+				for (j = 0; j < _3D; j++) { // set the default value
+					currWall->A[j] = 1.0;
+					currWall->AINV[j] = 1.0;
+				}
+				// printf("Error: Could not find aInv in BC %d.\n", i);
+				// exit(EXIT_FAILURE);
 			}
 			// rotsymm array
 			cJSON *arrRotSym = NULL;
@@ -1299,7 +1294,7 @@ void readJson( char fpath[], inputList *in, spec **SP, kinTheory **theory, parti
 			}
 			// Whether or not to apply absolute operator to the center of mass position terms
 			currWall->ABS = getJObjInt(objElem, "abs", 0, jsonTagList); // abs
-			// Powers array - NECESSARY
+			// Powers array 
 			cJSON *arrP = NULL;
 			getCJsonArray(objElem, &arrP, "P", jsonTagList, arrayList, 0);
 			if (arrP != NULL) { // if grav has been found then....
@@ -1311,19 +1306,27 @@ void readJson( char fpath[], inputList *in, spec **SP, kinTheory **theory, parti
 					currWall->P[j] = cJSON_GetArrayItem(arrP, j)->valuedouble;
 				}
 			} else {
-				printf("Error: Could not find P in BC %d.\n", i);
-				exit(EXIT_FAILURE);
+				printf("Warning: Could not find P in BC %d. Setting to sphere\n", i);
+				for ( j=0; j<4; j++ ) { // set the default value of a sphere
+					currWall->P[j] = 2.0;
+				}
+				// printf("Error: Could not find P in BC %d.\n", i);
+				// exit(EXIT_FAILURE);
 			}
 			// some more primitives
-			currWall->R = getJObjDou(objElem, "R", 2, jsonTagList); // r - NECESSARY
-			currWall->DN = getJObjDou(objElem, "DN", 1, jsonTagList); // dn - NECESSARY
+			currWall->R = getJObjDou(objElem, "R", 2, jsonTagList); // r 
+			currWall->DN = getJObjDou(objElem, "DN", 1, jsonTagList); // dn 
 			currWall->DT = getJObjDou(objElem, "DT", 0, jsonTagList); // dt
 			currWall->DVN = getJObjDou(objElem, "DVN", 0, jsonTagList); // dvn
 			currWall->DVT = getJObjDou(objElem, "DVT", 0, jsonTagList); // dvt
 
 			//
 			//
-			// WORKING ON THIS
+			//
+			//
+			// WORKING ON THIS FOR ALEX 
+			//
+			//
 			//
 			//
 			// Read the arguments for SURFMODE==VERT_SURF
@@ -1356,6 +1359,10 @@ void readJson( char fpath[], inputList *in, spec **SP, kinTheory **theory, parti
 			// 
 			//
 			//
+			//
+			//
+			//
+			//
 
 			// Collision rules
 			// DVxyz array
@@ -1374,8 +1381,8 @@ void readJson( char fpath[], inputList *in, spec **SP, kinTheory **theory, parti
 					currWall->DVxyz[j] = 0;
 				}
 			}
-			currWall->MVN = getJObjDou(objElem, "MVN", 1, jsonTagList); // mvn - NECESSARY
-			currWall->MVT = getJObjDou(objElem, "MVT", 1, jsonTagList); // mvt - NECESSARY
+			currWall->MVN = getJObjDou(objElem, "MVN", -1, jsonTagList); // mvn
+			currWall->MVT = getJObjDou(objElem, "MVT", -1, jsonTagList); // mvt
 			currWall->MUN = getJObjDou(objElem, "MUN", 1, jsonTagList); // mun
 			currWall->MUT = getJObjDou(objElem, "MUT", 1, jsonTagList); // mut
 			// MUxyz array
@@ -1493,7 +1500,7 @@ void readJson( char fpath[], inputList *in, spec **SP, kinTheory **theory, parti
 		if (oldBCNo > 0) { // if wall already exists then realloc
 			(*WALL) = (bc*) realloc(*WALL, NBC * sizeof(bc)); // realloc mem
 		} else { // otherwise need to malloc
-//			(*WALL) = (bc*) malloc(NBC * sizeof(bc)); // malloc mem
+			// (*WALL) = (bc*) malloc(NBC * sizeof(bc)); // malloc mem
 			(*WALL) = calloc(NBC, sizeof(bc)); // malloc mem
 		}
 
@@ -1508,42 +1515,42 @@ void readJson( char fpath[], inputList *in, spec **SP, kinTheory **theory, parti
 			}
 			switch (i) { // set up walls based on index
 				case 0: // left wall
-					currWall->AINV[0] = 1; // aInv array - NECESSARY
+					currWall->AINV[0] = 1; // aInv array
 					currWall->A[0] = 1.0/currWall->AINV[0];
 					currWall->R = 0; // r
 					currWall->DN = XYZ[0]; // dn
 					break;
 
 				case 1: // right wall
-					currWall->AINV[0] = -1; // aInv array - NECESSARY
+					currWall->AINV[0] = -1; // aInv array
 					currWall->A[0] = 1.0/currWall->AINV[0];
 					currWall->R = -XYZ[0]; // r
 					currWall->DN = XYZ[0]; // dn
 					break;
 
 				case 2: // bottom wall
-					currWall->AINV[1] = 1; // aInv array - NECESSARY
+					currWall->AINV[1] = 1; // aInv array
 					currWall->A[1] = 1.0/currWall->AINV[1];
 					currWall->R = 0; // r
 					currWall->DN = XYZ[1]; // dn
 					break;
 
 				case 3: // top wall
-					currWall->AINV[1] = -1; // aInv array - NECESSARY
+					currWall->AINV[1] = -1; // aInv array
 					currWall->A[1] = 1.0/currWall->AINV[1];
 					currWall->R = -XYZ[1]; // r
 					currWall->DN = XYZ[1]; // dn
 					break;
 
 				case 4: // near wall
-					currWall->AINV[2] = 1; // aInv array - NECESSARY
+					currWall->AINV[2] = 1; // aInv array
 					currWall->A[2] = 1.0/currWall->AINV[2];
 					currWall->R = 0; // r
 					currWall->DN = XYZ[2]; // dn
 					break;
 
 				case 5: // far wall
-					currWall->AINV[2] = -1; // aInv array - NECESSARY
+					currWall->AINV[2] = -1; // aInv array
 					currWall->A[2] = 1.0/currWall->AINV[2];
 					currWall->R = -XYZ[2]; // r
 					currWall->DN = XYZ[2]; // dn
@@ -1591,7 +1598,7 @@ void readJson( char fpath[], inputList *in, spec **SP, kinTheory **theory, parti
 				currWall->ROTSYMM[j] = 4;
 			}
 			currWall->ABS = 0; // abs
-			for (j = 0; j < 4; j++) { // P array - NECESSARY
+			for (j = 0; j < 4; j++) { // P array
 				currWall->P[j] = 1;
 			}
 			currWall->DT = 0; // dt
