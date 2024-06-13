@@ -2760,6 +2760,13 @@ void checkpoint(FILE *fout, inputList in, spec *SP, particleMPC *pSRD, int MD_mo
 		fprintf( fout,"%lf %lf %lf %lf %lf %lf\n", WALL[i].dV[0], WALL[i].dV[1], WALL[i].dV[2], WALL[i].dL[0], WALL[i].dL[1], WALL[i].dL[2] );
 		for( j=0; j<MAXSPECI+2; j++ ) fprintf( fout,"%i ", WALL[i].INTER[j] );		//BC particle interaction flags
 		fprintf( fout,"\n" );
+		fprintf( fout,"%d %lf %d\n", WALL[i].SURFMODE, WALL[i].SMOOTH_VERT, WALL[i].NUMVERT );
+		for( j=0; j<MAXVERT; j++ ) fprintf( fout,"%lf ", WALL[i].VERTICES[j][0] );		//BC vertices - x-component
+		fprintf( fout,"\n" );
+		for( j=0; j<MAXVERT; j++ ) fprintf( fout,"%lf ", WALL[i].VERTICES[j][1] );		//BC vertices - y-component
+		fprintf( fout,"\n" );
+		for( j=0; j<MAXVERT; j++ ) fprintf( fout,"%lf ", WALL[i].VERTICES[j][2] );		//BC vertices - z-component
+		fprintf( fout,"\n" );
 	}
 
 	//MPCD particles

@@ -790,6 +790,23 @@ void readchckpnt(inputList *in, spec **SP, particleMPC **pSRD, cell ****CL, int 
 			if(fscanf( finput,"%d ",&((*WALL+i)->INTER[j]) ));	//Read the species' interactions
 			else printf("Warning: Failed to read BC %d interaction with particle %d.\n",i,j);
 		}
+		if(fscanf( finput,"%d %lf %d", &((*WALL+i)->SURFMODE), &((*WALL+i)->SMOOTH_VERT), &((*WALL+i)->NUMVERT) ));
+		else printf("Warning: Failed to read BC %d.\n",i);
+		for( j=0; j<MAXVERT; j++ ) {
+			//Read the x-components of BC vertices
+			if(fscanf( finput,"%lf ",&((*WALL+i)->VERTICES[j][0]) ));	//Read the x-component
+			else printf("Warning: Failed to read BC %d vertex %d x-compoent.\n",i,j);
+		}
+		for( j=0; j<MAXVERT; j++ ) {
+			//Read the y-components of BC vertices
+			if(fscanf( finput,"%lf ",&((*WALL+i)->VERTICES[j][1]) ));	//Read the y-component
+			else printf("Warning: Failed to read BC %d vertex %d x-compoent.\n",i,j);
+		}
+		for( j=0; j<MAXVERT; j++ ) {
+			//Read the z-components of BC vertices
+			if(fscanf( finput,"%lf ",&((*WALL+i)->VERTICES[j][2]) ));	//Read the z-component
+			else printf("Warning: Failed to read BC %d vertex %d z-compoent.\n",i,j);
+		}
 	}
 
 	//Read the MPCD particles

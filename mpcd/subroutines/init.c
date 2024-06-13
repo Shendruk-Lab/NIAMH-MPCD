@@ -1676,6 +1676,16 @@ void checkSim( FILE *fsynopsis,int SYNOUT,inputList in,spec *SP,bc *WALL,specSwi
 	// Initialize BC
 	//Check that BCs make sense
 	for( i=0; i<NBC; i++ ) {
+		if( WALL[i].SURFMODE>VERT_SURF ) {
+			printf("Error: Unknown BC surface mode.\n");
+			if(SYNOUT == OUT) fprintf(fsynopsis,"Error: Unknown BC surface mode.\n");
+			exit(1);
+		}
+		if( WALL[i].SURFMODE==VERT_SURF && DIM!=_2D ) {
+			printf("Error: Vertex surface mode (SURFMODE) currently only works in 2D.\n");
+			if(SYNOUT == OUT) fprintf(fsynopsis,"Error: Vertex surface mode (SURFMODE) currently only works in 2D.\n");
+			exit(1);
+		}
 		if( WALL[i].DSPLC==0 ) for( j=0; j<DIM; j++ ) {
 			if( fneq(WALL[i].V[j],0.0) ) {
 				printf( "Warning:\tBC %d immobile; setting velocity to zero.\n",i );
@@ -1707,6 +1717,11 @@ void checkSim( FILE *fsynopsis,int SYNOUT,inputList in,spec *SP,bc *WALL,specSwi
 					}
 				}
 			}
+		}
+		if( WALL[i].NUMVERT>MAXVERT ) {
+			printf("Error: The number of BC vertices cannot exceed %d unless definitions.h is altered to increase MAXVERT.\n", MAXVERT);
+			if(SYNOUT == OUT) fprintf(fsynopsis,"Error: The number of BC vertices cannot exceed %d unless definitions.h is altered to increase MAXVERT.\n", MAXVERT);
+			exit(1);
 		}
 	}
 	if( !( in.LC==ISOF || in.LC==LCL || in.LC==LCG || in.LC==BCT) ){
