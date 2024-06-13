@@ -1132,6 +1132,10 @@ void readJson( char fpath[], inputList *in, spec **SP, kinTheory **theory, parti
 	getCJsonArray(jObj, &arrBC, "BC", jsonTagList, arrayList, 1);
 	if(arrBC != NULL) { // if this can be found in the json
 		NBC = cJSON_GetArraySize(arrBC); // get the number of BCs
+		if(NBC > MAXBC) { // check dimensionality is valid
+			printf("Error: Too many BCs given. To run this many BC go into mpcd/headers/definitions.h, increase MAXBC and recompile. \n");
+			exit(EXIT_FAILURE);
+		}
 
 		//Allocate the needed amount of memory for the BCs
 		(*WALL) = (bc*) calloc( NBC, sizeof( bc ) );
@@ -1594,6 +1598,10 @@ void readJson( char fpath[], inputList *in, spec **SP, kinTheory **theory, parti
 	getCJsonArray(jObj, &arrSpecies, "species", jsonTagList, arrayList, 1);
 	if(arrSpecies != NULL){ // if this can be found in the json
 		NSPECI = cJSON_GetArraySize(arrSpecies); // get the number of species
+		if(NSPECI > MAXSPECI) { // check dimensionality is valid
+			printf("Error: Too many fluid particle species given. To run this many species go into mpcd/headers/definitions.h, increase MAXSPECI and recompile. \n");
+			exit(EXIT_FAILURE);
+		}
 
 		//Allocate the needed amount of memory for the species SP
 		(*SP) = (spec*) malloc( NSPECI * sizeof( spec ) );
