@@ -160,6 +160,7 @@ typedef struct bc {
 	// SURFMODE==VERT_SURF
 	double SMOOTH_VERT;				///< Smooths the vertices --- json `'smooth'`.
 	double VERTICES[MAXVERT][_3D];	///< The array of vertices that define the surface --- json `'vertices'`.
+	int NUMVERT;					///< The number of vertices.
 
 	//BC rules for collision events
 	// Variables that control collision rules with the wall

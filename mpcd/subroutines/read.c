@@ -969,7 +969,7 @@ int checkBC(cJSON *bc){
 void readJson( char fpath[], inputList *in, spec **SP, kinTheory **theory, particleMPC **pSRD,
 	cell ****CL, int *MDMode, outputFlagsList *out, bc **WALL,
 	specSwimmer *specS, swimmer **sw){
-	int i, j; // counting variables
+	int i,j,k; 						// counting variables
 	int useDens[MAXSPECI]={0};		//Flag to decide if set POP by read in number OR calculate from density override
 	double dens[MAXSPECI]={0.0};	//Density
 
@@ -1150,6 +1150,7 @@ void readJson( char fpath[], inputList *in, spec **SP, kinTheory **theory, parti
 			}
 
 			// parse through first set of primitives
+			currWall->SURFMODE = getJObjInt(objElem, "surfMode", 0, jsonTagList); // surface mode
 			currWall->COLL_TYPE = getJObjInt(objElem, "colType", 1, jsonTagList); // collType
 			currWall->PHANTOM = getJObjInt(objElem, "phantom", 0, jsonTagList); // phantom
 			currWall->E = getJObjDou(objElem, "E", -1.0, jsonTagList); // E
@@ -1244,6 +1245,7 @@ void readJson( char fpath[], inputList *in, spec **SP, kinTheory **theory, parti
 				}
 			}
 
+			// Read the arguments for SURFMODE==TRAD_SURF
 			// aInv array - NECESSARY
 			cJSON *arrAInv = NULL;
 			getCJsonArray(objElem, &arrAInv, "aInv", jsonTagList, arrayList, 0);
@@ -1252,7 +1254,6 @@ void readJson( char fpath[], inputList *in, spec **SP, kinTheory **theory, parti
 					printf("Error: aInv must be 3D.\n");
 					exit(EXIT_FAILURE);
 				}
-
 				for (j = 0; j < _3D; j++) { // get the value
 					currWall->AINV[j] = cJSON_GetArrayItem(arrAInv, j)->valuedouble;
 					if( fneq(currWall->AINV[j],0.0) ) currWall->A[j] = 1.0/currWall->AINV[j];
@@ -1262,7 +1263,6 @@ void readJson( char fpath[], inputList *in, spec **SP, kinTheory **theory, parti
 				printf("Error: Could not find aInv in BC %d.\n", i);
 				exit(EXIT_FAILURE);
 			}
-
 			// rotsymm array
 			cJSON *arrRotSym = NULL;
 			getCJsonArray(objElem, &arrRotSym, "rotSym", jsonTagList, arrayList, 0);
@@ -1280,10 +1280,9 @@ void readJson( char fpath[], inputList *in, spec **SP, kinTheory **theory, parti
 					currWall->ROTSYMM[j] = 4;
 				}
 			}
-
+			// Whether or not to apply absolute operator to the center of mass position terms
 			currWall->ABS = getJObjInt(objElem, "abs", 0, jsonTagList); // abs
-
-			// P array - NECESSARY
+			// Powers array - NECESSARY
 			cJSON *arrP = NULL;
 			getCJsonArray(objElem, &arrP, "P", jsonTagList, arrayList, 0);
 			if (arrP != NULL) { // if grav has been found then....
@@ -1291,7 +1290,6 @@ void readJson( char fpath[], inputList *in, spec **SP, kinTheory **theory, parti
 					printf("Error: P must have 4 elements.\n");
 					exit(EXIT_FAILURE);
 				}
-
 				for (j = 0; j < 4; j++) { // get the value
 					currWall->P[j] = cJSON_GetArrayItem(arrP, j)->valuedouble;
 				}
@@ -1299,7 +1297,6 @@ void readJson( char fpath[], inputList *in, spec **SP, kinTheory **theory, parti
 				printf("Error: Could not find P in BC %d.\n", i);
 				exit(EXIT_FAILURE);
 			}
-
 			// some more primitives
 			currWall->R = getJObjDou(objElem, "R", 2, jsonTagList); // r - NECESSARY
 			currWall->DN = getJObjDou(objElem, "DN", 1, jsonTagList); // dn - NECESSARY
@@ -1307,6 +1304,43 @@ void readJson( char fpath[], inputList *in, spec **SP, kinTheory **theory, parti
 			currWall->DVN = getJObjDou(objElem, "DVN", 0, jsonTagList); // dvn
 			currWall->DVT = getJObjDou(objElem, "DVT", 0, jsonTagList); // dvt
 
+			//
+			//
+			// WORKING ON THIS
+			//
+			//
+			// Read the arguments for SURFMODE==VERT_SURF
+			currWall->SMOOTH_VERT = getJObjDou(objElem, "smooth", 0, jsonTagList); // smooth
+			//Read the vertices for this BC
+			for (j=0; j<MAXVERT; j++) for (k=0; k<_3D; k++) currWall->VERTICES[j][k]=0.0;	//Initialize all vertices to zero
+			cJSON *arrBCvert = NULL;
+			getCJsonArray(objElem, &arrBCvert, "vertices", jsonTagList, arrayList, 0);
+			if (arrBCvert==NULL && currWall->SURFMODE==VERT_SURF) { // if arrBCvert has NOT been found then AND should be....
+				printf("Error: BC %d surface mode set to %d but no vertices given. \n",i,VERT_SURF);
+				exit(EXIT_FAILURE);
+			}
+			if (arrBCvert != NULL) { // if arrBCvert has been found then....
+				currWall->NUMVERT = cJSON_GetArraySize(arrBCvert);
+				if (currWall->NUMVERT > MAXVERT) { // check dimensionality is valid
+					printf("Error: Too many vertices in BC %d. To run this many vertices go into mpcd/headers/definitions.h, increase MAXVERT and recompile. \n",i);
+					exit(EXIT_FAILURE);
+				}
+				for (j = 0; j < currWall->NUMVERT; j++) { // get the values
+					// NOTE TO DISCUSS WITH TIM:
+					// I want these to be of the form [ [x1,y1,z1], [x2,y2,z2], ... ]
+					// It would be nicer if it COULD also cope with [ [x1,y1], [x2,y2], ... ]
+					// I understand that what I've coded below does not do this; it is just a placeholder
+					// for (k=0; k<_3D; k++) currWall->VERTICES[j][k] = cJSON_GetArrayItem(arrBCvert, j,k)->valuedouble;
+					for (k=0; k<_3D; k++) currWall->VERTICES[j][k] = 0.0;
+				}
+			}
+			//
+			//
+			// 
+			//
+			//
+
+			// Collision rules
 			// DVxyz array
 			cJSON *arrDVxyz = NULL;
 			getCJsonArray(objElem, &arrDVxyz, "DVxyz", jsonTagList, arrayList, 0);
@@ -1315,7 +1349,6 @@ void readJson( char fpath[], inputList *in, spec **SP, kinTheory **theory, parti
 					printf("Error: DVxyz must have two components.\n");
 					exit(EXIT_FAILURE);
 				}
-
 				for (j = 0; j < _3D; j++) { // get the value
 					currWall->DVxyz[j] = cJSON_GetArrayItem(arrDVxyz, j)->valuedouble;
 				}
@@ -1324,12 +1357,10 @@ void readJson( char fpath[], inputList *in, spec **SP, kinTheory **theory, parti
 					currWall->DVxyz[j] = 0;
 				}
 			}
-
 			currWall->MVN = getJObjDou(objElem, "MVN", 1, jsonTagList); // mvn - NECESSARY
 			currWall->MVT = getJObjDou(objElem, "MVT", 1, jsonTagList); // mvt - NECESSARY
 			currWall->MUN = getJObjDou(objElem, "MUN", 1, jsonTagList); // mun
 			currWall->MUT = getJObjDou(objElem, "MUT", 1, jsonTagList); // mut
-
 			// MUxyz array
 			cJSON *arrMUxyz = NULL;
 			getCJsonArray(objElem, &arrMUxyz, "MUxyz", jsonTagList, arrayList, 0);
@@ -1338,7 +1369,6 @@ void readJson( char fpath[], inputList *in, spec **SP, kinTheory **theory, parti
 					printf("Error: MUxyz must have two components.\n");
 					exit(EXIT_FAILURE);
 				}
-
 				for (j = 0; j < _3D; j++) { // get the value
 					currWall->MUxyz[j] = cJSON_GetArrayItem(arrMUxyz, j)->valuedouble;
 				}
@@ -1347,7 +1377,6 @@ void readJson( char fpath[], inputList *in, spec **SP, kinTheory **theory, parti
 					currWall->MUxyz[j] = 1;
 				}
 			}
-
 			// DUxyz array
 			cJSON *arrDUxyz = NULL;
 			getCJsonArray(objElem, &arrDUxyz, "DUxyz", jsonTagList, arrayList, 0);
@@ -1366,6 +1395,7 @@ void readJson( char fpath[], inputList *in, spec **SP, kinTheory **theory, parti
 				}
 			}
 
+			//Other boundary properties
 			currWall->KBT = getJObjDou(objElem, "kbt", 1, jsonTagList); // kbt
 			currWall->DSPLC = getJObjInt(objElem, "dsplc", 0, jsonTagList); // dspc
 			currWall->INV = getJObjInt(objElem, "inv", 0, jsonTagList); // inv
