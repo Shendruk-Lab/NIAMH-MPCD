@@ -87,13 +87,19 @@ typedef struct spec {
 /// @see readJson()
 ///
 /// @note
+/// When setting the surface boundaries, there are two different modes given by SURFMODE. SURFMODE can be TRAD_SURF (smooth surface) or VERT_SURF (Alex Houston's vertices-based approach)
+//
+
+/// @note
+/// SURFMODE==TRAD_SURF
+///
+/// @note
 /// Setting fixed boundary surfaces or initializing mobile surfaces uses the variables:
 /// - `Q[3]` for position, \f$\vec{Q}\f$. 
 /// - `AINV[3]` the "semi-axes" of the surface (as in an ellipsoid), which are the coefficients in front of each cartesion term, \f$\vec{A}\f$. 
 /// - `R` for the shift term (as in the radius of a sphere), \f$ R \f$. 
 /// - `P[4]` the powers  of each cartesion term, \f$\vec{p}\f$. 
 ///
-
 /// @note
 /// Boundary surface take on a general form of
 /// - \f$ \mathcal{S} = \left( \frac{x-Q_x}{A_x} \right)^{p_x} + \left( \frac{y-Q_y}{A_y} \right)^{p_y} + \left( \frac{z-Q_z}{A_z} \right)^{p_z} - R^{p_R} = 0 \f$ where the 
@@ -125,8 +131,20 @@ typedef struct spec {
 ///	This formulation allows us to make things like triangles, hexagons, stars.
 /// Please see sampleInputs/ for more examples. 
 ///
+
+/// @note
+/// SURFMODE==VERT_SURF
+/// 
+/// @note
+/// Boundary surface is given by a set of vertices in _3D (currently only implemented in _2D but coded for future expansion)
+/// A surface smoothing parameter SMOOTH_VERT does HACK: ALEX FILL IN
+/// HACK: ALEX WRITE DESCRIPTION
+///
 typedef struct bc {
 	// Variables that set the geometry of the surface
+	int SURFMODE;			 ///< Flags what 'mode'/method is used to define the BC surface --- json `'surfMode'`.
+	//
+	// SURFMODE==TRAD_SURF
 	double P[4];			///< Boundary `P` parameter --- json `'P'`.
 	double A[3];	        ///< Boundary 'A' parameter.
     double AINV[3];         ///< Inverse of boundary 'A' parameter --- json `'aInv'` (aInv is prefered for ellipse and similar surfaces).
@@ -138,10 +156,15 @@ typedef struct bc {
 	double ROTSYMM[2];		///< Sets the rotational symmetry of the shapes --- json `'rotSym'`.
 	                        // (see Gielis, American Journal of Botany 90(3): 333–338. 2003)
 	int INV;				///< Flags whether the BC is inversed or not (0-no; 1-yes) --- json `'inv'`.
+	//
+	// SURFMODE==VERT_SURF
+	double SMOOTH_VERT;				///< Smooths the vertices --- json `'smooth'`.
+	double VERTICES[MAXVERT][_3D];	///< The array of vertices that define the surface --- json `'vertices'`.
 
-	// Variables that control collisions with the wall
+	//BC rules for collision events
+	// Variables that control collision rules with the wall
 	//N stands for normal to surface, T for tangential
-	int COLL_TYPE;		    ///< See the list of different types of collisions --- json `'colType'`.
+	int COLL_TYPE;		    ///< See the list of different types of collisions in definitions.h --- json `'colType'`.
 	int PHANTOM;		    ///< The flag for using phantom particles at walls. Use phantom particles if 1; don't if 0 --- json `'phantom'`.
 	double E;			    ///< Coefficient of restitution --- json `'E'`.
 	double DN;              ///< Normal shift of a particle's position if it passes the bc --- json `'DN'`.
@@ -169,18 +192,17 @@ typedef struct bc {
 	double dV[3];		    ///< The BC's change in velocity due to collisions.
 	double dL[3];		    ///< The BC's change in angular velocity due to collisions.
 
-	// Qualities of the object
+	// Qualities of the BC object
 	int DSPLC;				///< Flags whether BC can be pushed around by particles (0-no; 1-yes) --- json `'dsplc'`.
 	double MASS;			///< The BC's mass (only relevant if it moves) --- json `'mass'`.
 	double VOL;				///< Body's volume.
 	double I[3][3];		    ///< The body's moment of inertia.
-
 	// Interaction matrix
 	// Which MPCD species, MD monomers and swimmers the object interacts with
 	// MAXSPECI is number of MPCD species then add one for MD monomers and another for swimmers
 	int INTER[MAXSPECI+2];	    ///< Interaction matrix for BC with particles. Each MPCD species has a flag, plus MD and swimmer particles --- json `'interSRD'`, `'interMD'` and `'interSw'`.
 /*
-   Examples
+   Examples for SURFMODE==TRAD_SURF
 
    A periodic boundary condition: Top wall
    COLL_TYPE = {0,1}		Either impulse or rule based
