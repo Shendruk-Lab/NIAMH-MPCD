@@ -1157,79 +1157,109 @@ void BC_MPCcollision(bc WALL[], int BCcurrent, particleMPC *pp, spec *pSP, doubl
 			bccoord( WALL[BCcurrent] );
 		}
 	#endif
-	while( flag ) {
-		/* ****************************************** */
-		/* ************ BCs ON PARTICLES ************ */
-		/* ****************************************** */
-		//We must check if any of the particles are now inside the BC,
-		//Find the one that the collision should have occured with and the time for that collision
-		#ifdef DBG
-			if( DBUG == DBGBCMPC ) printf( "Choose a particle: " );
-		#endif
-		// chooseP( WALL[BCcurrent],pp,&time,&W,&chosenP,t_step,GRAV );
-		chooseP( WALL[BCcurrent],pp,&W,&chosenP );
-		#ifdef DBG
-			if( DBUG == DBGBCMPC ) printf( "BC=%d; particle=%d; W=%e\n",BCcurrent,chosenP,W );
-		#endif
-		//If the particle doesn't collide with any MPCD particles exit
-		if( chosenP>=GPOP ) flag = 0;
-		//If no particles were inside then we are done.
-		if( W > -TOL ) flag = 0;
-		else{
-			//A particle got inside a BC since the BC translated
+	if( WALL[BCcurrent].SURFMODE==TRAD_SURF ) {
+		//
+		//
+		//
+		//
+		// WORKING ON THIS FOR ALEX 
+		//
+		//
+		//
+		//
+		//HACK: CURRENTLY THE SURFMODE CHECK IS OUTSIDE the while *BUT* will want to put it inside, I think 
+		while( flag ) {
+			/* ****************************************** */
+			/* ************ BCs ON PARTICLES ************ */
+			/* ****************************************** */
+			//We must check if any of the particles are now inside the BC,
+			//Find the one that the collision should have occured with and the time for that collision
 			#ifdef DBG
-				if( DBUG == DBGBCMPC ) {
-					printf( "%d\n",chosenP );
-					printf( " W: %e\n", W );
-					pvec( (pp+chosenP)->Q,DIM );
-					pvec( (pp+chosenP)->V,DIM );
-					printf( " distance: %lf\n", distpoints( WALL[BCcurrent].Q,(pp+chosenP)->Q,DIM ) );
-				}
+				if( DBUG == DBGBCMPC ) printf( "Choose a particle: " );
 			#endif
-			//Save the particle and BC's velocities
-			for( i=0; i<DIM; i++ ) pV[i]=(pp+chosenP)->V[i];
-			for( i=0; i<DIM; i++ ) bcV[i]=WALL[BCcurrent].V[i];
-			for( i=0; i<_3D; i++ ) bcL[i]=WALL[BCcurrent].L[i];
-			//Give the particle negative the BC's velocity
-			for( i=0; i<DIM; i++ ) (pp+chosenP)->V[i]=-bcV[i];
-			//The change in reference frame means BC vel=0 (at the surface)
-			for( i=0; i<DIM; i++ ) WALL[BCcurrent].V[i]=-pV[i];
-			for( i=0; i<_3D; i++ ) WALL[BCcurrent].L[i]=0.0;
+			// chooseP( WALL[BCcurrent],pp,&time,&W,&chosenP,t_step,GRAV );
+			chooseP( WALL[BCcurrent],pp,&W,&chosenP );
 			#ifdef DBG
-				if( DBUG == DBGBCMPC ) {
-					printf( "Change the reference frame:\nBC %d\n",BCcurrent );
-					pvec( WALL[BCcurrent].Q,DIM );
-					pvec( WALL[BCcurrent].V,DIM );
-					printf( "MPC Particle %d\n",chosenP );
-					pvec( (pp+chosenP)->Q,DIM );
-					pvec( (pp+chosenP)->V,DIM );
-					printf( "Full rewind:" );
-					rewind_BC( &WALL[BCcurrent],t_step );
-					printf( " distance: %lf\n", distpoints( WALL[BCcurrent].Q,(pp+chosenP)->Q,DIM ) );
-					stream_BC( &WALL[BCcurrent],t_step );
-				}
+				if( DBUG == DBGBCMPC ) printf( "BC=%d; particle=%d; W=%e\n",BCcurrent,chosenP,W );
 			#endif
-			//With the BC's negative velocity work out all the BCs for this particle
-			MPC_BCcollision( pp,chosenP,WALL,pSP,KBT,t_step,LC,bcCNT,reCNT,rethermCNT,0 );
-			#ifdef DBG
-				if( DBUG == DBGBCMPC ) {
-					printf( "New particle position:\n" );
-					pvec( (pp+chosenP)->Q,DIM );
-					pvec( (pp+chosenP)->V,DIM );
-					printf( " distance: %lf\n", distpoints( WALL[BCcurrent].Q,(pp+chosenP)->Q,DIM ) );
-				}
-			#endif
-			//Give the particle back it's old velocity (plus the velocity it got from these collisions)
-			#ifdef DBG
-				if( DBUG == DBGBCMPC ) 	printf( "Change the reference frame back\n" );
-			#endif
-			for( i=0; i<DIM; i++ ) (pp+chosenP)->V[i] += pV[i] + bcV[i];
-			for( i=0; i<DIM; i++ ) WALL[BCcurrent].V[i] += pV[i] + bcV[i];
-			for( i=0; i<_3D; i++ ) WALL[BCcurrent].L[i] = bcL[i];
-			//Done. Reset particle number test
-			chosenP=GPOP+1;
-			// wait4u();
+			//If the particle doesn't collide with any MPCD particles exit
+			if( chosenP>=GPOP ) flag = 0;
+			//If no particles were inside then we are done.
+			if( W > -TOL ) flag = 0;
+			else{
+				//A particle got inside a BC since the BC translated
+				#ifdef DBG
+					if( DBUG == DBGBCMPC ) {
+						printf( "%d\n",chosenP );
+						printf( " W: %e\n", W );
+						pvec( (pp+chosenP)->Q,DIM );
+						pvec( (pp+chosenP)->V,DIM );
+						printf( " distance: %lf\n", distpoints( WALL[BCcurrent].Q,(pp+chosenP)->Q,DIM ) );
+					}
+				#endif
+				//Save the particle and BC's velocities
+				for( i=0; i<DIM; i++ ) pV[i]=(pp+chosenP)->V[i];
+				for( i=0; i<DIM; i++ ) bcV[i]=WALL[BCcurrent].V[i];
+				for( i=0; i<_3D; i++ ) bcL[i]=WALL[BCcurrent].L[i];
+				//Give the particle negative the BC's velocity
+				for( i=0; i<DIM; i++ ) (pp+chosenP)->V[i]=-bcV[i];
+				//The change in reference frame means BC vel=0 (at the surface)
+				for( i=0; i<DIM; i++ ) WALL[BCcurrent].V[i]=-pV[i];
+				for( i=0; i<_3D; i++ ) WALL[BCcurrent].L[i]=0.0;
+				#ifdef DBG
+					if( DBUG == DBGBCMPC ) {
+						printf( "Change the reference frame:\nBC %d\n",BCcurrent );
+						pvec( WALL[BCcurrent].Q,DIM );
+						pvec( WALL[BCcurrent].V,DIM );
+						printf( "MPC Particle %d\n",chosenP );
+						pvec( (pp+chosenP)->Q,DIM );
+						pvec( (pp+chosenP)->V,DIM );
+						printf( "Full rewind:" );
+						rewind_BC( &WALL[BCcurrent],t_step );
+						printf( " distance: %lf\n", distpoints( WALL[BCcurrent].Q,(pp+chosenP)->Q,DIM ) );
+						stream_BC( &WALL[BCcurrent],t_step );
+					}
+				#endif
+				//With the BC's negative velocity work out all the BCs for this particle
+				MPC_BCcollision( pp,chosenP,WALL,pSP,KBT,t_step,LC,bcCNT,reCNT,rethermCNT,0 );
+				#ifdef DBG
+					if( DBUG == DBGBCMPC ) {
+						printf( "New particle position:\n" );
+						pvec( (pp+chosenP)->Q,DIM );
+						pvec( (pp+chosenP)->V,DIM );
+						printf( " distance: %lf\n", distpoints( WALL[BCcurrent].Q,(pp+chosenP)->Q,DIM ) );
+					}
+				#endif
+				//Give the particle back it's old velocity (plus the velocity it got from these collisions)
+				#ifdef DBG
+					if( DBUG == DBGBCMPC ) 	printf( "Change the reference frame back\n" );
+				#endif
+				for( i=0; i<DIM; i++ ) (pp+chosenP)->V[i] += pV[i] + bcV[i];
+				for( i=0; i<DIM; i++ ) WALL[BCcurrent].V[i] += pV[i] + bcV[i];
+				for( i=0; i<_3D; i++ ) WALL[BCcurrent].L[i] = bcL[i];
+				//Done. Reset particle number test
+				chosenP=GPOP+1;
+				// wait4u();
+			}
 		}
+	}
+	else if( WALL[BCcurrent].SURFMODE==VERT_SURF ) {
+		//
+		//
+		//
+		//
+		// WORKING ON THIS FOR ALEX 
+		//
+		//
+		//
+		//
+		// Don't do anything for now --- skipping this BC. Will do with Alex
+		printf("Entered VERT_SURF for BC %d.\n",BCcurrent);
+		flag = 0;
+	}
+	else {
+		printf("Error: BC %d surface mode unkwown (SURFMODE=%d). \n",BCcurrent,WALL[BCcurrent].SURFMODE);
+		exit(EXIT_FAILURE);
 	}
 }
 

@@ -320,10 +320,10 @@
 # define BC_THERMO_HALF 4
 // /// @brief BC type. Moving wall.
 // #define BC_MOVING_WALL 5
-/// @brief BC surface type option for SURF_MODE. The TRAD_SURF is the smooth surface of the form
+/// @brief BC surface type option for SURFMODE. The TRAD_SURF is the smooth surface of the form
 /// - \f$ \mathcal{S} = \left( \frac{x-Q_x}{A_x} \right)^{p_x} + \left( \frac{y-Q_y}{A_y} \right)^{p_y} + \left( \frac{z-Q_z}{A_z} \right)^{p_z} - R^{p_R} = 0 
 # define TRAD_SURF 0
-/// @brief BC surface type option for SURF_MODE. The VERT_SURF is Alex Houston's vertices-based approach
+/// @brief BC surface type option for SURFMODE. The VERT_SURF is Alex Houston's vertices-based approach
 # define VERT_SURF 1
 
 /* ****************************************** */

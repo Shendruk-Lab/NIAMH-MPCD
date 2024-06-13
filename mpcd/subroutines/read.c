@@ -1345,14 +1345,26 @@ void readJson( char fpath[], inputList *in, spec **SP, kinTheory **theory, parti
 					printf("Error: Too many vertices in BC %d. To run this many vertices go into mpcd/headers/definitions.h, increase MAXVERT and recompile. \n",i);
 					exit(EXIT_FAILURE);
 				}
-				for (j = 0; j < currWall->NUMVERT; j++) { // get the values
-					// NOTE TO DISCUSS WITH TIM:
-					// I want these to be of the form [ [x1,y1,z1], [x2,y2,z2], ... ]
-					// It would be nicer if it COULD also cope with [ [x1,y1], [x2,y2], ... ]
-					// I understand that what I've coded below does not do this; it is just a placeholder
-					// for (k=0; k<_3D; k++) currWall->VERTICES[j][k] = cJSON_GetArrayItem(arrBCvert, j,k)->valuedouble;
-					for (k=0; k<_3D; k++) currWall->VERTICES[j][k] = 0.0;
-				}
+				for (j = 0; j < currWall->NUMVERT; j++) { // get the arrays for each vertex position
+					// Vertex position array 
+					cJSON *arrVert = NULL;
+					getCJsonArray(objElem, &arrVert, "pos", jsonTagList, arrayList, 0);
+					if (arrVert != NULL) { // if grav has been found then....
+						if (cJSON_GetArraySize(arrVert)==_3D) {
+							for( k=0; k<_3D; k++)  currWall->VERTICES[j][k] = cJSON_GetArrayItem(arrVert,k)->valuedouble;
+						}
+						else if (cJSON_GetArraySize(arrVert)==_2D) {
+							for( k=0; k<_2D; k++)  currWall->VERTICES[j][k] = cJSON_GetArrayItem(arrVert,k)->valuedouble;
+						}
+						else if (cJSON_GetArraySize(arrVert)==_1D) {
+							for( k=0; k<_1D; k++)  currWall->VERTICES[j][k] = cJSON_GetArrayItem(arrVert,k)->valuedouble;
+						}
+						else {
+							printf("Error: Vertex %d of BC %d does not have appropriate dimensionality\n",j,i);
+							exit(EXIT_FAILURE);
+						}
+					}
+				} 
 			}
 			//
 			//

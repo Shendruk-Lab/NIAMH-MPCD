@@ -189,7 +189,8 @@ These are noted as NECESSARY in the default value column.
 
 Tag             | Type          | Default Value | Description
 ---             | ---           | ---           | ---
-`colType`       | int           | 1             | Which BC type do you want to use. See definitions.h for a list
+`surfMode`       | int          | 0             | Which BC surface mode do you want to use. See definitions.h for a list
+`colType`       | int           | 1             | Which BC collision-type do you want to use. See definitions.h for a list
 `phantom`       | int           | 0             | Use phantom particles if 1, 0 otherwise
 `E`             | double        | -1            | Coefficient of restitution
 `Q`             | array(double) | [0,0,0]       | Position of the boundary, **must** be 3D
@@ -197,18 +198,21 @@ Tag             | Type          | Default Value | Description
 `O`             | array(double) | [0,0,0]       | Orientation of the boundary about (x,y,z), **must** be 3D
 `L`             | array(double) | [0,0,0]       | Angular velocity of the boundary, **must** be 3D
 `G`             | array(double) | [0,0,0]       | External acceleration (ie, due to gravity) of the boundary, **must** be 3D
-`aInv`          | array(double) | NECESSARY     | Sets the geometry of the surface. Principal semi-axes of the ellipsoid (see SRDClass for explanation). **Must** be 3D. If you declare a BC then this **must** be given, or the simulation will not run
+`aInv`          | array(double) | [1,1,1]       | Sets the geometry of the surface. Principal semi-axes of the ellipsoid (see SRDClass for explanation). **Must** be 3D. If you declare a BC then this **must** be given, or the simulation will not run
 `rotSym`        | array(double) | [4,4]         | Sets rotational symmetry of shapes. **Must** be of form (a,b)
 `abs`           | int           | 0             | Flags if each term should be absolute only. 1 = yes, 0 = no
-`P`             | array(double) | NECESSARY     | Sets the geometry of the surface. **Must** be of form (a,b,c,d). See SRDClass for explanation. If you declare a BC then this **must** be given, or the simulation will not run
-`R`             | double        | NECESSARY     | Sets the geometry of the surface. See SRDClass for explanation. If you declare a BC then this **must** be given, or the simulation will not run
-`DN`            | double        | NECESSARY     | Displacement of the particle in the normal direction. If you declare a BC then this **must** be given, or the simulation will not run
+`P`             | array(double) | [2,2,2,2]     | Sets the geometry of the surface. **Must** be of form (a,b,c,d). See SRDClass for explanation. If you declare a BC then this **must** be given, or the simulation will not run
+`R`             | double        | 2             | Sets the geometry of the surface. See SRDClass for explanation. If you declare a BC then this **must** be given, or the simulation will not run
+`smooth`        | double        | 0.0           | The degree to which vertex-mode surfaces are smoothed. 
+`vertices`      | array(vert)   | [[0,0,0],...] | The array of vertices. Should be a list of `pos` tags, which are position vectors. 
+`BC`            | array(BC)     | PBCs around domain | The array of boundary objects. See the [BC table](#bc-tag-table) for BC tags
+`DN`            | double        | 0             | Displacement of the particle in the normal direction. If you declare a BC then this **must** be given, or the simulation will not run
 `DT`            | double        | 0             | Displacement of the particle in the tangential direction
 `DVN`           | double        | 0             | Add velocity in the normal direction on contact
 `DVT`           | double        | 0             | Add velocity in the tangential direction on contact
 `DVxyz`         | array(double) | [0,0,0]       | Add velocity in the cartesian directions on contact. **Must** be 3D
-`MVN`           | double        | NECESSARY     | Multiplies the velocity in the normal direction on contact. If you declare a BC then this **must** be given, or the simulation will not run
-`MVT`           | double        | NECESSARY     | Multiplies the velocity in the tangential direction on contact. If you declare a BC then this **must** be given, or the simulation will not run
+`MVN`           | double        | -1            | Multiplies the velocity in the normal direction on contact. If you declare a BC then this **must** be given, or the simulation will not run
+`MVT`           | double        | -1            | Multiplies the velocity in the tangential direction on contact. If you declare a BC then this **must** be given, or the simulation will not run
 `MUN`           | double        | 1             | Multiplies the orientation in the normal direction on contact
 `MUT`           | double        | 1             | Multiplies the orientation in the tangential direction on contact
 `MUxyz`         | array(double) | [1,1,1]       | Multiplies the orientation in the cartesian direction on contact. **Must** be 3D
