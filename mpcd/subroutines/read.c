@@ -1333,15 +1333,20 @@ void readJson( char fpath[], inputList *in, spec **SP, kinTheory **theory, parti
 			currWall->SMOOTH_VERT = getJObjDou(objElem, "smooth", 0, jsonTagList); // smooth
 			//Read the vertices for this BC
 			for (j=0; j<MAXVERT; j++) for (k=0; k<_3D; k++) currWall->VERTICES[j][k]=0.0;	//Initialize all vertices to zero
+			//
+			//
+			//The commented out bit seems BETTER than the hack I use below *BUT* I couldn't get this to work
 			cJSON *arrBCvert = NULL;
 			// getCJsonArray(objElem, &arrBCvert, "vertices", jsonTagList, arrayList, 0);
-			getCJsonArray(jObj, &arrBCvert, "vertices", jsonTagList, arrayList, 1);
+			getCJsonArray(objElem, &arrBCvert, "vertices", jsonTagList, arrayList, 1);
 			if (arrBCvert==NULL && currWall->SURFMODE==VERT_SURF) { // if arrBCvert has NOT been found then AND should be....
-				printf("Error: BC %d surface mode set to %d but no vertices given. \n",i,VERT_SURF);
+				printf("Error: BC %d surface mode set to %d (%d) but no vertices given. \n",i,currWall->SURFMODE,VERT_SURF);
 				exit(EXIT_FAILURE);
 			}
-			if (arrBCvert != NULL) { // if arrBCvert has been found then....
+			if (arrBCvert!=NULL) { // if arrBCvert has been found then....
+				printf("Entered vertices for BC %d\n",i);
 				currWall->NUMVERT = cJSON_GetArraySize(arrBCvert);
+				printf("\tNumber of vertices %d\n",currWall->NUMVERT);
 				if (currWall->NUMVERT > MAXVERT) { // check dimensionality is valid
 					printf("Error: Too many vertices in BC %d. To run this many vertices go into mpcd/headers/definitions.h, increase MAXVERT and recompile. \n",i);
 					exit(EXIT_FAILURE);
@@ -1349,8 +1354,9 @@ void readJson( char fpath[], inputList *in, spec **SP, kinTheory **theory, parti
 				for (j = 0; j < currWall->NUMVERT; j++) { // get the arrays for each vertex position
 					// Vertex position array 
 					cJSON *arrVert = NULL;
-					getCJsonArray(objElem, &arrVert, "pos", jsonTagList, arrayList, 0);
+					getCJsonArray(arrBCvert, &arrVert, "pos", jsonTagList, arrayList, 0);
 					if (arrVert != NULL) { // if grav has been found then....
+						printf("\tFound artVert %d\n",j);
 						if (cJSON_GetArraySize(arrVert)==_3D) {
 							for( k=0; k<_3D; k++)  currWall->VERTICES[j][k] = cJSON_GetArrayItem(arrVert,k)->valuedouble;
 						}
@@ -1366,7 +1372,28 @@ void readJson( char fpath[], inputList *in, spec **SP, kinTheory **theory, parti
 						}
 					}
 				} 
+				for (j = 0; j < currWall->NUMVERT; j++) pvec(currWall->VERTICES[j],DIM);
 			}
+			exit(EXIT_FAILURE);
+			//
+			//
+			//HACK: To make it work ahead of meeting with Alex
+			// cJSON *arrBFM = NULL;
+			// getCJsonArray(jObj, &arrBFM, "interMatr", jsonTagList, arrayList, 0);
+			// if (arrBFM != NULL) { // if grav has been found then....
+			// 	if (cJSON_GetArraySize(arrBFM) != NSPECI) { // check dimensionality is valid
+			// 		printf("Error: Interaction matrices must have columns of length equal to the number of species.\n");
+			// 		exit(EXIT_FAILURE);
+			// 	}
+
+			// 	for (j = 0; j < NSPECI; j++) { // get the value
+			// 		(*SP+i)->M[j] = cJSON_GetArrayItem(arrBFM, j)->valuedouble;
+			// 	}
+			// } else {
+			// 	for (j = 0; j < NSPECI; j++) { // get the value
+			// 		(*SP+i)->M[j] = 0;
+			// 	}
+			// }
 			//
 			//
 			// 
