@@ -981,8 +981,8 @@ void readJson( char fpath[], inputList *in, spec **SP, kinTheory **theory, parti
 	int i,j,k; 						// counting variables
 	int useDens[MAXSPECI]={0};		//Flag to decide if set POP by read in number OR calculate from density override
 	double dens[MAXSPECI]={0.0};	//Density
-
 	char* fileStr = NULL;
+
 	if(getFileStr(fpath, &fileStr) != 0){ // read, return on error
 		exit(EXIT_FAILURE);
 	}
@@ -1079,7 +1079,7 @@ void readJson( char fpath[], inputList *in, spec **SP, kinTheory **theory, parti
 	in->inCOMP = getJObjInt(jObj, "incomp", 0, jsonTagList); // inCOMP
 	in->MULTIPHASE = getJObjInt(jObj, "multiphase", 0, jsonTagList); // multiPhase
 
-	// grav array
+	// Gravity vector
 	cJSON *arrGrav = NULL;
 	getCJsonArray(jObj, &arrGrav, "grav", jsonTagList, arrayList, 0);
 	if (arrGrav != NULL) { // if grav has been found then....
@@ -1087,7 +1087,6 @@ void readJson( char fpath[], inputList *in, spec **SP, kinTheory **theory, parti
 			printf("Error: Grav must be a 3D array.\n");
 			exit(EXIT_FAILURE);
 		}
-
 		for (i = 0; i < _3D; i++) { // get the value
 			in->GRAV[i] = cJSON_GetArrayItem(arrGrav, i)->valuedouble;
 		}
@@ -1097,7 +1096,7 @@ void readJson( char fpath[], inputList *in, spec **SP, kinTheory **theory, parti
 		in->GRAV[2] = 0;
 	}
 
-	// mag array
+	// Magnetic field vector 
 	cJSON *arrMag = NULL;
 	getCJsonArray(jObj, &arrMag, "mag", jsonTagList, arrayList, 0);
 	if (arrMag != NULL) { // if mag has been found then....
@@ -1105,11 +1104,10 @@ void readJson( char fpath[], inputList *in, spec **SP, kinTheory **theory, parti
 			printf("Error: Mag must be a 3D array.\n");
 			exit(EXIT_FAILURE);
 		}
-
 		for (i = 0; i < _3D; i++) { // get the value
 			in->MAG[i] = cJSON_GetArrayItem(arrMag, i)->valuedouble;
 		}
-	} else { // if no grav specified then fallback
+	} else { // if no mag specified then fallback
 		in->MAG[0] = 0;
 		in->MAG[1] = 0;
 		in->MAG[2] = 0;
@@ -1164,10 +1162,10 @@ void readJson( char fpath[], inputList *in, spec **SP, kinTheory **theory, parti
 			currWall->PHANTOM = getJObjInt(objElem, "phantom", 0, jsonTagList); // phantom
 			currWall->E = getJObjDou(objElem, "E", -1.0, jsonTagList); // E
 
-			// Q array
+			// Position array Q
 			cJSON *arrQ = NULL;
 			getCJsonArray(objElem, &arrQ, "Q", jsonTagList, arrayList, 0);
-			if (arrQ != NULL) { // if grav has been found then....
+			if (arrQ != NULL) { // if position has been found then....
 				if (cJSON_GetArraySize(arrQ) != _3D) { // check dimensionality is valid
 					printf("Error: Q must be 3D.\n");
 					exit(EXIT_FAILURE);
@@ -1182,10 +1180,10 @@ void readJson( char fpath[], inputList *in, spec **SP, kinTheory **theory, parti
 				}
 			}
 
-			// V array
+			// Velocity array V
 			cJSON *arrV = NULL;
 			getCJsonArray(objElem, &arrV, "V", jsonTagList, arrayList, 0);
-			if (arrV != NULL) { // if grav has been found then....
+			if (arrV != NULL) { // if velocity has been found then....
 				if (cJSON_GetArraySize(arrV) != _3D) { // check dimensionality is valid
 					printf("Error: V must be 3D.\n");
 					exit(EXIT_FAILURE);
@@ -1200,15 +1198,14 @@ void readJson( char fpath[], inputList *in, spec **SP, kinTheory **theory, parti
 				}
 			}
 
-			// O array
+			// Orientation vector
 			cJSON *arrO = NULL;
 			getCJsonArray(objElem, &arrO, "O", jsonTagList, arrayList, 0);
-			if (arrO != NULL) { // if grav has been found then....
+			if (arrO != NULL) { // if orientation has been found then....
 				if (cJSON_GetArraySize(arrO) != _3D) { // check dimensionality is valid
 					printf("Error: O must be 3D.\n");
 					exit(EXIT_FAILURE);
 				}
-
 				for (j = 0; j < _3D; j++) { // get the value
 					currWall->O[j] = cJSON_GetArrayItem(arrO, j)->valuedouble;
 				}
@@ -1218,15 +1215,14 @@ void readJson( char fpath[], inputList *in, spec **SP, kinTheory **theory, parti
 				}
 			}
 
-			// L array
+			// Angular velocity vector
 			cJSON *arrL = NULL;
 			getCJsonArray(objElem, &arrL, "L", jsonTagList, arrayList, 0);
-			if (arrL != NULL) { // if grav has been found then....
+			if (arrL != NULL) { // if ang velocity has been found then....
 				if (cJSON_GetArraySize(arrL) != _3D) { // check dimensionality is valid
 					printf("Error: L must be 3D.\n");
 					exit(EXIT_FAILURE);
 				}
-
 				for (j = 0; j < _3D; j++) { // get the value
 					currWall->L[j] = cJSON_GetArrayItem(arrL, j)->valuedouble;
 				}
@@ -1236,10 +1232,10 @@ void readJson( char fpath[], inputList *in, spec **SP, kinTheory **theory, parti
 				}
 			}
 
-			// G array
+			// Gravity vector acting on BC
 			cJSON *arrG = NULL;
 			getCJsonArray(objElem, &arrG, "G", jsonTagList, arrayList, 0);
-			if (arrG != NULL) { // if grav has been found then....
+			if (arrG != NULL) { // if gravity has been found then....
 				if (cJSON_GetArraySize(arrG) != _3D) { // check dimensionality is valid
 					printf("Error: G must be 3D.\n");
 					exit(EXIT_FAILURE);
@@ -1256,7 +1252,7 @@ void readJson( char fpath[], inputList *in, spec **SP, kinTheory **theory, parti
 			// Read the arguments for SURFMODE==TRAD_SURF
 			cJSON *arrAInv = NULL;
 			getCJsonArray(objElem, &arrAInv, "aInv", jsonTagList, arrayList, 0);
-			if (arrAInv != NULL) { // if grav has been found then....
+			if (arrAInv != NULL) { // if surface normal A (inverse) has been found then....
 				if (cJSON_GetArraySize(arrAInv) != _3D) { // check dimensionality is valid
 					printf("Error: aInv must be 3D.\n");
 					exit(EXIT_FAILURE);
@@ -1267,7 +1263,7 @@ void readJson( char fpath[], inputList *in, spec **SP, kinTheory **theory, parti
 					else currWall->A[j] = 0.0;
 				}
 			} else {
-				printf("Warning: Could not find A in BC %d. Setting to sphere\n", i);
+				// printf("Warning: Could not find A in BC %d. Setting to sphere\n", i);
 				for (j = 0; j < _3D; j++) { // set the default value
 					currWall->A[j] = 1.0;
 					currWall->AINV[j] = 1.0;
@@ -1275,15 +1271,14 @@ void readJson( char fpath[], inputList *in, spec **SP, kinTheory **theory, parti
 				// printf("Error: Could not find aInv in BC %d.\n", i);
 				// exit(EXIT_FAILURE);
 			}
-			// rotsymm array
+			// Rotational symmetry array
 			cJSON *arrRotSym = NULL;
 			getCJsonArray(objElem, &arrRotSym, "rotSym", jsonTagList, arrayList, 0);
-			if (arrRotSym != NULL) { // if grav has been found then....
+			if (arrRotSym != NULL) { // if rotational symmetry has been found then....
 				if (cJSON_GetArraySize(arrRotSym) != 2) { // check dimensionality is valid
 					printf("Error: rotSym must have two components.\n");
 					exit(EXIT_FAILURE);
 				}
-
 				for (j = 0; j < 2; j++) { // get the value
 					currWall->ROTSYMM[j] = cJSON_GetArrayItem(arrRotSym, j)->valuedouble;
 				}
@@ -1297,7 +1292,7 @@ void readJson( char fpath[], inputList *in, spec **SP, kinTheory **theory, parti
 			// Powers array 
 			cJSON *arrP = NULL;
 			getCJsonArray(objElem, &arrP, "P", jsonTagList, arrayList, 0);
-			if (arrP != NULL) { // if grav has been found then....
+			if (arrP != NULL) { // if powers have been found then....
 				if (cJSON_GetArraySize(arrP) != 4) { // check dimensionality is valid
 					printf("Error: P must have 4 elements.\n");
 					exit(EXIT_FAILURE);
@@ -1306,7 +1301,7 @@ void readJson( char fpath[], inputList *in, spec **SP, kinTheory **theory, parti
 					currWall->P[j] = cJSON_GetArrayItem(arrP, j)->valuedouble;
 				}
 			} else {
-				printf("Warning: Could not find P in BC %d. Setting to sphere\n", i);
+				// printf("Warning: Could not find P in BC %d. Setting to sphere\n", i);
 				for ( j=0; j<4; j++ ) { // set the default value of a sphere
 					currWall->P[j] = 2.0;
 				}
@@ -1332,83 +1327,45 @@ void readJson( char fpath[], inputList *in, spec **SP, kinTheory **theory, parti
 			// Read the arguments for SURFMODE==VERT_SURF
 			currWall->SMOOTH_VERT = getJObjDou(objElem, "smooth", 0, jsonTagList); // smooth
 			//Read the vertices for this BC
+			//Zero all the vertices
 			for (j=0; j<MAXVERT; j++) for (k=0; k<_3D; k++) currWall->VERTICES[j][k]=0.0;	//Initialize all vertices to zero
-			//
-			//
-			//The commented out bit seems BETTER than the hack I use below *BUT* I couldn't get this to work
+			//Make a pointer to the array of vertices
 			cJSON *arrBCvert = NULL;
-			// getCJsonArray(objElem, &arrBCvert, "vertices", jsonTagList, arrayList, 0);
 			getCJsonArray(objElem, &arrBCvert, "vertices", jsonTagList, arrayList, 1);
 			if (arrBCvert==NULL && currWall->SURFMODE==VERT_SURF) { // if arrBCvert has NOT been found then AND should be....
 				printf("Error: BC %d surface mode set to %d (%d) but no vertices given. \n",i,currWall->SURFMODE,VERT_SURF);
 				exit(EXIT_FAILURE);
 			}
 			if (arrBCvert!=NULL) { // if arrBCvert has been found then....
-				printf("Entered vertices for BC %d\n",i);
+				// Set the number of vertices to be the length of the vertex array
 				currWall->NUMVERT = cJSON_GetArraySize(arrBCvert);
-				printf("\tNumber of vertices %d\n",currWall->NUMVERT);
 				if (currWall->NUMVERT > MAXVERT) { // check dimensionality is valid
 					printf("Error: Too many vertices in BC %d. To run this many vertices go into mpcd/headers/definitions.h, increase MAXVERT and recompile. \n",i);
 					exit(EXIT_FAILURE);
 				}
-				for (j = 0; j < currWall->NUMVERT; j++) { // get the arrays for each vertex position
-					// Vertex position array 
-					cJSON *arrVert = NULL;
-					getCJsonArray(arrBCvert, &arrVert, "pos", jsonTagList, arrayList, 0);
-					if (arrVert != NULL) { // if grav has been found then....
-						printf("\tFound artVert %d\n",j);
-						if (cJSON_GetArraySize(arrVert)==_3D) {
-							for( k=0; k<_3D; k++)  currWall->VERTICES[j][k] = cJSON_GetArrayItem(arrVert,k)->valuedouble;
-						}
-						else if (cJSON_GetArraySize(arrVert)==_2D) {
-							for( k=0; k<_2D; k++)  currWall->VERTICES[j][k] = cJSON_GetArrayItem(arrVert,k)->valuedouble;
-						}
-						else if (cJSON_GetArraySize(arrVert)==_1D) {
-							for( k=0; k<_1D; k++)  currWall->VERTICES[j][k] = cJSON_GetArrayItem(arrVert,k)->valuedouble;
-						}
+				//Loop through each vertex and get its position
+				for (j = 0; j < currWall->NUMVERT; j++) { // get the position vector for each vertex 
+					cJSON *objVert = cJSON_GetArrayItem(arrBCvert, j); // get the vertex object
+					// Vertex position vector
+					cJSON *arrVertPos = NULL;
+					getCJsonArray(objVert, &arrVertPos, "pos", jsonTagList, arrayList, 0);
+					if (arrVertPos != NULL) { // if vertex has been found then....
+						if (cJSON_GetArraySize(arrVertPos)==_3D) for( k=0; k<_3D; k++)  currWall->VERTICES[j][k] = cJSON_GetArrayItem(arrVertPos,k)->valuedouble;
+						else if (cJSON_GetArraySize(arrVertPos)==_2D) for( k=0; k<_2D; k++)  currWall->VERTICES[j][k] = cJSON_GetArrayItem(arrVertPos,k)->valuedouble;
+						else if (cJSON_GetArraySize(arrVertPos)==_1D) for( k=0; k<_1D; k++)  currWall->VERTICES[j][k] = cJSON_GetArrayItem(arrVertPos,k)->valuedouble;
 						else {
 							printf("Error: Vertex %d of BC %d does not have appropriate dimensionality\n",j,i);
 							exit(EXIT_FAILURE);
 						}
 					}
 				} 
-				for (j = 0; j < currWall->NUMVERT; j++) pvec(currWall->VERTICES[j],DIM);
 			}
-			exit(EXIT_FAILURE);
-			//
-			//
-			//HACK: To make it work ahead of meeting with Alex
-			// cJSON *arrBFM = NULL;
-			// getCJsonArray(jObj, &arrBFM, "interMatr", jsonTagList, arrayList, 0);
-			// if (arrBFM != NULL) { // if grav has been found then....
-			// 	if (cJSON_GetArraySize(arrBFM) != NSPECI) { // check dimensionality is valid
-			// 		printf("Error: Interaction matrices must have columns of length equal to the number of species.\n");
-			// 		exit(EXIT_FAILURE);
-			// 	}
-
-			// 	for (j = 0; j < NSPECI; j++) { // get the value
-			// 		(*SP+i)->M[j] = cJSON_GetArrayItem(arrBFM, j)->valuedouble;
-			// 	}
-			// } else {
-			// 	for (j = 0; j < NSPECI; j++) { // get the value
-			// 		(*SP+i)->M[j] = 0;
-			// 	}
-			// }
-			//
-			//
-			// 
-			//
-			//
-			//
-			//
-			//
-			//
 
 			// Collision rules
-			// DVxyz array
+			// Addition to velocity in cartesian directions (DVxyz array)
 			cJSON *arrDVxyz = NULL;
 			getCJsonArray(objElem, &arrDVxyz, "DVxyz", jsonTagList, arrayList, 0);
-			if (arrDVxyz != NULL) { // if grav has been found then....
+			if (arrDVxyz != NULL) { // if DVxyz has been found then....
 				if (cJSON_GetArraySize(arrDVxyz) != _3D) { // check dimensionality is valid
 					printf("Error: DVxyz must have two components.\n");
 					exit(EXIT_FAILURE);
@@ -1425,10 +1382,10 @@ void readJson( char fpath[], inputList *in, spec **SP, kinTheory **theory, parti
 			currWall->MVT = getJObjDou(objElem, "MVT", -1, jsonTagList); // mvt
 			currWall->MUN = getJObjDou(objElem, "MUN", 1, jsonTagList); // mun
 			currWall->MUT = getJObjDou(objElem, "MUT", 1, jsonTagList); // mut
-			// MUxyz array
+			// Multiplication on orientation in cartesian directions (MUxyz array)
 			cJSON *arrMUxyz = NULL;
 			getCJsonArray(objElem, &arrMUxyz, "MUxyz", jsonTagList, arrayList, 0);
-			if (arrMUxyz != NULL) { // if grav has been found then....
+			if (arrMUxyz != NULL) { // if MUxyz has been found then....
 				if (cJSON_GetArraySize(arrMUxyz) != _3D) { // check dimensionality is valid
 					printf("Error: MUxyz must have two components.\n");
 					exit(EXIT_FAILURE);
@@ -1441,15 +1398,14 @@ void readJson( char fpath[], inputList *in, spec **SP, kinTheory **theory, parti
 					currWall->MUxyz[j] = 1;
 				}
 			}
-			// DUxyz array
+			// Addition on orientation in cartesian directions (DUxyz array)
 			cJSON *arrDUxyz = NULL;
 			getCJsonArray(objElem, &arrDUxyz, "DUxyz", jsonTagList, arrayList, 0);
-			if (arrDUxyz != NULL) { // if grav has been found then....
+			if (arrDUxyz != NULL) { // if DUxyz has been found then....
 				if (cJSON_GetArraySize(arrDUxyz) != _3D) { // check dimensionality is valid
 					printf("Error: DUxyz must have two components.\n");
 					exit(EXIT_FAILURE);
 				}
-
 				for (j = 0; j < _3D; j++) { // get the value
 					currWall->DUxyz[j] = cJSON_GetArrayItem(arrDUxyz, j)->valuedouble;
 				}
@@ -1726,7 +1682,7 @@ void readJson( char fpath[], inputList *in, spec **SP, kinTheory **theory, parti
 			//Read the binary fluid interaction matrix for this species with all other species
 			cJSON *arrBFM = NULL;
 			getCJsonArray(jObj, &arrBFM, "interMatr", jsonTagList, arrayList, 0);
-			if (arrBFM != NULL) { // if grav has been found then....
+			if (arrBFM != NULL) { // if interactions has been found then....
 				if (cJSON_GetArraySize(arrBFM) != NSPECI) { // check dimensionality is valid
 					printf("Error: Interaction matrices must have columns of length equal to the number of species.\n");
 					exit(EXIT_FAILURE);

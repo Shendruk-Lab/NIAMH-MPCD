@@ -1686,6 +1686,11 @@ void checkSim( FILE *fsynopsis,int SYNOUT,inputList in,spec *SP,bc *WALL,specSwi
 			if(SYNOUT == OUT) fprintf(fsynopsis,"Error: Vertex surface mode (SURFMODE) currently only works in 2D.\n");
 			exit(1);
 		}
+		if( WALL[i].SURFMODE==VERT_SURF && WALL[i].NUMVERT<=2 ) {
+			printf("Error: Vertex surface mode (SURFMODE) is on for BC %d. However, number of vertices %d and should be greater than 2 to form an enclosed shape.\n",i,WALL[i].NUMVERT);
+			if(SYNOUT == OUT) fprintf(fsynopsis,"Error: Vertex surface mode (SURFMODE) is on for BC %d. However, number of vertices %d and should be greater than 2 to form an enclosed shape.\n",i,WALL[i].NUMVERT);
+			exit(1);
+		}
 		if( WALL[i].DSPLC==0 ) for( j=0; j<DIM; j++ ) {
 			if( fneq(WALL[i].V[j],0.0) ) {
 				printf( "Warning:\tBC %d immobile; setting velocity to zero.\n",i );
