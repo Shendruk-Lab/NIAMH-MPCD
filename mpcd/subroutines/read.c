@@ -1315,7 +1315,7 @@ void readJson( char fpath[], inputList *in, spec **SP, kinTheory **theory, parti
 			}
 			// some more primitives
 			currWall->R = getJObjDou(objElem, "R", 2, jsonTagList); // r 
-			currWall->DN = getJObjDou(objElem, "DN", 1, jsonTagList); // dn 
+			currWall->DN = getJObjDou(objElem, "DN", 0, jsonTagList); // dn 
 			currWall->DT = getJObjDou(objElem, "DT", 0, jsonTagList); // dt
 			currWall->DVN = getJObjDou(objElem, "DVN", 0, jsonTagList); // dvn
 			currWall->DVT = getJObjDou(objElem, "DVT", 0, jsonTagList); // dvt

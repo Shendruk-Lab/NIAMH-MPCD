@@ -1157,6 +1157,7 @@ void BC_MPCcollision(bc WALL[], int BCcurrent, particleMPC *pp, spec *pSP, doubl
 			bccoord( WALL[BCcurrent] );
 		}
 	#endif
+	printf( "BC %d SURFMODE=%d\n",BCcurrent,WALL[BCcurrent].SURFMODE );
 	if( WALL[BCcurrent].SURFMODE==TRAD_SURF ) {
 		//
 		//
@@ -1255,6 +1256,10 @@ void BC_MPCcollision(bc WALL[], int BCcurrent, particleMPC *pp, spec *pSP, doubl
 		//
 		// Don't do anything for now --- skipping this BC. Will do with Alex
 		printf("Entered VERT_SURF for BC %d.\n",BCcurrent);
+		for( i=0; i<WALL[BCcurrent].NUMVERT; i++ ) {
+			printf("\t Vertex %d:",BCcurrent);
+			pvec( WALL[BCcurrent].VERTICES[i],DIM );
+		}
 		flag = 0;
 	}
 	else {
@@ -1281,7 +1286,7 @@ void BC_MPCcollision(bc WALL[], int BCcurrent, particleMPC *pp, spec *pSP, doubl
 ///
 void chooseBC( bc WALL[],int currentP,particleMPC *pp,spec *pSP,double *t_minColl,double *chosenW,int *chosenBC,double t_left ) {
 
-	int i,flag;
+	int i,j,flag;
 	double t1,t2,tc;
 	double tempW, shift[DIM];
 
@@ -1291,74 +1296,108 @@ void chooseBC( bc WALL[],int currentP,particleMPC *pp,spec *pSP,double *t_minCol
 	flag=0;
 
 	for( i=0; i<NBC; i++ ) if(WALL[i].INTER[(pp+currentP)->SPID] == BCON) {
-		// Planar BCs
-		if( WALL[i].PLANAR ) {
-			tempW=calcW_PLANE( WALL[i],*(pp+currentP) );
-			if( tempW < 0.0 ) {
-				//printf("ChoosePlanar\n");
-				//Calculate crosstime
-				crosstimeReverse( *(pp+currentP),WALL[i],&t1,&t2,t_left );
-				tc=t_left-t1;
-				if( tc < *t_minColl ) {
-					*t_minColl = tc;
-					*chosenBC = i;
-					*chosenW = tempW;
+		printf( "BC %d SURFMODE=%d\n",i,WALL[i].SURFMODE );
+		if( WALL[i].SURFMODE==TRAD_SURF ) {
+			//
+			//
+			//
+			//
+			// WORKING ON THIS FOR ALEX 
+			//
+			//
+			//
+			//
+			//HACK: CURRENTLY THE SURFMODE CHECK IS OUTSIDE the while *BUT* will want to put it inside, I think 
+			// Planar BCs
+			if( WALL[i].PLANAR ) {
+				tempW=calcW_PLANE( WALL[i],*(pp+currentP) );
+				if( tempW < 0.0 ) {
+					//printf("ChoosePlanar\n");
+					//Calculate crosstime
+					crosstimeReverse( *(pp+currentP),WALL[i],&t1,&t2,t_left );
+					tc=t_left-t1;
+					if( tc < *t_minColl ) {
+						*t_minColl = tc;
+						*chosenBC = i;
+						*chosenW = tempW;
+					}
 				}
 			}
-		}
-		//Planar wavy BCs
-		else if ( !feq(WALL[i].B[0],0.0) && feq(WALL[i].P[0],1.0) && feq(WALL[i].P[1],1.0) && feq(WALL[i].P[2],1.0) ) {
-			tempW=calcW( WALL[i],*(pp+currentP) );
-			if( tempW < 0.0 ) {
-				//Calculate crosstime
-				crosstimeReverse( *(pp+currentP),WALL[i],&t1,&t2,t_left );
-				t1=t_left-t1;
-				t2=t_left-t2;
-				tc = chooseT( t_left,t1,t2,currentP,&flag );
-				if( flag ) {
-					printf( "Error: Cross time unacceptable for particle %d colliding with wall %d: %lf.\n",currentP,i,tc );
-				}
-				if( tc < *t_minColl ) {
-					*t_minColl = tc;
-					*chosenBC = i;
-					*chosenW = tempW;
+			//Planar wavy BCs
+			else if ( !feq(WALL[i].B[0],0.0) && feq(WALL[i].P[0],1.0) && feq(WALL[i].P[1],1.0) && feq(WALL[i].P[2],1.0) ) {
+				tempW=calcW( WALL[i],*(pp+currentP) );
+				if( tempW < 0.0 ) {
+					//Calculate crosstime
+					crosstimeReverse( *(pp+currentP),WALL[i],&t1,&t2,t_left );
+					t1=t_left-t1;
+					t2=t_left-t2;
+					tc = chooseT( t_left,t1,t2,currentP,&flag );
+					if( flag ) {
+						printf( "Error: Cross time unacceptable for particle %d colliding with wall %d: %lf.\n",currentP,i,tc );
+					}
+					if( tc < *t_minColl ) {
+						*t_minColl = tc;
+						*chosenBC = i;
+						*chosenW = tempW;
+					}
 				}
 			}
+			//Non-planar BCs
+			else {
+				//Shift BC due to periodic BCs
+				shiftBC( shift,&WALL[i],(pp+currentP) );
+				rotateBC( &WALL[i],(pp+currentP),0 );
+				tempW=calcW( WALL[i],*(pp+currentP) );
+				if( tempW < 0.0 ) {
+					//Calculate crosstime
+					crosstimeReverse( *(pp+currentP),WALL[i],&t1,&t2,t_left );
+					// t1 and t2 calculated in the line above are the times between when
+					// the particle crossed the boundary, and the end time of streaming (tstep).
+					// Convert times to cross-time
+					// (time from start of streaming to when the particle crossed boundary)
+					t1=t_left-t1;
+					t2=t_left-t2;
+					// #ifdef DBG
+					// 	if( DBUG==DBGMPCBC || DBUG==DBGBCMPC) {
+					// 		printf( "t1=%e, t2=%e\n",t1,t2 );
+					// 	}
+					// #endif
+					tc = chooseT( t_left,t1,t2,currentP,&flag );
+					if( flag ) {
+						printf( "Error: Cross time unacceptable for particle %d colliding with wall %d: %lf.\n",currentP,i,tc );
+						//exit( 1 );
+					}
+					if( tc < *t_minColl ) {
+						*t_minColl = tc;
+						*chosenBC = i;
+						*chosenW = tempW;
+					}
+				}
+				//Shift BC back
+				rotatebackBC( &WALL[i],(pp+currentP),0 );
+				shiftbackBC( shift,&WALL[i] );
+			}
 		}
-		//Non-planar BCs
+		else if( WALL[i].SURFMODE==VERT_SURF ) {
+			//
+			//
+			//
+			//
+			// WORKING ON THIS FOR ALEX 
+			//
+			//
+			//
+			//
+			// Don't do anything for now --- skipping this BC. Will do with Alex
+			printf("Entered VERT_SURF for BC %d. Number of vertices=%d\n",i,WALL[i].NUMVERT);
+			for( j=0; j<WALL[i].NUMVERT; j++ ) {
+				printf("\t Vertex %d:",j);
+				pvec( WALL[i].VERTICES[j],DIM );
+			}
+		}
 		else {
-			//Shift BC due to periodic BCs
-			shiftBC( shift,&WALL[i],(pp+currentP) );
-			rotateBC( &WALL[i],(pp+currentP),0 );
-			tempW=calcW( WALL[i],*(pp+currentP) );
-			if( tempW < 0.0 ) {
-				//Calculate crosstime
-				crosstimeReverse( *(pp+currentP),WALL[i],&t1,&t2,t_left );
-				// t1 and t2 calculated in the line above are the times between when
-				// the particle crossed the boundary, and the end time of streaming (tstep).
-				// Convert times to cross-time
-				// (time from start of streaming to when the particle crossed boundary)
-				t1=t_left-t1;
-				t2=t_left-t2;
-				// #ifdef DBG
-				// 	if( DBUG==DBGMPCBC || DBUG==DBGBCMPC) {
-				// 		printf( "t1=%e, t2=%e\n",t1,t2 );
-				// 	}
-				// #endif
-				tc = chooseT( t_left,t1,t2,currentP,&flag );
-				if( flag ) {
-					printf( "Error: Cross time unacceptable for particle %d colliding with wall %d: %lf.\n",currentP,i,tc );
-					//exit( 1 );
-				}
-				if( tc < *t_minColl ) {
-					*t_minColl = tc;
-					*chosenBC = i;
-					*chosenW = tempW;
-				}
-			}
-			//Shift BC back
-			rotatebackBC( &WALL[i],(pp+currentP),0 );
-			shiftbackBC( shift,&WALL[i] );
+			printf("Error: BC %d surface mode unkwown (SURFMODE=%d). \n",i,WALL[i].SURFMODE);
+			exit(EXIT_FAILURE);
 		}
 	}
 }
@@ -1401,6 +1440,15 @@ void MPC_BCcollision( particleMPC *pp,int currentP,bc WALL[],spec *pSP,double KB
 	double shift[DIM];
 
 	while( flag ) {
+		//
+		//
+		//
+		//
+		// WORKING ON THIS FOR ALEX 
+		//
+		//
+		//
+		//
 		//We must check if the particle is inside any of the BCs
 		// printf( "\nChoosing BC...\n" );
 		chooseBC( WALL,currentP,pp,pSP,&t_coll,&W,&chosenBC,t_left );
