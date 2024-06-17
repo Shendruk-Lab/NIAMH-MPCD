@@ -1687,8 +1687,8 @@ void checkSim( FILE *fsynopsis,int SYNOUT,inputList in,spec *SP,bc *WALL,specSwi
 			exit(1);
 		}
 		if( WALL[i].SURFMODE==VERT_SURF && WALL[i].NUMVERT<=2 ) {
-			printf("Error: Vertex surface mode (SURFMODE) is on for BC %d. However, number of vertices %d and should be greater than 2 to form an enclosed shape.\n",i,WALL[i].NUMVERT);
-			if(SYNOUT == OUT) fprintf(fsynopsis,"Error: Vertex surface mode (SURFMODE) is on for BC %d. However, number of vertices %d and should be greater than 2 to form an enclosed shape.\n",i,WALL[i].NUMVERT);
+			printf("Error: Vertex surface mode (SURFMODE) is *ON* for BC %d. However, the number of vertices is %d but should be greater than 2 to form a closed shape.\n",i,WALL[i].NUMVERT);
+			if(SYNOUT == OUT) fprintf(fsynopsis,"Error: Vertex surface mode (SURFMODE) is *ON* for BC %d. However, the number of vertices is %d but should be greater than 2 to form a closed shape.\n",i,WALL[i].NUMVERT);
 			exit(1);
 		}
 		if( WALL[i].DSPLC==0 ) for( j=0; j<DIM; j++ ) {
