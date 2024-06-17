@@ -1334,7 +1334,8 @@ void readJson( char fpath[], inputList *in, spec **SP, kinTheory **theory, parti
 			//Read the vertices for this BC
 			for (j=0; j<MAXVERT; j++) for (k=0; k<_3D; k++) currWall->VERTICES[j][k]=0.0;	//Initialize all vertices to zero
 			cJSON *arrBCvert = NULL;
-			getCJsonArray(objElem, &arrBCvert, "vertices", jsonTagList, arrayList, 0);
+			// getCJsonArray(objElem, &arrBCvert, "vertices", jsonTagList, arrayList, 0);
+			getCJsonArray(jObj, &arrBCvert, "vertices", jsonTagList, arrayList, 1);
 			if (arrBCvert==NULL && currWall->SURFMODE==VERT_SURF) { // if arrBCvert has NOT been found then AND should be....
 				printf("Error: BC %d surface mode set to %d but no vertices given. \n",i,VERT_SURF);
 				exit(EXIT_FAILURE);
