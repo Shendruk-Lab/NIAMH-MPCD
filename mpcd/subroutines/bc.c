@@ -53,7 +53,64 @@
 /// @return Returns the inside-boundary check parameter.
 ///
 double calcW( bc WALL,particleMPC P ) {
+	double terms=0.0f, W=0.0f;
+	double Q[_3D]={0.0};
+	int i=0;
 
+	//Transform the particle position into the rotated-frame of the BC's orientation
+	if(DIM==_3D) {
+		Q[2] = P.Q[2];	//z-component
+		Q[1] = P.Q[1];	//y-component
+		Q[0] = P.Q[0];	//x-component
+	}
+	else if(DIM==_2D) {
+		Q[1] = WALL.sinPhi*(P.Q[0]-WALL.Q[0]) + WALL.cosPhi*(P.Q[1]-WALL.Q[1]);	//y-component
+		Q[0] = WALL.cosPhi*(P.Q[0]-WALL.Q[0]) - WALL.sinPhi*(P.Q[1]-WALL.Q[1]);	//x-component
+	}
+	else if(DIM==_1D) Q[0] = P.Q[0];	//x-component (can't have rotations in 1D)
+	else {
+		printf("Error: Hyper-dimensional solvent simulations not supported (should have been caught during initialization).\n");
+		exit(EXIT_FAILURE);
+	}
+
+	if( feq(WALL.ROTSYMM[0],4.0) && feq(WALL.ROTSYMM[1],4.0) ) {
+		for( i=0; i<DIM; i++ ) {
+			// Unlike the non-rotated version there is no minus wall position because already accounted for in rotation above
+			// terms = WALL.A[i] * ( Q[i]-WALL.Q[i] );
+			terms = WALL.A[i] * Q[i];
+			if( WALL.ABS ) terms=fabs(terms);
+			terms = smrtPow( terms,WALL.P[i] );
+			W += terms;
+		}
+		terms = WALL.R;
+		if( WALL.ABS ) terms=fabs(terms);
+		terms = smrtPow( terms,WALL.P[3] );
+		W -= terms;
+		//Check if need wavy wall complications
+		if( !feq(WALL.B[0],0.0) ) W += calcWavyW(WALL,Q,W);
+		//Check if invert wall
+		if( WALL.INV ) W *= -1.0;
+	}
+	else {
+		W = non4foldSymmCalcW( WALL,Q,DIM );
+	}
+	return W;
+}
+
+///
+/// @brief Calculates a parameter to determine if the particle is inside the boundary when rotations are not allowed.
+///
+/// This is the legacy routine that calculate the `W` parameter but before rotations of the BC were allowed. It is not called in the current version of the code.
+///
+/// @param WALL The boundary.
+/// @note For this routine to work as intended, then the WALL parameter must have A, Q, ROTSYMM, ABS, P, and B set!
+/// @param P The individual mpcd particle.
+/// @see calcW_PLANE()
+/// @see calcW_BC()
+/// @see calcWavyW()
+/// @return Returns the inside-boundary check parameter.
+///
+double calcW_nonRotated( bc WALL,particleMPC P ) {
 	double terms=0.0f, W=0.0f;
 	int i=0;
 
@@ -178,6 +235,63 @@ double calcW_BC( bc movingWall,bc stillWall,int flagCentre ) {
 }
 
 ///
+///	@brief Evaluates a surface function for a BC for a given position.
+///
+/// Evaluates a surface function for a BC for a given position. For 4-fold symmetry.
+///
+/// @param WALL Boundary condition to evaluate surface function for.
+/// @param POS Position to evaluate surface function at.
+/// @param dimension Dimensionality of the input values.
+/// @return Value of the surface function.
+///
+double non4foldSymmCalcW( bc WALL,double POS[], int dimension ) {
+	double terms, W=0.0;
+	int i;
+	double r,phi,theta;
+	double cosT,sinT,cosP,sinP;
+
+	r=0.0;
+	for( i=0; i<dimension; i++ ) r += ( POS[i]-WALL.Q[i] )*( POS[i]-WALL.Q[i] );
+	r=sqrt(r);
+	phi=atan2( POS[1]-WALL.Q[1],POS[0]-WALL.Q[0] );
+	cosP=cos(0.25*WALL.ROTSYMM[0]*phi);
+	sinP=sin(0.25*WALL.ROTSYMM[0]*phi);
+	if( dimension>_2D ) {
+		theta=acos( (POS[2]-WALL.Q[2])/r );
+		cosT=cos(0.25*WALL.ROTSYMM[1]*theta);
+		sinT=sin(0.25*WALL.ROTSYMM[1]*theta);
+	}
+	else{
+		theta=0.0;
+		cosT=0.0;
+		sinT=1.0;
+	}
+	// First term
+	terms = WALL.A[0]*cosP*sinT;
+	if( WALL.ABS ) terms=fabs(terms);
+	terms = smrtPow( terms,WALL.P[0] );
+	W += terms;
+	// Second term
+	terms = WALL.A[1]*sinP*sinT;
+	if( WALL.ABS ) terms=fabs(terms);
+	terms = smrtPow( terms,WALL.P[1] );
+	W += terms;
+	// Third term
+	terms = WALL.A[2]*cosT;
+	if( WALL.ABS ) terms=fabs(terms);
+	terms = smrtPow( terms,WALL.P[2] );
+	W += terms;
+	// Fourth terms
+	terms = WALL.R/r;
+	if( WALL.ABS ) terms=fabs(terms);
+	terms = smrtPow( terms,WALL.P[3] );
+	W -= terms;
+	if( WALL.INV ) W *= -1.0;
+
+	return W;
+}
+
+///
 /// @brief Calculates the particle crosstime.
 ///
 /// This routine calculates the forward particle crosstime.
@@ -196,7 +310,24 @@ double calcW_BC( bc movingWall,bc stillWall,int flagCentre ) {
 ///
 void crosstime( particleMPC p,bc WALL,double *tc_pos, double *tc_neg,double t_step ) {
 	double a=0.0,b=0.0,c=0.0;
+	double Q[_3D]={0.0};
 	int i;
+
+	//Transform the particle position into the rotated-frame of the BC's orientation
+	if(DIM==_3D) {
+		Q[2] = p.Q[2];	//z-component
+		Q[1] = p.Q[1];	//y-component
+		Q[0] = p.Q[0];	//x-component
+	}
+	else if(DIM==_2D) {
+		Q[1] = WALL.sinPhi*(p.Q[0]-WALL.Q[0]) + WALL.cosPhi*(p.Q[1]-WALL.Q[1]);	//y-component
+		Q[0] = WALL.cosPhi*(p.Q[0]-WALL.Q[0]) - WALL.sinPhi*(p.Q[1]-WALL.Q[1]);	//x-component
+	}
+	else if(DIM==_1D) Q[0] = p.Q[0];	//x-component (can't have rotations in 1D)
+	else {
+		printf("Error: Hyper-dimensional solvent simulations not supported (should have been caught during initialization).\n");
+		exit(EXIT_FAILURE);
+	}
 
 	// Planar Wall
 	if( WALL.PLANAR || ( feq(WALL.P[0],1.0) && feq(WALL.P[1],1.0) && feq(WALL.P[2],1.0) && feq(WALL.P[3],1.0) ) ) {
@@ -212,8 +343,10 @@ void crosstime( particleMPC p,bc WALL,double *tc_pos, double *tc_neg,double t_st
 	//else if( feq(WALL.P[0],2.0) && feq(WALL.P[1],2.0)) {
 		for( i=0; i<DIM; i++ ) {
 			a += WALL.A[i]*WALL.A[i]*p.V[i]*p.V[i];
-			b += WALL.A[i]*WALL.A[i]*p.V[i]*(p.Q[i]-WALL.Q[i]);
-			c += WALL.A[i]*WALL.A[i]*(p.Q[i]*p.Q[i]-2.0*p.Q[i]*WALL.Q[i]+WALL.Q[i]*WALL.Q[i]);
+			// b += WALL.A[i]*WALL.A[i]*p.V[i]*(p.Q[i]-WALL.Q[i]);
+			b += WALL.A[i]*WALL.A[i]*p.V[i]*Q[i];
+			// c += WALL.A[i]*WALL.A[i]*(p.Q[i]*p.Q[i]-2.0*p.Q[i]*WALL.Q[i]+WALL.Q[i]*WALL.Q[i]);
+			c += WALL.A[i]*WALL.A[i]*smrtPow(Q[i],2);
 		}
 		b *= 2.0;
 		c -= smrtPow(WALL.R,WALL.P[3]);
@@ -249,9 +382,33 @@ void crosstime( particleMPC p,bc WALL,double *tc_pos, double *tc_neg,double t_st
 /// For ellipsoidal boundaries, two solutions emerge from the sign in the quadratic formula.
 ///
 void crosstimeReverse( particleMPC p,bc WALL,double *tc_pos, double *tc_neg,double t_step ) {
-
 	double a=0.0,b=0.0,c=0.0;
+	double Q[_3D]={0.0},V[_3D]={0.0};
 	int i;
+	
+	//Transform the particle position into the rotated-frame of the BC's orientation
+	if(DIM==_3D) {
+		Q[2] = p.Q[2];	//z-component
+		V[2] = p.V[2];
+		Q[1] = p.Q[1];	//y-component
+		V[1] = p.V[1];
+		Q[0] = p.Q[0];	//x-component
+		V[0] = p.V[0];
+	}
+	else if(DIM==_2D) {
+		Q[1] = WALL.sinPhi*(p.Q[0]-WALL.Q[0]) + WALL.cosPhi*(p.Q[1]-WALL.Q[1]);	//y-component
+		V[1] = WALL.sinPhi*p.V[0] + WALL.cosPhi*p.V[1];
+		Q[0] = WALL.cosPhi*(p.Q[0]-WALL.Q[0]) - WALL.sinPhi*(p.Q[1]-WALL.Q[1]);	//x-component
+		V[0] = WALL.cosPhi*p.V[0] - WALL.sinPhi*p.V[1];
+	}
+	else if(DIM==_1D) {
+		Q[0] = p.Q[0];	//x-component (can't have rotations in 1D)
+		V[0] = p.V[0];
+	}
+	else {
+		printf("Error: Hyper-dimensional solvent simulations not supported (should have been caught during initialization).\n");
+		exit(EXIT_FAILURE);
+	}
 
 	// Planar Wall
 	if ( ( WALL.PLANAR ) || ( feq(WALL.P[0],1.0) && feq(WALL.P[1],1.0) && feq(WALL.P[2],1.0) && feq(WALL.P[3],1.0) && feq(WALL.B[0],0.0) ) ){
@@ -265,9 +422,12 @@ void crosstimeReverse( particleMPC p,bc WALL,double *tc_pos, double *tc_neg,doub
 	//else if( feq(WALL.P[0],2.0) && feq(WALL.P[1],2.0) && feq(WALL.P[2],2.0) ) {
 	else if ((DIM == 2 && feq(WALL.P[0],2.0) && feq(WALL.P[1],2.0) && feq(WALL.B[0],0.0) ) || (DIM > 2 && feq(WALL.P[0],2.0) && feq(WALL.P[1],2.0) && feq(WALL.P[2],2.0) && feq(WALL.B[0],0.0) )){
 		for( i=0; i<DIM; i++ ) {
-			a += WALL.A[i]*WALL.A[i]*(-p.V[i])*(-p.V[i]);
-			b += WALL.A[i]*WALL.A[i]*(-p.V[i])*(p.Q[i]-WALL.Q[i]);
-			c += WALL.A[i]*WALL.A[i]*(p.Q[i]*p.Q[i]-2.*p.Q[i]*WALL.Q[i]+WALL.Q[i]*WALL.Q[i]);
+			// a += WALL.A[i]*WALL.A[i]*(-p.V[i])*(-p.V[i]);
+			a += WALL.A[i]*WALL.A[i]*(-V[i])*(-V[i]);
+			// b += WALL.A[i]*WALL.A[i]*(-p.V[i])*(p.Q[i]-WALL.Q[i]);
+			b += WALL.A[i]*WALL.A[i]*(-V[i])*Q[i];
+			// c += WALL.A[i]*WALL.A[i]*(p.Q[i]*p.Q[i]-2.*p.Q[i]*WALL.Q[i]+WALL.Q[i]*WALL.Q[i]);
+			c += WALL.A[i]*WALL.A[i]*smrtPow(Q[i],2);
 		}
 		b *= 2.0;
 		c -= smrtPow(WALL.R,WALL.P[3]);
@@ -430,15 +590,21 @@ void shiftbackBC( double *shift,bc *WALL ) {
 /// @note We are doing this for a computational speedup so that we don't have to re-calculate these values for rotations over and over again
 ///
 void setTrigOrientations( bc *WALL ) {
-	double theta,phi;	//Angles in spherical coordinates
+	double theta,phi,alpha;	//Angles in spherical coordinates
 
-	theta = acos(WALL->Q[2]);
-	phi = sgn(WALL->Q[1]) * acos(WALL->Q[0]/sqrt( pow(WALL->Q[0],2)+pow(WALL->Q[1],2) ));
+	norm( WALL->O,DIM );
 
-	WALL->cosTheta = cos(theta);
-	WALL->sinTheta = sin(theta);
-	WALL->cosPhi = cos(phi);
-	WALL->sinPhi = sin(phi);
+	theta = acos(WALL->O[2]);
+	phi = sgn(WALL->O[1]) * acos(WALL->O[0]/sqrt( pow(WALL->O[0],2)+pow(WALL->O[1],2) ));
+	alpha = 1.0;	//THIS IS A PLACEHOLD TO BE SET BY ALEX
+
+	//We will rotate backwards
+	WALL->cosTheta = cos(-theta);
+	WALL->sinTheta = sin(-theta);
+	WALL->cosPhi = cos(-phi);
+	WALL->sinPhi = sin(-phi);
+	WALL->cosAlpha = cos(-alpha);
+	WALL->sinAlpha = sin(-alpha);
 }
 
 ///
@@ -926,7 +1092,7 @@ void chooseP( bc WALL,particleMPC *pp,double *chosenW,int *chosenP ) {
 	for( i=0; i<GPOP; i++ ) if(WALL.INTER[(pp+i)->SPID] == BCON) {
 		//Shift the BC due to any periodic BCs
 		shiftBC( shift,&WALL,(pp+i) );
-		rotateBC( &WALL,(pp+i),0 );
+		// rotateBC( &WALL,(pp+i),0 );
 		tempW = calcW( WALL,*(pp+i) );
 		if( tempW < -TOL ) {
 			//Particle within BC
@@ -935,7 +1101,7 @@ void chooseP( bc WALL,particleMPC *pp,double *chosenW,int *chosenP ) {
 			break;
 		}
 		//Shift the BC back to it's real position
-		rotatebackBC( &WALL,(pp+i),0 );
+		// rotatebackBC( &WALL,(pp+i),0 );
 		shiftbackBC( shift,&WALL );
 	}
 }
@@ -1353,7 +1519,7 @@ void chooseBC( bc WALL[],int currentP,particleMPC *pp,spec *pSP,double *t_minCol
 					t2=t_left-t2;
 					tc = chooseT( t_left,t1,t2,currentP,&flag );
 					if( flag ) {
-						printf( "Error: Cross time unacceptable for particle %d colliding with wall %d: %lf.\n",currentP,i,tc );
+						printf( "Error: Cross times (%lf, %lf) unacceptable for particle %d colliding with wall %d: %lf.\n",t1,t2,currentP,i,tc );
 					}
 					if( tc < *t_minColl ) {
 						*t_minColl = tc;
@@ -1366,7 +1532,7 @@ void chooseBC( bc WALL[],int currentP,particleMPC *pp,spec *pSP,double *t_minCol
 			else {
 				//Shift BC due to periodic BCs
 				shiftBC( shift,&WALL[i],(pp+currentP) );
-				rotateBC( &WALL[i],(pp+currentP),0 );
+				// rotateBC( &WALL[i],(pp+currentP),0 );
 				tempW=calcW( WALL[i],*(pp+currentP) );
 				if( tempW < 0.0 ) {
 					//Calculate crosstime
@@ -1384,7 +1550,7 @@ void chooseBC( bc WALL[],int currentP,particleMPC *pp,spec *pSP,double *t_minCol
 					// #endif
 					tc = chooseT( t_left,t1,t2,currentP,&flag );
 					if( flag ) {
-						printf( "Error: Cross time unacceptable for particle %d colliding with wall %d: %lf.\n",currentP,i,tc );
+						printf( "Error: Cross times (%lf, %lf) unacceptable for particle %d colliding with wall %d: %lf.\n",t1,t2,currentP,i,tc );
 						//exit( 1 );
 					}
 					if( tc < *t_minColl ) {
@@ -1394,7 +1560,7 @@ void chooseBC( bc WALL[],int currentP,particleMPC *pp,spec *pSP,double *t_minCol
 					}
 				}
 				//Shift BC back
-				rotatebackBC( &WALL[i],(pp+currentP),0 );
+				// rotatebackBC( &WALL[i],(pp+currentP),0 );
 				shiftbackBC( shift,&WALL[i] );
 			}
 		}
@@ -1484,7 +1650,7 @@ void MPC_BCcollision( particleMPC *pp,int currentP,bc WALL[],spec *pSP,double KB
 			cnt++;
 			//Shift the BC due to any periodic BCs
 			shiftBC( shift,&WALL[chosenBC],(pp+currentP) );
-			rotateBC( &WALL[chosenBC],(pp+currentP),LC );
+			// rotateBC( &WALL[chosenBC],(pp+currentP),LC );
 			if( t_coll>-TOL ) {
 				// printf( "Enter collision W=%lf t_coll=%lf...\n",W,t_coll );
 				//We have the BC to collide with and the time at which it collided
@@ -1553,7 +1719,7 @@ void MPC_BCcollision( particleMPC *pp,int currentP,bc WALL[],spec *pSP,double KB
 			}
 			//Shift the BC back to it's real position
 			// printf( "Shift and rotate BC back...\n" );
-			rotatebackBC( &WALL[chosenBC],(pp+currentP),LC );
+			// rotatebackBC( &WALL[chosenBC],(pp+currentP),LC );
 			shiftbackBC( shift,&WALL[chosenBC] );
 
 			if( cnt>NBOUNCE ) {

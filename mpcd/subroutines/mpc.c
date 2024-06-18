@@ -433,7 +433,7 @@ void ghostPart( cell ***CL,bc WALL[],double KBT,int LC, spec *SP) {
 					// Shift moving wall (periodic BC).
 					if ( WALL[i].DSPLC ){
 						shiftBC( shift, &WALL[i], &tp[0] );
-						rotateBC( &WALL[i], &tp[0], LC );
+						// rotateBC( &WALL[i], &tp[0], LC );
 					}
 
 					// Loop over corners. Does the cell get cut by a BC?
@@ -449,7 +449,7 @@ void ghostPart( cell ***CL,bc WALL[],double KBT,int LC, spec *SP) {
 
 					// Shift back moving wall
 					if ( WALL[i].DSPLC ){
-						rotatebackBC( &WALL[i], &tp[0], LC );
+						// rotatebackBC( &WALL[i], &tp[0], LC );
 						shiftbackBC( shift, &WALL[i] );
 					}
 				}
@@ -464,7 +464,7 @@ void ghostPart( cell ***CL,bc WALL[],double KBT,int LC, spec *SP) {
 				// Shift moving wall (periodic BC)
 				if ( WALL[i].DSPLC ){
 					shiftBC( shift, &WALL[i], &tp[0] );
-					rotateBC( &WALL[i], &tp[0], LC );
+					// rotateBC( &WALL[i], &tp[0], LC );
 				}
 
 				// Corner loop. Does the cell get cut by a BC?
@@ -540,7 +540,7 @@ void ghostPart( cell ***CL,bc WALL[],double KBT,int LC, spec *SP) {
 
 				// Shift back moving wall
 				if ( WALL[i].DSPLC ){
-					rotatebackBC( &WALL[i], &tp[0], LC );
+					// rotatebackBC( &WALL[i], &tp[0], LC );
 					shiftbackBC( shift, &WALL[i] );
 				}
 			} // End boundary loop

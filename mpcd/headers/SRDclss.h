@@ -204,7 +204,7 @@ typedef struct bc {
 	int INTER[MAXSPECI+2];	    ///< Interaction matrix for BC with particles. Each MPCD species has a flag, plus MD and swimmer particles --- json `'interSRD'`, `'interMD'` and `'interSw'`.
 
 	// Convenient quantities for speeding up the code
-	double cosTheta,sinTheta,cosPhi,sinPhi;	///< The trigfunctions of the angles from the orientation vector O get used so often that we calculate and save them rather than recalculate every time. 
+	double cosTheta,sinTheta,cosPhi,sinPhi,cosAlpha,sinAlpha;	///< The trigfunctions of the angles from the orientation vector O get used so often that we calculate and save them rather than recalculate every time. 
 /*
    Examples for SURFMODE==TRAD_SURF
 

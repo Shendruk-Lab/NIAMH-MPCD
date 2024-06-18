@@ -1213,6 +1213,7 @@ void readJson( char fpath[], inputList *in, spec **SP, kinTheory **theory, parti
 				for (j = 0; j < _3D; j++) { // get the value
 					currWall->O[j] = 0;
 				}
+				currWall->O[0] = 1;	//Set the default orientation along the x-axis
 			}
 
 			// Angular velocity vector
