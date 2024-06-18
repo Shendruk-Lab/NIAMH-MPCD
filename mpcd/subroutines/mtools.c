@@ -394,6 +394,20 @@ double signedAngle( double v1[], double v2[], int dimension ) {
 }
 
 ///
+///	@brief Sign function
+///
+///	Returns the sign of a real number
+///
+/// @param x The real number
+/// @return -1,1, or 0
+///
+int sgn( double x ) {
+	if( x>0 ) return 1;
+	if( x<0 ) return -1;
+	return 0;
+}
+
+///
 ///	@brief Calculates the distance between two points.
 ///
 /// Computes the distance between two points.
@@ -1568,6 +1582,7 @@ double stdNum( cell ***CL,int GPOP,int XYZ[3],int XYZ_P1[3] ) {
 /// @param theta Rotation angle.
 /// @note `rotAx` MUST be a UNIT vector so immediately normalized.
 /// @note Requires 3D vectors due to dependency on the cross product.
+/// @note See https://en.wikipedia.org/wiki/Rodrigues%27_rotation_formula
 ///
 void rodriguesRotation( double vec[],double rotAx[],double theta ) {
 	int i;

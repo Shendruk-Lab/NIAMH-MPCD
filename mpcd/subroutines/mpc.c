@@ -629,6 +629,8 @@ void stream_BC( bc *WALL,double t ) {
 void spin_BC( bc *WALL,double t ) {
 	int i;
 	for( i=0; i<_3D	; i++ ) WALL->O[i] += t * WALL->L[i];
+	//Set the angles
+	setTrigOrientations( &WALL[i] );
 }
 
 /// 

@@ -33,6 +33,7 @@ double cosang( double v1[],double v2[],int dimension );
 double atan2( double y,double x );
 double absAngle( double v1[], double v2[], int dimension );
 double signedAngle( double v1[], double v2[], int dimension );
+int sgn( double x );
 
 // Tensors
 void outerprod( double x[], double y[], double result[][3],int dimension );

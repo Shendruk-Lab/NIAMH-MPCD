@@ -1182,6 +1182,8 @@ void initvar( unsigned long *seed,time_t *to,clock_t *co,int *runtime,int *warmt
 	for( i=0; i<NBC; i++ ) {		//Set the velocity of the walls to zero
 		dim_vol( &WALL[i],XYZ,DIM );
 		mominert( &WALL[i],XYZ,DIM );
+		//Set the angles
+		setTrigOrientations( &WALL[i] );
 	}
 
 	//Zero everything in the cell lists
@@ -1686,8 +1688,8 @@ void checkSim( FILE *fsynopsis,int SYNOUT,inputList in,spec *SP,bc *WALL,specSwi
 			if(SYNOUT == OUT) fprintf(fsynopsis,"Error: Vertex surface mode (SURFMODE) currently only works in 2D.\n");
 			exit(1);
 		}
-		if( WALL[i].SURFMODE==VERT_SURF && WALL[i].NUMVERT<=2 ) {
-			printf("Error: Vertex surface mode (SURFMODE) is *ON* for BC %d. However, the number of vertices is %d but should be greater than 2 to form a closed shape.\n",i,WALL[i].NUMVERT);
+		if( WALL[i].SURFMODE==VERT_SURF && WALL[i].NUMVERT<=DIM ) {
+			printf("Error: Vertex surface mode (SURFMODE) is *ON* for BC %d. However, the number of vertices is %d but should be greater than DIM=%d to form a closed shape.\n",i,WALL[i].NUMVERT,DIM);
 			if(SYNOUT == OUT) fprintf(fsynopsis,"Error: Vertex surface mode (SURFMODE) is *ON* for BC %d. However, the number of vertices is %d but should be greater than 2 to form a closed shape.\n",i,WALL[i].NUMVERT);
 			exit(1);
 		}

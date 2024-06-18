@@ -24,6 +24,7 @@ double calcW_PLANE( bc WALL,particleMPC P );
 
 void shiftBC( double *shift,bc *WALL,particleMPC *pp );
 void shiftbackBC( double *shift,bc *WALL );
+void setTrigOrientations( bc *WALL );
 void MPC_BCrotation( bc *WALL,particleMPC *pp, double sign, int LC );
 void rotateBC( bc *WALL,particleMPC *pp, int LC );
 void rotatebackBC( bc *WALL,particleMPC *pp, int LC );

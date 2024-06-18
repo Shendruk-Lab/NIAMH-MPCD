@@ -422,6 +422,26 @@ void shiftbackBC( double *shift,bc *WALL ) {
 }
 
 ///
+/// @brief Sets/saves the trig functions of the orientation based on the orientation unit vector.
+///
+/// Calculates cos(theta), sin(theta), cos(phi) and sin(phi) based on the unit vector O
+/// Just https://en.wikipedia.org/wiki/Spherical_coordinate_system
+/// @param WALL Return pointer to the boundary being shifted.
+/// @note We are doing this for a computational speedup so that we don't have to re-calculate these values for rotations over and over again
+///
+void setTrigOrientations( bc *WALL ) {
+	double theta,phi;	//Angles in spherical coordinates
+
+	theta = acos(WALL->Q[2]);
+	phi = sgn(WALL->Q[1]) * acos(WALL->Q[0]/sqrt( pow(WALL->Q[0],2)+pow(WALL->Q[1],2) ));
+
+	WALL->cosTheta = cos(theta);
+	WALL->sinTheta = sin(theta);
+	WALL->cosPhi = cos(phi);
+	WALL->sinPhi = sin(phi);
+}
+
+///
 /// @brief Rotates the boundary (by rotating the surrounding fluid).
 ///
 /// If the boundary has a listed non-zero orientation, then it must be rotated to match that orientation.
@@ -1157,7 +1177,7 @@ void BC_MPCcollision(bc WALL[], int BCcurrent, particleMPC *pp, spec *pSP, doubl
 			bccoord( WALL[BCcurrent] );
 		}
 	#endif
-	printf( "BC %d SURFMODE=%d\n",BCcurrent,WALL[BCcurrent].SURFMODE );
+	// printf( "BC %d SURFMODE=%d\n",BCcurrent,WALL[BCcurrent].SURFMODE );
 	if( WALL[BCcurrent].SURFMODE==TRAD_SURF ) {
 		//
 		//
@@ -1296,7 +1316,7 @@ void chooseBC( bc WALL[],int currentP,particleMPC *pp,spec *pSP,double *t_minCol
 	flag=0;
 
 	for( i=0; i<NBC; i++ ) if(WALL[i].INTER[(pp+currentP)->SPID] == BCON) {
-		printf( "BC %d SURFMODE=%d\n",i,WALL[i].SURFMODE );
+		// printf( "BC %d SURFMODE=%d\n",i,WALL[i].SURFMODE );
 		if( WALL[i].SURFMODE==TRAD_SURF ) {
 			//
 			//
