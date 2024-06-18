@@ -18,9 +18,11 @@ void MPC_BCcollision( particleMPC *pp,int currentP,bc WALL[],spec *pSP,double KB
 void BC_MPCcollision(bc WALL[], int BCcurrent, particleMPC *pp, spec *pSP, double KBT, double GRAV[], double t_step, simptr simMD, int MD_mode, int LC, int *bcCNT, int *reCNT, int *rethermCNT);
 
 double calcW( bc WALL,particleMPC P );
+double calcW_nonRotated( bc WALL,particleMPC P );
 double calcWavyW( bc WALL,double POS[], double W );
 double calcW_BC( bc movingWall,bc stillWall,int flagCentre );
 double calcW_PLANE( bc WALL,particleMPC P );
+double non4foldSymmCalcW( bc WALL,double POS[], int dimension );
 
 void shiftBC( double *shift,bc *WALL,particleMPC *pp );
 void shiftbackBC( double *shift,bc *WALL );

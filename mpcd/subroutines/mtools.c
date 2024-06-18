@@ -1143,63 +1143,6 @@ void conservation( double VA[],int MA,double QA[],double VB[],int MB,double QB[]
 ///
 ///	@brief Evaluates a surface function for a BC for a given position.
 ///
-/// Evaluates a surface function for a BC for a given position. For 4-fold symmetry.
-///
-/// @param WALL Boundary condition to evaluate surface function for.
-/// @param POS Position to evaluate surface function at.
-/// @param dimension Dimensionality of the input values.
-/// @return Value of the surface function.
-///
-double non4foldSymmCalcW( bc WALL,double POS[], int dimension ) {
-	double terms, W=0.0;
-	int i;
-	double r,phi,theta;
-	double cosT,sinT,cosP,sinP;
-
-	r=0.0;
-	for( i=0; i<dimension; i++ ) r += ( POS[i]-WALL.Q[i] )*( POS[i]-WALL.Q[i] );
-	r=sqrt(r);
-	phi=atan2( POS[1]-WALL.Q[1],POS[0]-WALL.Q[0] );
-	cosP=cos(0.25*WALL.ROTSYMM[0]*phi);
-	sinP=sin(0.25*WALL.ROTSYMM[0]*phi);
-	if( dimension>_2D ) {
-		theta=acos( (POS[2]-WALL.Q[2])/r );
-		cosT=cos(0.25*WALL.ROTSYMM[1]*theta);
-		sinT=sin(0.25*WALL.ROTSYMM[1]*theta);
-	}
-	else{
-		theta=0.0;
-		cosT=0.0;
-		sinT=1.0;
-	}
-	// First term
-	terms = WALL.A[0]*cosP*sinT;
-	if( WALL.ABS ) terms=fabs(terms);
-	terms = smrtPow( terms,WALL.P[0] );
-	W += terms;
-	// Second term
-	terms = WALL.A[1]*sinP*sinT;
-	if( WALL.ABS ) terms=fabs(terms);
-	terms = smrtPow( terms,WALL.P[1] );
-	W += terms;
-	// Third term
-	terms = WALL.A[2]*cosT;
-	if( WALL.ABS ) terms=fabs(terms);
-	terms = smrtPow( terms,WALL.P[2] );
-	W += terms;
-	// Fourth terms
-	terms = WALL.R/r;
-	if( WALL.ABS ) terms=fabs(terms);
-	terms = smrtPow( terms,WALL.P[3] );
-	W -= terms;
-	if( WALL.INV ) W *= -1.0;
-
-	return W;
-}
-
-///
-///	@brief Evaluates a surface function for a BC for a given position.
-///
 /// This method gives the value of the surface function for a given position. Doesn't require 4-fold 
 /// symmetry like non4foldSymmCalcW().
 ///

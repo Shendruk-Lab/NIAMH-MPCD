@@ -75,7 +75,6 @@ void conservation( double VA[],int MA,double QA[],double VB[],int MB,double QB[]
 
 //Surfaces
 double surf_func( bc WALL, double POS[],int dimension );
-double non4foldSymmCalcW( bc WALL,double POS[], int dimension );
 
 // Eigenvalues and vectors
 void eigenvalues2x2( double **m,double eigval[] );
