@@ -310,20 +310,28 @@ double non4foldSymmCalcW( bc WALL,double POS[], int dimension ) {
 ///
 void crosstime( particleMPC p,bc WALL,double *tc_pos, double *tc_neg,double t_step ) {
 	double a=0.0,b=0.0,c=0.0;
-	double Q[_3D]={0.0};
+	double Q[_3D]={0.0},V[_3D]={0.0};
 	int i;
 
 	//Transform the particle position into the rotated-frame of the BC's orientation
 	if(DIM==_3D) {
 		Q[2] = p.Q[2];	//z-component
+		V[2] = p.V[2];
 		Q[1] = p.Q[1];	//y-component
+		V[1] = p.V[1];
 		Q[0] = p.Q[0];	//x-component
+		V[0] = p.V[0];
 	}
 	else if(DIM==_2D) {
 		Q[1] = WALL.sinPhi*(p.Q[0]-WALL.Q[0]) + WALL.cosPhi*(p.Q[1]-WALL.Q[1]);	//y-component
+		V[1] = WALL.sinPhi*p.V[0] + WALL.cosPhi*p.V[1];
 		Q[0] = WALL.cosPhi*(p.Q[0]-WALL.Q[0]) - WALL.sinPhi*(p.Q[1]-WALL.Q[1]);	//x-component
+		V[0] = WALL.cosPhi*p.V[0] - WALL.sinPhi*p.V[1];
 	}
-	else if(DIM==_1D) Q[0] = p.Q[0];	//x-component (can't have rotations in 1D)
+	else if(DIM==_1D) {
+		Q[0] = p.Q[0];	//x-component (can't have rotations in 1D)
+		V[0] = p.V[0];
+	}
 	else {
 		printf("Error: Hyper-dimensional solvent simulations not supported (should have been caught during initialization).\n");
 		exit(EXIT_FAILURE);
@@ -342,9 +350,10 @@ void crosstime( particleMPC p,bc WALL,double *tc_pos, double *tc_neg,double t_st
 	else if ((DIM == 2 && feq(WALL.P[0],2.0) && feq(WALL.P[1],2.0)) || (DIM > 2 && feq(WALL.P[0],2.0) && feq(WALL.P[1],2.0) && feq(WALL.P[2],2.0))){
 	//else if( feq(WALL.P[0],2.0) && feq(WALL.P[1],2.0)) {
 		for( i=0; i<DIM; i++ ) {
-			a += WALL.A[i]*WALL.A[i]*p.V[i]*p.V[i];
+			// a += WALL.A[i]*WALL.A[i]*p.V[i]*p.V[i];
+			a += WALL.A[i]*WALL.A[i]*V[i]*V[i];
 			// b += WALL.A[i]*WALL.A[i]*p.V[i]*(p.Q[i]-WALL.Q[i]);
-			b += WALL.A[i]*WALL.A[i]*p.V[i]*Q[i];
+			b += WALL.A[i]*WALL.A[i]*V[i]*Q[i];
 			// c += WALL.A[i]*WALL.A[i]*(p.Q[i]*p.Q[i]-2.0*p.Q[i]*WALL.Q[i]+WALL.Q[i]*WALL.Q[i]);
 			c += WALL.A[i]*WALL.A[i]*smrtPow(Q[i],2);
 		}

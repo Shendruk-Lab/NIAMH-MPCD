@@ -627,10 +627,19 @@ void stream_BC( bc *WALL,double t ) {
 /// @param t The time interval for which the wall rotates.
 ///
 void spin_BC( bc *WALL,double t ) {
-	int i;
-	for( i=0; i<_3D	; i++ ) WALL->O[i] += t * WALL->L[i];
-	//Set the angles
-	setTrigOrientations( &WALL[i] );
+	double V[_3D]={0.0}, Lhat[_3D]={0.0};
+	double lenO=0.0,lenV=0.0,theta=0.0;
+	
+	//Rotate
+	crossprod( WALL->L,WALL->O,V );				//If the rotation of vector O is about L, need the orthogonal direction V
+	normCopy( WALL->L,Lhat,_3D );				//If we are rotating O about the axis of L then we need the unit vector of L
+	lenO = length( WALL->O,_3D );
+	lenV = length( V,_3D );
+	theta = atan2( lenV,lenO );					//The angle between orthogonal vector V and the orientation O
+	rodriguesRotation( WALL->O,Lhat,theta );	//Do the rotation
+
+	//Set the angles for later computational efficiency
+	setTrigOrientations( WALL );
 }
 
 /// 
