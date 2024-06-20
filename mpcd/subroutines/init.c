@@ -1608,7 +1608,7 @@ void setcoord(char dir[], spec SP[], particleMPC *pp, double KBT, double AVVEL[]
 /// @param SS Species of swimmer.
 ///
 void checkSim( FILE *fsynopsis,int SYNOUT,inputList in,spec *SP,bc *WALL,specSwimmer SS ) {
-	int i,j,k,m,d;
+	int i,j;
 	double checkValue;
 
 	//Check thermostat
@@ -1731,25 +1731,6 @@ void checkSim( FILE *fsynopsis,int SYNOUT,inputList in,spec *SP,bc *WALL,specSwi
 			exit(1);
 		}
 	}
-	//Check that if more than one mobile BC colloid, that they are all spherical
-	i=0;	//Count number of mobile BCs
-	for( j=0; j<NBC; j++ ) if( WALL[j].DSPLC ) i++;
-	if( i>0 ){
-		// Since there are more than one mobile BC, check they are all spherical
-		m=0;
-		for( j=0; j<NBC; j++ ) if( WALL[j].DSPLC ) {
-			k=0;	//Flag if any are not spherical
-			for( d=0; d<DIM; d++ ) if( WALL[j].P[d]>2 ) k++;
-			if( WALL[j].P[3]>2 ) k++;
-			for( d=1; d<DIM; d++ ) if( WALL[j].AINV[d]!=WALL[j].AINV[d-1] ) k++;
-			if(k) m++;	//Identify this as a non-spherical colloid
-		}
-		if(m>1){	//More than one non-spherical colloid
-			printf( "Error: Only spherical mobile BC colloids are allowed when simulating many mobile colloids.\n\tOther sphapes can only be a single mobile colloid. This is because the code cannot identify BC-BC collisions for more complicated shapes. \n\tFuture researchers (you?) will have to implement this.\n" );
-			exit( 1 );
-		}
-	}
-
 	if( !( in.LC==ISOF || in.LC==LCL || in.LC==LCG || in.LC==BCT) ){
 		printf( "Error: Unrecognized value of LC=%d.\n",in.LC );
 		exit( 1 );
@@ -2068,7 +2049,7 @@ void initOutput( char op[],outputFlagsList *outFlag,outputFilesList *outFile,inp
 /// @see zerocnt()
 ///
 void initializeSIM(cell ***CL, particleMPC *SRDparticles, spec SP[], bc WALL[], simptr simMD, specSwimmer *specS, swimmer *swimmers, int argc, char* argv[], inputList *in, time_t *to, clock_t *co, int *runtime, int *warmtime, double *AVVEL, kinTheory *theorySP, kinTheory *theoryGl, double *KBTNOW, double *AVS, double *S4, double *stdN, double AVNOW[_3D], double AVV[_3D], double avDIR[_3D], outputFlagsList outFlags, int MD_mode, FILE *fsynopsis, char ip[] ) {
-	int i,j;
+	int i,j,k,m,d;
 
 	#ifdef DBG
 		if( DBUG >= DBGINIT ) printf("\tInitialize Parameters\n");
@@ -2083,12 +2064,30 @@ void initializeSIM(cell ***CL, particleMPC *SRDparticles, spec SP[], bc WALL[], 
 	// Flag whether or not to do BC re-orientations
 	for( i=0; i<NBC; i++ ) {
 		(WALL+i)->REORIENT = 1;
-		// If the colloid cannot move and doesn't have an initial non-zero orientation, then never bother with rotations
-		if( (WALL+i)->DSPLC==0 && feq((WALL+i)->O[0],0.0) && feq((WALL+i)->O[1],0.0) && feq((WALL+i)->O[2],0.0) ) (WALL+i)->REORIENT = 0;
+		// If the colloid cannot move then never bother with rotations
+		if( (WALL+i)->DSPLC==0 ) (WALL+i)->REORIENT = 0;
 		// If the colloid has circular symmetry, then never bother with rotations
+		//2D
 		else if( DIM==_2D && feq((WALL+i)->P[0],2.0) && feq((WALL+i)->P[1],2.0) && feq((WALL+i)->A[0],(WALL+i)->A[1]) ) (WALL+i)->REORIENT = 0;
-		// If the colloid has spherical symmetry, then never bother with rotations
+		//3D
 		else if( feq((WALL+i)->P[0],2.0) && feq((WALL+i)->P[1],2.0) && feq((WALL+i)->P[2],2.0) && feq((WALL+i)->A[0],(WALL+i)->A[1]) && feq((WALL+i)->A[1],(WALL+i)->A[2]) ) (WALL+i)->REORIENT = 0;
+	}
+	//Check that if more than one mobile BC colloid, that they are all spherical
+	i=0;	//Count number of mobile BCs
+	for( j=0; j<NBC; j++ ) if( (WALL+j)->DSPLC ) i++;
+	if( i>0 ) {
+		// Since there are more than one mobile BC, check they are all spherical
+		m=0;
+		for( j=0; j<NBC; j++ ) if( (WALL+j)->DSPLC ) {
+			k=1;	//Flag if spherical (true )
+			for( d=0; d<DIM; d++ ) if( (WALL+j)->P[d]>2 ) k=0;
+			for( d=1; d<DIM; d++ ) if( (WALL+j)->AINV[d]!=(WALL+j)->AINV[d-1] ) k=0;
+			if(!k) m++;	//Identify this as a non-spherical colloid
+		}
+		if( i>1 && m>0) {	//More than one non-spherical colloid
+			printf( "Error: Only spherical mobile BC colloids are allowed when simulating many mobile colloids.\n\tOther sphapes can only be a single mobile colloid. This is because the code cannot identify BC-BC collisions for more complicated shapes. \n\tFuture researchers (you?) will have to implement this.\n" );
+			exit( 1 );
+		}
 	}
 	in->MAG_FLAG = 0;
 	if( fneq(in->MAG[0],0.0) || fneq(in->MAG[1],0.0) || fneq(in->MAG[2],0.0) ) in->MAG_FLAG = 1;
