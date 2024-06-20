@@ -4710,7 +4710,6 @@ void timestep(cell ***CL, particleMPC *SRDparticles, spec SP[], bc WALL[], simpt
 		if( DBUG >= DBGTITLE ) printf( "Impulse on BCs from MPCD collisions.\n" );
 	#endif
 	//Apply impulse from MPC_BCcollision()
-
 	if(!in.warmupSteps){
 		for( i=0; i<NBC; i++ ) if( (WALL+i)->DSPLC ) {
 			for( j=0; j<DIM; j++ ) (WALL+i)->V[j] += (WALL+i)->dV[j];
@@ -4732,17 +4731,10 @@ void timestep(cell ***CL, particleMPC *SRDparticles, spec SP[], bc WALL[], simpt
 	//Translate each of the BCs --- using velocity from BEFORE MPC_BCcollision()
 	for( i=0; i<NBC; i++ ) if( (WALL+i)->DSPLC ) stream_BC( (WALL+i),in.dt );
 	/* ****************************************** */
-	/* *************** ROTATE BCs *************** */
+	/* *********** BC-BC (TRANSLATION) ********** */
 	/* ****************************************** */
 	#ifdef DBG
-		if( DBUG >= DBGTITLE ) printf( "Spin BCs.\n" );
-	#endif
-	for( i=0; i<NBC; i++ ) if( (WALL+i)->DSPLC ) spin_BC( (WALL+i),in.dt );
-	/* ****************************************** */
-	/* ***************** BC-BC ****************** */
-	/* ****************************************** */
-	#ifdef DBG
-		if( DBUG >= DBGTITLE ) printf( "Check BCs Against BCs.\n" );
+		if( DBUG >= DBGTITLE ) printf( "Check BCs Against BCs (translation).\n" );
 	#endif
 	//Check each BC
 	for( i=0; i<NBC; i++ ) if( (WALL+i)->DSPLC ) {
@@ -4756,25 +4748,23 @@ void timestep(cell ***CL, particleMPC *SRDparticles, spec SP[], bc WALL[], simpt
 		}
 	}
 	/* ****************************************** */
-	/* ***************** BC-MPCD **************** */
+	/* ********** BC-MPCD (TRANSLATION) ********* */
 	/* ****************************************** */
-	// if( BC_FLAG ) {
-		#ifdef DBG
-			if( DBUG >= DBGTITLE ) printf( "Check BCs Against MPCs after BC-BC collisions.\n" );
-		#endif
-		bcCNT=0;
-		reCNT=0;
-		rethermCNT=0;
-		// Check each BC for collisions MPC particles
-		for( i=0; i<NBC; i++ ) if( (WALL+i)->DSPLC ) {
-			BC_MPCcollision( WALL,i,SRDparticles,SP,in.KBT,in.GRAV,in.dt,simMD,MDmode,in.LC,&bcCNT,&reCNT,&rethermCNT );
-		}
-		#ifdef DBG
-			if( DBUG == DBGBCCNT ) if( bcCNT>0 ) printf( "\t%d particles had difficulty with the BCs when the BCs moved (%d rewind events; %d rethermalization events).\n",bcCNT,reCNT,rethermCNT );
-		#endif
-	// }
+	#ifdef DBG
+		if( DBUG >= DBGTITLE ) printf( "Check BCs Against MPCs after BC-BC collisions (translation).\n" );
+	#endif
+	bcCNT=0;
+	reCNT=0;
+	rethermCNT=0;
+	// Check each BC for collisions MPC particles
+	for( i=0; i<NBC; i++ ) if( (WALL+i)->DSPLC ) {
+		BC_MPCcollision( WALL,i,SRDparticles,SP,in.KBT,in.GRAV,in.dt,simMD,MDmode,in.LC,&bcCNT,&reCNT,&rethermCNT );
+	}
+	#ifdef DBG
+		if( DBUG == DBGBCCNT ) if( bcCNT>0 ) printf( "\t%d particles had difficulty with the BCs when the BCs moved (%d rewind events; %d rethermalization events).\n",bcCNT,reCNT,rethermCNT );
+	#endif
 	/* ****************************************** */
-	/* ************* APPLY IMPULSE ************** */
+	/* ****** APPLY IMPULSE (TRANSLATION) ******* */
 	/* ****************************************** */
 	#ifdef DBG
 		if( DBUG >= DBGTITLE ) printf( "Impulse on BCs from BC-translations.\n" );
@@ -4784,7 +4774,81 @@ void timestep(cell ***CL, particleMPC *SRDparticles, spec SP[], bc WALL[], simpt
 		for( j=0; j<DIM; j++ ) (WALL+i)->V[j] += (WALL+i)->dV[j];
 		//THERE SHOULD BE NO dL since BC_MPCcollision() ignores ang mom
 		for( j=0; j<_3D; j++ ) (WALL+i)->L[j] += (WALL+i)->dL[j];
+		zerovec(WALL[i].dV,DIM);
+		zerovec(WALL[i].dL,_3D);
 	}
+	/* ****************************************** */
+	/* *************** ROTATE BCs *************** */
+	/* ****************************************** */
+	#ifdef DBG
+		if( DBUG >= DBGTITLE ) printf( "Spin BCs.\n" );
+	#endif
+	for( i=0; i<NBC; i++ ) if( (WALL+i)->DSPLC ) spin_BC( (WALL+i),in.dt );
+	//
+	//
+	//
+	//
+	// WORKING ON THIS FOR ALEX 
+	//
+	//
+	//
+	//
+	/* ****************************************** */
+	/* ************ BC-BC (ROTATION) ************ */
+	/* ****************************************** */
+	#ifdef DBG
+		if( DBUG >= DBGTITLE ) printf( "Check BCs Against BCs (rotation).\n" );
+	#endif
+	// //Check each BC
+	// for( i=0; i<NBC; i++ ) if( (WALL+i)->DSPLC ) {
+	// 	BC_FLAG = 0;
+	// 	for( j=0; j<NBC; j++ ) if( j != i ) {
+	// 		//Check BC number i for collisions other BCs
+	// 		#ifdef DBG
+	// 			if( DBUG == DBGBCBC ) printf( "BC%d BC%d\n",i,j );
+	// 		#endif
+	// 		BC_BCcollision( WALL+i,WALL+j,in.dt,&BC_FLAG );
+	// 	}
+	// }
+	/* ****************************************** */
+	/* *********** BC-MPCD (ROTATION) *********** */
+	/* ****************************************** */
+	#ifdef DBG
+		if( DBUG >= DBGTITLE ) printf( "Check BCs Against MPCs after BC-BC collisions (rotation).\n" );
+	#endif
+	// bcCNT=0;
+	// reCNT=0;
+	// rethermCNT=0;
+	// // Check each BC for collisions MPC particles
+	// for( i=0; i<NBC; i++ ) if( (WALL+i)->DSPLC ) {
+	// 	BC_MPCcollision( WALL,i,SRDparticles,SP,in.KBT,in.GRAV,in.dt,simMD,MDmode,in.LC,&bcCNT,&reCNT,&rethermCNT );
+	// }
+	// #ifdef DBG
+	// 	if( DBUG == DBGBCCNT ) if( bcCNT>0 ) printf( "\t%d particles had difficulty with the BCs when the BCs moved (%d rewind events; %d rethermalization events).\n",bcCNT,reCNT,rethermCNT );
+	// #endif
+	/* ****************************************** */
+	/* ******** APPLY IMPULSE (ROTATION) ******** */
+	/* ****************************************** */
+	#ifdef DBG
+		if( DBUG >= DBGTITLE ) printf( "Impulse on BCs from BC-rotation.\n" );
+	#endif
+	//Apply impulse from BC_MPCcollision()
+	for( i=0; i<NBC; i++ ) if( (WALL+i)->DSPLC ) {
+		for( j=0; j<DIM; j++ ) (WALL+i)->V[j] += (WALL+i)->dV[j];
+		for( j=0; j<_3D; j++ ) (WALL+i)->L[j] += (WALL+i)->dL[j];
+		zerovec(WALL[i].dV,DIM);
+		zerovec(WALL[i].dL,_3D);
+	}
+	//
+	//
+	//
+	//
+	// END WORKING ON THIS FOR ALEX 
+	//
+	//
+	//
+	//
+
 	/* ****************************************** */
 	/* ************* ACCELERATE BCs ************* */
 	/* ****************************************** */

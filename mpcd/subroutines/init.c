@@ -1608,7 +1608,7 @@ void setcoord(char dir[], spec SP[], particleMPC *pp, double KBT, double AVVEL[]
 /// @param SS Species of swimmer.
 ///
 void checkSim( FILE *fsynopsis,int SYNOUT,inputList in,spec *SP,bc *WALL,specSwimmer SS ) {
-	int i,j;
+	int i,j,k,m,d;
 	double checkValue;
 
 	//Check thermostat
@@ -1731,6 +1731,25 @@ void checkSim( FILE *fsynopsis,int SYNOUT,inputList in,spec *SP,bc *WALL,specSwi
 			exit(1);
 		}
 	}
+	//Check that if more than one mobile BC colloid, that they are all spherical
+	i=0;	//Count number of mobile BCs
+	for( j=0; j<NBC; j++ ) if( WALL[j].DSPLC ) i++;
+	if( i>0 ){
+		// Since there are more than one mobile BC, check they are all spherical
+		m=0;
+		for( j=0; j<NBC; j++ ) if( WALL[j].DSPLC ) {
+			k=0;	//Flag if any are not spherical
+			for( d=0; d<DIM; d++ ) if( WALL[j].P[d]>2 ) k++;
+			if( WALL[j].P[3]>2 ) k++;
+			for( d=1; d<DIM; d++ ) if( WALL[j].AINV[d]!=WALL[j].AINV[d-1] ) k++;
+			if(k) m++;	//Identify this as a non-spherical colloid
+		}
+		if(m>1){	//More than one non-spherical colloid
+			printf( "Error: Only spherical mobile BC colloids are allowed when simulating many mobile colloids.\n\tOther sphapes can only be a single mobile colloid. This is because the code cannot identify BC-BC collisions for more complicated shapes. \n\tFuture researchers (you?) will have to implement this.\n" );
+			exit( 1 );
+		}
+	}
+
 	if( !( in.LC==ISOF || in.LC==LCL || in.LC==LCG || in.LC==BCT) ){
 		printf( "Error: Unrecognized value of LC=%d.\n",in.LC );
 		exit( 1 );
