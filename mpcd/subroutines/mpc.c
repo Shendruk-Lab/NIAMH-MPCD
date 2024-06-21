@@ -624,7 +624,7 @@ void stream_BC( bc *WALL,double t ) {
 /// This function simply updates the orientation vector of a single wall (boundary condition). 
 /// Must be in 3D because the rotation direction in 2D is in the third dimension. 
 /// @param WALL All of the walls (boundary conditions) that particles might interact with. 
-/// @param t The time interval for which the wall rotates.
+/// @param t_step The time interval for which the wall rotates.
 ///
 void spin_BC( bc *WALL,double t ) {
 	double V[_3D]={0.0}, Lhat[_3D]={0.0};
@@ -635,7 +635,7 @@ void spin_BC( bc *WALL,double t ) {
 	normCopy( WALL->L,Lhat,_3D );				//If we are rotating O about the axis of L then we need the unit vector of L
 	lenO = length( WALL->O,_3D );
 	lenV = length( V,_3D );
-	theta = atan2( lenV,lenO );					//The angle between orthogonal vector V and the orientation O
+	theta = atan2( lenV,lenO )*t;				//The angle between orthogonal vector V and the orientation O
 	rodriguesRotation( WALL->O,Lhat,theta );	//Do the rotation
 
 	//Set the angles for later computational efficiency
@@ -4758,10 +4758,10 @@ void timestep(cell ***CL, particleMPC *SRDparticles, spec SP[], bc WALL[], simpt
 	rethermCNT=0;
 	// Check each BC for collisions MPC particles
 	for( i=0; i<NBC; i++ ) if( (WALL+i)->DSPLC ) {
-		BC_MPCcollision( WALL,i,SRDparticles,SP,in.KBT,in.GRAV,in.dt,simMD,MDmode,in.LC,&bcCNT,&reCNT,&rethermCNT );
+		BC_MPCcollision( WALL,i,SRDparticles,SP,in.KBT,in.dt,simMD,MDmode,in.LC,&bcCNT,&reCNT,&rethermCNT );
 	}
 	#ifdef DBG
-		if( DBUG == DBGBCCNT ) if( bcCNT>0 ) printf( "\t%d particles had difficulty with the BCs when the BCs moved (%d rewind events; %d rethermalization events).\n",bcCNT,reCNT,rethermCNT );
+		if( DBUG == DBGBCCNT ) if( bcCNT>0 ) printf( "\t%d particles had difficulty with the BCs when the BCs translated (%d rewind events; %d rethermalization events).\n",bcCNT,reCNT,rethermCNT );
 	#endif
 	/* ****************************************** */
 	/* ****** APPLY IMPULSE (TRANSLATION) ******* */
@@ -4784,6 +4784,27 @@ void timestep(cell ***CL, particleMPC *SRDparticles, spec SP[], bc WALL[], simpt
 		if( DBUG >= DBGTITLE ) printf( "Spin BCs.\n" );
 	#endif
 	for( i=0; i<NBC; i++ ) if( (WALL+i)->DSPLC ) spin_BC( (WALL+i),in.dt );
+	/* ****************************************** */
+	/* ************ BC-BC (ROTATION) ************ */
+	/* ****************************************** */
+	// #ifdef DBG
+	// 	if( DBUG >= DBGTITLE ) printf( "Check BCs Against BCs (rotation).\n" );
+	// #endif
+	// This is not implemented. Only multiple spheres are allowed to be mobile (so BC-BC interactions due to rotation are irrelevant). Future implementations will have to create this
+	// //Check each BC
+	// for( i=0; i<NBC; i++ ) if( (WALL+i)->DSPLC ) {
+	// 	BC_FLAG = 0;
+	// 	for( j=0; j<NBC; j++ ) if( j != i ) {
+	// 		//Check BC number i for collisions other BCs
+	// 		#ifdef DBG
+	// 			if( DBUG == DBGBCBC ) printf( "BC%d BC%d\n",i,j );
+	// 		#endif
+	// 		BC_BCcollisionRotation( WALL+i,WALL+j,in.dt,&BC_FLAG );
+	// 	}
+	// }
+	/* ****************************************** */
+	/* *********** BC-MPCD (ROTATION) *********** */
+	/* ****************************************** */
 	//
 	//
 	//
@@ -4793,44 +4814,24 @@ void timestep(cell ***CL, particleMPC *SRDparticles, spec SP[], bc WALL[], simpt
 	//
 	//
 	//
-	/* ****************************************** */
-	/* ************ BC-BC (ROTATION) ************ */
-	/* ****************************************** */
-	#ifdef DBG
-		if( DBUG >= DBGTITLE ) printf( "Check BCs Against BCs (rotation).\n" );
-	#endif
-	// //Check each BC
-	// for( i=0; i<NBC; i++ ) if( (WALL+i)->DSPLC ) {
-	// 	BC_FLAG = 0;
-	// 	for( j=0; j<NBC; j++ ) if( j != i ) {
-	// 		//Check BC number i for collisions other BCs
-	// 		#ifdef DBG
-	// 			if( DBUG == DBGBCBC ) printf( "BC%d BC%d\n",i,j );
-	// 		#endif
-	// 		BC_BCcollision( WALL+i,WALL+j,in.dt,&BC_FLAG );
-	// 	}
-	// }
-	/* ****************************************** */
-	/* *********** BC-MPCD (ROTATION) *********** */
-	/* ****************************************** */
 	#ifdef DBG
 		if( DBUG >= DBGTITLE ) printf( "Check BCs Against MPCs after BC-BC collisions (rotation).\n" );
 	#endif
-	// bcCNT=0;
-	// reCNT=0;
-	// rethermCNT=0;
-	// // Check each BC for collisions MPC particles
-	// for( i=0; i<NBC; i++ ) if( (WALL+i)->DSPLC ) {
-	// 	BC_MPCcollision( WALL,i,SRDparticles,SP,in.KBT,in.GRAV,in.dt,simMD,MDmode,in.LC,&bcCNT,&reCNT,&rethermCNT );
-	// }
-	// #ifdef DBG
-	// 	if( DBUG == DBGBCCNT ) if( bcCNT>0 ) printf( "\t%d particles had difficulty with the BCs when the BCs moved (%d rewind events; %d rethermalization events).\n",bcCNT,reCNT,rethermCNT );
-	// #endif
+	bcCNT=0;
+	reCNT=0;
+	rethermCNT=0;
+	// Check each BC for collisions MPC particles
+	for( i=0; i<NBC; i++ ) if( (WALL+i)->DSPLC ) {
+		BC_MPCcollisionRotation( WALL,i,SRDparticles,SP,in.KBT,in.dt,simMD,MDmode,in.LC,&bcCNT,&reCNT,&rethermCNT );
+	}
+	#ifdef DBG
+		if( DBUG == DBGBCCNT ) if( bcCNT>0 ) printf( "\t%d particles had difficulty with the BCs when the BCs rotated (%d rewind events; %d rethermalization events).\n",bcCNT,reCNT,rethermCNT );
+	#endif
 	/* ****************************************** */
 	/* ******** APPLY IMPULSE (ROTATION) ******** */
 	/* ****************************************** */
 	#ifdef DBG
-		if( DBUG >= DBGTITLE ) printf( "Impulse on BCs from BC-rotation.\n" );
+		if( DBUG >= DBGTITLE ) printf( "Impulse on BCs from BC-translations.\n" );
 	#endif
 	//Apply impulse from BC_MPCcollision()
 	for( i=0; i<NBC; i++ ) if( (WALL+i)->DSPLC ) {

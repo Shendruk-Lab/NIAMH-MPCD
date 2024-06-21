@@ -1073,7 +1073,7 @@ double chooseT( double tstep,double tp,double tn,int p,int *flag ) {
 }
 
 ///
-/// @brief Finds if the particle lies inside the boundary.
+/// @brief For a translating BC, determines which particle BC should have collided with.
 ///
 /// This routine finds if any of the particles is inside the boundary. It does this by
 /// calculating `W` (if `W` < 0 then the particle is inside the boundary). In
@@ -1096,22 +1096,23 @@ void chooseP( bc WALL,particleMPC *pp,double *chosenW,int *chosenP ) {
  	int i;
 	double tempW = 1.0;
 	double shift[DIM];
-	*chosenW = 1.0;
+	*chosenW = 1.0;		//Default if no particle is chosen
+	*chosenP = GPOP+1;	//Default if no particle is chosen
 
 	for( i=0; i<GPOP; i++ ) if(WALL.INTER[(pp+i)->SPID] == BCON) {
 		//Shift the BC due to any periodic BCs
 		shiftBC( shift,&WALL,(pp+i) );
 		// rotateBC( &WALL,(pp+i),0 );
 		tempW = calcW( WALL,*(pp+i) );
+		//Shift the BC back to it's real position now that have calculated W
+		// rotatebackBC( &WALL,(pp+i),0 );
+		shiftbackBC( shift,&WALL );
 		if( tempW < -TOL ) {
 			//Particle within BC
 			*chosenW = tempW;
 			*chosenP = i;
 			break;
 		}
-		//Shift the BC back to it's real position
-		// rotatebackBC( &WALL,(pp+i),0 );
-		shiftbackBC( shift,&WALL );
 	}
 }
 
@@ -1307,9 +1308,9 @@ void BC_BCcollision( bc *movingWall,bc *stillWall,double t_step,int *flag ) {
 }
 
 ///
-/// @brief Performs the collision event between the moving boundary and particles.
+/// @brief Performs the collision event between the moving (translating) boundary and particles.
 ///
-/// This routine performs the collision event between a boundary in motion and particles.
+/// This routine performs the collision event between a translating boundary in motion and particles.
 /// The following steps are performed:
 /// - Finds if the particle is inside the boundary.
 /// - Rewind the particle to the boundary (in the moving reference frame of the boundary).
@@ -1320,7 +1321,6 @@ void BC_BCcollision( bc *movingWall,bc *stillWall,double t_step,int *flag ) {
 /// @param pp Return pointer to the first element in the MPCD particle array.
 /// @param pSP The species-wide information about MPCD particles.
 /// @param KBT Thermal energy.
-/// @param GRAV Constant acceleration from external force.
 /// @param t_step The time step interval.
 /// @param simMD A pointer to the entire MD portion of the simulation.
 /// @param MD_mode The MD coupling mode. Can be off (noMD), MD particles included in the MPCD collisions (MDinMPC), or MPCD particles included in MD pair interactions (MPCinMD).
@@ -1337,7 +1337,7 @@ void BC_BCcollision( bc *movingWall,bc *stillWall,double t_step,int *flag ) {
 /// @note The change in velocity for the boundary (due to this BC-particle interaction) is calculated in MPC_BCcollision()
 /// and the impulse to the boundary is applied in timestep().
 ///
-void BC_MPCcollision(bc WALL[], int BCcurrent, particleMPC *pp, spec *pSP, double KBT, double GRAV[], double t_step,
+void BC_MPCcollision(bc WALL[], int BCcurrent, particleMPC *pp, spec *pSP, double KBT, double t_step,
                      simptr simMD, int MD_mode, int LC, int *bcCNT, int *reCNT, int *rethermCNT) {
 
 	int i;
@@ -1352,38 +1352,31 @@ void BC_MPCcollision(bc WALL[], int BCcurrent, particleMPC *pp, spec *pSP, doubl
 			bccoord( WALL[BCcurrent] );
 		}
 	#endif
+	//HACK WITH ALEX: CURRENTLY THE SURFMODE CHECK IS OUTSIDE the while *BUT* will want to put it inside, I think 
 	// printf( "BC %d SURFMODE=%d\n",BCcurrent,WALL[BCcurrent].SURFMODE );
 	if( WALL[BCcurrent].SURFMODE==TRAD_SURF ) {
-		//
-		//
-		//
-		//
-		// WORKING ON THIS FOR ALEX 
-		//
-		//
-		//
-		//
-		//HACK: CURRENTLY THE SURFMODE CHECK IS OUTSIDE the while *BUT* will want to put it inside, I think 
 		while( flag ) {
 			/* ****************************************** */
 			/* ************ BCs ON PARTICLES ************ */
 			/* ****************************************** */
-			//We must check if any of the particles are now inside the BC,
+			//We must check if any of the MPCD particles are now inside the BC,
 			//Find the one that the collision should have occured with and the time for that collision
 			#ifdef DBG
 				if( DBUG == DBGBCMPC ) printf( "Choose a particle: " );
 			#endif
-			// chooseP( WALL[BCcurrent],pp,&time,&W,&chosenP,t_step,GRAV );
 			chooseP( WALL[BCcurrent],pp,&W,&chosenP );
 			#ifdef DBG
-				if( DBUG == DBGBCMPC ) printf( "BC=%d; particle=%d; W=%e\n",BCcurrent,chosenP,W );
+				if( DBUG == DBGBCMPC ) {
+					if( chosenP<=GPOP ) printf( "BC=%d; particle=%d; W=%e\n",BCcurrent,chosenP,W );
+					else printf( "No translational collision event identified\n" );
+				}
 			#endif
-			//If the particle doesn't collide with any MPCD particles exit
+			//If the BC doesn't collide with any MPCD particles exit
 			if( chosenP>=GPOP ) flag = 0;
-			//If no particles were inside then we are done.
+			//If no MPCD particles were inside then we are done.
 			if( W > -TOL ) flag = 0;
 			else{
-				//A particle got inside a BC since the BC translated
+				//An MPCD particle got inside a BC since the BC translated and rotated
 				#ifdef DBG
 					if( DBUG == DBGBCMPC ) {
 						printf( "%d\n",chosenP );
@@ -1398,10 +1391,11 @@ void BC_MPCcollision(bc WALL[], int BCcurrent, particleMPC *pp, spec *pSP, doubl
 				for( i=0; i<DIM; i++ ) bcV[i]=WALL[BCcurrent].V[i];
 				for( i=0; i<_3D; i++ ) bcL[i]=WALL[BCcurrent].L[i];
 				//Give the particle negative the BC's velocity
-				for( i=0; i<DIM; i++ ) (pp+chosenP)->V[i]=-bcV[i];
+				for( i=0; i<DIM; i++ ) (pp+chosenP)->V[i] = -bcV[i];
 				//The change in reference frame means BC vel=0 (at the surface)
-				for( i=0; i<DIM; i++ ) WALL[BCcurrent].V[i]=-pV[i];
-				for( i=0; i<_3D; i++ ) WALL[BCcurrent].L[i]=0.0;
+				for( i=0; i<DIM; i++ ) WALL[BCcurrent].V[i] = -pV[i];
+				//Ignore rotational component since will do later in BC_MPCcollisionRotation()
+				for( i=0; i<_3D; i++ ) WALL[BCcurrent].L[i] = 0.0; 	
 				#ifdef DBG
 					if( DBUG == DBGBCMPC ) {
 						printf( "Change the reference frame:\nBC %d\n",BCcurrent );
@@ -1432,7 +1426,172 @@ void BC_MPCcollision(bc WALL[], int BCcurrent, particleMPC *pp, spec *pSP, doubl
 				#endif
 				for( i=0; i<DIM; i++ ) (pp+chosenP)->V[i] += pV[i] + bcV[i];
 				for( i=0; i<DIM; i++ ) WALL[BCcurrent].V[i] += pV[i] + bcV[i];
-				for( i=0; i<_3D; i++ ) WALL[BCcurrent].L[i] = bcL[i];
+				for( i=0; i<_3D; i++ ) WALL[BCcurrent].L[i] += bcL[i];
+				//Done. Reset particle number test
+				chosenP=GPOP+1;
+				// wait4u();
+			}
+		}
+	}
+	else if( WALL[BCcurrent].SURFMODE==VERT_SURF ) {
+		//
+		//
+		//
+		//
+		// WORKING ON THIS FOR ALEX 
+		//
+		//
+		//
+		//
+		// Don't do anything for now --- skipping this BC. Will do with Alex
+		printf("Entered VERT_SURF for BC %d.\n",BCcurrent);
+		for( i=0; i<WALL[BCcurrent].NUMVERT; i++ ) {
+			printf("\t Vertex %d:",BCcurrent);
+			pvec( WALL[BCcurrent].VERTICES[i],DIM );
+		}
+		flag = 0;
+	}
+	else {
+		printf("Error: BC %d surface mode unkwown (SURFMODE=%d). \n",BCcurrent,WALL[BCcurrent].SURFMODE);
+		exit(EXIT_FAILURE);
+	}
+}
+
+///
+/// @brief Performs the collision event between the rotating boundary and particles.
+///
+/// This routine performs the collision event between a boundary that is rotating and particles.
+/// The following steps are performed:
+/// - Finds if the particle is inside the boundary.
+/// - Rewind the particle to the boundary (in the moving reference frame of the boundary).
+/// - Apply boundary conditions to the particle using MPC_BCcollision().
+///
+/// @param WALL The boundary.
+/// @param BCcurrent The index for the boundary.
+/// @param pp Return pointer to the first element in the MPCD particle array.
+/// @param pSP The species-wide information about MPCD particles.
+/// @param KBT Thermal energy.
+/// @param t_step The time step interval.
+/// @param simMD A pointer to the entire MD portion of the simulation.
+/// @param MD_mode The MD coupling mode. Can be off (noMD), MD particles included in the MPCD collisions (MDinMPC), or MPCD particles included in MD pair interactions (MPCinMD).
+/// @param LC The flag for the fluid being liquid crystalline.
+/// @param bcCNT Count for failed particle-boundary interaction.
+/// @param reCNT Count for failed rewind events (particle not able to rewind to boundary).
+/// @param rethermCNT Count for failed rethermalization events.
+/// @see chooseP()
+/// @see timestep()
+/// @see MPC_BCcollision()
+/// @see BC_BCcollision()
+/// @note Particle collisions with other boundaries (after these new transformations are applied) are handled in MPC_BCcollision().
+/// @note Boundary to boundary collisions were handled in BC_BCcollision().
+/// @note The change in velocity for the boundary (due to this BC-particle interaction) is calculated in MPC_BCcollision()
+/// and the impulse to the boundary is applied in timestep().
+///
+void BC_MPCcollisionRotation(bc WALL[], int BCcurrent, particleMPC *pp, spec *pSP, double KBT,
+					 double t_step, simptr simMD, int MD_mode, int LC, int *bcCNT, int *reCNT, int *rethermCNT) {
+
+	int i;
+	int chosenP=GPOP+1;							//Particle to go with t_min
+	int flag = 1;								//Flag for if should keep looping. Loop while 1.
+	double pV[DIM],bcV[DIM],bcL[_3D];			//Temporary velocities
+	double dr[_3D]={0.0},surfVel[_3D]={0.0};	//Separation between MPCD particle and centre of BC and velocity of surface at collision
+	double W;
+
+	#ifdef DBG
+		if( DBUG == DBGBCMPCROT ) {
+			printf( "BC %d\n",BCcurrent );
+			bccoord( WALL[BCcurrent] );
+		}
+	#endif
+	//HACK WITH ALEX: CURRENTLY THE SURFMODE CHECK IS OUTSIDE the while *BUT* will want to put it inside, I think 
+	// printf( "BC %d SURFMODE=%d\n",BCcurrent,WALL[BCcurrent].SURFMODE );
+	if( WALL[BCcurrent].SURFMODE==TRAD_SURF ) {
+		//
+		//
+		//
+		//
+		// WORKING ON THIS FOR ALEX 
+		//
+		//
+		//
+		//
+		while( flag ) {
+			/* ****************************************** */
+			/* ************ BCs ON PARTICLES ************ */
+			/* ****************************************** */
+			//We must check if any of the MPCD particles are now inside the BC,
+			//Find the one that the collision should have occured with and the time for that collision
+			#ifdef DBG
+				if( DBUG == DBGBCMPCROT ) printf( "Choose a particle: " );
+			#endif
+			chooseP( WALL[BCcurrent],pp,&W,&chosenP );
+			#ifdef DBG
+				if( DBUG == DBGBCMPCROT ) {
+					if( chosenP<=GPOP ) printf( "BC=%d; particle=%d; W=%e\n",BCcurrent,chosenP,W );
+					else printf( "No rotational collision event identified\n" );
+				}
+			#endif
+			//If the BC doesn't collide with any MPCD particles, exit
+			if( chosenP>=GPOP ) flag = 0;
+			//If no MPCD particles were inside then we are done.
+			if( W > -TOL ) flag = 0;
+			else{
+				//An MPCD particle got inside a BC since the BC translated and rotated
+				#ifdef DBG
+					if( DBUG == DBGBCMPCROT ) {
+						printf( "%d\n",chosenP );
+						printf( " W: %e\n", W );
+						pcoord( *(pp+chosenP) );
+						printf( " distance: %lf\n", distpoints( WALL[BCcurrent].Q,(pp+chosenP)->Q,DIM ) );
+					}
+				#endif
+				//Save the particle and BC's velocities
+				for( i=0; i<DIM; i++ ) pV[i]=(pp+chosenP)->V[i];
+				for( i=0; i<DIM; i++ ) bcV[i]=WALL[BCcurrent].V[i];
+				for( i=0; i<_3D; i++ ) bcL[i]=WALL[BCcurrent].L[i];
+				//Give the particle negative the BC's surface velocity at the collision point (where the MPCD particle is)
+				for( i=0; i<DIM; i++ ) dr[i]=(pp+chosenP)->Q[i]-WALL[BCcurrent].Q[i];
+				crossprod( dr,bcL,surfVel );
+				//To consider the rotational collision, move into the ref frame of the collision point
+				//Give the particle negative the BC's velocity AT the collision point
+				for( i=0; i<DIM; i++ ) (pp+chosenP)->V[i] = -bcV[i] - surfVel[i];
+				//The change in reference frame means BC vel=0 and so the centre must move so that not rotation about collision point
+				for( i=0; i<DIM; i++ ) WALL[BCcurrent].V[i] = -pV[i] - surfVel[i];
+				//Not rotating in this frame
+				for( i=0; i<_3D; i++ ) WALL[BCcurrent].L[i] = 0.0; 	
+				#ifdef DBG
+					if( DBUG == DBGBCMPCROT ) {
+						printf( "Ang vel: " );
+						pvec(bcL,_3D);
+						printf( "Vel at surf: " );
+						pvec(surfVel,_3D);
+						printf( "Change the reference frame to rotating frame:\nBC %d\n",BCcurrent );
+						bccoord( WALL[BCcurrent] );
+						printf( "MPC Particle %d\n",chosenP );
+						pcoord( *(pp+chosenP) );
+					}
+				#endif
+				//With the BC's negative velocity work out all the BCs for this particle
+				MPC_BCcollision( pp,chosenP,WALL,pSP,KBT,t_step,LC,bcCNT,reCNT,rethermCNT,0 );
+				#ifdef DBG
+					if( DBUG == DBGBCMPCROT ) {
+						printf( "New particle position:\n" );
+						pvec( (pp+chosenP)->Q,DIM );
+						pvec( (pp+chosenP)->V,DIM );
+						printf( " distance: %lf\n", distpoints( WALL[BCcurrent].Q,(pp+chosenP)->Q,DIM ) );
+					}
+				#endif
+				//Give the particle back it's old velocity (plus the velocity it got from these collisions)
+				#ifdef DBG
+					if( DBUG == DBGBCMPCROT ) 	printf( "Change the reference frame back\n" );
+				#endif
+				// for( i=0; i<DIM; i++ ) (pp+chosenP)->V[i] += pV[i] + surfVel[i] + bcV[i];
+				// for( i=0; i<DIM; i++ ) WALL[BCcurrent].V[i] = pV[i] + bcV[i];
+				// for( i=0; i<_3D; i++ ) WALL[BCcurrent].L[i] = bcL[i];
+				// TESTING:
+				for( i=0; i<DIM; i++ ) (pp+chosenP)->V[i] += pV[i] + bcV[i] + surfVel[i];
+				for( i=0; i<DIM; i++ ) WALL[BCcurrent].V[i] += pV[i] + bcV[i] + surfVel[i];
+				for( i=0; i<_3D; i++ ) WALL[BCcurrent].L[i] += bcL[i];
 				//Done. Reset particle number test
 				chosenP=GPOP+1;
 				// wait4u();
@@ -1651,17 +1810,11 @@ void MPC_BCcollision( particleMPC *pp,int currentP,bc WALL[],spec *pSP,double KB
 		if( W > -TOL ) flag = 0;
 		//Otherwise, COLLISON
 		else {
-			// #ifdef DBG
-			// 	if( DBUG==DBGMPCBC || DBUG==DBGBCMPC) {
-			// 		printf( "Chosen BC=%d, time left=%lf cross time=%lf\n",chosenBC,t_left,t_coll );
-			// 	}
-			// #endif
 			cnt++;
 			//Shift the BC due to any periodic BCs
 			shiftBC( shift,&WALL[chosenBC],(pp+currentP) );
 			// rotateBC( &WALL[chosenBC],(pp+currentP),LC );
 			if( t_coll>-TOL ) {
-				// printf( "Enter collision W=%lf t_coll=%lf...\n",W,t_coll );
 				//We have the BC to collide with and the time at which it collided
 				//Rewind the particle back to when it should have collided with the surface
 				rewind_P( (pp+currentP),t_left-t_coll );
@@ -1705,17 +1858,16 @@ void MPC_BCcollision( particleMPC *pp,int currentP,bc WALL[],spec *pSP,double KB
 					#endif
 				}
 				else{
-						//When BC on MPC don't stream. Leave on surface BUT do make sure obeys PBCs
-						// Ultimate PBC conditions for particles AT surface of moving BC
-						// printf( "Set on surface...\n" );
+					//When BC on MPC don't stream. Leave on surface BUT do make sure obeys PBCs
+					// Ultimate PBC conditions for particles AT surface of moving BC
+					// printf( "Set on surface...\n" );
 
-						// THIS SEEMS TO BE THE PROBLEM!!! PARTICLE SET ON SURFACE BUT WHEN ROTATE BACK, NOT PERFECT AND FAILS???
-						//NOTICE: This doesn't seem to be setting it anywhere at all!!!
-
-						for( i=0; i<DIM; i++ ) {
-							if( (pp+currentP)->Q[i] < 0.0 ) (pp+currentP)->Q[i] += XYZ[i];
-							else if( (pp+currentP)->Q[i] > XYZ[i] ) (pp+currentP)->Q[i] -= XYZ[i];
-						}
+					// THIS SEEMS TO BE THE PROBLEM!!! PARTICLE SET ON SURFACE BUT WHEN ROTATE BACK, NOT PERFECT AND FAILS???
+					//NOTICE: This doesn't seem to be setting it anywhere at all!!!
+					for( i=0; i<DIM; i++ ) {
+						if( (pp+currentP)->Q[i] < 0.0 ) (pp+currentP)->Q[i] += XYZ[i];
+						else if( (pp+currentP)->Q[i] > XYZ[i] ) (pp+currentP)->Q[i] -= XYZ[i];
+					}
 				}
 				//Make sure streamed out
 				W = calcW( WALL[chosenBC],*(pp+currentP) );

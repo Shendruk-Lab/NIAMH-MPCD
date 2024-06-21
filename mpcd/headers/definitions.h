@@ -451,4 +451,6 @@
 # define DBGSWIMMERTORQUE 22
 /// @brief Debug/verbosity level.
 # define DBGINCOMP 23
+/// @brief Debug/verbosity level.
+# define DBGBCMPCROT 24
 #endif

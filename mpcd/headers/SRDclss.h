@@ -151,7 +151,7 @@ typedef struct bc {
 	double B[3];			///< Generalized amplitudes and frequencies for wavy-walls --- json `'wavy'`.
 	double R;				///< Boundary 'R' parameter --- json `'R'`.
 	int PLANAR;				///< Flags if BC is just a simple (X,Y or Z) plane.
-	int REORIENT;			///< Flags whether or not a rotation needs to be done everytime (very expensive).
+	int REORIENT;			///< Flags whether or not a rotation needs to be done everytime.
 	int ABS;				///< Flags if each term should be magnitude only --- json `'abs'`.
 	double ROTSYMM[2];		///< Sets the rotational symmetry of the shapes --- json `'rotSym'`.
 	                        // (see Gielis, American Journal of Botany 90(3): 333–338. 2003)
