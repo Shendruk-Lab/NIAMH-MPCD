@@ -1268,7 +1268,7 @@ void push( double V[],double KBT,int PL,double MASS,FILE *fin ) {
 	}
 	else{
 		printf( "Error: Particle velocity distribution unacceptable.\n" );
-		printf( "\t\tPL=%d.\n",PL );
+		printf( "\tPL=%d.\n",PL );
 		exit( 1 );
 	}
 }

@@ -1407,8 +1407,9 @@ void listinput( inputList in,double AVVEL,spec SP[],kinTheory theorySP[],kinTheo
 				}
 				printf( "\t\tInteraction matrix: " );
 				pvec( SP[i].M,NSPECI );
-				printf( "\t\tSpecies total mass: %lf\n",SP[i].DAMP );
-				printf( "\t\tDamping/friction coefficient: %lf\n",theorySP[i].sumM );
+				printf( "\t\tSpecies total mass: %lf\n",theorySP[i].sumM );
+				printf( "\t\tDamping/friction coefficient: %lf\n",SP[i].DAMP );
+				printf( "\t\tInitial distributions: pos=%d, vel=%d, ori=%d\n",SP[i].QDIST,SP[i].VDIST,SP[i].ODIST );
 				printf( "\t\tThe following assume the species are perfectly separated from each other\n" );
 				printf( "\t\t\tParticle number density: %lf\n",SP[i].nDNST );
 				printf( "\t\t\tMass density: %lf\n",SP[i].mDNST );
@@ -1563,9 +1564,9 @@ void stateinput( inputList in,spec SP[],bc WALL[],specSwimmer SS,outputFlagsList
 		fprintf( fsynopsis,"\tSpring separation: %lf\n",SS.ro );
 		fprintf( fsynopsis,"\tLJ sigma: %lf\n",SS.sig );
 		fprintf( fsynopsis,"\tLJ energy: %lf\n",SS.eps );
-		if(SS.dep==0){fprintf( fsynopsis," --- No short range attractive potential.\n" ); }
-		if(SS.dep==1) {fprintf( fsynopsis," --- AO potential turned on.\n" );fprintf( fsynopsis,"\tAO potential depth: %lf\n",SS.depth );fprintf( fsynopsis,"\tAO potential range: %lf\n",SS.range );}
-		if(SS.dep==2) {fprintf( fsynopsis," --- Square attractive potential turned on.\n" );fprintf( fsynopsis,"\t Square potential depth: %lf\n",SS.depth );fprintf( fsynopsis,"\t Square potential range: %lf\n",SS.range ); }
+		if(SS.dep==0){fprintf( fsynopsis,"\t--- No short range attractive potential.\n" ); }
+		if(SS.dep==1) {fprintf( fsynopsis,"\t--- AO potential turned on.\n" );fprintf( fsynopsis,"\tAO potential depth: %lf\n",SS.depth );fprintf( fsynopsis,"\tAO potential range: %lf\n",SS.range );}
+		if(SS.dep==2) {fprintf( fsynopsis,"\t--- Square attractive potential turned on.\n" );fprintf( fsynopsis,"\t Square potential depth: %lf\n",SS.depth );fprintf( fsynopsis,"\t Square potential range: %lf\n",SS.range ); }
 		fprintf( fsynopsis,"\tAverage run time: %lf\n",SS.runTime );
 		fprintf( fsynopsis,"\tAverage tumble time: %lf\n",SS.tumbleTime );
 		fprintf( fsynopsis,"\tMagnetic moment strength: %lf\n",SS.MAGMOM );
@@ -1594,9 +1595,9 @@ void stateinput( inputList in,spec SP[],bc WALL[],specSwimmer SS,outputFlagsList
 		fprintf( fsynopsis,"Order-order correlation:\t\t%d\n",out.CSSOUT);
 		fprintf( fsynopsis,"Phase-phase (binary fluid) correlation:\t\t%d\n",out.CPPOUT);
 		fprintf( fsynopsis,"Binder cumulant:\t\t%d --- bin size:\t\t%d\n",out.BINDER,out.BINDERBIN);
-		fprintf( fsynopsis,"How often  solids' trajectories outputted: %i\n",out.SOLOUT );
+		fprintf( fsynopsis,"How often solids' trajectories outputted: %i\n",out.SOLOUT );
 		fprintf( fsynopsis,"Print distributions:\n" );
-		fprintf( fsynopsis,"\tVel: %d\n\tSpeed: %d\n\tVorticity: %d\\n\tEnstrophy: %d\n\tDirector: %d\n\tScalar order parameter: %d\n\tDensity: %d\n",out.HISTVELOUT,out.HISTSPEEDOUT,out.HISTVORTOUT,out.HISTENSTROUT,out.HISTDIROUT,out.HISTSOUT,out.HISTNOUT );
+		fprintf( fsynopsis,"\tVel: %d\n\tSpeed: %d\n\tVorticity: %d\n\tEnstrophy: %d\n\tDirector: %d\n\tScalar order parameter: %d\n\tDensity: %d\n",out.HISTVELOUT,out.HISTSPEEDOUT,out.HISTVORTOUT,out.HISTENSTROUT,out.HISTDIROUT,out.HISTSOUT,out.HISTNOUT );
 		fprintf( fsynopsis,"Synopsis of Simulation: %i\n",out.SYNOUT );
 	}
 }
