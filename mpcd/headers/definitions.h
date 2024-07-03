@@ -250,7 +250,7 @@
 /* ****************************************** */
 //For translocation, the pore width can be changed in the BC inputs
 //HOWEVER, for initializing the polymer conformation, we need to know the pore width and it is hardcoded as transPoreWidth
-# define transPoreWidth 2
+# define transPoreWidth 4
 
 /* ****************************************** */
 /* *********** COLLISION OPERATOR *********** */
