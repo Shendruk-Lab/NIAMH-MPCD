@@ -2188,3 +2188,182 @@ void initializeRecovery(cell ***CL, particleMPC *SRDparticles, spec SP[], specSw
 	localPROP( CL,SP,specS,RTECH,LC );
 }
 
+
+///
+/// @brief Initializes a new instance of particleMPC with all zeros.
+///
+/// This function will set all parameters included in struct particleMPC to zero.
+/// This is useful/necessary because c-code can sometimes use undefined values if they were not explicitly set
+///
+/// @param p Pointer to the MPCD particle you are zero'ing.
+///
+void initZeroParticle(particleMPC *p) {
+	zerovec( p->Q,_3D );
+	zerovec( p->V,_3D );
+	zerovec( p->U,_3D );
+	zerovec( p->T,_3D );
+	p->S_flag=0;
+	p->SPID=0;
+	p->q=0.0;
+}
+
+///
+/// @brief Initializes a new instance of MPC species with all zeros.
+///
+/// This function will set all parameters included in struct spec to zero.
+/// This is useful/necessary because c-code can sometimes use undefined values if they were not explicitly set
+///
+/// @param sp Pointer to the MPCD species you are zero'ing.
+///
+void initZeroSpecies(spec *sp) {
+	sp->POP=0;
+	sp->QDIST=0;
+	sp->VDIST=0;
+	sp->ODIST=0;
+	sp->MASS=0.0;
+	sp->RFC=0.0;
+	sp->TUMBLE=0.0;
+	sp->CHIHI=0.0;
+	sp->CHIA=0.0;
+	sp->LEN=0.0;
+	sp->ACT=0.0;
+	sp->BS=0.0;
+	sp->MFPOT=0.0;
+	sp->DAMP=0.0;
+	zerovec( sp->M,MAXSPECI );
+	sp->SIGWIDTH=0.0;
+	sp->SIGPOS=0.0;
+	sp->MINACTRATIO=0.0;
+	sp->VOL=0.0;
+	sp->nDNST=0.0;
+	sp->mDNST=0.0;
+}
+
+///
+/// @brief Initializes a new instance of BC with all zeros.
+///
+/// This function will set all parameters included in struct BC to zero.
+/// This is useful/necessary because c-code can sometimes use undefined values if they were not explicitly set
+///
+/// @param  WALL Pointer to the WALL you are zero'ing.
+///
+void initZeroBC(bc *WALL) {
+	int i;
+	zerovec( WALL->P,4 );
+	zerovec( WALL->A,_3D );
+	zerovec( WALL->AINV,_3D );
+    zerovec( WALL->B,_3D );
+	WALL->R=0.0;
+	WALL->PLANAR=0;
+	WALL->REORIENT=0;
+	WALL->ABS=0;
+	zerovec( WALL->ROTSYMM,2 );
+	WALL->INV=0;
+	WALL->COLL_TYPE=0;
+	WALL->PHANTOM=0;
+	WALL->E=0.0;
+	WALL->DN=0.0;
+    WALL->DT=0.0;
+	WALL->DVN=0.0;
+    WALL->DVT=0.0;
+	zerovec( WALL->DVxyz,_3D );
+	WALL->MVN=0.0;
+    WALL->MVT=0.0;
+	WALL->MUN=0.0;
+    WALL->MUT=0.0;
+	zerovec( WALL->MUxyz,_3D );
+	zerovec( WALL->DUxyz,_3D );
+	WALL->KBT=0.0;
+	zerovec( WALL->Q,_3D );
+	zerovec( WALL->V,_3D );
+	zerovec( WALL->O,_3D );
+	zerovec( WALL->L,_3D );
+	zerovec( WALL->G,_3D );
+	WALL->W=0.0;
+	zerovec( WALL->Q_old,_3D );
+	zerovec( WALL->O_old,_3D );
+	zerovec( WALL->dV,_3D );
+	zerovec( WALL->dL,_3D );
+	WALL->DSPLC=0;
+	WALL->MASS=0.0;
+	WALL->VOL=0.0;
+	zeromatrix( WALL->I,_3D,_3D );
+	for( i=0; i<MAXSPECI+2; i++ ) WALL->INTER[i]=0;
+}
+
+///
+/// @brief Initializes a new instance of smono with all zeros.
+///
+/// This function will set all parameters included in struct smono to zero.
+/// This is useful/necessary because c-code can sometimes use undefined values if they were not explicitly set
+///
+/// @param sm Pointer to the MPCD species you are zero'ing.
+///
+void initZeroSmono(smono *sm) {
+	zerovec( sm->Q,_3D );
+	zerovec( sm->V,_3D );
+	zerovec( sm->A,_3D );
+	sm->HorM=0;
+	sm->next=NULL;
+	sm->previous=NULL;
+}
+
+///
+/// @brief Initializes a new instance of swimmer with all zeros.
+///
+/// This function will set all parameters included in struct swimmer to zero.
+/// This is useful/necessary because c-code can sometimes use undefined values if they were not explicitly set
+///
+/// @param sw Pointer to the MPCD species you are zero'ing.
+///
+void initZeroSwimmer(swimmer *sw) {
+	initZeroSmono(&(sw->H));
+	initZeroSmono(&(sw->M));
+	sw->RT=0;
+	zerovec( sw->n0,_3D );
+	sw->timeCNT=0;
+	sw->timeRND=0;
+	sw->ro=0.0;
+	sw->iro=0.0;
+	sw->sig=0.0;
+	sw->k=0.0;
+}
+
+///
+/// @brief Initializes a new instance of swimmer species with all zeros.
+///
+/// This function will set all parameters included in struct specSwimmer to zero.
+/// This is useful/necessary because c-code can sometimes use undefined values if they were not explicitly set
+///
+/// @param ss Pointer to the MPCD species you are zero'ing.
+///
+void initZeroSpecSwimmer(specSwimmer *ss) {
+	ss->TYPE=0;
+	ss->QDIST=0;
+	ss->ODIST=0;
+	ss->headM=0;
+    ss->middM=0;
+	ss->iheadM=0.0;
+    ss->imiddM=0.0;
+	ss->HSPid=0;
+    ss->MSPid=0;
+	ss->FS=0.0;
+	ss->TS=0.0;
+	ss->DS=0.0;
+	ss->sizeShrink=0.0;
+	ss->springShrink=0.0;
+	ss->fixDist=0.0;
+	ss->k=0.0;
+	ss->ro=0.0;
+    ss->iro=0.0;
+	ss->sig=0.0;
+    ss->isig=0.0;
+	ss->eps=0.0;
+	ss->dep=0;
+	ss->range=0.0;
+	ss->depth=0.0;
+	ss->runTime=0.0;
+    ss->tumbleTime=0.0;
+	ss->shrinkTime=0;
+	ss->MAGMOM=0.0;
+}

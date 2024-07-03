@@ -55,6 +55,9 @@ void MD_BCcollision( particleMD *atom,bc WALL[],double KBT,double t_step ) {
 	int bcCNT=0,reCNT=0,rethermCNT=0;
 	int INTER_backup[NBC][MAXSPECI+2];	    // Interaction matrix for BC with particles. 
 
+	//MAKE A FUNC THAT SETS EVERYTHING TO ZERO (or sensible)
+	initZeroParticle(&tempMPC);
+	initZeroSpecies(&tempSP);
 	//Cast the MD atom as a temporary MPCD particle
 	tempMPC.Q[0]=atom->rx;
 	tempMPC.V[0]=atom->vx;
@@ -70,6 +73,7 @@ void MD_BCcollision( particleMD *atom,bc WALL[],double KBT,double t_step ) {
 		tempMPC.U[d]=0.0;
 		tempMPC.T[d]=0.0;
 	}
+	//THINK ABVOUT HOW TO SET WHICH BCs TO INTERACT WITH
 	tempMPC.S_flag=0;
 	tempMPC.SPID=0;
 	tempSP.POP=1;

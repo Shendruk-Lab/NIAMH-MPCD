@@ -23,5 +23,6 @@ int isNaNs(double *x, int n);
 // Routines to set various forms of arrays to be zero'd
 void zerovec( double VEC[],int dimension );
 void zerovec_v(int count, int dim, ...); // variadic
+void zeromatrix( double MATRIX[][3],int dimRow,int dimCol );
 
 #endif
