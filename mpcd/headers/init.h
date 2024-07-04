@@ -84,4 +84,8 @@ void initializeRecovery(cell ***CL, particleMPC *SRDparticles, spec SP[], specSw
 
 void initZeroParticle(particleMPC *p);
 void initZeroSpecies(spec *sp);
+void initZeroBC(bc *WALL);
+void initZeroSmono(smono *sm);
+void initZeroSwimmer(swimmer *sw);
+void initZeroSpecSwimmer(specSwimmer *ss);
 #endif
