@@ -389,6 +389,22 @@ void openflow( FILE **f,char dir[],char fname[],char ext[] ) {
 }
 
 ///
+/// @brief Function that initializes the polar field output file.
+///
+/// This function initializes the polar field output file.
+/// It opens it up for writing and reading while formatting it with its header.
+///
+/// @param f Return pointer to the polar field output file being opened.
+/// @param dir Path to the directory of the polar field output file.
+/// @param fname Name of the polar field output file.
+/// @param ext Extension of the polar field output file.
+///
+void openpolar( FILE **f,char dir[],char fname[],char ext[] ) {
+	openBasic( f,dir,fname,ext );
+	polarheader( *f );
+}
+
+///
 /// @brief Function that initializes the velocity field output file.
 ///
 /// This function initializes the velocity field output file.
@@ -1577,6 +1593,15 @@ void setcoord(char dir[], spec SP[], particleMPC *pp, double KBT, double AVVEL[]
 		for( j=0; j<DIM; j++ ) AVVEL[j] += (pp+i)->V[j];
 
 		if( LC>ISOF ) orient( (pp+i)->U,(pp+i)->Q,SP[(pp+i)->SPID].ODIST );
+
+		// Add swimming speed in initialization for bacteria case
+		if (LC == BCT) {
+			for (int i = 0; i < GPOP; i++) {
+				for( j=0; j<DIM; j++ ) {
+					(pp+i)->V[j] += (pp+i)->U[j]*(SP[0].BS); //FIXME, make for every species
+				}
+			}
+		}
 	}
 	for( j=0; j<DIM; j++ ) AVVEL[j] /= (double)GPOP;
 	//Check particleMPC coordinates
@@ -1822,6 +1847,7 @@ void initOutput( char op[],outputFlagsList *outFlag,outputFilesList *outFile,inp
 	char filedensSTD[]="densSTD";
 	char fileenstrophy[]="avEnstrophy";
 	char fileflow[]="flowfield";
+	char filepolar[]="polarfield";
 	char filevel[]="velfield";
 	char fileswflow[]="swimmerflowfield";
 	char filesolids[]="solidtraj";
@@ -1868,6 +1894,7 @@ void initOutput( char op[],outputFlagsList *outFlag,outputFilesList *outFile,inp
 		outFlag->QKOUT=0;
 		outFlag->CNNOUT=0;
 		outFlag->CSSOUT=0;
+		outFlag->POLAROUT=0;
 	}
 	//Make no swimmerflowfield.dat if there's no swimmer
 	if(NS==0) {
@@ -1877,7 +1904,7 @@ void initOutput( char op[],outputFlagsList *outFlag,outputFilesList *outFile,inp
 	if( (outFlag->TRAJOUT)>=OUT ) for(i=0;i<NSPECI;i++) if(SP[i].POP>=1) opendetails( i,outFile->fdetail,op,fileprefix,filesuffix,fileextension );
 	//Initialize the course grained output file
 	if( (outFlag->COAROUT)>=OUT ) opencoarse( &(outFile->fcoarse),op,filecoarse,fileextension );
-	//d
+	//Initialize the velocity output file
 	if( (outFlag->AVVELOUT)>=OUT ) openavvel( &(outFile->favvel),op,fileavvel,fileextension );
 	//Initialize the orientation output file
 	if( (outFlag->AVORIOUT)>=OUT ) openavori( &(outFile->favori),op,fileavori,fileextension );
@@ -1892,8 +1919,9 @@ void initOutput( char op[],outputFlagsList *outFlag,outputFilesList *outFile,inp
 	if( (outFlag->DENSOUT)>=OUT ) opendensSTD( &(outFile->fdensSTD),op,filedensSTD,fileextension );
 	//Initialize the enstrophy output file
 	if( (outFlag->ENSTROPHYOUT)>=OUT ) openavenstrophy( &(outFile->fenstrophy),op,fileenstrophy,fileextension );
-	//Initialize the flow and velocity field output files
+	//Initialize the flow, polar and velocity field output files
 	if( (outFlag->FLOWOUT)>=OUT ) openflow( &(outFile->fflow),op,fileflow,fileextension );
+	if( (outFlag->POLAROUT)>=OUT ) openpolar( &(outFile->fpolar),op,filepolar,fileextension );
 	if( (outFlag->VELOUT)>=OUT ) openvel( &(outFile->fvel),op,filevel,fileextension );
 	//Initialize the flowfield around the first swimmer
 	if( (outFlag->SWFLOWOUT)>=OUT ) openswflow( &(outFile->fswflow),op,fileswflow,fileextension );

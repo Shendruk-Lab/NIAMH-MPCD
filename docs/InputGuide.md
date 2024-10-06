@@ -79,6 +79,7 @@ Tag             | Type          | Default Value | Description
 `trajOut`       | int           | 0             | Detailed particle trajectories for every particle of species type given by `trajSpecOut`
 `trajSpecOut`   | int           | 0             | Which number of species whose detailed trajectories to output
 `coarseOut`     | int           | 0             | Coarse grain data (cell velocity, densities, density of each species) field
+`polarOut`      | int           | 0             | Polar order averaged between output times
 `flowOut`       | int           | 0             | Flow field averaged between output times
 `velOut`        | int           | 0             | Instantaneous velocity field
 `swFlowOut`     | int           | 0             | Flow field averaged between output times, in the first bacteria's reference frame
@@ -281,6 +282,7 @@ As a reminder, if you wish to use the default value for a tag, you can leave it 
     "trajSpecOut":      0,
     "coarseOut":        0,
     "flowOut":          0,
+    "polarOut":         0,
     "velOut":           0,
     "swFlowOut":        0,
     "avVelOut":         0,
