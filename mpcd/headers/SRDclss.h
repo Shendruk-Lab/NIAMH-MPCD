@@ -296,7 +296,7 @@ typedef struct cell {
 /// All output files are stored within this struct, used as a container for simple passing to functions.
 ///
 typedef struct outputFilesList {
-	FILE *fcoarse,*fflow,*fvel,*fswflow,*fenergy,*fenergyfield,*fenneighbours;
+	FILE *fcoarse,*fflow,*fpolar,*fvel,*fswflow,*fenergy,*fenergyfield,*fenneighbours;
 	FILE *fsynopsis,*favvel,*favori,*forder,*forderQ,*forderQK,*favs,*fdensSTD,*fchckpnt,*fenstrophy,*fmultiphase,*fpressure;
 	FILE *fcorrVV,*fcorrNN,*fcorrWW,*fcorrDD,*fcorrSS,*fcorrPP,*fbinder;
 	FILE *fhistVel,*fhistSpeed,*fhistVort,*fhistEnstr,*fhistDir,*fhistS,*fhistDens;
@@ -322,6 +322,7 @@ typedef struct outputFlagsList {
 	int AVVELOUT;				///< Flag for if total average velocity is outputted --- json `'avVelOut'`.
 	int AVORIOUT;				///< Flag for if total average orientation is outputted --- json `'avOriOut'`.
 	int FLOWOUT;				///< Flag for if the running-average flow field is outputted --- json `'flowOut'`.
+	int POLAROUT;				///< Flag for if the polar field is outputted --- json `'polarOut'`.
 	int VELOUT;				    ///< Flag for if the instantaneous velocity field is outputted --- json `'velOut'`.
 	int SWFLOWOUT;				///< Flag for if the running-average flow field in 0th swimmer's reference frame is outputted --- json `'swFlowOut'`.
 

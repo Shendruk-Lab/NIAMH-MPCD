@@ -521,6 +521,24 @@ void coarseheader( FILE *fout ) {
 }
 
 ///
+/// @brief Prints column headers for polar field data output files.
+///
+/// Column headers are produced for polar field .dat files to display raw data in a table format.
+/// Time, t, is the first column header.
+/// QX, QY, and QZ are indices of spatial positions in Cartesian co-ordinates.
+/// UcmX, UcmY, and UcmZ are centre of mass velocity values in the Cartesian directions.
+/// POP is the cell population
+/// @param fout This is a pointer to the output .dat file name to be produced.
+///
+///
+void polarheader( FILE *fout ) {
+	int n;
+	fprintf( fout,"t\t\t\t\tQX\t\tQY\t\tQZ\tUcmX\t\t\tUcmY\t\t\tUcmZ\t\t\t\tPOP" );
+	for( n=0; n<NSPECI; n++ ) fprintf( fout,"\t\tSP%d",n );
+	fprintf( fout,"\n" );
+}
+
+///
 /// @brief Prints column headers for director field data output files.
 ///
 /// Column headers are produced for director field .dat files to display raw data in a table format.
@@ -1576,6 +1594,7 @@ void stateinput( inputList in,spec SP[],bc WALL[],specSwimmer SS,outputFlagsList
 		fprintf( fsynopsis,"Number of species with detailed output: %i\n",out.printSP );
 		fprintf( fsynopsis,"Print coarse data every %i time steps\n",out.COAROUT );
 		fprintf( fsynopsis,"Print flow data: %i\n",out.FLOWOUT );
+		fprintf( fsynopsis,"Print polar data: %i\n",out.POLAROUT );
         fprintf( fsynopsis,"Print velocity data: %i\n",out.VELOUT );
 		fprintf( fsynopsis,"Print flow around first swimmer data: %i\n",out.SWFLOWOUT );
 		fprintf( fsynopsis,"Print averaged flow data: %i\n",out.AVVELOUT );
@@ -2063,6 +2082,50 @@ void avenstrophyout( FILE *fout,double t,double E ) {
 ///
 void binderout( FILE *fout,double t,double UL ) {
 	fprintf( fout, "%12.5e\t%12.5e\n",t,UL );
+	#ifdef FFLSH
+		fflush(fout);
+	#endif
+}
+
+///
+/// @brief Outputs polar field data calculated from cell velocities.
+///
+/// This function computes the centre of mass velocity in the `x`,`y`, and `z` directions for each cell, as well as the average orienation.
+/// The sum of all centre of mass orientations are computed into an average in the `x`, `y`, and `z` directions.
+/// The centre of mass velocities and averages are printed to the output file.
+///
+/// @param fout This is a pointer to the output .dat file name to be produced.
+/// @param CL This is a pointer to the co-ordinates and cell of each particle.
+/// @param interval is the time interval used for normalisation.
+/// @param t This is the time step.
+/// @see outputResults()
+///
+void polarout( FILE *fout,double t,cell ***CL) {
+	int i,j,k,n;
+	for( i=0; i<XYZ[0]; i++ ) for( j=0; j<XYZ[1]; j++ ) for( k=0; k<XYZ[2]; k++ ) {
+		fprintf( fout,"%.2f\t",t );
+		fprintf( fout,"%5d\t%5d\t%5d\t",i,j,k );
+		if( CL[i][j][k].POP == 0 || CL[i][j][k].pp==NULL ) {
+			fprintf( fout, "%12.5e\t%12.5e\t%12.5e\t%5i",0.,0.,0.,0 );
+			for( n=0; n<NSPECI; n++ ) fprintf( fout, "\t%5i",0 );
+			fprintf( fout,"\n" );
+		}
+		else {
+			double AVORI[_3D];
+			int d;
+			particleMPC *pMPC;	//Temporary pointer to MPC particles
+			pMPC = CL[i][j][k].pp;
+			for( d=0; d<DIM; d++ ) AVORI[d]=0.;
+			while(pMPC!=NULL) {
+				for( d=0; d<DIM; d++ ) AVORI[d]+=pMPC->U[d];
+				pMPC = pMPC->next;
+			}
+			for( d=0; d<DIM; d++ ) AVORI[d]/=CL[i][j][k].POP;
+			fprintf( fout, "%12.5e\t%12.5e\t%12.5e\t%5i",AVORI[0],AVORI[1],AVORI[2],CL[i][j][k].POP );
+			for( n=0; n<NSPECI; n++ ) fprintf( fout, "\t%5i",CL[i][j][k].SP[n] );
+			fprintf( fout,"\n" );
+		}
+	}
 	#ifdef FFLSH
 		fflush(fout);
 	#endif
@@ -3066,6 +3129,7 @@ void outputResults(cell ***CL, particleMPC *SRDparticles, spec SP[], bc WALL[], 
 	#endif
 	if(outFlag.printSP>0) if( outFlag.TRAJOUT>=OUT  && runtime%outFlag.TRAJOUT==0 ) coordout( outFiles.fdetail,outFlag.printSP,time_now,SRDparticles,SP );
 	if( outFlag.FLOWOUT>=OUT && runtime%outFlag.FLOWOUT==0 ) flowout( outFiles.fflow,CL,outFlag.FLOWOUT, time_now);
+	if( outFlag.POLAROUT>=OUT && runtime%outFlag.POLAROUT==0 ) polarout( outFiles.fpolar,time_now,CL);
 	if( outFlag.VELOUT>=OUT && runtime%outFlag.VELOUT==0 ) velout( outFiles.fvel, CL, time_now);
 	if( outFlag.SWFLOWOUT>=OUT && runtime%outFlag.SWFLOWOUT==0 && runtime!=0) swflowout( outFiles.fswflow,CL,outFlag.SWFLOWOUT, time_now);
 	if( outFlag.COAROUT>=OUT && runtime%outFlag.COAROUT==0 ) coarseout( outFiles.fcoarse,time_now,CL );
@@ -3327,7 +3391,7 @@ int writeOutput( int t,outputFlagsList f,int RFRAME,int zeroNetMom ) {
 		return 1;
 	}
 	//Fields
-	else if( ( f.FLOWOUT>=OUT && t%f.FLOWOUT==0 ) || ( f.VELOUT>=OUT && t%f.VELOUT==0 ) || ( f.SWFLOWOUT>=OUT && t%f.SWFLOWOUT==0 ) || ( f.COAROUT>=OUT && t%f.COAROUT==0 ) || ( f.ENFIELDOUT>=OUT && t%f.ENFIELDOUT==0 ) || ( f.ORDEROUT && t%f.ORDEROUT==0 ) || ( f.QTENSOUT && t%f.QTENSOUT==0 ) || ( f.TOPOOUT && t%f.TOPOOUT==0 ) || ( f.DEFECTOUT && t%f.DEFECTOUT==0 ) || ( f.DISCLINOUT && t%f.DISCLINOUT==0 ) || ( f.SPOUT && t%f.SPOUT==0 ) || ( f.PRESOUT && t%f.PRESOUT==0 ) ) {
+	else if( ( f.FLOWOUT>=OUT && t%f.FLOWOUT==0 ) || ( f.POLAROUT>=OUT && t%f.POLAROUT==0 ) || ( f.VELOUT>=OUT && t%f.VELOUT==0 ) || ( f.SWFLOWOUT>=OUT && t%f.SWFLOWOUT==0 ) || ( f.COAROUT>=OUT && t%f.COAROUT==0 ) || ( f.ENFIELDOUT>=OUT && t%f.ENFIELDOUT==0 ) || ( f.ORDEROUT && t%f.ORDEROUT==0 ) || ( f.QTENSOUT && t%f.QTENSOUT==0 ) || ( f.TOPOOUT && t%f.TOPOOUT==0 ) || ( f.DEFECTOUT && t%f.DEFECTOUT==0 ) || ( f.DISCLINOUT && t%f.DISCLINOUT==0 ) || ( f.SPOUT && t%f.SPOUT==0 ) || ( f.PRESOUT && t%f.PRESOUT==0 ) ) {
 		return 1;
 	}
 	//Correlation functions
