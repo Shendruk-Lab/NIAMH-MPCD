@@ -1,0 +1,34 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "C Make Clean Debug",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/mpcd.out",
+            "args": [],
+            "cwd": "${workspaceFolder}",
+            "preLaunchTask": "make clean make debug"
+        },
+        {
+            "name": "C Make Debug",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/mpcd.out",
+            "args": [],
+            "cwd": "${workspaceFolder}",
+            "preLaunchTask": "make debug"
+        },
+        {
+            "name": "Run Specific Sim",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/../mpcdDebugPlus.out",
+            "args": ["-i", "/Users/tshendru/Documents/research/results/activeTranslocation/batch02_findProb/checkSimSingleFluidButComplexBCs/input.json", "-o", "/Users/tshendru/Documents/research/results/activeTranslocation/batch02_findProb/checkSimSingleFluidButComplexBCs/"],
+            "cwd": "${workspaceFolder}"
+        }
+    ]
+}

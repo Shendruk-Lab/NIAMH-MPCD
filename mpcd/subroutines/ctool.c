@@ -88,6 +88,21 @@ void zerovec( double VEC[],int dimension ) {
 }
 
 ///
+/// @brief Function that zeros any matrix.
+///
+/// This function sets the component of the receiving matrix to 0.
+///
+/// @param MATRIX The matrix whose components will be zeroed.
+/// @param dimRow The dimension of the rows.
+/// @param dimCol The dimension of the columns (can't be longer than 3).
+///
+void zeromatrix( double MATRIX[][3],int dimRow,int dimCol ) {
+    int i,j;
+    if(dimCol>3) dimCol=3;
+    for( i=0; i<dimRow; i++ ) for( j=0; j<dimCol; j++ ) MATRIX[i][j]=0.0;
+}
+
+///
 /// @brief Variadic version of zerovec
 ///
 /// This function will set all vectors following the `dim` param to zero.

@@ -1521,6 +1521,9 @@ void readJson( char fpath[], inputList *in, spec **SP, kinTheory **theory, parti
 			// set all the default values
 			currWall->COLL_TYPE = 1; // collType
 			currWall->E = -1.0; // E
+			for (j = 0; j < _3D; j++) {
+				currWall->B[j] = 0; // B array
+			}
 			for (j = 0; j < _3D; j++) { // Q array
 				currWall->Q[j] = 0;
 			}

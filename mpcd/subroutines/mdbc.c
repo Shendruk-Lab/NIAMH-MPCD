@@ -55,6 +55,8 @@ void MD_BCcollision( particleMD *atom,bc WALL[],double KBT,double t_step ) {
 	int bcCNT=0,reCNT=0,rethermCNT=0;
 	int INTER_backup[NBC][MAXSPECI+2];	    // Interaction matrix for BC with particles. 
 
+	initZeroParticle(&tempMPC);
+	initZeroSpecies(&tempSP);
 	//Cast the MD atom as a temporary MPCD particle
 	tempMPC.Q[0]=atom->rx;
 	tempMPC.V[0]=atom->vx;
@@ -83,6 +85,7 @@ void MD_BCcollision( particleMD *atom,bc WALL[],double KBT,double t_step ) {
 		// Set the interaction with species zero (since set temporary MPC particle's SPID=0) to MD interaction (index=MAXSPECI+0)
 		WALL[i].INTER[0]=INTER_backup[i][MAXSPECI+0];
 	}
+	tempSP.VDIST=RANDVEL;	//Set velocity distribution to randomly draw velocities in case of boundary issue
 
 	MPC_BCcollision( &tempMPC,0,WALL,&tempSP,KBT,t_step,0,&bcCNT,&reCNT,&rethermCNT,0 );
 
