@@ -168,6 +168,9 @@ Time `t` given in MPCD units. Separation `dr` given in MPCD units.
 | `velCorrOut`   | `corrVelVel.dat`     | Velocity autocorrelation (radial function)               | Time              | `t`            |
 |                |                      |                                                          | Separation        | `dr`           |
 |                |                      |                                                          | Correlation value | `C`            |
+| `densCorrOut`  | `corrDensDens.dat`   | Density autocorrelation (radial function)                | Time              | `t`            |
+|                |                      |                                                          | Separation        | `dr`           |
+|                |                      |                                                          | Correlation value | `C`            |
 | `dirCorrOut`   | `corrDirDir.dat`     | Director autocorrelation (radial function)               | Time              | `t`            |
 |                |                      |                                                          | Separation        | `dr`           |
 |                |                      |                                                          | Correlation value | `C`            |
