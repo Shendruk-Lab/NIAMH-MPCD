@@ -304,7 +304,7 @@ while infile:
     # load defects and draw them as necessary
     # FIXME: only works for 2d for now, doesnt take into account d1 or d2
     if LOADDEFECTS and (j < len(defects)):
-      print(f"Drawing defects {j}/{len(defects)-1}")
+      # print(f"Drawing defects {j}/{len(defects)-1}")
       for defect in defects[j-1]: # j is not 0 indexed reeeeee
         defect.drawDefect(0.5*(qx+qy), 2)
     name='frame%04d.png'%(n)

@@ -101,12 +101,13 @@ def getDefectData(dir: str, sysDim):
     :return: List of `TimestepDefectContainer` objects containing the defects 
         at each timestep
     """
+    firstLine = 14
     assert(sysDim[2] == 1), "defectLoader only works for 2D"
 
     #load data file, cannot use numpy for this because of the data format
     file = dir
     infile = open(file, "r")
-    for i in range(13): #toss header
+    for i in range(firstLine): #toss header
         line = infile.readline()
 
     # data to return later
@@ -119,47 +120,58 @@ def getDefectData(dir: str, sysDim):
     # 3D array containing defect ID info, [x][y][z], default -1
 
     error = False # error catching
-    currLine = 14
+    currLine = firstLine+1 # current line number
     t = 0
     while infile: #loop through file to look for the target data we want
-        line = infile.readline()
-
-        def endTStep(t : float): # code to be run at the end of each timestep
-            collatedDefect = _collapseDefects(DEFECTDATA, DEFECTIDARRAY, 
-                sysDim)
-            timeStepList.append(TimestepDefectContainer(t, collatedDefect))
-
-        if (not line): #leave loop if EoF
-            endTStep(t)
+        line = infile.readline() #read time and number of defects
+        if not line: #leave loop if EoF
             break
-        else:
+        try:
+            time, numDefects = line.split("\t", 1)
+            time = float(time)
+            numDefects = int(numDefects)
+            # Set up the defect data structure
+            error = False
+            DEFECTDATA = [] #clear defect data list
+            DEFECTIDARRAY = -1*np.ones((sysDim[0], sysDim[1], sysDim[2]))  
+            # 3D array containing defect ID info, [x][y][z], default -1
+        except:
+            print("Error reading file "+dir+" on line "+str(currLine))
+            error = True
+            continue
+        # if numDefects == 0: #if no defects, skip to next line
+        #     error = False
+        #     continue
+        if numDefects < 0: #if negative number of defects, then we have a problem
+            print("Error negative number of defects from file "+dir+" on line "+str(currLine))
+
+        for d in range(numDefects):
+            line = infile.readline()
             try:
-                t,qx,qy,qz,charge,angle = line.split("\t", 6)
-                t = float(t)
+                qx,qy,charge,angle = line.split("\t", 6)
+                qx = float(qx)
+                qy = float(qy)
                 charge = float(charge)
+                angle = float(angle)
             except:
                 error = True
                 print("Error reading file "+dir+" on line +"+str(currLine))
                 continue
-
-            if t > lastT: # if there's a new timestep worth of data, prepare for the next block of data
-                if not error: endTStep(t) # only append data if not error
-                lastT = t                
-                error = False
-
-                DEFECTDATA = [] #clear defect data list
-                DEFECTIDARRAY = -1*np.ones((sysDim[0], sysDim[1], sysDim[2]))  
-                # 3D array containing defect ID info, [x][y][z], default -1
-
             if abs(abs(charge)-0.5) < 0.001: # if we have charge \pm 1/2 then we have a defect
-                DEFECTDATA.append(Defect(pos=np.array([float(qx), float(qy), 
-                    float(qz)]), charge=float(charge), angle=float(angle)))
-
+                DEFECTDATA.append(Defect(pos=np.array([float(qx), float(qy),0]), charge=float(charge), angle=float(angle)))
                 #add to the defect ID array too
-                DEFECTIDARRAY[int(qx)][int(qy)][int(qz)] = len(DEFECTDATA) - 1
+                DEFECTIDARRAY[int(qx)][int(qy)][0] = len(DEFECTDATA) - 1
+            currLine += 1
         
+        # Read empty line and prepare for next timestep
+        line = infile.readline() #read empty line
         currLine += 1
-    
+        error = False
+        collatedDefect = _collapseDefects(DEFECTDATA, DEFECTIDARRAY, sysDim)
+        timeStepList.append(TimestepDefectContainer(t, collatedDefect))
+        DEFECTDATA = [] #clear defect data list
+        DEFECTIDARRAY = -1*np.ones((sysDim[0], sysDim[1], sysDim[2]))
+
     infile.close()
     return timeStepList
 
