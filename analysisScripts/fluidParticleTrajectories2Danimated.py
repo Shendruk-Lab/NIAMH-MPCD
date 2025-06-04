@@ -62,6 +62,10 @@ suffix='.mp4'
 _x=0
 _y=1
 _z=2
+if(colloidName is None):
+    colloidName = []
+if(particleName is None):
+    particleName = []
 
 ###########################################################
 ### Read input json
@@ -99,6 +103,7 @@ if "species" in input:
             exit()
 radius=[]
 aspectRatio=[]
+displacement=[]
 if "BC" in input:
     for c in input['BC']:
         if 'R' in c:
@@ -110,6 +115,20 @@ if "BC" in input:
             aspectRatio.append(c['aInv'][_x]/c['aInv'][_y])
         else:
             aspectRatio.append(1.0)
+        if 'dsplc' in c:
+            displacement.append(c['dsplc'])
+        else:
+            displacement.append(0)
+i=0
+while i<len(displacement):
+    if displacement[i]==0:
+        displacement.pop(i)
+        radius.pop(i)
+        aspectRatio.pop(i)
+        i-=1
+    i+=1
+print("Radius: ",radius)
+print("colloidNames: ",colloidName)
 solidTrajOut=0
 trajOut=0
 if "solidTrajOut" in input:
@@ -203,7 +222,13 @@ for c in range(numFluidParticles):
             break
         i=i+1
     infile.close()
-time=len(cPos[0])
+if(len(cPos)>0):
+    time=len(cPos[0])
+elif(len(fPos)>0):
+    time=len(fPos[0])
+else:
+    print("No data found in input files.")
+    exit()
 for i in range(len(fPos)):
     time=min(time,len(fPos[i]))
 for i in range(len(cPos)):
@@ -235,7 +260,7 @@ for t in range(time):
     xlabel(r'$x$')
     ylabel(r'$y$')
     plt.axis(xmax=xyzSize[_x],xmin=0,ymax=xyzSize[_y],ymin=0)
-    name='frame%04d.png'%(t)
+    name='frame%06d.png'%(t)
     # uncomment below for snapshots
     plt.axis('off')
     plt.subplots_adjust(left=0, right=1, top=1, bottom=0)
@@ -248,7 +273,7 @@ print( "Animating ..." )
 name='2Dorientation_animation%s'%suffix
 myCommand="rm %s"%name
 call(myCommand,shell=True)
-myCommand = "ffmpeg -f image2 -r %d"%(framerate)+" -i frame%04d.png"+" -vcodec %s -b %dk -r %d %s"%(codec,bitrate,framerate,name)
+myCommand = "ffmpeg -f image2 -r %d"%(framerate)+" -i frame%06d.png"+" -vcodec %s -b %dk -r %d %s"%(codec,bitrate,framerate,name)
 call(myCommand,shell=True)
 if not keepFrames:
     myCommand="rm frame*.png"
