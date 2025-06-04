@@ -315,7 +315,31 @@ int main(int argc, char* argv[]) {
 		//If translocated then set runtime to a value even greater than simSteps to trigger a break
 		if(MDmode && simMD->polyLayout[POLY_SETS-1]==LAYOUT_TRANS) {
 			atom=simMD->atom.items;
-			if( atom->ry>XYZ_P1[1]/2+2*transPoreWidth || (atom+(simMD->atom.n-1))->ry<XYZ_P1[1]/2-2*transPoreWidth ) runtime =inputVar.simSteps+1;	
+			if( atom->ry>XYZ_P1[1]/2+2*transPoreWidth || (atom+(simMD->atom.n-1))->ry<XYZ_P1[1]/2-2*transPoreWidth ){
+
+				// local simulation variables
+				sceneptr s = simMD->scenes;
+				int	phase = simMD->phase;
+				
+				// Flag to track if ACTION_PRINT happened
+				int printed = 0;
+
+				// check every histogram
+				while (s) {
+					if (s->active && s->stream) {
+						if (s->stepPrint[count_] == s->stepPrint[phase]) {
+							if (s->scenefunc) {
+								s->scenefunc ((void *) simMD, s, ACTION_PRINT);
+								printed = 1; // Set the flag
+							}
+						}
+					}
+					s = s->next;
+				}
+				if (printed) {
+					runtime =inputVar.simSteps+1;
+				}
+			}	
 		}
 	}
 	#ifdef DBG
