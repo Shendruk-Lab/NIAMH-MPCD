@@ -220,6 +220,7 @@ int main(int argc, char* argv[]) {
 				if( DBUG >= DBGINIT ) printf( "\tLaunch MD simulation\n" );
 			#endif
 			simMD = launchMD(argc,argv);
+			simMD->pinnedParticles = 0;  // default: no pinning after warmup unless explicitly set
 			if(outFlags.SYNOUT == OUT) fprintf(outFiles.fsynopsis,"\nMD integrator launched.\n" );
 		}
 		//Normal initialization
@@ -287,8 +288,15 @@ int main(int argc, char* argv[]) {
 	// This is the main loop of the SRD program. The temporal loop.
 	starttime=runtime;
 	if (simMD != NULL) {
-		simMD->warmupMD = POS_WARMUP;
+		if (simMD->warmupMD == PINNED_THROUGH) {
+			simMD->warmupMD = POS_WARMUP;     // transition to saving mode
+			simMD->pinnedParticles = 1;       // but keep pinning active
+		} else {
+			simMD->warmupMD = POS_WARMUP;     // standard transition
+			simMD->pinnedParticles = 0;       // default: no pinning
+		}
 	}
+	
 	// Track previous MD stepPrint count for detecting reset after print
 	int prev_step_count = 0;
 	for( runtime=starttime; runtime<=inputVar.simSteps; runtime++ ) {

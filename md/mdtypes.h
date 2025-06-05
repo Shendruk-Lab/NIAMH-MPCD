@@ -86,6 +86,8 @@ extern int snprintf (char *__restrict __s, size_t __maxlen, __const char *__rest
 # define PINNED_WARMUP          2
 //MD Flag that warmup has finished
 # define POS_WARMUP             3
+//pinned before and after warmup
+#define PINNED_THROUGH 4 
 
 // domains
 #define	DOMAIN_ALL				-1
@@ -147,6 +149,9 @@ extern int snprintf (char *__restrict __s, size_t __maxlen, __const char *__rest
 #define	LAYOUT_TRANS		9
 // Holly and Emma added for curved rods
 #define	LAYOUT_BANANA		10
+
+// Shift applied to polymer length on translocation
+#define TRANS_SHIFT         5
 
 // atom types (index)
 #define TYPE_WALL				0
@@ -690,6 +695,7 @@ typedef struct simulation {		 		// a simulation
     char		label[STRLEN];			///< simulation label
     char		msg[STRLEN];		 	///< message buffer
 
+    int pinnedParticles;                ///< keep a cetain monomer pinned 
 } simulation;
 typedef simulation *simptr;
 

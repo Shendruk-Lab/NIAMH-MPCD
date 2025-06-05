@@ -683,6 +683,10 @@ void TranslateMacros (char **stringptr)
 	snprintf (macro, STRMAX, "POS_WARMUP");
 	snprintf (value, STRMAX, "%u", POS_WARMUP);
 	ReplaceMacro (stringptr, macro, value);
+
+	snprintf (macro, STRMAX, "PINNED_THROUGH");
+	snprintf (value, STRMAX, "%u", PINNED_THROUGH);
+	ReplaceMacro (stringptr, macro, value);
 }
 
 
