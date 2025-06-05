@@ -110,7 +110,7 @@ void integrateMD_Pinned (simptr sim, int MDmode, int steps,struct particleMPC *p
 	if (sim->monoCharge[0]!=0 || sim->rCutCoul!=0.) ComputeElectrostaticForcesSRD(sim,pSRD,SP,GPOP,steps,CL);
 
 	nAtom	= sim->atom.n;
-	int nRod = (int)(nAtom/2) - TRANS_SHIFT;  // offset +TRANS_SHIFT
+	int nRod = (int)(nAtom/2) + TRANS_SHIFT;  // offset +TRANS_SHIFT
 
 	// the central monomer 
 	p	= (sim->atom.items) + nRod ;
