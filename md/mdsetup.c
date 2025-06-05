@@ -1140,11 +1140,29 @@ void InitPolymers (simptr sim)
 					}
 					// Mixing Fluid and RODY layout 
 					else if (polyLayout[set]==LAYOUT_TRANS ) {
+						// Decide how many monomers to grow in the rod part (shifted start if flag==1)
+						int nRod = sim->polyN[set]/2 - TRANS_SHIFT;  // offset +TRANS_SHIFT 
+						int porePadding = 2;               // assumed extra spacing
+						int nRodTotal = nRod + 1 + transPoreWidth/2 + porePadding; // rod + middle + pore + padding
+						int nRandom = sim->polyN[set] - nRodTotal;  // remainder to grow randomly
+
+						// Grow the directed (rod-like) portion first
 						p1 = p3;
-						p1->next = GrowRodChain (sim, polyAtomType[set], layout, polyN[set],  NULL, &grown, y_, 1);
-						if((sim->polyN[set]/2)-3 > 0){
-							grown = 0 ;
-							GrowLinearChainTrans (sim, polyAtomType[set], layout, sim->polyN[set]-((sim->polyN[set]/2)+1+transPoreWidth/2+2), (p1->next)+polyN[set]/2+transPoreWidth/2+2, &grown);
+						p1->next = GrowRodChain(sim, polyAtomType[set], layout, polyN[set], NULL, &grown, y_, 1);
+
+						// Grow the random part if any monomers are left
+						if(nRandom > 0){
+							// Traverse to the last monomer created by GrowRodChain
+							particleMD *pLastRod = p1->next;
+							int steps = nRodTotal - 1;  // zero-based index of last rod monomer
+							while (steps-- && pLastRod) {
+								pLastRod = pLastRod->next;
+							}
+							// Grow the random part, connected to the last rod monomer
+							if (pLastRod) {
+								grown = 0 ;
+								GrowLinearChainTrans(sim, polyAtomType[set], layout, nRandom, pLastRod, &grown);
+							}
 						}
 					}
 					// Curved layout 
@@ -2737,14 +2755,24 @@ particleMD *GrowRodChain (simptr sim, int type, int layout, int n, particleMD *p
 	// pointer otherwise. It also sets the status variable to 1 for a fully
 	// grown subchain, 0 otherwise.
 
-	int		grown, loop,Ntotal;
+	int		grown, loop, nRandom, nRod;
 	particleMD	p1, *pNew=0;
 	real	dr=0.0;
 
-	// Number of monomers left for random part of LAYOUT_TRANS, works if translocation flag is on
-	Ntotal = sim->polyN[POLY_SETS-1]-((sim->polyN[POLY_SETS-1]/2)+1+transPoreWidth*0.5+2.0);
+	// Decide how many monomers to grow in the rod part (shifted start if flag==1)
+	if (flag == 1) {
+		nRod = sim->polyN[POLY_SETS-1]/2 - TRANS_SHIFT;
+
+	} else {
+		nRod = sim->polyN[POLY_SETS-1]/2;
+	}
+
+	int porePadding = 2;               // assumed extra spacing
+	int nRodTotal = nRod + 1 + transPoreWidth/2 + porePadding; // rod + middle + pore + padding
+	// Number of monomers left to grow randomly for LAYOUT_TRANS, works if translocation flag is on
+	nRandom = sim->polyN[POLY_SETS-1] - nRodTotal;
 	// return if there is no monomer to add
-	if (n==0 || (flag==1 && n==Ntotal)) {
+	if (n==0 || (flag==1 && n==nRandom)) {
 		*status = 1;
 		return 0;
 	}
@@ -2752,7 +2780,7 @@ particleMD *GrowRodChain (simptr sim, int type, int layout, int n, particleMD *p
 	// add a monomer in the chain
 	grown = 0;
 	loop  = GROWLOOP_MAX;
-	dr=0.5*(sim->sigma_lj+sim->r0Fene);
+	dr = 0.5 * (sim->sigma_lj+sim->r0Fene);
 	while (!grown && loop--) {
 
 		// new monomer location
@@ -2764,15 +2792,17 @@ particleMD *GrowRodChain (simptr sim, int type, int layout, int n, particleMD *p
 		}
 		else {
 			pNew = AtomInsert (sim, type, layout, 0, CHECK, CHECK);
+			// Shift initial monomer location
+			real offset = (real)nRod;
 			// Force it to be at a give position rather than the random position it was inserted at
-			pNew->rx = sim->box[x_]*0.5 - (1-dir)*n/2;
-			pNew->ry = sim->box[y_]*0.5	- (dir)*n/2;
+			pNew->rx = sim->box[x_]*0.5 - (1-dir) * offset * dr;
+			pNew->ry = sim->box[y_]*0.5	- (dir) * offset * dr;
 			pNew->rz = sim->box[z_]*0.5;
-			pNew->wx = sim->box[x_]*0.5 - (1-dir)*n/2;
-			pNew->wy = sim->box[y_]*0.5 - (dir)*n/2;
+			pNew->wx = sim->box[x_]*0.5 - (1-dir) * offset * dr;
+			pNew->wy = sim->box[y_]*0.5 - (dir) * offset * dr;
 			pNew->wz = sim->box[z_]*0.5;
-			pNew->x0 = sim->box[x_]*0.5 - (1-dir)*n/2;
-			pNew->y0 = sim->box[y_]*0.5 - (dir)*n/2;
+			pNew->x0 = sim->box[x_]*0.5 - (1-dir) * offset * dr ;
+			pNew->y0 = sim->box[y_]*0.5 - (dir) * offset * dr;
 			pNew->z0 = sim->box[z_]*0.5;
 		}
 
