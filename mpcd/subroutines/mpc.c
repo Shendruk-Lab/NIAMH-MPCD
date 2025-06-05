@@ -4575,13 +4575,22 @@ void timestep(cell ***CL, particleMPC *SRDparticles, spec SP[], bc WALL[], simpt
 		if( DBUG >= DBGTITLE && MD_mode != noMD ) printf("Integrate MD.\n" );
 	#endif
 	if (MD_mode) {
+		// === Post-warmup or free warmup phase ===
+		// Either in a free warmup (monomers evolve normally, data is not saved), 
+		// or the main simulation phase (POS_WARMUP, data is saved)
 		if (simMD->warmupMD == FREE_WARMUP || simMD->warmupMD == POS_WARMUP) {
+			// After warmup, if pinning should persist (e.g., from PINNED_THROUGH), use the pinned integrator
 			if (simMD->pinnedParticles) {
 				integrateMD_Pinned(simMD, MD_mode, in.stepsMD, SRDparticles, WALL, SP, GPOP, NBC, CL);
+			// Otherwise, proceed with normal (unpinned) MD integration
 			} else {
 				integrateMD(simMD, MD_mode, in.stepsMD, SRDparticles, WALL, SP, GPOP, NBC, CL);
 			}
 		}
+		// === During pinned warmup ===
+		// Warmup phase where monomers are pinned in place, either:
+		// - explicitly in PINNED_WARMUP, or
+		// - temporarily in PINNED_THROUGH before transitioning to data-saving mode
 		else if (simMD->warmupMD == PINNED_WARMUP || simMD->warmupMD == PINNED_THROUGH) {
 			integrateMD_Pinned(simMD, MD_mode, in.stepsMD, SRDparticles, WALL, SP, GPOP, NBC, CL);
 		}
