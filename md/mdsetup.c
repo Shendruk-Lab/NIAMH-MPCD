@@ -1141,7 +1141,7 @@ void InitPolymers (simptr sim)
 					// Mixing Fluid and RODY layout 
 					else if (polyLayout[set]==LAYOUT_TRANS ) {
 						// Decide how many monomers to grow in the rod part (shifted start if flag==1)
-						int nRod = sim->polyN[set]/2 - TRANS_SHIFT;  // offset +TRANS_SHIFT 
+						int nRod = sim->polyN[set]/2 + TRANS_SHIFT;  // offset +TRANS_SHIFT 
 						int porePadding = 2;               // assumed extra spacing
 						int nRodTotal = nRod + 1 + transPoreWidth/2 + porePadding; // rod + middle + pore + padding
 						int nRandom = sim->polyN[set] - nRodTotal;  // remainder to grow randomly
@@ -2761,7 +2761,7 @@ particleMD *GrowRodChain (simptr sim, int type, int layout, int n, particleMD *p
 
 	// Decide how many monomers to grow in the rod part (shifted start if flag==1)
 	if (flag == 1) {
-		nRod = sim->polyN[POLY_SETS-1]/2 - TRANS_SHIFT;
+		nRod = sim->polyN[POLY_SETS-1]/2 + TRANS_SHIFT;
 
 	} else {
 		nRod = sim->polyN[POLY_SETS-1]/2;
