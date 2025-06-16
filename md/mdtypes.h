@@ -151,7 +151,7 @@ extern int snprintf (char *__restrict __s, size_t __maxlen, __const char *__rest
 #define	LAYOUT_BANANA		10
 
 // Shift applied to polymer length on translocation
-#define TRANS_SHIFT         5
+#define TRANS_SHIFT         100
 
 // atom types (index)
 #define TYPE_WALL				0
