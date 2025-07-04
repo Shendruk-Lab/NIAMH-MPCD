@@ -71,6 +71,7 @@ typedef struct spec {
 	double SIGWIDTH;		///< The width of the sigmoid for active dipole sigmoid (`DIPOLE_DIR_SIG` in definitions.h). 
 	double SIGPOS;			///< The position of the sigmoid for active dipole sigmoid (`DIPOLE_DIR_SIG` in definitions.h).
 	double MINACTRATIO;		///< Minimum proportion of particles in the cell for activity to be applied.
+	double sMFPOT;			///< A specy-specific Mean Field Potential. --- json `'sMFPOT'`
 	double VOL;				///< The volume accessible to this species of particle. Determined by Monte Carlo.
 	double nDNST;			///< The particle number density of this species. Found using the volume `'VOL'`.
 	double mDNST;			///< The mass density of this species. Found using the volume `'VOL'`.
@@ -297,7 +298,7 @@ typedef struct cell {
 ///
 typedef struct outputFilesList {
 	FILE *fcoarse,*fflow,*fvel,*fswflow,*fenergy,*fenergyfield,*fenneighbours;
-	FILE *fsynopsis,*favvel,*favori,*forder,*forderQ,*forderQK,*favs,*fdensSTD,*fchckpnt,*fenstrophy,*fmultiphase,*fpressure;
+	FILE *fsynopsis,*favvel,*favori,*forder,*forderQ,*forderQK,*favs,*fdensSTD,*fchckpnt,*fenstrophy,*fmultiphase,*fpressure,*fsppressure,*fmpcom;
 	FILE *fcorrVV,*fcorrNN,*fcorrWW,*fcorrDD,*fcorrSS,*fcorrPP,*fbinder;
 	FILE *fhistVel,*fhistSpeed,*fhistVort,*fhistEnstr,*fhistDir,*fhistS,*fhistDens;
 	FILE *fenergyspect,*fenstrophyspect;
@@ -342,12 +343,14 @@ typedef struct outputFlagsList {
     int ENNEIGHBOURS;	        ///< Flag for if orientational energy as a function of neighbours is outputted --- json `'neighbourEnOut'`.
 	int SPOUT;					///< Flag for if the colour/phi/species-type field is outputted --- json `'colourOut'`.
 	int PRESOUT;				///< Flag for if the pressure field is outputted --- json `'pressureOut'`.
+	int spPRESOUT;				///< Flag for if the pressure field is outputted --- json `'spPressureOut'`.
 	int SYNOUT;					///< Flag for if system synopsis is outputted --- json `'synopsisOut'`.
 	int ORDEROUT;				///< Flag for if the order parameter are outputted --- json `'dirSOut'`.
 	int QTENSOUT;               ///< Flag for if the order parameter tensor is outputted --- json `'qTensOut'`.
     int QKOUT;			        ///< Flag for if the reciprocal space Q is outputted --- json `'qkTensOut'`.
 	int AVSOUT;					///< Flag for if total average scalar order parameter is outputted --- json `'avSOut'`.
 	int DENSOUT;				///< Flag for density standard deviation is outputted --- json `'densSDOut'`.
+	int AVCOMOUT;				///< Flag for if average CoM of each species is outputted --- json `'avCoMOut'`.
 	int ENSTROPHYOUT;			///< Flag for if total average enstrophy is outputted --- json `'enstrophyOut'`.
 	int CHCKPNT;				///< Flag for checkpointing --- json `'checkpointOut'`.
 	float CHCKPNTTIMER;			///< Flag for checkpointing based on a timer --- json `'checkpointTimerOut'`.

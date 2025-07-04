@@ -685,6 +685,22 @@ void openpressure( FILE **f,char dir[],char fname[],char ext[] ) {
 }
 
 ///
+/// @brief Function that initializes the pressure field output file.
+///
+/// This function initializes the multiphase pressure output file.
+/// It opens it up for writing and reading while formatting it with its header.
+///
+/// @param f Return pointer to the pressure field output file being opened.
+/// @param dir Path to the directory of the pressure field output file.
+/// @param fname Name of the pressure field output file.
+/// @param ext Extension of the pressure field output file.
+///
+void opensppressure( FILE **f,char dir[],char fname[],char ext[] ) {
+	openBasic( f,dir,fname,ext );
+	sppressureheader( *f );
+}
+
+///
 /// @brief Function that initializes the Binder cumulant output file.
 ///
 /// This function initializes the Binder cumulant output file.
@@ -731,6 +747,22 @@ void openswimmer( FILE **f,char dir[],char fname[],char ext[] ) {
 void openswimmerOri( FILE **f,char dir[],char fname[],char ext[] ) {
 	openBasic( f,dir,fname,ext );
 	swimmeroriheader( *f );
+}
+
+///
+/// @brief Function that initializes the centres of masses of a multiphase fluid output file.
+///
+/// This function initializes the centres of masses of a multiphase fluid  output file.
+/// It opens it up for writing and reading while formatting it with its header.
+///
+/// @param f Return pointer to the centres of masses of a multiphase fluid  output file being opened.
+/// @param dir Path to the directory of the centres of masses of a multiphase fluid output file.
+/// @param fname Name of the centres of masses of a multiphase fluid output file.
+/// @param ext Extension of the centres of masses of a multiphase fluid output file.
+///
+void opencom( FILE **f,char dir[],char fname[],char ext[] ) {
+	openBasic( f,dir,fname,ext );
+	comheader( *f );
 }
 
 ///
@@ -1197,18 +1229,80 @@ void initvar( unsigned long *seed,time_t *to,clock_t *co,int *runtime,int *warmt
 /// or reading it from a file.
 ///
 /// @param Q Return pointer to the position of the MPCD particle.
-/// @param PL Integer that is 0 if position is determined randomly, 1 if read from a file.
+/// @param PL Particle placement distribution (QDIST).
 /// @param fin File from which to read the particle position.
+/// @param specID Species ID corresponding to the particle.
+/// @param concentration Global concentration of the species corresponding to the particle.
 ///
-void place( double Q[],int PL,FILE *fin ) {
+void place( double Q[],int PL,FILE *fin,int specID,double concentration ) {
 	int d;
 
 	if( PL == PRF ) for( d=0; d<DIM; d++ ) Q[d] = genrand_real( ) * XYZ[d];
 	else if( PL == READ ) for( d=0; d<DIM; d++ ) {
 		if(fscanf( fin, "%lf",&Q[d] ));
 		else printf("Warning: Failed to read place input file.\n");
-	}
-	else{
+	} else if (PL == QDIST_SPLIT) {
+        // idea here is to distribute particles about the z axis from the center of the domain, split into sectors every
+        //      2*M_PI/NSPECI radians
+
+        // Note: there is probably a much nicer analytical way to do this, but initialisation is "free" so who cares if
+        //      this takes forever
+        double lowerBound = ((2.0*M_PI) / (double)NSPECI) * (double)specID; // angle measured from vertical (for l/r split)
+        double upperBound = ((2.0*M_PI) / (double)NSPECI) * (double)(specID + 1.0);
+
+        int flag = 1;
+        while (flag) { // repeatedly try to find a point in the sector
+            Q[0] = genrand_real() * XYZ[0];
+            Q[1] = genrand_real() * XYZ[1];
+
+            // check if the point is in the sector
+            double x_offset = Q[0] - (XYZ[0] / 2.0);
+            double y_offset = Q[1] - (XYZ[1] / 2.0);
+            double theta = atan2(x_offset, y_offset) + M_PI; // again, measuring theta from vertical
+            if (theta >= lowerBound && theta < upperBound) flag = 0;
+        }
+        // z axis is easy, just pick a random number between 0 and the domain size
+        Q[2] = genrand_real() * XYZ[2];
+    } else if (PL == QDIST_SPHERICAL) {
+        // initial error checking
+        if (NSPECI != 2) {
+            printf("Error: Spherical Q distribution only works for two species.\n");
+            exit(1);
+        }
+
+        // compute radius of sphere/ circle
+        int vol = XYZ[0]*XYZ[1]*XYZ[2];
+        double radMax = 0.0;
+        if (DIM == _2D) {
+            radMax = sqrt((concentration*vol) / M_PI);
+        } else if (DIM == _3D) {
+            radMax = cbrt((3.0*concentration*vol) / (4.0*M_PI));
+        }
+
+        // again, doing this a dumb way because initialisation is "free"
+        int flag = 1;
+        while (flag) {
+            Q[0] = genrand_real() * XYZ[0];
+            Q[1] = genrand_real() * XYZ[1];
+            if (DIM == _3D) Q[2] = genrand_real() * XYZ[2];
+
+            // check if the point is in the sphere/ circle
+            double x_offset = Q[0] - (XYZ[0] / 2.0);
+            double y_offset = Q[1] - (XYZ[1] / 2.0);
+            double radius = 0.0;
+            if (DIM == _2D) {
+                radius = sqrt(x_offset*x_offset + y_offset*y_offset);
+            } else if (DIM == _3D) {
+                double z_offset = Q[2] - (XYZ[2] / 2.0);
+                radius = sqrt(x_offset*x_offset + y_offset*y_offset + z_offset*z_offset);
+            }
+            if ((specID == 0) && (radius < radMax)){
+                flag = 0;
+            } else if ((specID == 1) && (radius >= radMax)) {
+                flag = 0;
+            }
+        }
+    } else {
 		printf( "Error: Particle placement distribution unacceptable.\n" );
 		exit( 1 );
 	}
@@ -1424,7 +1518,7 @@ int checkplaceMPC( int i,particleMPC *pp,spec SP[],bc WALL[] ) {
 		shiftbackBC( shift,&WALL[j] );
 		//If W<=0 then the particleMPC is inside an obstacle and must be replaced
 		if( WALL[j].W <= TOL ) {
-			replace( (pp+i) );
+			replace( (pp+i) ); //FIXME: this will cause issues for nonstandard QDISTs
 			//push( (pp+i)->V,KBT,SP[(pp+i)->SPID].VDIST, SP[(pp+i)->SPID].M,NULL );
 			i--;
 			return i;
@@ -1570,7 +1664,8 @@ void setcoord(char dir[], spec SP[], particleMPC *pp, double KBT, double AVVEL[]
 			(pp+i)->U[j] = 0.0;
 		}
 		//Set particleMPC position, velocity and orientation
-		place( (pp+i)->Q,SP[(pp+i)->SPID].QDIST, fin[(pp+i)->SPID] );
+		place( (pp+i)->Q,SP[(pp+i)->SPID].QDIST, fin[(pp+i)->SPID], (pp+i)->SPID, ((double)SP[0].POP / (double)GPOP));
+		// want the concentration of species 0 only for the spherical qdist only 
 
 		push( (pp+i)->V,KBT,SP[(pp+i)->SPID].VDIST, SP[(pp+i)->SPID].MASS,fin[(pp+i)->SPID] );
 		//Shift first mode of the velocity dist by the average velocity (push() centres about zero)
@@ -1851,8 +1946,10 @@ void initOutput( char op[],outputFlagsList *outFlag,outputFilesList *outFile,inp
 	char fileswimmer[]="swimmers";
 	char fileswimmerori[]="swimmersOri";
 	char fileruntumble[]="runtumble";
+	char filecom[]="com";
 	char filemultiphase[]="multiphase";
 	char filepressure[]="pressure";
+	char filesppressure[]="sppressure";
 
 	char filesuffix[]="0000";
 	char fileextension[]=".dat";
@@ -1943,6 +2040,8 @@ void initOutput( char op[],outputFlagsList *outFlag,outputFilesList *outFile,inp
 	if( (outFlag->SPOUT)>=OUT ) openmultiphase( &(outFile->fmultiphase),op,filemultiphase,fileextension );
 	//Initialize the pressure field output file
 	if( (outFlag->PRESOUT)>=OUT ) openpressure( &(outFile->fpressure),op,filepressure,fileextension );
+	//Initialize the pressure field output file
+	if( (outFlag->spPRESOUT)>=OUT ) opensppressure( &(outFile->fsppressure),op,filesppressure,fileextension );
 
 	if( (outFlag->SYNOUT)==OUT) {
 		fprintf(outFile->fsynopsis,"Output:\n" );

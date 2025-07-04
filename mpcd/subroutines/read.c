@@ -159,7 +159,7 @@ void readin( char fpath[],inputList *in,spec **SP,particleMPC **pSRD,cell ****CL
 		read=fscanf( finput,"%i %s",&MS,STR );
 		checkRead( read,"velocity distribution",inSTR);
 		(*SP+i)->VDIST = MS;
-		//Read the species' orienation distribution function
+		//Read the species' orientation distribution function
 		read=fscanf( finput,"%i %s",&MS,STR );
 		checkRead( read,"orientational distribution",inSTR);
 		(*SP+i)->ODIST = MS;
@@ -719,9 +719,11 @@ void readchckpnt(inputList *in, spec **SP, particleMPC **pSRD, cell ****CL, int 
 	else printf("Warning: Failed to read checkpoint and MD modes.\n");
 
 	//Read output
-	if(fscanf( finput,"%d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %f",&DBUG, &(out->TRAJOUT), &(out->printSP), &(out->COAROUT), &(out->FLOWOUT), &(out->VELOUT), &(out->SWFLOWOUT), &(out->AVVELOUT), &(out->AVORIOUT), &(out->ORDEROUT), &(out->QTENSOUT), &(out->QKOUT), &(out->AVSOUT), &(out->SOLOUT), &(out->ENOUT), &(out->ENFIELDOUT), &(out->ENNEIGHBOURS), &(out->ENSTROPHYOUT), &(out->DENSOUT), &(out->CVVOUT), &(out->CNNOUT), &(out->CWWOUT), &(out->CDDOUT), &(out->CSSOUT), &(out->CPPOUT), &(out->BINDER), &(out->BINDERBIN), &(out->SYNOUT), &(out->CHCKPNT), &(out->CHCKPNTrcvr), &(out->CHCKPNTTIMER) ));
+	if(fscanf( finput,"%d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d",&DBUG, &(out->TRAJOUT), &(out->printSP), &(out->COAROUT), &(out->FLOWOUT), &(out->VELOUT), &(out->AVVELOUT), &(out->ORDEROUT), &(out->QTENSOUT), &(out->QKOUT), &(out->AVSOUT), &(out->AVCOMOUT),&(out->SOLOUT), &(out->ENOUT), &(out->ENFIELDOUT), &(out->ENNEIGHBOURS), &(out->ENSTROPHYOUT), &(out->DENSOUT), &(out->CVVOUT), &(out->CNNOUT), &(out->CWWOUT), &(out->CDDOUT), &(out->CSSOUT), &(out->CPPOUT), &(out->BINDER), &(out->BINDERBIN), &(out->SYNOUT), &(out->CHCKPNT), &(out->CHCKPNTrcvr) ));
 	else printf("Warning: Failed to read output.\n");
 	if(fscanf( finput,"%d %d",&(out->SPOUT), &(out->PRESOUT) ));
+	else printf("Warning: Failed to read output.\n");
+	if(fscanf( finput,"%d",&(out->spPRESOUT) ));
 	else printf("Warning: Failed to read output.\n");
 	if(fscanf( finput,"%d %d %d %d %d %d %d",&(out->HISTVELOUT), &(out->HISTSPEEDOUT), &(out->HISTVORTOUT), &(out->HISTENSTROUT), &(out->HISTDIROUT), &(out->HISTSOUT), &(out->HISTNOUT) ));
 	else printf("Warning: Failed to read histogram output.\n");
@@ -734,7 +736,7 @@ void readchckpnt(inputList *in, spec **SP, particleMPC **pSRD, cell ****CL, int 
 	(*SP) = (spec*) calloc( NSPECI, sizeof( spec ) );
 	for( i=0; i<NSPECI; i++ ) {
 
-		if(fscanf( finput,"%lf %i %i %i %i %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf",&((*SP+i)->MASS), &((*SP+i)->POP), &((*SP+i)->QDIST), &((*SP+i)->VDIST), &((*SP+i)->ODIST), &((*SP+i)->RFC), &((*SP+i)->LEN), &((*SP+i)->TUMBLE), &((*SP+i)->CHIHI), &((*SP+i)->CHIA), &((*SP+i)->ACT),&((*SP+i)->MFPOT), &((*SP+i)->SIGWIDTH), &((*SP+i)->SIGPOS), &((*SP+i)->DAMP), &((*SP+i)->VOL), &((*SP+i)->nDNST), &((*SP+i)->mDNST), &((*SP+i)->MINACTRATIO), &((*SP+i)->BS) ));	//Read the species' properties
+		if(fscanf( finput,"%lf %lf %i %i %i %i %lf %lf %lf %lf %lf %lf %lf %lf %lf",&((*SP+i)->MASS), &((*SP+i)->sMFPOT), &((*SP+i)->POP), &((*SP+i)->QDIST), &((*SP+i)->VDIST), &((*SP+i)->ODIST), &((*SP+i)->RFC), &((*SP+i)->LEN), &((*SP+i)->TUMBLE), &((*SP+i)->CHIHI), &((*SP+i)->CHIA), &((*SP+i)->ACT), &((*SP+i)->SIGWIDTH), &((*SP+i)->SIGPOS), &((*SP+i)->DAMP) ));	//Read the species' properties
 		else printf("Warning: Failed to read species %i.\n",i);
 		for( j=0; j<NSPECI; j++ ) {
 			//Read the species' interaction matrix with other species
@@ -1607,6 +1609,7 @@ void readJson( char fpath[], inputList *in, spec **SP, kinTheory **theory, parti
 
 			// now get first set of primitives
 			(*SP+i)->MASS = getJObjDou(objElem, "mass", 1.0, jsonTagList); // mass
+			(*SP+i)->MFPOT = getJObjDou(objElem, "sMFPOT", in->MFPOT, jsonTagList); // specy-specific mean field potential
 
 			// Numerically determine the accessible volume for the fluid, given these BCs
 			(*SP+i)->VOL = accessibleVolume( (*WALL),i );
@@ -1627,7 +1630,7 @@ void readJson( char fpath[], inputList *in, spec **SP, kinTheory **theory, parti
 
 			//Read the binary fluid interaction matrix for this species with all other species
 			cJSON *arrBFM = NULL;
-			getCJsonArray(jObj, &arrBFM, "interMatr", jsonTagList, arrayList, 0);
+			getCJsonArray(objElem, &arrBFM, "interMatr", jsonTagList, arrayList, 0);
 			if (arrBFM != NULL) { // if grav has been found then....
 				if (cJSON_GetArraySize(arrBFM) != NSPECI) { // check dimensionality is valid
 					printf("Error: Interaction matrices must have columns of length equal to the number of species.\n");
@@ -1738,10 +1741,13 @@ void readJson( char fpath[], inputList *in, spec **SP, kinTheory **theory, parti
 	out->QTENSOUT = getJObjInt(jObj, "qTensOut", 0, jsonTagList); // qTensOut
 	out->QKOUT = getJObjInt(jObj, "qkTensOut", 0, jsonTagList); // qKOut
 	out->ENFIELDOUT = getJObjInt(jObj, "oriEnOut", 0, jsonTagList); // enFieldOut
-	out->SPOUT = getJObjInt(jObj, "colourOut", 0, jsonTagList); // spOut
+	const char* multiphaseOutTags[2] = {"colourOut", "mpDensOut"}; // possible tags for multiphase out SPOUT
+    out->SPOUT = getJObjIntMultiple(jObj, multiphaseOutTags, 2, 0, jsonTagList); // RTECH
 	out->PRESOUT = getJObjInt(jObj, "pressureOut", 0, jsonTagList); // presOut
+	out->spPRESOUT = getJObjInt(jObj, "spPressureOut", 0, jsonTagList); // spPresOut
 	out->ENNEIGHBOURS = getJObjInt(jObj, "neighbourEnOut", 0, jsonTagList); // enNeighbours
 	out->AVSOUT = getJObjInt(jObj, "avSOut", 0, jsonTagList); // avSOut
+	out->AVCOMOUT = getJObjInt(jObj, "avCoMOut", 0, jsonTagList); // avCoMOut
 	out->DENSOUT = getJObjInt(jObj, "densSDOut", 0, jsonTagList); // densOut
 	out->ENSTROPHYOUT = getJObjInt(jObj, "enstrophyOut", 0, jsonTagList); // enStrophOut
 	out->HISTVELOUT = getJObjInt(jObj, "histVelOut", 0, jsonTagList); // histVelOut

@@ -66,9 +66,6 @@ void incompAddVirial( cell *CL,double virialCoB, double virialCoC, double virial
 void incompSwap( cell *CL,spec *SP,specSwimmer SS );
 void incompSubtractDivergence( cell *CL,spec *SP,specSwimmer SS );
 
-void multiphaseColl(cell *CL, spec *SP, specSwimmer SS, int multiphaseMode, double KBT, int MD_mode, double *CLQ, int outP );
-void multiphaseCollPoint(cell *CL, spec *SP, specSwimmer SS, double KBT, int MD_mode, double *CLQ, int outP );
-
 void activeMD(simptr simMD, cell ***CL, spec *SP, inputList in);
 
 void localVCM( double vcm[_3D],cell CL,spec *SP,specSwimmer specS);

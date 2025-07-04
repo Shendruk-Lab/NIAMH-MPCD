@@ -23,6 +23,7 @@
     [
         {
             "mass":         1,
+            "sMFPOT":       10,
             "pop":          18000,
             "mfpot":        10,
             "qDist":        0,
@@ -47,6 +48,7 @@
     "coarseOut":        0,
     "flowOut":          0,
     "velOut":           0,
+    "avCoMOut":         0,
     "avVelOut":         0,
     "dirSOut":          0,
     "qTensOut":         0,
@@ -54,6 +56,7 @@
     "oriEnOut":         0,
     "colourOut":        0,
     "pressureOut":      0,
+    "spPressureOut":    0,
     "neighbourEnOut":   0,
     "avSOut":           0,
     "densSDOut":        0,
@@ -80,7 +83,7 @@
     "binderBin":        0,
     "swimQOut":         0,
     "swimOOut":         0,
-    "swimROut":         0,
+    "swimRTOut":         0,
     "synopsisOut":      1,
     "checkpointOut":    0,
     "BC":

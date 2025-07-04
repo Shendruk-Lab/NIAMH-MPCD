@@ -103,7 +103,7 @@ int main(int argc, char* argv[]) {
 	double KBTNOW=0.0;				//Current un-thermostated temperature
 	double AVVEL=0.0;				//The average speed
 	double AVS=0.0,S4=0.0,stdN=0.0; //The average of the scalar order parameter, director and fourth moment
-	double avDIR[_3D],AVV[_3D],AVNOW[_3D];  //The past and current average flow velocities
+	double avDIR[_3D],AVV[_3D],AVNOW[_3D],CoM[MAXSPECI][_3D];  //The past and current average flow velocities
     zerovec_v(3, _3D, avDIR, AVV, AVNOW); // initialise to zero
 	//Input/Output
 	int CHCKPNTrcvr = 0;			//Flag for simulation from recovery of checkpoint
@@ -138,7 +138,7 @@ int main(int argc, char* argv[]) {
 	/* ****************************************** */
 	/* ****************************************** */
 	#ifdef DBG
-		if( DBUG > DBGRUN ) printf( "\nBegin NAIMH-MPCD\n" );
+		if( DBUG > DBGRUN ) printf( "\nBegin NIAMH-MPCD\n" );
 	#endif
 	/* ****************************************** */
 	/* ****************************************** */
@@ -299,7 +299,7 @@ int main(int argc, char* argv[]) {
 		/* ***************** OUTPUT ***************** */
 		/* ****************************************** */
 		if( writeOutput(runtime,outFlags,inputVar.RFRAME,inputVar.zeroNetMom) ) {
-			outputResults( CL, SRDparticles, SPECIES, WALL, simMD, specS, swimmers, AVNOW, AVV, avDIR, runtime, inputVar, AVVEL, KBTNOW, &AVS, &S4, &stdN, MDmode, outFlags, outFiles );
+			outputResults( CL, SRDparticles, SPECIES, WALL, simMD, specS, swimmers, AVNOW, AVV, avDIR, runtime, inputVar, AVVEL, KBTNOW, &AVS, &S4, &stdN, &CoM[MAXSPECI][_3D], MDmode, outFlags, outFiles );
 		}
 		//The histogram stuff takes a lot of memory so only make it IF necessary
 		if( writeHistograms(runtime,outFlags) ) outputHist( CL, runtime, inputVar, outFlags, outFiles );

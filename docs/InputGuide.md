@@ -79,6 +79,7 @@ Tag             | Type          | Default Value | Description
 `trajOut`       | int           | 0             | Detailed particle trajectories for every particle of species type given by `trajSpecOut`
 `trajSpecOut`   | int           | 0             | Which number of species whose detailed trajectories to output
 `coarseOut`     | int           | 0             | Coarse grain data (cell velocity, densities, density of each species) field
+`avCoMOut`      | int           | 0             | Centre of masses of multiphase fluid averaged between output times
 `flowOut`       | int           | 0             | Flow field averaged between output times
 `velOut`        | int           | 0             | Instantaneous velocity field
 `swFlowOut`     | int           | 0             | Flow field averaged between output times, in the first bacteria's reference frame
@@ -88,6 +89,7 @@ Tag             | Type          | Default Value | Description
 `qTensOut`      | int           | 0             | Q tensor field
 `qkTensOut`     | int           | 0             | Reciprocal Q tensor field
 `oriEnOut`      | int           | 0             | Orientational energy field
+`spPressureOut` | int           | 0             | Specific pressures due to each phase of a multiphase fluid
 `colourOut`     | int           | 0             | Colour/ phi/ species-type field
 `pressureOut`   | int           | 0             | Pressure field
 `neighbourEnOut`| int           | 0             | Orientational energy from neighbours. System-averaged single value
@@ -166,6 +168,7 @@ Tag             | Type          | Default Value | Description
 `oDist`         | int           | 2             | Initial orientation distribution function for the species. See definitions.h for a list
 `interMatr`     | array(double) | [0,...]       | Interaction matrix for this species, against other species. **Must** be of the same length as the number of species. Default will autopopulate with 0s
 `mfpot`         | double        | 10            | Liquid crystal mean field potential in units of thermal energy
+`sMFPOT`        | double        | 10            | Liquid crystal mean-field potential for this species
 `rfc`           | double        | 0.01          | Nematogen rotational friction coefficient
 `len`           | double        | 0.007         | Effective rod length (specifically for solid boundary interactions)
 `tumble`        | double        | 2             | Tumbling parameter
@@ -259,6 +262,7 @@ As a reminder, if you wish to use the default value for a tag, you can leave it 
         {
             "mass":         1,
             "pop":          18000,
+            "sMFPOT":       10,
             "qDist":        0,
             "vDist":        0,
             "oDist":        2,
@@ -289,6 +293,8 @@ As a reminder, if you wish to use the default value for a tag, you can leave it 
     "qkTensOut":        0,
     "oriEnOut":         0,
     "colourOut":        0,
+    "avCoMOut":         0,
+    "spPressureOut":    0,
     "pressureOut":      0,
     "neighbourEnOut":   0,
     "avSOut":           0,

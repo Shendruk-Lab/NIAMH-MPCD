@@ -16,6 +16,7 @@
 # include "../headers/ctools.h"
 # include "../headers/bc.h"
 # include "../headers/init.h"
+# include "../headers/multiphase_2x2.h"
 
 /* ****************************************** */
 /* ****************************************** */
@@ -2173,4 +2174,113 @@ void checkNAN_V( cell ***CL,int XYZ_P1[3],int pauseFlag,int dimension ) {
 		}
 	}
 	if( cnt>0 && pauseFlag ) wait4u();
+}
+
+
+void cofactors6x6(double a[][6],int pop,double result[6][6],double det) { 
+	int ncoeff = 6;
+	int i,j,k;
+
+	//pop = a.GetLength(0); 
+	double m[ncoeff][ncoeff];
+	double detTemp = 0; 
+	//calculate M = A^TA
+	for (i=0;i<ncoeff;i++) for (j=0;j<ncoeff;j++) 
+	{
+		m[i][j]=0.;
+		for (k=0;k<pop;k++)
+		{
+			m[i][j]+=a[k][i]*a[k][j];
+		}
+	}
+
+	cofactorUpperTriangle(result, m); // this hard coded matrix is put in it's own exclusion header file
+
+	//fill in lower triangular values using symmetry 
+	for (i=1;i<ncoeff;i++) for (j=0;j<i;j++)
+	{
+		result[i][j]= result[j][i];
+	}
+	//compute determinant
+	for (j=0;j<ncoeff;j++)
+	{
+		detTemp+= m[0][j]*result[0][j];
+	}
+
+	for (i=0;i<ncoeff;i++)
+	{
+		for(j=0;j<ncoeff;j++)
+		{
+			result[i][j]/=detTemp;
+		}
+	}
+
+}
+
+
+void cofactors10x10(double a[][10],int pop,double result[10][10],double det) { 
+	int ncoeff = 10;
+	int i,j,k,q;
+	//pop = a.GetLength(0); 
+	double m[ncoeff][ncoeff];
+	double detTemp = 0; 
+	//calculate M = A^TA
+	for (i=0;i<ncoeff;i++) for (j=0;j<ncoeff;j++) 
+	{
+		m[i][j]=0.;
+		for (k=0;k<pop;k++)
+		{
+			m[i][j]+=a[k][i]*a[k][j];
+		}
+	}
+	//compute upper triangular values
+	for (i=0;i<ncoeff;i++) for (j=i;j<ncoeff;j++)
+	{
+		double sign = 1.0;
+		if ((i+j)%2!=0) sign = -1.0;
+		//create 9x9 matrix
+		double reducedM[ncoeff-1][ncoeff-1];
+		int count_k = 0;
+		int count_q = 0;
+		for (k=0;k<ncoeff;k++) 
+		{
+			count_q = 0;
+			if (k!=i)
+			{
+				for (q=0;q<ncoeff;q++)
+				{
+					if (q!=j)
+					{
+						reducedM[count_k][count_q] = m[k][q];
+						count_q++;
+					}
+				}
+				count_k ++;
+			}
+		}
+		double det[1];
+		det9(reducedM,det);
+		result[i][j] = det[0];
+		result[i][j] *= sign;
+	}
+
+	//fill in lower triangular values using symmetry 
+	for (i=1;i<ncoeff;i++) for (j=0;j<i;j++)
+	{
+		result[i][j]= result[j][i];
+	}
+	//compute determinant
+	for (j=0;j<ncoeff;j++)
+	{
+		detTemp+= m[0][j]*result[0][j];
+	}
+
+	for (i=0;i<ncoeff;i++)
+	{
+		for(j=0;j<ncoeff;j++)
+		{
+			result[i][j]/=detTemp;
+		}
+	}
+
 }

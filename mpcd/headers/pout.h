@@ -28,6 +28,7 @@ void defectheader( FILE *fout );
 void disclinTensorheader( FILE *fout );
 void multiphaseheader( FILE *fout );
 void pressureheader( FILE *fout );
+void sppressureheader( FILE *fout );
 void avsheader( FILE *fout );
 void densheader( FILE *fout );
 void avenstrophyheader( FILE *fout );
@@ -49,6 +50,7 @@ void energyneighboursheader( FILE *fout );
 void swimmerheader( FILE *fout );
 void swimmeroriheader( FILE *fout );
 void runtumbleheader( FILE *fout );
+void comheader( FILE *fout );
 
 // Print data
 void coordout( FILE *fout[10],int pr,double T,particleMPC p[],spec SP[] );
@@ -56,6 +58,7 @@ void coarseout( FILE *fout,double t,cell ***CL );
 void orderout( FILE *fout,double t,cell ***CL,int LC );
 void multiphaseout( FILE *fout,double t,cell ***CL );
 void pressureout( FILE *fout,double t,cell ***CL );
+void sppressureout( FILE *fout,double t,cell ***CL );
 void orderQout( FILE *fout,double t,cell ***CL,int LC );
 void orderQKout( FILE *fout,double t,particleMPC pMPC[],cell ***CL,int LC );
 void histVelout( FILE *fout,int vel[_3D][BINS],double minRange,double maxRange,double t );
@@ -73,6 +76,7 @@ void densSTDout( FILE *fout,double t,double stdN );
 void avenstrophyout( FILE *fout,double t,double E );
 void binderout( FILE *fout,double t,double UL );
 void flowout( FILE *fout,cell ***CL,int interval, double t);
+void avcomout( FILE *fout,double t,double CoM[MAXSPECI][_3D],double stdCoM[MAXSPECI][_3D][_3D]);
 void velout( FILE *fout,cell ***CL, double t );
 void swflowout( FILE *fout,cell ***CL,int interval, double t);
 void solidout( FILE *fout,bc WALL,double t );
@@ -109,7 +113,7 @@ void stateinput( inputList in,spec SP[],bc WALL[],specSwimmer SS,outputFlagsList
 void listinput( inputList in,double AVVEL,spec SP[],kinTheory theorySP[],kinTheory theoryGl );
 
 // Larger output-control routines
-void outputResults(cell ***CL, particleMPC *SRDparticles, spec SP[], bc WALL[], simptr simMD, specSwimmer SS, swimmer swimmers[], double AVNOW[_3D], double AVV[_3D], double avDIR[_3D], int runtime, inputList in, double AVVEL, double KBTNOW, double *AVS, double *S4, double *stdN, int MD_mode, outputFlagsList outFlag, outputFilesList outFiles );
+void outputResults(cell ***CL, particleMPC *SRDparticles, spec SP[], bc WALL[], simptr simMD, specSwimmer SS, swimmer swimmers[], double AVNOW[_3D], double AVV[_3D], double avDIR[_3D], int runtime, inputList in, double AVVEL, double KBTNOW, double *AVS, double *S4, double *stdN,double *CoM[MAXSPECI][_3D], int MD_mode, outputFlagsList outFlag, outputFilesList outFiles );
 void outputHist( cell ***CL,int runtime, inputList in,outputFlagsList outFlag,outputFilesList outFiles );
 void closeOutputFiles( spec *SP,bc WALL[],outputFlagsList outFlag,outputFilesList outFiles );
 int writeOutput( int t,outputFlagsList f,int GAL,int zeroNetMom );

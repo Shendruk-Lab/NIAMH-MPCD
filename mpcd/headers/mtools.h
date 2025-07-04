@@ -116,4 +116,10 @@ void checkNAN_V( cell ***CL,int XYZ_P1[3],int pauseFlag,int dimension );
 
 //Optimisation related functions
 double smrtPow(double x, double y);
+
+//Returns cofactor matrix for symmetric 6x6 and 10x10 matrix 
+void cofactors6x6(double a[][6],int pop,double result[6][6],double det);
+void det9(double a[9][9],double* det);
+void cofactors10x10(double a[][10],int pop,double result[10][10],double det);
+
 #endif

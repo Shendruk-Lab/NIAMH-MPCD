@@ -23,7 +23,7 @@ void zeroPressureColl( cell *CL );
 
 void initvar( unsigned long *seed,time_t *to,clock_t *co,int *runtime,int *warmtime,double AV[_3D],double avDIR[_3D],spec SP[],double *C,double *S,double RA,double *AVVEL,double KBT,bc WALL[],cell ***CL,particleMPC *pp );
 
-void place( double Q[],int PL,FILE *fin );
+void place( double Q[],int PL,FILE *fin,int specID,double concentration );
 void replace( particleMPC *p );
 void push( double V[],double KBT,int PL,double MASS,FILE *fin );
 void orient( double U[],double Q[],int PL );
@@ -71,10 +71,12 @@ void opendefect( FILE **f,char dir[],char fname[],char ext[] );
 void opendisclin( FILE **f,char dir[],char fname[],char ext[] );
 void openmultiphase( FILE **f,char dir[],char fname[],char ext[] );
 void openpressure( FILE **f,char dir[],char fname[],char ext[] );
+void opensppressure( FILE **f,char dir[],char fname[],char ext[] );
 void openbinder( FILE **f,char dir[],char fname[],char ext[],int binSize );
 void openswimmer( FILE **f,char dir[],char fname[],char ext[] );
 void openswimmerOri( FILE **f,char dir[],char fname[],char ext[] );
 void openruntumble( FILE **f,char dir[],char fname[],char ext[] );
+void opencom( FILE **f,char dir[],char fname[],char ext[] );
 
 void checkSim( FILE *fsynopsis,int SYNOUT,inputList in,spec *SP,bc *WALL,specSwimmer SS );
 

@@ -415,6 +415,7 @@ void genrand_maierSaupeMetropolis_2D( double DIR[],double rotAx[],double rotAngl
 ///
 /// Does the multi-particle orientation collision in a single cell.
 /// Collision has randomly sampled orientations (which obey the Maier-Saupe distribution) around the local director.
+/// In multiphase fluids, species-specific Mean Field Potentials can be defined (jSON 'sMFPOT').
 ///
 /// @param CL Class containing cell data (pointed to local cell considered).
 /// @param SP List of species.
@@ -425,12 +426,12 @@ void genrand_maierSaupeMetropolis_2D( double DIR[],double rotAx[],double rotAngl
 /// @param LC Variable to define if Nematic LC using an isotropic fluid (0), the local nematic order  value (1) or global nematic order value (2).
 ///
 void LCcollision( cell *CL,spec *SP,double KBT,int zeroMFPot,double dt,double SG,int LC ) {
-	int i,id;
+	int i=0,id=0;
 	double DIR[_3D]={0.0},dU[_3D]={0.0};	//The director, the difference in orientation
 	double rotAx[_3D],xaxis[_3D]={0.0},rotAngle;
-	double rfc;			//Rotational friction coefficient
-	double S;			//Local scalar order parameter
-	double avMFPOT,MFPOT_scaled;	//Mean field potential that actually get used in the calculation
+	double rfc=0.0;			//Rotational friction coefficient
+	double smfpot=0.0,smfpot_scaled=0.0;      //Specy-specific mean field potential
+	double S=0.0;			//Local scalar order parameter
 	particleMPC *tmpc;		//Temporary particleMPC
 
 	if( LC==LCL || LC==BCT ) S=CL->S;		//Use the local scalar order parameter in collision
@@ -478,21 +479,23 @@ void LCcollision( cell *CL,spec *SP,double KBT,int zeroMFPot,double dt,double SG
 	
 	//Calculate cell's average mean field potential
 	if(zeroMFPot) {
-		MFPOT_scaled=0.0;
+		smfpot_scaled=0.0;
 	}
 	else {
-		avMFPOT=0.0;
+		smfpot=0.0;
 		tmpc = CL->pp;
 		while( tmpc!=NULL ) {
 			id = tmpc->SPID;
-			avMFPOT+=(SP+id)->MFPOT;
+			rfc=(SP+id)->RFC;
+			smfpot+=(SP+id)->sMFPOT;
+			smfpot_scaled=smfpot*0.5*(double)DIM;
 			//Increment link in list
 			tmpc = tmpc->next;
 		}
-		if( CL->POPSRD>1 ) avMFPOT /= (float)(CL->POPSRD);
+		if( CL->POPSRD>1 ) smfpot /= (float)(CL->POPSRD);
 		// MFPOT_scaled=MFPOT*0.5*(double)DIM;
 		// printf("\tMFPOT=%lf\n",avMFPOT);
-		MFPOT_scaled=avMFPOT*0.5*(double)DIM;
+		smfpot_scaled=smfpot*0.5*(double)DIM;
 	}
 
 	//Generate random orientations for MPCD particles
@@ -502,6 +505,8 @@ void LCcollision( cell *CL,spec *SP,double KBT,int zeroMFPot,double dt,double SG
 		while( tmpc!=NULL ) {
 			id = tmpc->SPID;
 			rfc=(SP+id)->RFC;
+			smfpot=(SP+id)->sMFPOT;
+			smfpot_scaled=smfpot*0.5*(double)DIM;
 			//Zero torque
 			for( i=0; i<_3D; i++ ) tmpc->T[i] = 0.;
 			//Save old orientation
@@ -514,7 +519,7 @@ void LCcollision( cell *CL,spec *SP,double KBT,int zeroMFPot,double dt,double SG
 					pvec( tmpc->U,DIM );
 				}
 			#endif
-			genrand_maierSaupe( DIR,rotAx,rotAngle,tmpc->U,KBT,S,MFPOT_scaled );
+			genrand_maierSaupe( DIR,rotAx,rotAngle,tmpc->U,KBT,S,smfpot_scaled );
 			#ifdef DBG
 				if( DBUG==DBGLCCOL || DBUG==DBGESCAPE ) {
 					printf( "New orientation: " );

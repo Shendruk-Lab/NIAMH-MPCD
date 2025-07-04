@@ -287,6 +287,24 @@ void pressureheader( FILE *fout ) {
 }
 
 ///
+/// @brief Prints column headers for multiphase pressure data output files.
+///
+/// Column headers are produced.
+/// Time, t, is the first column header.
+/// The next column denote each species whose pressure will be outputted below.
+///
+/// @param fout This is a pointer to the output .dat file name to be produced.
+///
+void sppressureheader( FILE *fout ) {
+	fprintf( fout,"t\t" );
+	for (int q=0;q<NSPECI;q++) {
+		fprintf( fout,"\tavP%d",q);
+		fprintf( fout,"\tstdP%d",q);
+	}
+	fprintf( fout,"\n");
+}
+
+///
 /// @brief Prints column headers for binning data output files for histogram use.
 ///
 /// Column headers are produced for histogram bins in .dat files in order to display raw data in a table format.
@@ -542,6 +560,21 @@ void swimmerheader( FILE *fout ) {
 ///
 void swimmeroriheader( FILE *fout ) {
 	fprintf( fout,"t\t\tnX\tnY\tnZ\tRTphase\n" );
+}
+
+///
+/// @brief Prints column headers for centre of masses of multiphase fluids.
+///
+/// Column headers are produced.
+/// Time, t, is the first column header.
+/// X, Y, and Z are the centres of masses' Cartesian co-ordinates.
+///
+/// @param fout This is a pointer to the output .dat file name to be produced.
+///
+void comheader( FILE *fout ) {
+	fprintf( fout,"t\t\t" );
+	for (int k=0;k<NSPECI;k++) fprintf( fout,"X%d\tY%d\tZ%d\tvarXX%d\tvarXY%d\tvarXZ%d\tvarYX%d\tvarYY%d\tvarYZ%d\tvarZX%d\tvarZY%d\tvarZZ%d\t",k,k,k,k,k,k,k,k,k,k,k,k );
+	fprintf( fout,"\n" );
 }
 
 ///
@@ -1161,6 +1194,7 @@ void stateinput( inputList in,spec SP[],bc WALL[],specSwimmer SS,outputFlagsList
 		fprintf( fsynopsis,"Print tensor order parameter data: %i\n",out.QTENSOUT );
 		fprintf( fsynopsis,"Print reciprocal space order parameter data: %i\n",out.QKOUT );
 		fprintf( fsynopsis,"Print averaged order parameter data: %i\n",out.AVSOUT );
+		fprintf( fsynopsis,"Print averaged center of mass of multiphase species: %i\n",out.AVCOMOUT );
 		fprintf( fsynopsis,"Print standard deviation of density data: %i\n",out.DENSOUT );
 		fprintf( fsynopsis,"Print averaged enstrophy data: %i\n",out.ENSTROPHYOUT );
 		fprintf( fsynopsis,"Velocity-velocity correlation:\t\t%d\n",out.CVVOUT);
@@ -1588,6 +1622,28 @@ void avveloutWithGradVel( FILE *fout,double t,double vel[_3D],double KBT,double 
 ///
 void avsout( FILE *fout,double t,double S,double S4,double DIR[] ) {
 	fprintf( fout, "%12.5e\t%12.5e\t%12.5e\t%12.5e\t%12.5e\t%12.5e\n",t,S,S4,DIR[0],DIR[1],DIR[2] );
+	#ifdef FFLSH
+		fflush(fout);
+	#endif
+}
+
+///
+/// @brief Outputs centres of masses of multiphase fluid to file.
+///
+/// This function simply prints the centres of masses of multiphase fluid to file..
+///
+/// @param fout This is a pointer to the output .dat file name to be produced.
+/// @param t This is time.
+/// @param CoM This is a pointer to the center of mass of a species from a multiphase fluid.
+/// @param stdCoM This is a pointer to the std tensor of the center of mass for a given species from a multiphase fluid.
+/// @see outputResults()
+///
+void avcomout( FILE *fout,double t,double CoM[MAXSPECI][_3D],double stdCoM[MAXSPECI][_3D][_3D]) {
+	int i;
+
+	fprintf( fout, "%12.5e",t );
+	for (i=0;i<NSPECI;i++) fprintf( fout, "\t%12.5e\t%12.5e\t%12.5e\t%12.5e\t%12.5e\t%12.5e\t%12.5e\t%12.5e\t%12.5e\t%12.5e\t%12.5e\t%12.5e",CoM[i][0],CoM[i][1],CoM[i][2],stdCoM[i][0][0],stdCoM[i][0][1],stdCoM[i][0][2],stdCoM[i][1][0],stdCoM[i][1][1],stdCoM[i][1][2],stdCoM[i][2][0],stdCoM[i][2][1],stdCoM[i][2][2] );
+	fprintf( fout, "\n" );
 	#ifdef FFLSH
 		fflush(fout);
 	#endif
@@ -2044,6 +2100,61 @@ void pressureout( FILE *fout,double t,cell ***CL ) {
 }
 
 ///
+/// @brief Outputs species-specific pressure field data to file.
+///
+/// This function simply prints species-specific pressure field data to an output data file.
+/// The streaming pressure `Ps` and collisional pressure `Pc` are the contributing factors computed.
+/// The species that is the most present has its pressure ouputted.
+///
+/// @param fout This is a pointer to the output .dat file name to be produced.
+/// @param t This is the time step.
+/// @param CL This is a pointer to the co-ordinates and cell of each particle.
+/// @see outputResults()
+///
+void sppressureout( FILE *fout,double t,cell ***CL ) {
+	int i,j,k,pop,maxp,maxid;
+	double avP[NSPECI],stdP[NSPECI],cnt[NSPECI],cutoff=0.7,P;
+
+
+	fprintf( fout,"%.2f",t );
+	for( i=0; i<XYZ[0]; i++ ) for( j=0; j<XYZ[1]; j++ ) for( k=0; k<XYZ[2]; k++ ) {
+
+		if( CL[i][j][k].POP > 0 ){
+			pop=CL[i][j][k].POP;
+			maxp=0;
+
+			for (int q=0;q<NSPECI;q++) {
+				if (CL[i][j][k].SP[q]>maxp){
+					maxp=CL[i][j][k].SP[q];
+					maxid=q;
+				}
+			}	
+
+			if (cutoff<=(float)maxp/(float)pop){
+				P=0;
+				cnt[maxid]++;
+				for (int q=0;q<DIM;q++) P+=CL[i][j][k].Ps[q][q]+CL[i][j][k].Pc[q][q];
+				P/=(float)DIM;
+				avP[maxid]+=P;
+				stdP[maxid]+=P*P;
+			}
+		}
+	}
+
+	for (i=0;i<NSPECI;i++){
+		avP[i]/=cnt[i];
+		stdP[i]/=cnt[i];
+		avP[i]=fabs(avP[i]);
+		stdP[i]=sqrt(fabs(stdP[i]-avP[i]*avP[i]));
+		fprintf( fout,"\t%12.5e\t%12.5e",avP[i],stdP[i]);
+	}
+	fprintf( fout,"\n");
+	#ifdef FFLSH
+		fflush(fout);
+	#endif
+}
+
+///
 /// @brief Outputs tensor order parameter `Q` data to file.
 ///
 /// This function obtains the tensor order parameter from `tensOrderParam`.
@@ -2301,7 +2412,7 @@ void checkpoint(FILE *fout, inputList in, spec *SP, particleMPC *pSRD, int MD_mo
 	// fprintf( fout,"%d %s\n",MDmode,mdInputFile );					//MD
 
 	//Output variables
-	fprintf( fout,"%d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %f\n",DBUG,outFlag.TRAJOUT,outFlag.printSP,outFlag.COAROUT,outFlag.FLOWOUT,outFlag.SWFLOWOUT,outFlag.VELOUT,outFlag.AVVELOUT,outFlag.AVORIOUT,outFlag.ORDEROUT,outFlag.QTENSOUT,outFlag.QKOUT,outFlag.AVSOUT,outFlag.SOLOUT,outFlag.ENOUT,outFlag.ENFIELDOUT,outFlag.ENNEIGHBOURS,outFlag.ENSTROPHYOUT,outFlag.DENSOUT,outFlag.CVVOUT,outFlag.CNNOUT,outFlag.CWWOUT,outFlag.CDDOUT,outFlag.CSSOUT,outFlag.CPPOUT,outFlag.BINDER,outFlag.BINDERBIN,outFlag.SYNOUT,outFlag.CHCKPNT,outFlag.CHCKPNTrcvr,outFlag.CHCKPNTTIMER );
+	fprintf( fout,"%d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d\n",DBUG,outFlag.TRAJOUT,outFlag.printSP,outFlag.COAROUT,outFlag.FLOWOUT,outFlag.VELOUT,outFlag.AVVELOUT,outFlag.ORDEROUT,outFlag.QTENSOUT,outFlag.QKOUT,outFlag.AVSOUT,outFlag.SOLOUT,outFlag.ENOUT,outFlag.ENFIELDOUT,outFlag.ENNEIGHBOURS,outFlag.ENSTROPHYOUT,outFlag.DENSOUT,outFlag.AVCOMOUT,outFlag.CVVOUT,outFlag.CNNOUT,outFlag.CWWOUT,outFlag.CDDOUT,outFlag.CSSOUT,outFlag.CPPOUT,outFlag.BINDER,outFlag.BINDERBIN,outFlag.SYNOUT,outFlag.CHCKPNT,outFlag.CHCKPNTrcvr );
 	fprintf( fout,"%d %d\n",outFlag.SPOUT,outFlag.PRESOUT );
 	fprintf( fout,"%d %d %d %d %d %d %d\n",outFlag.HISTVELOUT,outFlag.HISTSPEEDOUT,outFlag.HISTVORTOUT,outFlag.HISTENSTROUT,outFlag.HISTDIROUT,outFlag.HISTSOUT,outFlag.HISTNOUT );
 	fprintf( fout,"%d %d %d %d %d\n",outFlag.ENERGYSPECTOUT,outFlag.ENSTROPHYSPECTOUT,outFlag.TOPOOUT,outFlag.DEFECTOUT,outFlag.DISCLINOUT );
@@ -2371,6 +2482,7 @@ void checkpoint(FILE *fout, inputList in, spec *SP, particleMPC *pSRD, int MD_mo
 /// @param avDIR This is the average director orientation in three-dimensions.
 /// @param S4 This is a pointer to the fourth moment of the scalar order parameter.
 /// @param stdN This is the standard deviation of the density.
+/// @param CoM These are the coordinates of the centres of masses of each species.
 /// @param KBTNOW This is a pointer to the current un-thermostated temperature.
 /// @param AVV This is a pointer to the past average flow velocities.
 /// @param AVNOW This is a pointer to the current average flow velocities.
@@ -2469,13 +2581,15 @@ void runCheckpoint(char op[STRLN], time_t *lastCheckpoint, FILE *fout, inputList
 /// @see pressureout()
 /// @see orderQKout()
 ///
-void outputResults(cell ***CL, particleMPC *SRDparticles, spec SP[], bc WALL[], simptr simMD, specSwimmer SS, swimmer swimmers[], double AVNOW[_3D], double AVV[_3D], double avDIR[_3D], int runtime, inputList in, double AVVEL, double KBTNOW, double *AVS, double *S4, double *stdN, int MD_mode, outputFlagsList outFlag, outputFilesList outFiles ) {
-	int a,b,c,i,j;
+void outputResults( cell ***CL,particleMPC *SRDparticles,spec SP[],bc WALL[],simptr simMD,specSwimmer SS, swimmer swimmers[],double AVNOW[_3D],double AVV[_3D],double avDIR[_3D], int runtime, inputList in, double AVVEL, double KBTNOW,double *AVS,double *S4,double *stdN,double *CoM[MAXSPECI][_3D],int MD_mode,outputFlagsList outFlag,outputFilesList outFiles ) {
+	int a,b,c,i,j,k;
 	double time_now = runtime*in.dt;					//Simulation time
 	double wmf;
 	double corr[maxXYZ],spect[maxXYZ];				//Correlation functions and energy spectra
 	double UL;																//Binder cumulant
-	double avGradVel[_3D][_3D];								//Velocity gradient
+	double avGradVel[_3D][_3D];	
+	double com[MAXSPECI][_3D];					//Center of mass vector for each species
+	double sigcom[MAXSPECI][_3D][_3D];	        // Center of mass std tensor for each species							//Velocity gradient
 	double AVORI[_3D];
 	/* ****************************************** */
 	/* ************** BC trajectory ************* */
@@ -2528,6 +2642,24 @@ void outputResults(cell ***CL, particleMPC *SRDparticles, spec SP[], bc WALL[], 
 	if( outFlag.DENSOUT>=OUT && runtime%outFlag.DENSOUT==0 ) {
 		*stdN = stdNum( CL,GPOP,XYZ,XYZ_P1 );
 		densSTDout( outFiles.fdensSTD,time_now,*stdN );
+	}
+	//Calculate centers of masses of multiphase fluids
+	if( outFlag.AVCOMOUT>=OUT && runtime%outFlag.AVCOMOUT==0 ) {
+		for (i=0;i<NSPECI;i++) for (j=0;j<_3D;j++) {
+		com[i][j]=0.0;
+		for (k=0;k<_3D;k++) sigcom[i][j][k]=0.0;
+		}
+		for (i=0;i<GPOP;i++){
+			a=SRDparticles[i].SPID;
+			for (j=0;j<DIM;j++) com[a][j]+=SRDparticles[i].Q[j];
+		}
+		for (i=0;i<NSPECI;i++) if(SP[i].POP>0) for (j=0;j<_3D;j++) com[i][j] /= (float) SP[i].POP;
+		for (i=0;i<GPOP;i++){
+			a=SRDparticles[i].SPID;
+			for (j=0;j<DIM;j++) for (k=0;k<DIM;k++) sigcom[a][j][k]+=(com[a][j]-SRDparticles[i].Q[j])*(com[a][k]-SRDparticles[i].Q[k]);
+		}
+		for (i=0;i<NSPECI;i++) if(SP[i].POP>0) for (j=0;j<_3D;j++) for (k=0;k<_3D;k++) sigcom[i][j][k] /= (float) SP[i].POP;
+		avcomout( outFiles.fmpcom,time_now,com,sigcom);
 	}
 	//Calculate binder cumulants
 	if( outFlag.BINDER>=OUT && runtime%outFlag.BINDER==0 ) {
@@ -2650,6 +2782,7 @@ void outputResults(cell ***CL, particleMPC *SRDparticles, spec SP[], bc WALL[], 
 	if(in.LC!=ISOF) if( outFlag.DISCLINOUT>=OUT && runtime%outFlag.DISCLINOUT==0 ) disclinationTensorOut( outFiles.fdisclination,time_now,CL,in.LC );
 	if( outFlag.SPOUT>=OUT && runtime%outFlag.SPOUT==0 ) multiphaseout( outFiles.fmultiphase,time_now,CL );
 	if( outFlag.PRESOUT>=OUT && runtime%outFlag.PRESOUT==0 ) pressureout( outFiles.fpressure,time_now,CL );
+	if( outFlag.spPRESOUT>=OUT && runtime%outFlag.spPRESOUT==0 ) sppressureout( outFiles.fsppressure,time_now,CL );
 	if(in.LC!=ISOF) if( outFlag.QKOUT>=OUT && runtime%outFlag.QKOUT==0 ) {
 		#ifdef DBG
 			if( DBUG >= DBGTITLE ) printf( "Calculate Q-tensor in reciprocal space.\n" );
@@ -2882,9 +3015,11 @@ void closeOutputFiles( spec *SP,bc WALL[],outputFlagsList outFlag,outputFilesLis
 	if( outFlag.DISCLINOUT>=OUT ) fclose( outFiles.fdisclination );
 	if( outFlag.SPOUT>=OUT ) fclose( outFiles.fmultiphase );
 	if( outFlag.PRESOUT>=OUT ) fclose( outFiles.fpressure );
+	if( outFlag.spPRESOUT>=OUT ) fclose( outFiles.fsppressure );
 	if( outFlag.SWOUT>=OUT ) fclose( outFiles.fswimmers );
 	if( outFlag.SWORIOUT>=OUT ) fclose( outFiles.fswimmersOri );
 	if( outFlag.RTOUT>=OUT ) fclose( outFiles.fruntumble );
+	if( outFlag.AVCOMOUT>=OUT ) fclose( outFiles.fmpcom );
 	if( outFlag.SOLOUT>=OUT ) for( i=0; i<NBC; i++ ) if( WALL[i].DSPLC ) fclose( outFiles.fsolids[i] );
 }
 
@@ -2899,7 +3034,7 @@ void closeOutputFiles( spec *SP,bc WALL[],outputFlagsList outFlag,outputFilesLis
 /// @param zeroNetMom This is momentum correction term to reset to the rest frame.
 ///
 int writeOutput( int t,outputFlagsList f,int RFRAME,int zeroNetMom ) {
-	if( ( RFRAME && t%zeroNetMom==0 ) || ( f.ENOUT>=OUT && t%f.ENOUT==0 ) || ( f.TRAJOUT>=OUT  && t%f.TRAJOUT==0 ) || ( f.AVVELOUT>=OUT && t%f.AVVELOUT==0 ) || ( f.AVORIOUT>=OUT && t%f.AVORIOUT==0 ) || ( f.QKOUT && t%f.QKOUT==0 ) || ( f.AVSOUT>=OUT && t%f.AVSOUT==0 ) || ( f.ENNEIGHBOURS>=OUT && t%f.ENNEIGHBOURS==0 ) || ( f.SOLOUT>=OUT && t%f.SOLOUT==0 ) || ( f.BINDER && t%f.BINDER==0 ) || ( f.SWOUT && t%f.SWOUT==0 ) || ( f.SWORIOUT && t%f.SWORIOUT==0 ) ) {
+	if( ( RFRAME && t%zeroNetMom==0 ) || ( f.ENOUT>=OUT && t%f.ENOUT==0 ) || ( f.TRAJOUT>=OUT  && t%f.TRAJOUT==0 ) || ( f.AVVELOUT>=OUT && t%f.AVVELOUT==0 ) || ( f.AVORIOUT>=OUT && t%f.AVORIOUT==0 ) || ( f.QKOUT && t%f.QKOUT==0 ) || ( f.AVSOUT>=OUT && t%f.AVSOUT==0 ) || ( f.ENNEIGHBOURS>=OUT && t%f.ENNEIGHBOURS==0 ) || ( f.SOLOUT>=OUT && t%f.SOLOUT==0 ) || ( f.BINDER && t%f.BINDER==0 ) || ( f.SWOUT && t%f.SWOUT==0 ) || ( f.SWORIOUT && t%f.SWORIOUT==0 ) || ( f.spPRESOUT && t%f.spPRESOUT==0 ) || ( f.AVCOMOUT && t%f.AVCOMOUT==0 ) ) {
 		return 1;
 	}
 	//Fields
