@@ -1075,6 +1075,7 @@ void readJson( char fpath[], inputList *in, spec **SP, kinTheory **theory, parti
 	in->noHI = getJObjInt(jObj, "noHI", 0, jsonTagList); // noHI
 	in->inCOMP = getJObjInt(jObj, "incomp", 0, jsonTagList); // inCOMP
 	in->MULTIPHASE = getJObjInt(jObj, "multiphase", 0, jsonTagList); // multiPhase
+	in->MFPOT = getJObjDou(jObj, "mfpot", 10.0, jsonTagList); // mean field potential
 
 	// grav array
 	cJSON *arrGrav = NULL;
@@ -1609,7 +1610,7 @@ void readJson( char fpath[], inputList *in, spec **SP, kinTheory **theory, parti
 
 			// now get first set of primitives
 			(*SP+i)->MASS = getJObjDou(objElem, "mass", 1.0, jsonTagList); // mass
-			(*SP+i)->MFPOT = getJObjDou(objElem, "sMFPOT", in->MFPOT, jsonTagList); // specy-specific mean field potential
+			(*SP+i)->sMFPOT = getJObjDou(objElem, "sMFPOT", in->MFPOT, jsonTagList); // specy-specific mean field potential
 
 			// Numerically determine the accessible volume for the fluid, given these BCs
 			(*SP+i)->VOL = accessibleVolume( (*WALL),i );
@@ -1654,8 +1655,7 @@ void readJson( char fpath[], inputList *in, spec **SP, kinTheory **theory, parti
 			(*SP+i)->CHIHI = getJObjDou(objElem, "shearSusc", 0.5, jsonTagList); // Hydrodynamic susceptibility
 			(*SP+i)->CHIA = getJObjDou(objElem, "magnSusc", 0.001, jsonTagList); // Magnetic susceptibility
 			(*SP+i)->ACT = getJObjDou(objElem, "act", 0.05, jsonTagList); // activity
-			(*SP+i)->MFPOT = getJObjDou(objElem, "mfpot", 10.0, jsonTagList); // mean field potential
-      (*SP+i)->BS = getJObjDou(objElem, "bs", 0.0, jsonTagList); // bs
+		    (*SP+i)->BS = getJObjDou(objElem, "bs", 0.0, jsonTagList); // bs
 
 			(*SP+i)->SIGWIDTH = getJObjDou(objElem, "sigWidth", 1, jsonTagList); // sigWidth
 			// error check, is SIGWIDTH 0?
@@ -1689,8 +1689,7 @@ void readJson( char fpath[], inputList *in, spec **SP, kinTheory **theory, parti
 			(*SP+i)->CHIHI = 0.5; // chiHi
 			(*SP+i)->CHIA = 0.001; // chiA
 			(*SP+i)->ACT = 0.05; // act
-      (*SP+i)->BS = 0.0; // bs
-			(*SP+i)->MFPOT = 10.0; // mean field potential
+			(*SP+i)->BS = 0.0; // bs
 
 			(*SP+i)->SIGWIDTH = 1; // sigwidth
 			(*SP+i)->SIGPOS = 1; // sigpos

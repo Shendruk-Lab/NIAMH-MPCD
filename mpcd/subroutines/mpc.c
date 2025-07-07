@@ -4521,7 +4521,7 @@ void timestep(cell ***CL, particleMPC *SRDparticles, spec SP[], bc WALL[], simpt
 
 	// Apply the multiphase interactions
 	if( in.MULTIPHASE != MPHOFF && NSPECI>1 ) {
-		for( i=0; i<XYZ_P1[0]; i++ ) for( j=0; j<XYZ_P1[1]; j++ ) for( k=0; k<XYZ_P1[2]; k++ ) if( CL[i][j][k].POP > 1 ) multiphaseColl(&CL[i][j][k], SP, *SS, in.MULTIPHASE, in.KBT, MD_mode, CLQ, outPressure );
+		for( i=0; i<XYZ_P1[0]; i++ ) for( j=0; j<XYZ_P1[1]; j++ ) for( k=0; k<XYZ_P1[2]; k++ ) if( CL[i][j][k].POP > 1 ) multiphaseColl(&CL[i][j][k], SP, *SS, in.MULTIPHASE, in.dt, in.KBT,  MD_mode, CLQ, outPressure );
 	}
 	// Apply the incompressibility correction
 	if( in.inCOMP != INCOMPOFF ) {

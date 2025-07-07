@@ -256,14 +256,13 @@ void multiphaseCollPoint(cell *CL, spec *SP, specSwimmer SS, double KBT, int MD_
 /// @param CLQ The geometric centre of `CL`, the MPCD cell.
 /// @param outP Flag whether or not to output the pressure.
 ///
-void multiphaseColl(cell *CL, spec *SP, specSwimmer SS, int multiphaseMode, double KBT, int MD_mode, double *CLQ, int outP ) {
+void multiphaseColl(cell *CL, spec *SP, specSwimmer SS, int multiphaseMode, double dt, double KBT, int MD_mode, double *CLQ, int outP ) {
 
 	if( multiphaseMode==MPHSURF ) {
 	
 		int i,j,k,d,id;
-		double timestep = 0.1; //it would be better to get this value from the input file, as it must correspond to the dt set there. 
 		smono *tsm;
-		int ncoeff; 
+		int ncoeff=0; 
 		int orderApprox = (SP+1)->M[1]; 
 		//for orderApprox, it may be better to set up new input variable. Currently the second element of "interMatr" for the second species in the input file 
 		//can be set to 2 or 3 for parabolic and cubic approximations, respectively, of the order parameter field. 
@@ -561,12 +560,12 @@ void multiphaseColl(cell *CL, spec *SP, specSwimmer SS, int multiphaseMode, doub
 				if (id==0) 
 				{
 					//this is type A
-					for( j=0; j<DIM; j++ ) Vtemp[j] += (FbulkMultiplier*Fbulk[j]*(0.5*N/Na)+FintMultiplier*Fint[j]*(0.5*N/Na)+FdenMultiplier*Fden[j])*timestep;
+					for( j=0; j<DIM; j++ ) Vtemp[j] += (FbulkMultiplier*Fbulk[j]*(0.5*N/Na)+FintMultiplier*Fint[j]*(0.5*N/Na)+FdenMultiplier*Fden[j])*dt;
 				}
 				else if (id==1)
 				{
 					//this is type B
-					for( j=0; j<DIM; j++ ) Vtemp[j] += (-1.0*FbulkMultiplier*Fbulk[j]*(0.5*N/Nb)-FintMultiplier*Fint[j]*(0.5*N/Nb)+FdenMultiplier*Fden[j])*timestep;
+					for( j=0; j<DIM; j++ ) Vtemp[j] += (-1.0*FbulkMultiplier*Fbulk[j]*(0.5*N/Nb)-FintMultiplier*Fint[j]*(0.5*N/Nb)+FdenMultiplier*Fden[j])*dt;
 				}
 				// now normalise the velocity and give it the original velocity magnitude, to maintain the temperature of the system. 
 				tempMag = dotprod(Vtemp,Vtemp,DIM);
