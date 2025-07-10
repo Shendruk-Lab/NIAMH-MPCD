@@ -1835,7 +1835,7 @@ void checkSim( FILE *fsynopsis,int SYNOUT,inputList in,spec *SP,bc *WALL,specSwi
 	}
 	//Check that if running as a LC that the LC mean field potential MFPOT is greater than zero
 	checkValue=0.0;
-	for( i=0; i<NSPECI; i++ ) checkValue+=SP[i].MFPOT;
+	for( i=0; i<NSPECI; i++ ) checkValue+=SP[i].sMFPOT;
 	if( in.LC>ISOF && checkValue<=0.0 ) {
 		#ifdef DBG
 			if( DBUG >= DBGWARN ) printf( "Error: Running as nematic liquid crystal (LC=%d) but sum of mean field = %lf. Must be greater than 0 or run as isotropic\n",in.LC,checkValue );

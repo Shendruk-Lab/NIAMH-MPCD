@@ -342,7 +342,7 @@ double calcE_LC( cell ***CL,int LC,spec *pSP ) {
 			id = tmpc->SPID;
 			for( i=0; i<DIM; i++ ) u[i] = tmpc->U[i];
 			un = dotprod( u,DIR,DIM );
-			wmf += ( S*un*un )*( (pSP+id)->MFPOT );
+			wmf += ( S*un*un )*( (pSP+id)->sMFPOT );
 			//wmf += (1.-S)*invdim;		//Don't include constant (wrt u.n) term
 			tmpc = tmpc->next;
 		}

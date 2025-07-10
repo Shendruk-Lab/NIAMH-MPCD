@@ -1011,7 +1011,7 @@ void listinput( inputList in,double AVVEL,spec SP[],kinTheory theorySP[],kinTheo
 					printf( "\t\t\tActivity: %lf\n",SP[i].ACT );
 					printf( "\t\t\t\tActive dipole sigmoid width: %lf\n",SP[i].SIGWIDTH );
 					printf( "\t\t\t\tActive dipole sigmoid position: %lf\n",SP[i].SIGPOS );
-					printf( "\t\t\tMean field potential: %lf\n",SP[i].MFPOT );
+					printf( "\t\t\tMean field potential: %lf\n",SP[i].sMFPOT );
 				}
 				printf( "\t\tInteraction matrix: " );
 				pvec( SP[i].M,NSPECI );
@@ -1111,7 +1111,7 @@ void stateinput( inputList in,spec SP[],bc WALL[],specSwimmer SS,outputFlagsList
 			fprintf( fsynopsis,"\tTumbling parameter: %lf\n",SP[i].TUMBLE);
 			fprintf( fsynopsis,"\tMagnetic Sysceptibility: %lf\n\tShear Sysceptibility: %lf\n",SP[i].CHIA,SP[i].CHIHI );
 			fprintf( fsynopsis,"\tActivity: %lf\n\tActivity-sigmoid width: %lf\n\tActivity-sigmoid position: %lf\n\tMinimum proportion for activity %lf\n",SP[i].ACT,SP[i].SIGWIDTH,SP[i].SIGPOS,SP[i].MINACTRATIO );
-			fprintf( fsynopsis,"\tMean field potential: %lf\n",SP[i].MFPOT );
+			fprintf( fsynopsis,"\tMean field potential: %lf\n",SP[i].sMFPOT );
 			fprintf( fsynopsis,"\tDamping friction: %lf\n",SP[i].DAMP );
 			fprintf( fsynopsis,"\tPos. dist.: %i\n\tVel. dist.: %i\n\tOri. dist.: %i\n",SP[i].QDIST,SP[i].VDIST,SP[i].ODIST );
 			fprintf( fsynopsis,"\tInteraction matrix: [" );
@@ -1464,7 +1464,7 @@ void enfieldout( FILE *fout,cell ***CL,spec *SP,int LC ) {
 				if( LC ) {
 					for( d=0; d<DIM; d++ ) u[d] = tmpc->U[d];
 					un = dotprod( u,DIR,DIM );
-					wmf += ( S*un*un  + (1.-S)*invdim )*( (SP+id)->MFPOT );
+					wmf += ( S*un*un  + (1.-S)*invdim )*( (SP+id)->sMFPOT );
 				}
 				//Kinetic energy
 				m = (SP+id)->MASS;
@@ -1515,7 +1515,7 @@ void enneighboursout( FILE *fout,double t,cell ***CL,spec *SP,int LC ) {
 			tmpc = CL[a][b][c].pp;
 			while( tmpc != NULL ) {
 				id = tmpc->SPID;
-				avMFPOT+=(SP+id)->MFPOT;
+				avMFPOT+=(SP+id)->sMFPOT;
 				tmpc = tmpc->next;
 			}
 			avMFPOT/=(float)CL[a][b][c].POPSRD;
@@ -2421,7 +2421,7 @@ void checkpoint(FILE *fout, inputList in, spec *SP, particleMPC *pSRD, int MD_mo
 	//Species of MPCD particles
 	for( i=0; i<NSPECI; i++ ) {
 		fprintf( fout,"%lf %i %i %i %i ",(SP+i)->MASS,(SP+i)->POP,(SP+i)->QDIST,(SP+i)->VDIST,(SP+i)->ODIST );
-		fprintf( fout,"%lf %lf %lf %lf %lf %lf %lf %lf %lf %lf ",(SP+i)->RFC, (SP+i)->LEN, (SP+i)->TUMBLE, (SP+i)->CHIHI, (SP+i)->CHIA, (SP+i)->ACT, (SP+i)->MFPOT, (SP+i)->SIGWIDTH, (SP+i)->SIGPOS, (SP+i)->DAMP );
+		fprintf( fout,"%lf %lf %lf %lf %lf %lf %lf %lf %lf %lf ",(SP+i)->RFC, (SP+i)->LEN, (SP+i)->TUMBLE, (SP+i)->CHIHI, (SP+i)->CHIA, (SP+i)->ACT, (SP+i)->sMFPOT, (SP+i)->SIGWIDTH, (SP+i)->SIGPOS, (SP+i)->DAMP );
 		fprintf( fout,"%lf %lf %lf %lf %lf\n",(SP+i)->VOL,(SP+i)->nDNST,(SP+i)->mDNST,(SP+i)->MINACTRATIO,(SP+i)->BS );
 		for( j=0; j<NSPECI; j++ ) fprintf( fout,"%lf ",(SP+i)->M[j] );			//Binary fluid control parameters
 		fprintf( fout,"\n" );
