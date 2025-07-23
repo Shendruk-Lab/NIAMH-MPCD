@@ -718,6 +718,22 @@ void openbinder( FILE **f,char dir[],char fname[],char ext[],int binSize ) {
 }
 
 ///
+/// @brief Function that initializes the centres of masses of a multiphase fluid output file.
+///
+/// This function initializes the centres of masses of a multiphase fluid  output file.
+/// It opens it up for writing and reading while formatting it with its header.
+///
+/// @param f Return pointer to the centres of masses of a multiphase fluid  output file being opened.
+/// @param dir Path to the directory of the centres of masses of a multiphase fluid output file.
+/// @param fname Name of the centres of masses of a multiphase fluid output file.
+/// @param ext Extension of the centres of masses of a multiphase fluid output file.
+///
+void opencom( FILE **f,char dir[],char fname[],char ext[] ) {
+	openBasic( f,dir,fname,ext );
+	comheader( *f );
+}
+
+///
 /// @brief Function that initializes the swimmer output file.
 ///
 /// This function initializes the swimmer output file.
@@ -747,22 +763,6 @@ void openswimmer( FILE **f,char dir[],char fname[],char ext[] ) {
 void openswimmerOri( FILE **f,char dir[],char fname[],char ext[] ) {
 	openBasic( f,dir,fname,ext );
 	swimmeroriheader( *f );
-}
-
-///
-/// @brief Function that initializes the centres of masses of a multiphase fluid output file.
-///
-/// This function initializes the centres of masses of a multiphase fluid  output file.
-/// It opens it up for writing and reading while formatting it with its header.
-///
-/// @param f Return pointer to the centres of masses of a multiphase fluid  output file being opened.
-/// @param dir Path to the directory of the centres of masses of a multiphase fluid output file.
-/// @param fname Name of the centres of masses of a multiphase fluid output file.
-/// @param ext Extension of the centres of masses of a multiphase fluid output file.
-///
-void opencom( FILE **f,char dir[],char fname[],char ext[] ) {
-	openBasic( f,dir,fname,ext );
-	comheader( *f );
 }
 
 ///
@@ -2026,6 +2026,8 @@ void initOutput( char op[],outputFlagsList *outFlag,outputFilesList *outFile,inp
 	if( (outFlag->SWORIOUT)>=OUT ) openswimmerOri( &(outFile->fswimmersOri),op,fileswimmerori,fileextension );
 	//Initialize swimmer run/tumble output files
 	if( (outFlag->RTOUT)>=OUT ) openruntumble( &(outFile->fruntumble),op,fileruntumble,fileextension );
+	//Initialize centre of masses of multiphase fluid output files
+	if( (outFlag->AVCOMOUT)>=OUT ) opencom( &(outFile->fmpcom),op,filecom,fileextension );
 	//Initialize the synopsis output files
 	if( (outFlag->SYNOUT)>=OUT ) opensynopsis( &(outFile->fsynopsis),op,1 );
 	//Initialize the solids' trajectories (or BC motion) output files
