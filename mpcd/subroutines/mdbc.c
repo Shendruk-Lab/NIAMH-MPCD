@@ -73,6 +73,7 @@ void MD_BCcollision( particleMD *atom,bc WALL[],double KBT,double t_step ) {
 	tempMPC.S_flag=0;
 	tempMPC.SPID=0;
 	tempSP.POP=1;
+	tempSP.VDIST=GAUSS;
 	tempSP.MASS=atom->mass;
 	for( i=0; i<NBC; i++ ) {
 		//Save the interaction matrix
