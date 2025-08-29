@@ -492,9 +492,26 @@ void bcin( FILE *fbc,bc *WALL,char fname[] ) {
 	read=fscanf( fbc,"%lf %s",&l,LABEL );
 	checkRead( read,"bc",fname);
 	WALL->R = l;
-
 	read=fscanf( fbc,"%lf %s",&l,LABEL );
 	checkRead( read,"bc",fname);
+	WALL->KOPT = l;
+	read=fscanf( fbc,"%lf %s",&l,LABEL );
+	checkRead( read,"bc",fname);
+	WALL->VOPT[0] = l;
+	read=fscanf( fbc,"%lf %s",&l,LABEL );
+	checkRead( read,"bc",fname);
+	WALL->VOPT[1] = l;
+	read=fscanf( fbc,"%lf %s",&l,LABEL );
+	checkRead( read,"bc",fname);
+	WALL->VOPT[2] = l;
+	read=fscanf( fbc,"%lf %s",&l,LABEL );
+	checkRead( read,"bc",fname);
+	WALL->tOnOpt = l;
+	read=fscanf( fbc,"%lf %s",&l,LABEL );
+	checkRead( read,"bc",fname);
+	WALL->tOffOpt = l;
+	read=fscanf( fbc,"%lf %s",&l,LABEL );
+	checkRead( read,"bc",fname);	
 	WALL->DN = l;
 	read=fscanf( fbc,"%lf %s",&l,LABEL );
 	checkRead( read,"bc",fname);
@@ -1407,6 +1424,51 @@ void readJson( char fpath[], inputList *in, spec **SP, kinTheory **theory, parti
 					currWall->B[j] = 0.0;
 			}
 
+			// Optical trap related parameters
+			// if kopt is present, then we assume the wall has a trap attached
+			currWall->KOPT = getJObjDou(objElem, "kOpt", 0.0, jsonTagList); // OPTICAL TRAP STRENGTH
+			if (fneq(currWall->KOPT, 0.0)) {  // only do optical trap parsing if kOpt is not set
+				currWall->ENABLEOPT = 1;
+
+				// set initial position of the trap to the colloid position
+				for (j = 0; j < _3D; j++) currWall->QOPT[j] = currWall->Q[j];
+
+				// Optical trap velocity array
+				cJSON *arrVOPT = NULL;
+				getCJsonArray(objElem, &arrVOPT, "vOpt", jsonTagList, arrayList, 0);
+				if (arrVOPT != NULL) { // if trap velocity has been found then ....
+					if (cJSON_GetArraySize(arrVOPT) != _3D) { // check dimensionality if valid
+						printf("Error: vOpt must be 3D (even in 2D simulations).\n");
+						exit(EXIT_FAILURE);
+					}
+
+					for (j = 0; j < _3D; j++) { // get the value
+						currWall->VOPT[j] = cJSON_GetArrayItem(arrVOPT, j)->valuedouble;
+					}
+				} else {  // vOpt must be set!
+					printf("Error: Could not find vOpt in BC %d.\n", i);
+					exit(EXIT_FAILURE);
+				}
+
+				// parse moving time
+				cJSON *arrMoveTime = NULL;
+				getCJsonArray(objElem, &arrMoveTime, "optMoveTime", jsonTagList, arrayList, 0);
+				if (arrMoveTime != NULL) { // if moveTime has been found then ....
+					if (cJSON_GetArraySize(arrMoveTime) != _2D) { // check dimensionality if valid
+						printf("Error: MoveTime must be 2D.\n");
+						exit(EXIT_FAILURE);
+					}
+
+					currWall->tOnOpt = cJSON_GetArrayItem(arrMoveTime, 0)->valueint;
+					currWall->tOffOpt = cJSON_GetArrayItem(arrMoveTime, 1)->valueint;
+				} else {  // moveTime must be set!
+					printf("Error: Could not find moveTime in BC %d.\n", i);
+					exit(EXIT_FAILURE);
+				}
+			} else {
+				currWall->ENABLEOPT = 0;
+			}
+
 			// Handle BC overrides /////////////////////////////////////////////
 			// anchoring
 			if (getJObjInt(objElem, "homeotropic", 0, jsonTagList) == 1) { // homeotropic anchoring
@@ -1547,6 +1609,13 @@ void readJson( char fpath[], inputList *in, spec **SP, kinTheory **theory, parti
 			for (j = 0; j < 4; j++) { // P array - NECESSARY
 				currWall->P[j] = 1;
 			}
+            currWall->KOPT = 0.0; // Optical trap strength for colloid
+			currWall->ENABLEOPT = 0;
+			for (j = 0; j < _3D; j++) { // VOPT array
+				currWall->VOPT[j] = 0.0;
+			}
+			currWall->tOnOpt = 0.0;
+			currWall->tOffOpt = 0.0;
 			currWall->DT = 0; // dt
 			currWall->DVN = 0; // dvn
 			currWall->DVT = 0; // dvt

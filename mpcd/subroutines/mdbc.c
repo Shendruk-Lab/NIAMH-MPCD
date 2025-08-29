@@ -849,6 +849,145 @@ void posBC_MD( particleMD *atom,bc WALL,double n[_3D] ) {
 /* ****************************************** */
 
 ///
+/// @brief Performs the collision event between the moving boundary and Swimmer.
+///
+/// This routine performs the collision event between a boundary in motion and swimmers.
+/// The following steps are performed:
+/// - Finds if atom particles making up the swimmers  inside the boundary.
+/// - Rewind the atom to the boundary (in the moving reference frame of the boundary).
+/// - Apply boundary conditions to the swimmers using Swimmer_BCcollision().
+///
+/// @param WALL The boundary.
+/// @param BCcurrent The index for the boundary.
+/// @param swimmers Array containing all the swimmers
+/// @param SS Specs of the swimmers
+/// @param t_step The time step interval.
+/// @see chooseNS()
+/// @see timestep()
+/// @see Swimmer_BCcollision()
+/// @note Swimmer collisions with other boundaries (after these new transformations are applied) are handled in Swimmer_BCcollision().
+/// @note The change in velocity for the boundary (due to this BC-Swimmer interaction) is calculated in Swimmer_BCcollision()
+/// and the impulse to the boundary is applied in timestep().
+///
+void BC_Swimmercollision(bc WALL[],int BCcurrent,swimmer swimmers[],specSwimmer SS,double t_step) {
+//void BC_Swimmercollision(bc WALL[],int BCcurrent,particleMPC *pp,spec *pSP,double KBT,double GRAV[],double t_step,simptr simMD,int MDmode,int LC,int *bcCNT,int *reCNT,int *rethermCNT) {
+
+	int i;
+	int chosenNS=NS+1;					//Swimmer to go with t_min
+	int flag = 1;								//flag for if should keep looping. Loop while 1.
+	double pVO[DIM],pVT[DIM],bcV[DIM],bcL[_3D];		//temporary velocities
+	double W;
+	int HM=0;   //Counter to check if Head or middle passed through center
+
+	#ifdef DBG
+		if( DBUG == DBGBCMPC ) {
+			printf( "BC %d\n",BCcurrent );
+			bccoord( WALL[BCcurrent] );
+		}
+	#endif
+	while( flag ) {
+		/* ****************************************** */
+		/* ************ BCs ON PARTICLES ************ */
+		/* ****************************************** */
+		//We must check if any of the particles are now inside the BC,
+		//Find the one that the collision should have occured with and the time for that collision
+		#ifdef DBG
+			if( DBUG == DBGBCMPC ) printf( "Choose a particle: " );
+		#endif
+		// chooseP( WALL[BCcurrent],pp,&time,&W,&chosenP,t_step,GRAV );
+
+		chooseNS(WALL,BCcurrent,SS,swimmers,&W,&chosenNS,&HM);
+
+		#ifdef DBG
+			//if( DBUG == DBGBCMPC ) printf( "BC=%d; particle=%d; W=%e\n",BCcurrent,chosenP,W );
+		#endif
+		//If the BC do not collide with any BC particles exit
+		if( chosenNS>=NS ) flag = 0;
+		//If no particles were inside then we are done.
+		if( W > -TOL ) flag = 0;
+		else{
+			//A particle got inside a BC since the BC translated
+			#ifdef DBG
+				if( DBUG == DBGBCMPC ) {
+		//			printf( "%d\n",chosenP );
+					printf( " W: %e\n", W );
+					//pvec( (pp+chosenP)->Q,DIM );
+					//pvec( (pp+chosenP)->V,DIM );
+					//printf( " distance: %lf\n", distpoints( WALL[BCcurrent].Q,(pp+chosenP)->Q,DIM ) );
+				}
+			#endif
+			//Save the particle and BC's velocities (need to safe the difference of head/middle and the one touching)
+			if (HM==1){for( i=0; i<DIM; i++ ) pVT[i]=(swimmers+chosenNS)->H.V[i];}
+			if (HM==-1){for( i=0; i<DIM; i++ ) pVT[i]=(swimmers+chosenNS)->M.V[i];}
+			//if (HM==1){for( i=0; i<DIM; i++ ) pVO[i]=(swimmers+chosenNS)->M.V[i];}
+			//if (HM==-1){for( i=0; i<DIM; i++ ) pVO[i]=(swimmers+chosenNS)->H.V[i];}
+
+			for( i=0; i<DIM; i++ ) bcV[i]=WALL[BCcurrent].V[i];
+			for( i=0; i<_3D; i++ ) bcL[i]=WALL[BCcurrent].L[i];
+			//Give the swimmer negative the BC's velocity (the none touching atom will get difference between the two velocities)
+			if (HM==1){for( i=0; i<DIM; i++ ) (swimmers+chosenNS)->H.V[i]=-bcV[i];}
+			//if (HM==1){for( i=0; i<DIM; i++ ) (swimmers+chosenNS)->M.V[i]=-bcV[i]+pVO[i]-pVT[i];}
+			//if (HM==-1){for( i=0; i<DIM; i++ ) (swimmers+chosenNS)->H.V[i]=-bcV[i]+pVO[i]-pVT[i];}
+			if (HM==-1){for( i=0; i<DIM; i++ ) (swimmers+chosenNS)->M.V[i]=-bcV[i];}
+
+			//The change in reference frame means BC vel=0 (at the surface) (If HM =1, head, if HM=-1 tail)
+			for( i=0; i<DIM; i++ ) WALL[BCcurrent].V[i]=-pVT[i];
+			for( i=0; i<_3D; i++ ) WALL[BCcurrent].L[i]=0.0;
+			#ifdef DBG
+				if( DBUG == DBGBCMPC ) {
+					printf( "Change the reference frame:\nBC %d\n",BCcurrent );
+					pvec( WALL[BCcurrent].Q,DIM );
+					pvec( WALL[BCcurrent].V,DIM );
+				//	printf( "MPC Particle %d\n",chosenP );
+				//	pvec( (pp+chosenP)->Q,DIM );
+				//	pvec( (pp+chosenP)->V,DIM );
+					printf( "Full rewind:" );
+				//	rewind_BC( &WALL[BCcurrent],t_step );
+				//	printf( " distance: %lf\n", distpoints( WALL[BCcurrent].Q,(pp+chosenP)->Q,DIM ) );
+				//	stream_BC( &WALL[BCcurrent],t_step );
+				}
+			#endif
+			//With the BC's negative velocity work out all the BCs for this particle
+			if (HM==1){printf("HM is 1, measured: %d, defect chosenNS is $d\n",HM, chosenNS);
+                    printf("Position head %f %f %f\n",(swimmers+chosenNS)->H.Q[0],(swimmers+chosenNS)->H.Q[1],(swimmers+chosenNS)->H.Q[2]);
+                    printf("Position middle %f %f %f\n",(swimmers+chosenNS)->M.Q[0],(swimmers+chosenNS)->M.Q[1],(swimmers+chosenNS)->M.Q[2]);
+                    swimmer_BCcollision( &(swimmers[chosenNS].H),WALL,SS,t_step , 0);
+                    printf("Position after head %f %f %f\n",(swimmers+chosenNS)->H.Q[0],(swimmers+chosenNS)->H.Q[1],(swimmers+chosenNS)->H.Q[2]);
+                    printf("Position after middle %f %f %f\n",(swimmers+chosenNS)->M.Q[0],(swimmers+chosenNS)->M.Q[1],(swimmers+chosenNS)->M.Q[2]);
+                    }
+			if (HM==-1){printf("HM is 1, measured: %d, defect chosenNS is $d\n",HM, chosenNS);
+                    printf("Position head %f %f %f\n",(swimmers+chosenNS)->H.Q[0],(swimmers+chosenNS)->H.Q[1],(swimmers+chosenNS)->H.Q[2]);
+                    printf("Position middle %f %f %f\n",(swimmers+chosenNS)->M.Q[0],(swimmers+chosenNS)->M.Q[1],(swimmers+chosenNS)->M.Q[2]);
+
+			    swimmer_BCcollision( &(swimmers[chosenNS].M),WALL,SS,t_step , 0);
+                    printf("Position after head %f %f %f\n",(swimmers+chosenNS)->H.Q[0],(swimmers+chosenNS)->H.Q[1],(swimmers+chosenNS)->H.Q[2]);
+                    printf("Position after middle %f %f %f\n",(swimmers+chosenNS)->M.Q[0],(swimmers+chosenNS)->M.Q[1],(swimmers+chosenNS)->M.Q[2]);
+
+			    }
+			#ifdef DBG
+				if( DBUG == DBGBCMPC ) {
+					printf( "New particle position:\n" );
+			//		pvec( (pp+chosenP)->Q,DIM );
+			//		pvec( (pp+chosenP)->V,DIM );
+			//		printf( " distance: %lf\n", distpoints( WALL[BCcurrent].Q,(pp+chosenP)->Q,DIM ) );
+				}
+			#endif
+			//Give the particle back it's old velocity (plus the velocity it got from these collisions)
+			#ifdef DBG
+				if( DBUG == DBGBCMPC ) 	printf( "Change the reference frame back\n" );
+			#endif
+			if (HM==1){for( i=0; i<DIM; i++ ) (swimmers+chosenNS)->H.V[i] +=bcV[i]+pVT[i];}
+			if (HM==-1){for( i=0; i<DIM; i++ ) (swimmers+chosenNS)->M.V[i] +=bcV[i]+pVT[i];}
+			for( i=0; i<DIM; i++ ) WALL[BCcurrent].V[i] += pVT[i] + bcV[i];
+			for( i=0; i<_3D; i++ ) WALL[BCcurrent].L[i] = bcL[i];
+			//Done. Reset particle number test
+			chosenNS=NS+1;
+			// wait4u();
+		}
+	}
+}
+
+///
 /// @brief	Applies the BCs to the MD particle forming the swimmer body, in case it is required.
 ///
 /// It checks if the particle is inside the boundaries. If it's inside the boundaries it does not
@@ -862,9 +1001,10 @@ void posBC_MD( particleMD *atom,bc WALL,double n[_3D] ) {
 /// @param WALL 	One of the walls of the BCs that the particle is interacting with.
 /// @param SS 		It specifies the type (features) of the swimmer to which the monomer belongs.
 /// @param t_step	The MD timestep increment.
+/// @param flagSwimmeronBC	Determines if it is used in a BC on swimmer or swimmer on BC collision
 /// @see			MPC_BCcollision()
 ///  
-void swimmer_BCcollision( smono *atom,bc WALL[],specSwimmer SS,double t_step ) {
+void swimmer_BCcollision( smono *atom,bc WALL[],specSwimmer SS,double t_step ,int flagSwimmeronBC) {
 	double t_delta;			//time passed so far
 	double time;			//time left to move for
 	double t_min=0.;		//smallest time
@@ -873,7 +1013,7 @@ void swimmer_BCcollision( smono *atom,bc WALL[],specSwimmer SS,double t_step ) {
 	int cnt=0;				//Count the loop iterations
 	double n[_3D] = {0.,0.,0.};	//Normal to the surface
 	double W,W1=0.0;
-	double shift[DIM];
+	double shift[_3D];
 	double RX=0.0,RY=0.0,RZ=0.0;
 
 	t_delta = 0.;
@@ -886,6 +1026,10 @@ void swimmer_BCcollision( smono *atom,bc WALL[],specSwimmer SS,double t_step ) {
 		if( W > TOL ) flag = 0;
 		//Otherwise, COLLISON
 		else {
+                if (flagSwimmeronBC==0){
+                    printf("inside swimmer BC, pos before %f, %f and %f\n",atom->Q[0],atom->Q[1],atom->Q[2]);
+                    printf("inside swimmer BC, vel before %f, %f and %f\n",atom->V[0],atom->V[1],atom->V[2]);
+                }
 			cnt++;
 			// #ifdef DBG
 			// 	if( DBUG == DBGSWIMMER ) printf( "\tW=%f BC=%d\n",W,chosenBC );
@@ -921,8 +1065,21 @@ void swimmer_BCcollision( smono *atom,bc WALL[],specSwimmer SS,double t_step ) {
 			//Update the time to stream for
 			time = t_step - t_delta;
 			//Let the BC stream the rest of the way
-			stream_swimmer( atom,time );
+			//Let the BC stream the rest of the way//Only do this for flagSwimmeronBC=1 (copied from to MPC)
+			if( flagSwimmeronBC )	{			
+				stream_swimmer( atom,time );
+			}
+			else{//Make sure PBC are satisfied
+                for(int i=0; i<DIM; i++ ) {
+                    if( (atom)->Q[i] < 0.0 ) (atom)->Q[i] += XYZ[i];
+                    else if( (atom)->Q[i] > XYZ[i] ) (atom)->Q[i] -= XYZ[i];
+                }
+
+			}	
 			//Return to the top and try to move again for the rest of the time.
+			if (flagSwimmeronBC==0){
+                    printf("inside swimmer BC, pos after %f, %f and %f\n",atom->Q[0],atom->Q[1],atom->Q[2]);
+                    printf("inside swimmer BC, vel after %f, %f and %f\n",atom->V[0],atom->V[1],atom->V[2]);}
 			W1 = calcW_swimmer(WALL[chosenBC],atom);
 			if (W1 < 0.0){
 				atom->Q[x_]=RX;
@@ -932,6 +1089,9 @@ void swimmer_BCcollision( smono *atom,bc WALL[],specSwimmer SS,double t_step ) {
 				atom->V[y_]=0.0;
 				atom->V[z_]=0.0;
 			}
+                if (flagSwimmeronBC==0){
+                printf("inside swimmer BC, pos after1 %f, %f and %f\n",atom->Q[0],atom->Q[1],atom->Q[2]);
+                printf("inside swimmer BC, vel after1 %f, %f and %f\n",atom->V[0],atom->V[1],atom->V[2]);}			
 		}
 	}
 }
@@ -956,7 +1116,7 @@ void swimmer_BCcollision( smono *atom,bc WALL[],specSwimmer SS,double t_step ) {
 void chooseBC_swimmer( bc WALL[],smono *atom,double *t_min,double *chosenW,int *chosenBC,double time,double t_step ) {
 	int i,flag;
 	double t1,t2,tc;
-	double tempW,shift[DIM];
+	double tempW,shift[_3D];
 
 	*t_min = time;
 	*chosenW=1.;
@@ -996,6 +1156,72 @@ void chooseBC_swimmer( bc WALL[],smono *atom,double *t_min,double *chosenW,int *
 		shiftbackBC( shift,&WALL[i] );
 	}
 }
+
+
+///
+/// @brief	Check if any Swimmer (head and/or tail) is inside the BC
+///
+/// It checks if any swimmer (heads and/or tail part) is inside the specific BC.
+/// it calculates the crosstime through crosstime_swimmer(). If the crosstime does not match the
+/// streaming timestep it raises a warning, but later in swimmer_BCcollision routine the issue is solved.
+///
+/// @param WALL 	The specific wall (BCs) under consideration.
+/// @param SS 	    Swimmer specifics
+/// @param swimmers All the swimmers
+/// @param t_min 	The rest of the `time` remains for the particle to stream after reducing the 		collision time.
+/// @param chosenW 	It is used to determine if the boundary conditions should be applied to the MD particle.
+/// @param chosenBC The wall out of which the MD particle is.
+/// @param time 	The total remaining time that the particle has to move.
+/// @param t_step 	The MD timestep increment.
+/// @see			chooseBC()
+///
+
+void chooseNS( bc WALL[],int BCcurrent, specSwimmer SS,swimmer swimmers[],double *chosenW,int *chosenNS, int *HM) {
+ 	int i;
+	double tempW = 1.0;
+	double shift[_3D];
+	*chosenW = 1.0;
+    //heads
+	for( i=0; i<NS; i++ ) {
+
+		//Shift BC due to periodic BCs
+		shiftBC_swimmer( shift,&WALL[BCcurrent],&(swimmers[i].H) );
+		rotateBC_swimmer( &WALL[BCcurrent],&(swimmers[i].H) );
+		tempW=calcW_swimmer( WALL[BCcurrent],&(swimmers[i].H) );
+
+		if( tempW < 0. ) {
+        	printf("WorkNS head smaller %d\n",i);
+            *chosenNS = i;
+            *chosenW = tempW;
+            *HM =1;
+			break;
+		}
+
+		//Shift BC back
+		rotatebackBC_swimmer( &WALL[BCcurrent],&(swimmers[i].H) );
+		shiftbackBC( shift,&WALL[BCcurrent] );
+	}
+    //middle
+	for( i=0; i<NS; i++ ) {
+		//Shift BC due to periodic BCs
+		shiftBC_swimmer( shift,&WALL[BCcurrent],&(swimmers[i].M) );
+		rotateBC_swimmer( &WALL[BCcurrent],&(swimmers[i].M) );
+		tempW=calcW_swimmer( WALL[BCcurrent],&(swimmers[i].M) );
+
+		if( tempW < 0. ) {
+        	printf("WorkNS middle smaller %d\n",i);
+            *chosenNS = i;
+            *chosenW = tempW;
+            *HM =-1;
+			break;
+		}
+
+		//Shift BC back
+		rotatebackBC_swimmer( &WALL[BCcurrent],&(swimmers[i].M) );
+		shiftbackBC( shift,&WALL[BCcurrent] );
+	}
+}
+
 
 ///
 /// @brief	Determines if the BC must be shifted due to the periodicity of the control volume.
@@ -1418,7 +1644,7 @@ void velBC_swimmer( smono *atom,bc *WALL,specSwimmer SS,double n[_3D] ) {
 	for( i=0; i<_3D; i++ ) atom->V[i] += V[i] * J * IMpart;
 	if( WALL->DSPLC ) {
 		//Set the velocity of BC
-		for( i=0; i<DIM; i++ ) WALL->V[i] -= V[i] * J * IMwall;
+		for( i=0; i<DIM; i++ ) WALL->dV[i] -= V[i] * J * IMwall;
 		//Set the angular velocity of BC
 		//Since VN isn't being used, use VN as the difference
 		for( i=0; i<_3D; i++ ) VN[i] = atom_POS[i] - WALL->Q[i];
