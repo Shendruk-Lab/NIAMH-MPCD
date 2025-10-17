@@ -32,6 +32,9 @@
 #include "mdsetup.h"
 #include "../mpcd/headers/definitions.h"
 
+// Add this function prototype before any function that uses GrowReadKnotChain
+particleMD *GrowReadKnotChain(simptr sim, int type, int layout, int n, particleMD *p0, int *status, const char* filename);
+
 #ifdef MPI
 #include <mpi.h>
 #endif
@@ -255,7 +258,10 @@ void SetupParameters (simptr sim)
 				HEXA_PARAM (sim, groupThermRescale),
 				INTG_PARAM (sim, stepThermRescale),
 				HEXA_PARAM (sim, groupThermDPD),
-				REAL_PARAM (sim, eta)
+				REAL_PARAM (sim, eta),
+
+				// reading
+				CHAR_PARAM (sim, filename),
 	};
 
 	// compute the number of parameters
@@ -910,9 +916,10 @@ void InitPolymers (simptr sim)
 									break;
 			case LAYOUT_PLATES:		polySurfaceTot+=polyM[set];
 									break;
-			case LAYOUT_FLUID: case LAYOUT_RODX: case LAYOUT_RODY: case LAYOUT_TRANS: case LAYOUT_U: case LAYOUT_BANANA:
-									polyBulkTot+=polyM[set];
+			case LAYOUT_FLUID: case LAYOUT_RODX: case LAYOUT_RODY: case LAYOUT_TRANS: case LAYOUT_U: case LAYOUT_BANANA: case LAYOUT_READKNOT:
+									polyBulkTot+=polyM[set]; 
 									break;
+					
 			case LAYOUT_ANCHOR:		polyM[set] = 1;
 									polyBulkTot+=polyM[set];
 									break;
@@ -944,7 +951,7 @@ void InitPolymers (simptr sim)
 				layout 	   = LAYOUT_FLUID;
 				layoutList = surface;
 				break;
-			case LAYOUT_FLUID: case LAYOUT_RODX: case LAYOUT_RODY: case LAYOUT_TRANS: case LAYOUT_BANANA: case LAYOUT_U:
+			case LAYOUT_FLUID: case LAYOUT_RODX: case LAYOUT_RODY: case LAYOUT_TRANS: case LAYOUT_BANANA: case LAYOUT_U: case LAYOUT_READKNOT:
 				d2Min  	   = pow (polySpread[set]*pow(V/polyBulkTot,1/3.0), 2.0);
 				layout 	   = LAYOUT_FLUID;
 				layoutList = fluid;
@@ -1000,8 +1007,8 @@ void InitPolymers (simptr sim)
 			loop   = LOOP_MAX;
 			while (!picked && loop--) {
 
-				// no candidates left!
-				if (candidates.n==0 && polyLayout[set]!=LAYOUT_ANCHOR && polyLayout[set]!=LAYOUT_FLUID && polyLayout[set]!=LAYOUT_PLATES && polyLayout[set]!=LAYOUT_CYLINDER && polyLayout[set]!=LAYOUT_RODX && polyLayout[set]!=LAYOUT_RODY && polyLayout[set]!=LAYOUT_U && polyLayout[set]!=LAYOUT_TRANS && polyLayout[set]!=LAYOUT_BANANA) error (EGRAFT);
+				// no candidates left! Throw an error
+				if (candidates.n==0 && polyLayout[set]!=LAYOUT_ANCHOR && polyLayout[set]!=LAYOUT_FLUID && polyLayout[set]!=LAYOUT_PLATES && polyLayout[set]!=LAYOUT_CYLINDER && polyLayout[set]!=LAYOUT_RODX && polyLayout[set]!=LAYOUT_RODY && polyLayout[set]!=LAYOUT_U && polyLayout[set]!=LAYOUT_TRANS && polyLayout[set]!=LAYOUT_BANANA && polyLayout[set]!=LAYOUT_READKNOT) error (EGRAFT);
 
 				// choose candidate atom randomly
 				c = (int) (RandomReal()*candidates.n);
@@ -1064,8 +1071,8 @@ void InitPolymers (simptr sim)
 								}
 							}
 							break;
-
-						case LAYOUT_FLUID: case LAYOUT_RODX: case LAYOUT_RODY: case LAYOUT_U: case LAYOUT_TRANS: case LAYOUT_BANANA:
+						// not 100% confident that readknot should go here
+						case LAYOUT_FLUID: case LAYOUT_RODX: case LAYOUT_RODY: case LAYOUT_U: case LAYOUT_TRANS: case LAYOUT_BANANA: case LAYOUT_READKNOT:
 							// distance with ALL other polymers
 							// this may cause a crash...  I commented it out in another code
 							for (j=0; j<polymer.n; j++) {
@@ -1158,6 +1165,13 @@ void InitPolymers (simptr sim)
 						p1 = p3;
 						p1->next = GrowUChain (sim, polyAtomType[set], layout, polyN[set],  NULL, &grown);
 					}
+
+					// taken from above
+					else if (polyLayout[set]==LAYOUT_READKNOT ) {
+						p1 = p3;
+						p1->next = GrowReadKnotChain(sim, polyAtomType[set], layout, polyN[set], NULL, &grown, sim->filename);
+					}
+
 					else p1->next = GrowLinearChain (sim, polyAtomType[set], layout, polyN[set], p1, &grown);
 					if (grown) {
 						// post-growth action depending on layout
@@ -1166,7 +1180,7 @@ void InitPolymers (simptr sim)
 								// just register the polymer
 								AddItemPoly (&polymer, p1, 1);
 								break;
-							case LAYOUT_FLUID: case LAYOUT_RODX: case LAYOUT_RODY: case LAYOUT_U: case LAYOUT_TRANS: case LAYOUT_BANANA:
+							case LAYOUT_FLUID: case LAYOUT_RODX: case LAYOUT_RODY: case LAYOUT_U: case LAYOUT_TRANS: case LAYOUT_BANANA: case LAYOUT_READKNOT:
 								// detach from first fluid atom and register polymer
 								// note this has been modded so we don't need to detach...
 								p1 = p1->next;
@@ -2860,6 +2874,163 @@ particleMD *GrowBananaChain (simptr sim, int type, int layout, int n, real centr
 	return pNew;
 }
 
+// defining file reading function
+#define MAX_ATOMS 1000
+#define MAX_LINE_LENGTH 256
+
+typedef struct {
+    char atom_type;
+    double x, y, z;
+} Atom;
+
+int readFinalTimestep(const char* filename, Atom atoms[], int max_atoms) {
+    FILE* file = fopen(filename, "r");
+    if (file == NULL) {
+        printf("Error: Could not open file %s\n", filename);
+        return -1;
+    }
+    
+    char line[MAX_LINE_LENGTH];
+    int atom_count = 0;
+    int current_timestep_atoms = 0;
+    int found_timestep = 0;
+    
+    // First pass: find where the last timestep starts
+    long last_timestep_pos = 0;
+    long current_pos = 0;
+    
+    while (fgets(line, sizeof(line), file) != NULL) {
+        current_pos = ftell(file);
+        
+        // Look for timestep headers
+        if (strstr(line, "Atoms. Timestep:") != NULL) {
+            last_timestep_pos = current_pos - strlen(line);
+            found_timestep = 1;
+        }
+    }
+    
+    if (!found_timestep) {
+        printf("Error: No timestep found in file\n");
+        fclose(file);
+        return -1;
+    }
+    
+    // Rewind to the last timestep
+    fseek(file, last_timestep_pos, SEEK_SET);
+    
+    // Skip the timestep header line
+    fgets(line, sizeof(line), file);
+    
+    // Read atoms for the last timestep
+    while (fgets(line, sizeof(line), file) != NULL && atom_count < max_atoms) {
+        // Check if we've reached the next timestep (line starting with number)
+        if (strlen(line) > 0 && line[0] >= '0' && line[0] <= '9') {
+            break;
+        }
+        
+        // Skip empty lines
+        if (strlen(line) <= 1) continue;
+        
+        // Parse atom data: format "O/N x y z"
+        char atom_type;
+        double x, y, z;
+        
+        if (sscanf(line, "%c %lf %lf %lf", &atom_type, &x, &y, &z) == 4) {
+            atoms[atom_count].atom_type = atom_type;
+            atoms[atom_count].x = x;
+            atoms[atom_count].y = y;
+            atoms[atom_count].z = z;
+            atom_count++;
+        }
+    }
+    
+    fclose(file);
+    return atom_count;
+}
+
+// else if (polyLayout[set]==LAYOUT_READKNOT ) {
+// 						p1 = p3;
+// 						p1->next = GrowReadKnotChain(sim, polyAtomType[set], layout, NULL, &grown, sim->filename);
+
+//================================================================================
+particleMD *GrowReadKnotChain (simptr sim, int type, int layout, int n, particleMD *p0, int *status, const char* filename)
+//================================================================================
+{
+	// Function to grow a n-long knotted polymer where n is defined in the read file
+	// Do I need to use particle pointed by p0, or can read from file entirely?
+	// If p0 is null, a new random starting point is generated.
+	// So perhaps want both capabilities
+
+	// I should also think about the fact that lammps output is going to give the type
+	// of atom which we are working with. I.e. Nitrogen (N) or Oxygen (O)
+	
+	//  If the growth is successful, it returns a pointer to the subchain, or a NULL pointer otherwise. 
+	// It also sets the status variable to 1 for a fully grown subchain, 0 otherwise.
+
+	printf("This is running!");
+
+	// get polymer from reading
+	Atom atoms[MAX_ATOMS]; // define atom data stucture
+	int atom_count = readFinalTimestep(filename, atoms, MAX_ATOMS);
+	
+
+	// modifying other code to work for me
+	int		grown, loop;
+	particleMD	p1, *pNew=0;
+	real	sigma=sim->sigma_lj;		// Bead size
+	int 	Ntot = atom_count;  // total number of monomers, gotten from read
+
+	// return if there is no monomer to add - recursion base case 
+	if (n==0) {
+		*status = 1;
+		return 0;
+	}
+	
+	// add a monomer in the chain
+	grown = 0;
+	loop  = GROWLOOP_MAX;
+	// while (!grown && loop--) {
+	// 	// new monomer location
+	// 	if (p0) {
+	// 		p1.rx = p0->rx;
+	// 		p1.ry = p0->ry;
+	// 		p1.rz = p0->rz;
+	// 		pNew = AtomInsert (sim, type, layout, &p1, CHECK, CHECK);
+	// 	}
+	// 	else {
+	// 		pNew = AtomInsert (sim, type, layout, 0, CHECK, CHECK);
+	// 		// Force it to be at a give position rather than the random position it was inserted at
+	// 		pNew->rx = sim->box[x_]*0.5 - 0.5*R*(1.0-cos(0.5*centralAng));
+	// 		pNew->ry = sim->box[y_]*0.5 - R*sin(0.5*centralAng);
+	// 		pNew->rz = sim->box[z_]*0.5;
+	// 		pNew->wx = sim->box[x_]*0.5 - 0.5*R*(1.0-cos(0.5*centralAng));
+	// 		pNew->wy = sim->box[y_]*0.5 - R*sin(0.5*centralAng);
+	// 		pNew->wz = sim->box[z_]*0.5;
+	// 		pNew->x0 = sim->box[x_]*0.5 - 0.5*R*(1.0-cos(0.5*centralAng));
+	// 		pNew->y0 = sim->box[y_]*0.5 - R*sin(0.5*centralAng);
+	// 		pNew->z0 = sim->box[z_]*0.5;
+	// 	}
+
+	// 	// continue growing (recursively), and remove candidate if stunted growth
+	// 	if (pNew) {
+	// 		pNew->prev = p0;
+	// 		pNew->next = GrowBananaChain (sim, type, layout, n-1, centralAng, R, pNew, &grown);
+	// 		if (!grown) AtomRemove (sim, type, PICK_POINTER, pNew);
+	// 	}
+	// }
+
+	// update growth status
+	*status = grown;
+
+	// growth failure
+	if (!grown) return NULL;
+
+	// growth success
+	return pNew;
+
+}
+
+
 //================================================================================
 particleMD *GrowUChain (simptr sim, int type, int layout, int n, particleMD *p0, int *status)
 //================================================================================
@@ -2872,6 +3043,9 @@ particleMD *GrowUChain (simptr sim, int type, int layout, int n, particleMD *p0,
 	int			grown, loop;
 	particleMD	p1, *pNew=0;
 	real		dr=0.0;
+
+	printf("\n\n\nOutputting p0 variable");
+	printf("p0=%p\n", (void*)p0);
 
 	// return if there is no monomer to add
 	if (n==0) {

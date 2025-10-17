@@ -48,6 +48,7 @@ extern int snprintf (char *__restrict __s, size_t __maxlen, __const char *__rest
 #define INTG   					0
 #define HEXA   					1
 #define REAL  					2
+#define CHAR                    3
 #define real					float
 #define	real_FORMAT_STR 			"%f"
 
@@ -147,6 +148,8 @@ extern int snprintf (char *__restrict __s, size_t __maxlen, __const char *__rest
 #define	LAYOUT_TRANS		9
 // Holly and Emma added for curved rods
 #define	LAYOUT_BANANA		10
+// John added for read-in knot function
+#define LAYOUT_READKNOT     11
 
 // atom types (index)
 #define TYPE_WALL				0
@@ -230,6 +233,7 @@ extern int snprintf (char *__restrict __s, size_t __maxlen, __const char *__rest
 #define  INTG_PARAM(x,y)		{ #y, &(x->y), INTG,  sizeof(x->y)/sizeof(int), 			0}
 #define  REAL_PARAM(x,y)		{ #y, &(x->y), REAL,  sizeof(x->y)/sizeof(real), 			0}
 #define  HEXA_PARAM(x,y)		{ #y, &(x->y), HEXA,  sizeof(x->y)/sizeof(unsigned int), 	0}
+#define  CHAR_PARAM(x,y)        { #y, &(x->y), CHAR, sizeof(x->y),                          0}
 
 
 //================================================================================
@@ -550,6 +554,8 @@ typedef struct simulation {		 		// a simulation
     int			polyM[PS];				///< number of polymer chains
     int			polyN[PS];				///< number of monomers per chain
 	real			monoCharge[PS];			///< charge of each monomer
+    // reading in 
+    char         filename[PS];
     
 	// charges
 	int			qLayout[QS];  			///< where to put the charges (e.g., SURFACE, TYPE_FLUID, ...)
@@ -686,7 +692,7 @@ typedef struct simulation {		 		// a simulation
     FILE		*input;					///< input file stream
     char		inputFile[STRLEN];		///< name of the input file
     char		outputDir[STRLEN];		///< directory where output files are written
-    char		programName[STRLEN];	///< litteral name of the program
+    char		programName[STRLEN];	///< literal name of the program
     char		label[STRLEN];			///< simulation label
     char		msg[STRLEN];		 	///< message buffer
 
