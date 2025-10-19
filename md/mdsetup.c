@@ -2978,9 +2978,20 @@ particleMD *GrowReadKnotChain (simptr sim, int type, int layout, int n, particle
 
 	printf("Growing knotted chain from file: %s\n", filename);
 
-	// // get polymer from reading
-	// Atom atoms[MAX_ATOMS]; // define atom data stucture
-	// int atom_count = readFinalTimestep(filename, atoms, MAX_ATOMS);
+	// get polymer from reading
+	Atom atoms[MAX_ATOMS]; // define atom data stucture
+	int atom_count = readFinalTimestep(filename, atoms, MAX_ATOMS);
+
+	// Print the last atom
+	if (atom_count > 0) {
+		Atom *last_atom = &atoms[atom_count - 1];
+		printf("Last atom (index %d):\n", atom_count - 1);
+		printf("  Type: %d\n", last_atom->atom_type);
+		printf("  Position: (%f, %f, %f)\n", last_atom->x, last_atom->y, last_atom->z);
+		// Add any other fields your Atom struct has
+	} else {
+		printf("No atoms were read from the file!\n");
+	}
 	
 
 	// // modifying other code to work for me

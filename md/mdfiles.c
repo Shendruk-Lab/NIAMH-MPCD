@@ -343,20 +343,33 @@ void ReadParameters (char *inputFile, paramptr param, int nParam, char *label, c
 						break;
 					// handling string inputs
 					case CHAR:
-						str = strpbrk(str, "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVSTUVWXYZ/._-");
-						if (str) {
-							ptr->n += sscanf(str, "%s", (char *)ptr->value + k*PATHMAX);
-							
-							// Remove trailing quote if present
+						// Skip leading whitespace
+						while (*str && isspace((unsigned char)*str)) str++;
+						
+						if (*str) {
 							char *read_value = (char *)ptr->value + k*PATHMAX;
-							size_t len = strlen(read_value);
-							if (len > 0 && read_value[len-1] == '"') {
-								read_value[len-1] = '\0';
+							
+							// Find the length until delimiter
+							size_t len = strcspn(str, " \t\n,;");
+							
+							// Copy the string
+							if (len >= PATHMAX) len = PATHMAX - 1;
+							strncpy(read_value, str, len);
+							read_value[len] = '\0';
+							
+							// Remove surrounding quotes
+							if (read_value[0] == '"' && read_value[len-1] == '"' && len >= 2) {
+								memmove(read_value, read_value + 1, len - 2);
+								read_value[len - 2] = '\0';
 							}
+							
+							// Advance the main pointer
+							str += len;
+							ptr->n++;
 							
 							printf("Read string: '%s'\n", read_value);
 						}
-    					break;
+						break;
 				}
 
 				// advance to next item
