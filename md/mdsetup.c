@@ -2961,96 +2961,77 @@ int readFinalTimestep(const char* filename, Atom atoms[], int max_atoms) {
 // 						p1 = p3;
 // 						p1->next = GrowReadKnotChain(sim, polyAtomType[set], layout, NULL, &grown, sim->filename);
 
-//================================================================================
+// Assumes readFinalTimestep(), AtomInsert(), AtomRemove(), particleMD, simptr, PICK_POINTER, etc. exist.
+
+// safer, iterative GrowReadKnotChain with robust rollback
 particleMD *GrowReadKnotChain (simptr sim, int type, int layout, int n, particleMD *p0, int *status, const char* filename)
-//================================================================================
 {
-	// Function to grow a n-long knotted polymer where n is defined in the read file
-	// Do I need to use particle pointed by p0, or can read from file entirely?
-	// If p0 is null, a new random starting point is generated.
-	// So perhaps want both capabilities
+	int		grown = 1;
+	particleMD	p1, *pNew=0;
+	//real	sigma=sim->sigma_lj;		// Bead size
+	//int 	Ntot = sim->polyN[POLY_SETS-1];  // total number of monomers 
 
-	// I should also think about the fact that lammps output is going to give the type
-	// of atom which we are working with. I.e. Nitrogen (N) or Oxygen (O)
-	
-	//  If the growth is successful, it returns a pointer to the subchain, or a NULL pointer otherwise. 
-	// It also sets the status variable to 1 for a fully grown subchain, 0 otherwise.
+    printf("Growing knotted chain from file: %s\n", filename);
 
-	printf("Growing knotted chain from file: %s\n", filename);
+    Atom atoms[MAX_ATOMS];
 
-	// get polymer from reading
-	Atom atoms[MAX_ATOMS]; // define atom data stucture
-	int atom_count = readFinalTimestep(filename, atoms, MAX_ATOMS);
+    int atom_count = readFinalTimestep(filename, atoms, MAX_ATOMS);
+    if (atom_count <= 0) {
+        printf("GrowReadKnotChain: no atoms read from file\n");
+        *status = 0;
+        return NULL;
+    }
 
-	// Print the last atom
-	if (atom_count > 0) {
-		Atom *last_atom = &atoms[atom_count - 1];
-		printf("Last atom (index %d):\n", atom_count - 1);
-		printf("  Type: %d\n", last_atom->atom_type);
-		printf("  Position: (%f, %f, %f)\n", last_atom->x, last_atom->y, last_atom->z);
-		// Add any other fields your Atom struct has
-	} else {
-		printf("No atoms were read from the file!\n");
+	printf("Number of atoms read: %d\n", atom_count);
+
+    double center_x = 0.5 * sim->box[x_];
+    double center_y = 0.5 * sim->box[y_];
+    double center_z = 0.5 * sim->box[z_];
+
+    // double shift_x = center_x - atoms[0].x;
+    // double shift_y = center_y - atoms[0].y;
+    // double shift_z = center_z - atoms[0].z;
+
+	int i;
+
+	for (i = 0; i<atom_count; i++) {
+		printf("Atom %d: type=%c, x=%f, y=%f, z=%f\n", i, atoms[i].atom_type, atoms[i].x, atoms[i].y, atoms[i].z);
+
+		// shift to new coordinates to force atoms to be relative to the centre
+		atoms[i].x += center_x;
+		atoms[i].y += center_y;
+		atoms[i].z += center_z;
+		
+		// insert and force location
+		pNew = AtomInsert (sim, type, layout, 0, CHECK, CHECK);
+		if (!pNew) {
+			// Rollback previously added atoms
+			printf("Failed to insert atom %d", i);
+			return NULL;
+			
+		}
+		pNew->rx = atoms[i].x;
+		pNew->ry = atoms[i].y;
+		pNew->rz = atoms[i].z;
+		pNew->wx = atoms[i].x;
+		pNew->wy = atoms[i].y;
+		pNew->wz = atoms[i].z;
+		pNew->x0 = atoms[i].x;
+		pNew->y0 = atoms[i].y;
+		pNew->z0 = atoms[i].z;
+
+		
 	}
-	
 
-	// // modifying other code to work for me
-	// int		grown, loop;
-	// particleMD	p1, *pNew=0;
-	// real	sigma=sim->sigma_lj;		// Bead size
-	// int 	Ntot = atom_count;  // total number of monomers, gotten from read
+	// update growth status
+	*status = grown;
 
-	// // return if there is no monomer to add - recursion base case 
-	// if (n==0) {
-	// 	*status = 1;
-	// 	return 0;
-	// }
-	
-	// // add a monomer in the chain
-	// grown = 0;
-	// loop  = GROWLOOP_MAX;
-	// while (!grown && loop--) {
-	// 	// new monomer location
-	// 	if (p0) {
-	// 		p1.rx = p0->rx;
-	// 		p1.ry = p0->ry;
-	// 		p1.rz = p0->rz;
-	// 		pNew = AtomInsert (sim, type, layout, &p1, CHECK, CHECK);
-	// 	}
-	// 	else {
-	// 		pNew = AtomInsert (sim, type, layout, 0, CHECK, CHECK);
-	// 		// Force it to be at a give position rather than the random position it was inserted at
-	// 		pNew->rx = sim->box[x_]*0.5 - 0.5*R*(1.0-cos(0.5*centralAng));
-	// 		pNew->ry = sim->box[y_]*0.5 - R*sin(0.5*centralAng);
-	// 		pNew->rz = sim->box[z_]*0.5;
-	// 		pNew->wx = sim->box[x_]*0.5 - 0.5*R*(1.0-cos(0.5*centralAng));
-	// 		pNew->wy = sim->box[y_]*0.5 - R*sin(0.5*centralAng);
-	// 		pNew->wz = sim->box[z_]*0.5;
-	// 		pNew->x0 = sim->box[x_]*0.5 - 0.5*R*(1.0-cos(0.5*centralAng));
-	// 		pNew->y0 = sim->box[y_]*0.5 - R*sin(0.5*centralAng);
-	// 		pNew->z0 = sim->box[z_]*0.5;
-	// 	}
+	// growth failure
+	if (!grown) return NULL;
 
-	// 	// continue growing (recursively), and remove candidate if stunted growth
-	// 	if (pNew) {
-	// 		pNew->prev = p0;
-	// 		pNew->next = GrowBananaChain (sim, type, layout, n-1, centralAng, R, pNew, &grown);
-	// 		if (!grown) AtomRemove (sim, type, PICK_POINTER, pNew);
-	// 	}
-	// }
-
-	// // update growth status
-	// *status = grown;
-
-	// // growth failure
-	// if (!grown) return NULL;
-
-	// // growth success
-	// return pNew;
-	return NULL; // Placeholder return to avoid compiler error
-
+	// growth success
+	return pNew;
 }
-
 
 //================================================================================
 particleMD *GrowUChain (simptr sim, int type, int layout, int n, particleMD *p0, int *status)
