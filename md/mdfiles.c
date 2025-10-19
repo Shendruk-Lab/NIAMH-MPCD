@@ -309,6 +309,8 @@ void ReadParameters (char *inputFile, paramptr param, int nParam, char *label, c
 		// get pointer to parameter
 		ptr = param+n;
 
+		printf("Reading parameter: %s\n", ptr->name);
+
 		// construct the key string for the current parameter
 		snprintf (key, KEYSIZE, "%s%s=", label, ptr->name);
 
@@ -339,6 +341,22 @@ void ReadParameters (char *inputFile, paramptr param, int nParam, char *label, c
 						str = strpbrk (str, digits);
 						if (str) ptr->n += sscanf (str, real_FORMAT_STR, (real *) ptr->value + k);
 						break;
+					// handling string inputs
+					case CHAR:
+						str = strpbrk(str, "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVSTUVWXYZ/._-");
+						if (str) {
+							ptr->n += sscanf(str, "%s", (char *)ptr->value + k*PATHMAX);
+							
+							// Remove trailing quote if present
+							char *read_value = (char *)ptr->value + k*PATHMAX;
+							size_t len = strlen(read_value);
+							if (len > 0 && read_value[len-1] == '"') {
+								read_value[len-1] = '\0';
+							}
+							
+							printf("Read string: '%s'\n", read_value);
+						}
+    					break;
 				}
 
 				// advance to next item
@@ -566,6 +584,11 @@ void TranslateMacros (char **stringptr)
 	snprintf (macro, STRMAX, "LAYOUT_BANANA");
 	snprintf (value, STRMAX, "%u", LAYOUT_BANANA);
 	ReplaceMacro (stringptr, macro, value);
+
+	// John added for read-in knot function - might need to be pathmax
+	snprintf(macro, STRMAX, "LAYOUT_READKNOT");
+	snprintf(value, STRMAX, "%u", LAYOUT_READKNOT);
+	ReplaceMacro(stringptr, macro, value);
 
 	snprintf (macro, STRMAX, "GROUP_NONE");
 	snprintf (value, STRMAX, "%#010X", GROUP_NONE);

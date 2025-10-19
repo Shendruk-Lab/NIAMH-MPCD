@@ -887,6 +887,7 @@ void InitPolymers (simptr sim)
 	// polymer set variables
 	polyBulkTot    = 0;
 	polySurfaceTot = 0;
+	printf("Initializing polymers\n");
 	for (set=0; set<POLY_SETS; set++) {
 
 		polyLayout[set] = sim->polyLayout[set];
@@ -917,6 +918,7 @@ void InitPolymers (simptr sim)
 			case LAYOUT_PLATES:		polySurfaceTot+=polyM[set];
 									break;
 			case LAYOUT_FLUID: case LAYOUT_RODX: case LAYOUT_RODY: case LAYOUT_TRANS: case LAYOUT_U: case LAYOUT_BANANA: case LAYOUT_READKNOT:
+									printf("Adding to bulk total: set %d, M %d\n", set, polyM[set]);
 									polyBulkTot+=polyM[set]; 
 									break;
 					
@@ -930,6 +932,8 @@ void InitPolymers (simptr sim)
 		}
 	}
 
+	printf("Total polymers to insert: %d (bulk %d, surface %d)\n", polyBulkTot+polySurfaceTot, polyBulkTot, polySurfaceTot);
+	printf("Bulding polymer sets");
 	// build polymer sets
 	for (set=0; set<POLY_SETS; set++) {
 
@@ -1000,6 +1004,7 @@ void InitPolymers (simptr sim)
 				}
 		}
 
+		printf("Growing polymer set %d (%d polymers of length %d)\n", set, polyM[set], polyN[set]);
 		// grow polymers
 		for (i=0; i<polyM[set]; i++) {
 			// grow polymer
@@ -1010,6 +1015,7 @@ void InitPolymers (simptr sim)
 				// no candidates left! Throw an error
 				if (candidates.n==0 && polyLayout[set]!=LAYOUT_ANCHOR && polyLayout[set]!=LAYOUT_FLUID && polyLayout[set]!=LAYOUT_PLATES && polyLayout[set]!=LAYOUT_CYLINDER && polyLayout[set]!=LAYOUT_RODX && polyLayout[set]!=LAYOUT_RODY && polyLayout[set]!=LAYOUT_U && polyLayout[set]!=LAYOUT_TRANS && polyLayout[set]!=LAYOUT_BANANA && polyLayout[set]!=LAYOUT_READKNOT) error (EGRAFT);
 
+				printf("Picking random candidate site");
 				// choose candidate atom randomly
 				c = (int) (RandomReal()*candidates.n);
 				if (c==candidates.n) c--;
@@ -1129,6 +1135,7 @@ void InitPolymers (simptr sim)
 					}
 				}
 
+				printf("Candidate site picked, growin polymer\n");
 				// grow it
 				if (keep){
 					if (polyLayout[set]==LAYOUT_FLUID ) {
@@ -1168,6 +1175,7 @@ void InitPolymers (simptr sim)
 
 					// taken from above
 					else if (polyLayout[set]==LAYOUT_READKNOT ) {
+						printf("GROWING A READKNOT POLYMER\n");
 						p1 = p3;
 						p1->next = GrowReadKnotChain(sim, polyAtomType[set], layout, polyN[set], NULL, &grown, sim->filename);
 					}
@@ -2884,6 +2892,7 @@ typedef struct {
 } Atom;
 
 int readFinalTimestep(const char* filename, Atom atoms[], int max_atoms) {
+	printf("Reading final timestep from file: %s\n", filename);
     FILE* file = fopen(filename, "r");
     if (file == NULL) {
         printf("Error: Could not open file %s\n", filename);
@@ -2967,28 +2976,28 @@ particleMD *GrowReadKnotChain (simptr sim, int type, int layout, int n, particle
 	//  If the growth is successful, it returns a pointer to the subchain, or a NULL pointer otherwise. 
 	// It also sets the status variable to 1 for a fully grown subchain, 0 otherwise.
 
-	printf("This is running!");
+	printf("Growing knotted chain from file: %s\n", filename);
 
-	// get polymer from reading
-	Atom atoms[MAX_ATOMS]; // define atom data stucture
-	int atom_count = readFinalTimestep(filename, atoms, MAX_ATOMS);
+	// // get polymer from reading
+	// Atom atoms[MAX_ATOMS]; // define atom data stucture
+	// int atom_count = readFinalTimestep(filename, atoms, MAX_ATOMS);
 	
 
-	// modifying other code to work for me
-	int		grown, loop;
-	particleMD	p1, *pNew=0;
-	real	sigma=sim->sigma_lj;		// Bead size
-	int 	Ntot = atom_count;  // total number of monomers, gotten from read
+	// // modifying other code to work for me
+	// int		grown, loop;
+	// particleMD	p1, *pNew=0;
+	// real	sigma=sim->sigma_lj;		// Bead size
+	// int 	Ntot = atom_count;  // total number of monomers, gotten from read
 
-	// return if there is no monomer to add - recursion base case 
-	if (n==0) {
-		*status = 1;
-		return 0;
-	}
+	// // return if there is no monomer to add - recursion base case 
+	// if (n==0) {
+	// 	*status = 1;
+	// 	return 0;
+	// }
 	
-	// add a monomer in the chain
-	grown = 0;
-	loop  = GROWLOOP_MAX;
+	// // add a monomer in the chain
+	// grown = 0;
+	// loop  = GROWLOOP_MAX;
 	// while (!grown && loop--) {
 	// 	// new monomer location
 	// 	if (p0) {
@@ -3019,14 +3028,15 @@ particleMD *GrowReadKnotChain (simptr sim, int type, int layout, int n, particle
 	// 	}
 	// }
 
-	// update growth status
-	*status = grown;
+	// // update growth status
+	// *status = grown;
 
-	// growth failure
-	if (!grown) return NULL;
+	// // growth failure
+	// if (!grown) return NULL;
 
-	// growth success
-	return pNew;
+	// // growth success
+	// return pNew;
+	return NULL; // Placeholder return to avoid compiler error
 
 }
 
