@@ -300,6 +300,7 @@ void ReadParameters (char *inputFile, paramptr param, int nParam, char *label, c
 	while (*strptr) {
 		FilterString (strptr, " \t");
 		TranslateMacros (strptr);
+		//printf("After macro translation - Line %d: %s\n", i, *strptr);
 		strptr = &lines[++i];
 	}
 
@@ -309,7 +310,8 @@ void ReadParameters (char *inputFile, paramptr param, int nParam, char *label, c
 		// get pointer to parameter
 		ptr = param+n;
 
-		printf("Reading parameter: %s\n", ptr->name);
+		// INTG = 0, HEXA = 1, REAL = 2, CHAR = 3
+		//printf("Reading parameter: %s (type: %d)\n", ptr->name, ptr->type);
 
 		// construct the key string for the current parameter
 		snprintf (key, KEYSIZE, "%s%s=", label, ptr->name);
@@ -331,7 +333,10 @@ void ReadParameters (char *inputFile, paramptr param, int nParam, char *label, c
 				switch (ptr->type) {
 					case INTG:
 						str = strpbrk (str, digits);
-						if (str) ptr->n += sscanf (str, "%d",  (int *) ptr->value + k);
+						//printf("After strpbrk, str = '%s'\n", str);
+						if (str) { 
+							ptr->n += sscanf (str, "%d",  (int *) ptr->value + k);
+						}
 						break;
 					case HEXA:
 						str = strpbrk (str, digits);
@@ -361,7 +366,7 @@ void ReadParameters (char *inputFile, paramptr param, int nParam, char *label, c
 							if (read_value[0] == '"' && read_value[len-1] == '"' && len >= 2) {
 								memmove(read_value, read_value + 1, len - 2);
 								read_value[len - 2] = '\0';
-							}
+							}     
 							
 							// Advance the main pointer
 							str += len;
@@ -375,6 +380,8 @@ void ReadParameters (char *inputFile, paramptr param, int nParam, char *label, c
 				// advance to next item
 				if (str) str = str + strspn (str, digits);
 				else break;
+
+				//printf("After advancing, str = '%s'\n", str);
 			}
 			break;
 			}
@@ -394,9 +401,9 @@ void ReadParameters (char *inputFile, paramptr param, int nParam, char *label, c
 	if (!ok) error (EABORT);
 
 	// free memory used to store the input lines
-	i=0;
-	while (lines[i]) free (lines[i++]);
-	free (lines);
+	// i=0;
+	// while (lines[i]) free (lines[i++]);
+	// free (lines);
 }
 
 
@@ -598,7 +605,7 @@ void TranslateMacros (char **stringptr)
 	snprintf (value, STRMAX, "%u", LAYOUT_BANANA);
 	ReplaceMacro (stringptr, macro, value);
 
-	// John added for read-in knot function - might need to be pathmax
+	// John added for read-in knot function
 	snprintf(macro, STRMAX, "LAYOUT_READKNOT");
 	snprintf(value, STRMAX, "%u", LAYOUT_READKNOT);
 	ReplaceMacro(stringptr, macro, value);

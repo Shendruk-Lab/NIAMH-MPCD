@@ -234,7 +234,7 @@ extern int snprintf (char *__restrict __s, size_t __maxlen, __const char *__rest
 #define  INTG_PARAM(x,y)		{ #y, &(x->y), INTG,  sizeof(x->y)/sizeof(int), 			0}
 #define  REAL_PARAM(x,y)		{ #y, &(x->y), REAL,  sizeof(x->y)/sizeof(real), 			0}
 #define  HEXA_PARAM(x,y)		{ #y, &(x->y), HEXA,  sizeof(x->y)/sizeof(unsigned int), 	0}
-#define  CHAR_PARAM(x,y)        { #y, &(x->y), CHAR, sizeof(x->y),                          0}
+#define  CHAR_PARAM(x,y)        { #y, &(x->y), CHAR, 1,                                     0}
 
 
 //================================================================================
@@ -556,7 +556,7 @@ typedef struct simulation {		 		// a simulation
     int			polyN[PS];				///< number of monomers per chain
 	real			monoCharge[PS];			///< charge of each monomer
     // reading in 
-    char         filename[PS];
+    char         filename[PATHMAX];
     
 	// charges
 	int			qLayout[QS];  			///< where to put the charges (e.g., SURFACE, TYPE_FLUID, ...)

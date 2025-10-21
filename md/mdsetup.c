@@ -267,6 +267,13 @@ void SetupParameters (simptr sim)
 	// compute the number of parameters
 	n = sizeof(param)/sizeof(simparam);
 
+
+	// // In SetupParameters, after parameter definitions but before ReadParameters
+	// printf("Memory layout check:\n");
+	// printf("sim->filename: %p to %p\n", &sim->filename[0], &sim->filename[PATHMAX-1]);
+	// printf("sim->qDensityKind: %p to %p\n", &sim->qDensityKind[0], &sim->qDensityKind[3]);
+	// printf("Distance: %td bytes\n", (char*)&sim->qDensityKind[0] - (char*)&sim->filename[0]);
+
 	// read the n parameters
 	ReadParameters (sim->inputFile, param, n, "#parameter:", "#end-header");
 
@@ -1176,6 +1183,7 @@ void InitPolymers (simptr sim)
 					// taken from above
 					else if (polyLayout[set]==LAYOUT_READKNOT ) {
 						printf("GROWING A READKNOT POLYMER\n");
+						//printf("filename reading from: %s\n", sim->filename);
 						p1 = p3;
 						p1->next = GrowReadKnotChain(sim, polyAtomType[set], layout, polyN[set], NULL, &grown, sim->filename);
 					}
@@ -1389,12 +1397,39 @@ void InitCharges (simptr sim)
 		qLayout[set] = sim->qLayout[set];
 		if (qLayout[set] == NONE) continue;
 
+		//printf("\n\n\nBEFORE COPY: sim->qDensityKind[%d] = %d\n", set, sim->qDensityKind[set]);
+
 		qDensityKind[set] = sim->qDensityKind[set];
 		qDensity[set] 	  = sim->qDensity[set];
 		qSpread[set] 	  = sim->qSpread[set];
 		qCharge[set]	  = sim->qCharge[set];
 		qNumber[set]	  = sim->qNumber[set];
 
+		// Enhanced debug output
+		// printf("=== DEBUG BEFORE SWITCH ===\n");
+		// printf("set = %d\n", set);
+		// printf("qDensityKind[%d] = %d\n", set, qDensityKind[set]);
+		// printf("VOLUME = %d, SURFACE = %d\n", VOLUME, SURFACE);
+
+		// // Check array bounds and all elements
+		// printf("Full qDensityKind array: ");
+		// for (int i = 0; i < 4; i++) {  // Adjust 4 to your actual array size
+		// 	printf("[%d]=%d ", i, qDensityKind[i]);
+		// }
+		// printf("\n");
+
+		// // Check if set is within valid range
+		// int max_index = 3;  // Adjust to your actual max index
+		// if (set < 0 || set > max_index) {
+		// 	printf("ERROR: set=%d is out of bounds! Valid range: 0 to %d\n", set, max_index);
+		// } else {
+		// 	printf("set index is within bounds\n");
+		// }
+
+		// // Check pointer address (to detect if it's the wrong array)
+		// printf("qDensityKind pointer: %p\n", (void*)qDensityKind);
+
+		// printf("=== END DEBUG ===\n");
 		switch (qDensityKind[set]) {
 			case VOLUME:	qNumber[set] += qDensity[set] * V;
 							break;
@@ -2957,13 +2992,7 @@ int readFinalTimestep(const char* filename, Atom atoms[], int max_atoms) {
     return atom_count;
 }
 
-// else if (polyLayout[set]==LAYOUT_READKNOT ) {
-// 						p1 = p3;
-// 						p1->next = GrowReadKnotChain(sim, polyAtomType[set], layout, NULL, &grown, sim->filename);
-
-// Assumes readFinalTimestep(), AtomInsert(), AtomRemove(), particleMD, simptr, PICK_POINTER, etc. exist.
-
-// safer, iterative GrowReadKnotChain with robust rollback
+// growing a polymer from a lammps file input
 particleMD *GrowReadKnotChain (simptr sim, int type, int layout, int n, particleMD *p0, int *status, const char* filename)
 {
 	int		grown = 1;
@@ -2983,14 +3012,15 @@ particleMD *GrowReadKnotChain (simptr sim, int type, int layout, int n, particle
     }
 
 	printf("Number of atoms read: %d\n", atom_count);
+	printf("\n");
 
-    double center_x = 0.5 * sim->box[x_];
-    double center_y = 0.5 * sim->box[y_];
-    double center_z = 0.5 * sim->box[z_];
+    // double center_x = 0.5 * sim->box[x_];
+    // double center_y = 0.5 * sim->box[y_];
+    // double center_z = 0.5 * sim->box[z_];
 
-    // double shift_x = center_x - atoms[0].x;
-    // double shift_y = center_y - atoms[0].y;
-    // double shift_z = center_z - atoms[0].z;
+    double shift_x = -atoms[0].x;
+    double shift_y = -atoms[0].y;
+    double shift_z = -atoms[0].z;
 
 	int i;
 
@@ -2998,15 +3028,16 @@ particleMD *GrowReadKnotChain (simptr sim, int type, int layout, int n, particle
 		printf("Atom %d: type=%c, x=%f, y=%f, z=%f\n", i, atoms[i].atom_type, atoms[i].x, atoms[i].y, atoms[i].z);
 
 		// shift to new coordinates to force atoms to be relative to the centre
-		atoms[i].x += center_x;
-		atoms[i].y += center_y;
-		atoms[i].z += center_z;
+		atoms[i].x += shift_x;
+		atoms[i].y += shift_y;
+		atoms[i].z += shift_z;
 		
 		// insert and force location
 		pNew = AtomInsert (sim, type, layout, 0, CHECK, CHECK);
 		if (!pNew) {
 			// Rollback previously added atoms
 			printf("Failed to insert atom %d", i);
+			printf("\n");
 			return NULL;
 			
 		}
@@ -3019,6 +3050,9 @@ particleMD *GrowReadKnotChain (simptr sim, int type, int layout, int n, particle
 		pNew->x0 = atoms[i].x;
 		pNew->y0 = atoms[i].y;
 		pNew->z0 = atoms[i].z;
+
+		printf("Inserted atom %d at (%f, %f, %f)\n", i, pNew->rx, pNew->ry, pNew->rz);
+		printf("\n");
 
 		
 	}
@@ -3045,9 +3079,6 @@ particleMD *GrowUChain (simptr sim, int type, int layout, int n, particleMD *p0,
 	int			grown, loop;
 	particleMD	p1, *pNew=0;
 	real		dr=0.0;
-
-	printf("\n\n\nOutputting p0 variable");
-	printf("p0=%p\n", (void*)p0);
 
 	// return if there is no monomer to add
 	if (n==0) {
