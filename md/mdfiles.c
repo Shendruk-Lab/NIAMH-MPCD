@@ -297,12 +297,6 @@ void ReadParameters (char *inputFile, paramptr param, int nParam, char *label, c
 	// filter unwanted characters and translate macros
 	i=0;
 	strptr = &lines[i];
-	while (*strptr) {
-		FilterString (strptr, " \t");
-		TranslateMacros (strptr);
-		//printf("After macro translation - Line %d: %s\n", i, *strptr);
-		strptr = &lines[++i];
-	}
 
 	// loop over all parameters
 	for (n=0; n<nParam; n++) {
@@ -544,6 +538,11 @@ void TranslateMacros (char **stringptr)
 	macro[STRMAX]='\0';
 	value[STRMAX]='\0';
 
+	// passing if we are handling filename, as it is subject to memory corruptions
+	if (strstr(*stringptr, "filename=")) {
+        return;  // Skip all macro processing for filename lines
+    }
+
 	snprintf (macro, STRMAX, "TYPE_WALL");
 	snprintf (value, STRMAX, "%u", TYPE_WALL);
 	ReplaceMacro (stringptr, macro, value);
@@ -760,9 +759,9 @@ void ReplaceMacro (char **stringptr, char *macro, char *value)
 
 		// write translated macro value
 		strncpy (ptr1, value, strlen(value));
-	}
-}
 
+}
+}
 
 //================================================================================
 void SetSimLabel (char *label, int pid)
