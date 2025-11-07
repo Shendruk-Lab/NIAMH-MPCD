@@ -215,7 +215,7 @@ extern int snprintf (char *__restrict __s, size_t __maxlen, __const char *__rest
 #define SQRT_3					1.732050807568877
 #define	STRLEN					256
 #define STRMAX					255
-#define PATHMAX                 2048 //4096, change if needing to assign more memory to file paths
+#define PATHMAX                 4096 //4096, change if needing to assign more memory to file paths
 #define DONE					1
 #define	YES					1
 #define	NO					0
