@@ -656,6 +656,41 @@ void acc_BC( bc *WALL,double t,double GRAV[] ) {
 	for( i=0; i<DIM; i++ ) WALL->V[i] = acc( t,GRAV[i],WALL->V[i] );
 }
 
+///
+/// @brief Apply a force to keep the particle in the optical trap
+///
+/// This function simply updates the velocity vector (in `DIM` dimensions) of a single wall (boundary condition).
+/// @param WALL One of the walls (boundary conditions).
+/// @param dt The time interval for which the wall (boundary condition) accelerates (ie, the timestep)
+/// @param t_on The time at which the optical trap is turned on
+/// @param t_off The time at which the optical trap is turned off
+/// @param KOPT The spring constant of the optical trap
+/// @param VOPT The velocity vector of the optical trap (only applied in DIM dimensions)
+/// @param mass The mass of the colloid
+/// @param runtime The current timestep of the simulation
+///
+void acc_Opt_Trap_BC( bc *WALL,double dt, int runtime, double t_on, double t_off, double KOPT, double VOPT[], double mass) {
+	int i;
+	double OPT_force[DIM];  // temp holder for force on the colloid from trap
+	double dQ[DIM];  // delta position between trap and colloid
+
+	// move the trap if in runtime
+	if (runtime >= t_on && runtime <= t_off) {
+		for (i = 0; i < DIM; ++i) {
+			WALL->QOPT[i] += VOPT[i] * dt;  // move the trap
+		}
+	}
+
+	// calculate the force on the colloid
+	for (i = 0; i < DIM; ++i) {
+		dQ[i] = WALL->Q[i] - WALL->QOPT[i];  // distance between colloid and trap
+		OPT_force[i] = -KOPT * dQ[i] / mass;  // Hooke's law for the trap
+
+		WALL->V[i] = acc(dt, OPT_force[i],WALL->V[i]);
+		WALL->F[i] = OPT_force[i];  // update the force on the colloid
+	}
+}
+
 /// 
 /// @brief Accelerating the velocity of a single MPCD particle. 
 /// 
@@ -4949,6 +4984,21 @@ void timestep(cell ***CL, particleMPC *SRDparticles, spec SP[], bc WALL[], simpt
 		#ifdef DBG
 			if( DBUG == DBGBCCNT ) if( bcCNT>0 ) printf( "\t%d particles had difficulty with the BCs when the BCs moved (%d rewind events; %d rethermalization events).\n",bcCNT,reCNT,rethermCNT );
 		#endif
+	/* ****************************************** */
+	/* ***************** BC-Swimmer **************** */
+	/* ****************************************** */
+	// if( BC_FLAG ) {
+		#ifdef DBG
+			if( DBUG >= DBGTITLE ) printf( "Check BCs Against MPCs after BC-Swimmer collisions.\n" );
+		#endif
+		// Check each BC for collisions Swimmer
+		for( i=0; i<NBC; i++ ) if( (WALL+i)->DSPLC ) {
+           BC_Swimmercollision(WALL,i,swimmers,*SS,in.dt);
+		}
+		#ifdef DBG
+			if( DBUG == DBGBCCNT ) if( bcCNT>0 ) printf( "\t%d particles had difficulty with the BCs when the BCs moved (%d rewind events; %d rethermalization events).\n",bcCNT,reCNT,rethermCNT );
+		#endif
+
 	// }
 	/* ****************************************** */
 	/* ************* APPLY IMPULSE ************** */
@@ -4970,6 +5020,17 @@ void timestep(cell ***CL, particleMPC *SRDparticles, spec SP[], bc WALL[], simpt
 	#endif
 	//Accelerate each of the BCs
 	if( in.GRAV_FLAG ) for( i=0; i<NBC; i++ ) if( (WALL+i)->DSPLC ) acc_BC( (WALL+i),in.dt,(WALL+i)->G );
+	// if( in.Opt_Trap_FLAG ) for( i=0; i<NBC; i++ ) if( (WALL+i)->DSPLC ) acc_Opt_Trap_BC( (WALL+i),in.dt,(WALL+i)->KOPT,runtime );
+
+	// apply optical trap forces if enabled
+	for (i = 0; i < NBC; ++i) {
+		if ((WALL+i)->DSPLC && (WALL+i)->ENABLEOPT) {
+			// Apply optical trap forces
+			acc_Opt_Trap_BC((WALL+i), in.dt, runtime, (WALL+i)->tOnOpt, (WALL+i)->tOffOpt, (WALL+i)->KOPT, (WALL+i)->VOPT, (WALL+i)->MASS);
+		}
+	}
+
+
 }
 	/* ****************************************** */
 	/* ***************** RE-BIN ***************** */

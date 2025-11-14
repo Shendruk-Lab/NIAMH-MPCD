@@ -682,11 +682,12 @@ void galileantrans( particleMPC *pp,bc WALL[],simptr simMD,spec SP[],double KBT,
 		totM += M;
 		for( j=0; j<dimension; j++ ) NET[j] += M*(pp+i)->V[j];
 	}
-	for( i=0; i<NBC; i++ ) if( WALL[i].DSPLC ) {
-		M = WALL[i].MASS;
-		totM += M;
-		for( j=0; j<dimension; j++ ) NET[j] += M*WALL[i].V[j];
-	}
+	// Turned off if we want to drag a colloid through the fluid
+	//for( i=0; i<NBC; i++ ) if( WALL[i].DSPLC ) {
+	//	M = WALL[i].MASS;
+	//	totM += M;
+	//	for( j=0; j<dimension; j++ ) NET[j] += M*WALL[i].V[j];
+	//}
 	if( MDmode == MDinMPC ) for( i=0; i<(simMD->atom.n); i++ ){
 		M = (double) (simMD->atom.items+i)->mass;
 		totM += M;
@@ -702,7 +703,8 @@ void galileantrans( particleMPC *pp,bc WALL[],simptr simMD,spec SP[],double KBT,
 
 	// Subtract off the net momentum
 	for( i=0; i<POP; i++ ) for( j=0; j<dimension; j++ ) (pp+i)->V[j] -= NET[j];
-	for( i=0; i<NBC; i++ ) if( WALL[i].DSPLC ) for( j=0; j<dimension; j++ ) WALL[i].V[j] -= NET[j];
+	//Turned off galilean transformation for boundaries if we apply a force to the boundary
+	//for( i=0; i<NBC; i++ ) if( WALL[i].DSPLC ) for( j=0; j<dimension; j++ ) WALL[i].V[j] -= NET[j];
 	if( MDmode == MDinMPC ) for( i=0; i<(simMD->atom.n); i++ ){
 		(simMD->atom.items+i)->vx -= NET[0];
 		if(dimension>=_2D) (simMD->atom.items+i)->vy -= NET[1];

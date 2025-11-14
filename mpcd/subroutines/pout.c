@@ -389,7 +389,7 @@ void densityheader( FILE *fout ) {
 /// @param fout This is a pointer to the output .dat file name to be produced.
 ///
 void solidsheader( FILE *fout ) {
-	fprintf( fout,"t \tQX\t\tQY\t\tQZ\t\tVX\t\tVY\t\tVZ\t\tOX\t\tOY\t\tOZ\t\tLX\t\tLY\t\tLZ\n" );
+	fprintf( fout,"t \tQX\t\tQY\t\tQZ\t\tVX\t\tVY\t\tVZ\t\tOX\t\tOY\t\tOZ\t\tLX\t\tLY\t\tLZ\t\tdVX\t\tdVY\t\tdVZ\n" );
 }
 
 ///
@@ -1804,6 +1804,7 @@ void solidout( FILE *fout,bc WALL,double t ) {
 	fprintf( fout,"%12.5e\t%12.5e\t%12.5e\t",WALL.V[0],WALL.V[1],WALL.V[2] );
 	fprintf( fout,"%12.5e\t%12.5e\t%12.5e\t",WALL.O[0],WALL.O[1],WALL.O[2] );
 	fprintf( fout,"%12.5e\t%12.5e\t%12.5e\n",WALL.L[0],WALL.L[1],WALL.L[2] );
+	fprintf( fout,"%12.5e\t%12.5e\t%12.5e\n",WALL.dV[0],WALL.dV[1],WALL.dV[2] );
 	#ifdef FFLSH
 		fflush(fout);
 	#endif
