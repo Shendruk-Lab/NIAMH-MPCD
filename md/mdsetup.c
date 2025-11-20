@@ -427,7 +427,6 @@ void SetupNewWorld (simptr sim)
 	printf("Printing initial scenes\n");
 	VMDPrint (sim, sim->scenes);
 	// report
-	printf("Simulation read to rock and roll");
 	LOG ("Simulation is ready to start\n");
 	LOG ("--------------------------------------------------------------\n");
 }
@@ -1104,7 +1103,6 @@ void InitPolymers (simptr sim)
 								}
 							}
 							break;
-						// not 100% confident that readknot should go here
 						case LAYOUT_FLUID: case LAYOUT_RODX: case LAYOUT_RODY: case LAYOUT_U: case LAYOUT_TRANS: case LAYOUT_BANANA: case LAYOUT_READKNOT:
 							// distance with ALL other polymers
 							// this may cause a crash...  I commented it out in another code
@@ -1202,7 +1200,7 @@ void InitPolymers (simptr sim)
 
 					// taken from above
 					else if (polyLayout[set]==LAYOUT_READKNOT ) {
-						printf("GROWING A READKNOT POLYMER\n");
+						//printf("GROWING A READKNOT POLYMER\n");
 						//printf("filename reading from: %s\n", sim->filename);
 						p1 = p3;
 						p1->next = GrowReadKnotChain(sim, polyAtomType[set], layout, polyN[set], NULL, &grown, sim->filename);
@@ -3095,18 +3093,19 @@ particleMD *GrowReadKnotChain (simptr sim, int type, int layout, int n, particle
     int grown = 1;
     particleMD *pNew = NULL, *pPrev = p0;
 
-    printf("Growing knotted chain from file: %s\n", filename);
+    //printf("Growing knotted chain from file: %s\n", filename);
 
     Atom atoms[MAX_ATOMS];
     int atom_count = readFinalTimestep(filename, atoms, MAX_ATOMS);
     if (atom_count <= 0) {
+		// if no atoms are read from the file, tell the user
         printf("GrowReadKnotChain: no atoms read from file\n");
         *status = 0;
         return NULL;
     }
 
-    printf("Number of atoms read: %d\n", atom_count);
-    printf("\n");
+    //printf("Number of atoms read: %d\n", atom_count);
+    //printf("\n");
 
     // Calculate box center
     double center_x = 0.5 * sim->box[x_];
@@ -3130,7 +3129,8 @@ particleMD *GrowReadKnotChain (simptr sim, int type, int layout, int n, particle
     double shift_z = center_z - centroid_z;
 
     for (int i = 0; i < atom_count; i++) {
-        printf("Atom %d: type=%c, x=%f, y=%f, z=%f\n", i, atoms[i].atom_type, atoms[i].x, atoms[i].y, atoms[i].z);
+		//print the atom coordinates 
+        //printf("Atom %d: type=%c, x=%f, y=%f, z=%f\n", i, atoms[i].atom_type, atoms[i].x, atoms[i].y, atoms[i].z);
 
         // Shift coordinates to center polymer in box
         atoms[i].x += shift_x;
@@ -3140,7 +3140,8 @@ particleMD *GrowReadKnotChain (simptr sim, int type, int layout, int n, particle
         // insert and force location
         pNew = AtomInsert (sim, type, layout, 0, CHECK, CHECK);
         if (!pNew) {
-            printf("Failed to insert atom %d\n", i);
+			//tell user atom failed to intsert
+            //printf("Failed to insert atom %d\n", i);
             *status = 0;
             return NULL;
         }
@@ -3155,8 +3156,9 @@ particleMD *GrowReadKnotChain (simptr sim, int type, int layout, int n, particle
         pNew->y0 = atoms[i].y;
         pNew->z0 = atoms[i].z;
 
-        printf("Inserted atom %d at (%f, %f, %f)\n", i, pNew->rx, pNew->ry, pNew->rz);
-        printf("\n");
+		//if successful, tell the user
+        //printf("Inserted atom %d at (%f, %f, %f)\n", i, pNew->rx, pNew->ry, pNew->rz);
+        //printf("\n");
 
         // Connect the polymer chain
         if (pPrev) {
