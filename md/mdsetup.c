@@ -72,14 +72,20 @@ simptr SetupSimulation (int argc, char *argv[])
 	MPI_Status  status;
 	#endif
 
+	//printf("Allocating space for simulation\n");
+
 	// allocate memory for the simulation information
 	sim = (simptr) mycalloc (1, sizeof(simulation));
 
 	// default options
 	options.setupType = SIMOPT_SETUP_NEW;
 
+
+	//printf("Allocating parse options\n");
 	// parse command-line options
 	ParseOptions (argc, argv, sim, &options);
+
+	//printf("Parseoptions works\n");
 
 
 	// MPI
@@ -101,11 +107,16 @@ simptr SetupSimulation (int argc, char *argv[])
 		printf   ("MPI rank %d: %s\n", rank, sim->inputFile);
 		#endif
 
+		//printf("Setting up the parameters\n");
 		// setup the simulation parameters
 		SetupParameters (sim);
+		//printf("Finished setting up the parameters\n");
 
+
+		//printf("Setting up the new world\n");
 		// setup simulation world
 		SetupNewWorld (sim);
+		//printf("Finsihed setting up the new world\n");
 
 		// report
 		LOG ("START of main simulation loop\n");
@@ -274,8 +285,11 @@ void SetupParameters (simptr sim)
 	// printf("sim->qDensityKind: %p to %p\n", &sim->qDensityKind[0], &sim->qDensityKind[3]);
 	// printf("Distance: %td bytes\n", (char*)&sim->qDensityKind[0] - (char*)&sim->filename[0]);
 
+	//printf("Reading in the parameters\n");
 	// read the n parameters
 	ReadParameters (sim->inputFile, param, n, "#parameter:", "#end-header");
+
+	//printf("Finished reading in the parameters\n");
 
 	// copy parameters to the simulation structure
 	sim->nParam = n;
@@ -387,44 +401,44 @@ void SetupNewWorld (simptr sim)
 	LOG ("  %-20s = %#05X\n", "pbcond",	  	 sim->pbcond);
 
 	// setup step counter lists
-	printf("Setting up step counters\n");
+	//printf("Setting up step counters\n");
 	SetupStepCounters (sim);
 	// setup particles
-	printf("Setting up particles\n");
+	//printf("Setting up particles\n");
 	SetupParticles (sim);
 	// setup particle lists
-	printf("Setting up polymer lists\n");
+	//printf("Setting up polymer lists\n");
 	SetupPolymerList  (sim);
-	printf("Setting up charge lists\n");
+	//printf("Setting up charge lists\n");
 	SetupChargeList   (sim);
 	// SetupNeighborList (sim);
-	printf("Setting up anchor lists\n");
+	//printf("Setting up anchor lists\n");
 	SetupAnchorList   (sim);
-	printf("Setting up FENE lists\n");
+	//printf("Setting up FENE lists\n");
 	SetupFeneList	  (sim);
-	printf("Setting up bend lists\n");
+	//printf("Setting up bend lists\n");
 	SetupBendList	  (sim);
-	printf("Setting up dihedral lists\n");
+	//printf("Setting up dihedral lists\n");
 	SetupDihedralList (sim);
 
 	// setup groups
-	printf("Setting up groups\n");
+	//printf("Setting up groups\n");
 	SetupGroups (sim);
 	// setup measurements
-	printf("Setting up measurements\n");
+	//printf("Setting up measurements\n");
 	SetupMeasurements (sim);
 	// jiggle and relax particle positions
 	// JiggleParticles (sim);
-	printf("Relaxing particles\n");
+	//printf("Relaxing particles\n");
 	RelaxParticles  (sim);
 	// set simulation time
 	sim->tNow = 0;
 
 	// start simulation phase
-	printf("Resetting simulation phase\n");
+	//printf("Resetting simulation phase\n");
 	SimulationPhaseReset (sim);
 	// print initial scenes
-	printf("Printing initial scenes\n");
+	//printf("Printing initial scenes\n");
 	VMDPrint (sim, sim->scenes);
 	// report
 	LOG ("Simulation is ready to start\n");
@@ -565,20 +579,20 @@ void SetupParticles (simptr sim)
 	}
 
 	// initialize polymers and charges
-	printf("\n\n\nInitializing polymers\n");
+	//printf("\n\n\nInitializing polymers\n");
 	InitPolymers (sim);
-	printf("Initializing charges\n");
+	//printf("Initializing charges\n");
 	InitCharges  (sim);
 
 	// initialize particle velocities
-	printf("Initializing velocities\n");
+	//printf("Initializing velocities\n");
 	InitVelocities (sim);
 
 	// initialize dipoles
-	printf("Initializing dipoles\n");
+	//printf("Initializing dipoles\n");
 	InitDipoles (sim);
 
-	printf("Dipoles done\n");
+	//printf("Dipoles done\n");
 
 	// report
 	LOG ("Particle initialization complete\n");
@@ -913,7 +927,7 @@ void InitPolymers (simptr sim)
 	// polymer set variables
 	polyBulkTot    = 0;
 	polySurfaceTot = 0;
-	printf("Initializing polymers\n");
+	//printf("Initializing polymers\n");
 	for (set=0; set<POLY_SETS; set++) {
 
 		polyLayout[set] = sim->polyLayout[set];
@@ -944,7 +958,7 @@ void InitPolymers (simptr sim)
 			case LAYOUT_PLATES:		polySurfaceTot+=polyM[set];
 									break;
 			case LAYOUT_FLUID: case LAYOUT_RODX: case LAYOUT_RODY: case LAYOUT_TRANS: case LAYOUT_U: case LAYOUT_BANANA: case LAYOUT_READKNOT:
-									printf("Adding to bulk total: set %d, M %d\n", set, polyM[set]);
+									//printf("Adding to bulk total: set %d, M %d\n", set, polyM[set]);
 									polyBulkTot+=polyM[set]; 
 									break;
 					
@@ -958,8 +972,8 @@ void InitPolymers (simptr sim)
 		}
 	}
 
-	printf("Total polymers to insert: %d (bulk %d, surface %d)\n", polyBulkTot+polySurfaceTot, polyBulkTot, polySurfaceTot);
-	printf("Bulding polymer sets");
+	//printf("Total polymers to insert: %d (bulk %d, surface %d)\n", polyBulkTot+polySurfaceTot, polyBulkTot, polySurfaceTot);
+	//printf("Bulding polymer sets");
 	// build polymer sets
 	for (set=0; set<POLY_SETS; set++) {
 
@@ -1030,7 +1044,7 @@ void InitPolymers (simptr sim)
 				}
 		}
 
-		printf("Growing polymer set %d (%d polymers of length %d)\n", set, polyM[set], polyN[set]);
+		//printf("Growing polymer set %d (%d polymers of length %d)\n", set, polyM[set], polyN[set]);
 		// grow polymers
 		for (i=0; i<polyM[set]; i++) {
 			// grow polymer
@@ -1041,7 +1055,7 @@ void InitPolymers (simptr sim)
 				// no candidates left! Throw an error
 				if (candidates.n==0 && polyLayout[set]!=LAYOUT_ANCHOR && polyLayout[set]!=LAYOUT_FLUID && polyLayout[set]!=LAYOUT_PLATES && polyLayout[set]!=LAYOUT_CYLINDER && polyLayout[set]!=LAYOUT_RODX && polyLayout[set]!=LAYOUT_RODY && polyLayout[set]!=LAYOUT_U && polyLayout[set]!=LAYOUT_TRANS && polyLayout[set]!=LAYOUT_BANANA && polyLayout[set]!=LAYOUT_READKNOT) error (EGRAFT);
 
-				printf("Picking random candidate site");
+				//printf("Picking random candidate site");
 				// choose candidate atom randomly
 				c = (int) (RandomReal()*candidates.n);
 				if (c==candidates.n) c--;
@@ -1160,7 +1174,7 @@ void InitPolymers (simptr sim)
 					}
 				}
 
-				printf("Candidate site picked, growin polymer\n");
+				//printf("Candidate site picked, growin polymer\n");
 				// grow it
 				if (keep){
 					if (polyLayout[set]==LAYOUT_FLUID ) {
@@ -1415,39 +1429,12 @@ void InitCharges (simptr sim)
 		qLayout[set] = sim->qLayout[set];
 		if (qLayout[set] == NONE) continue;
 
-		//printf("\n\n\nBEFORE COPY: sim->qDensityKind[%d] = %d\n", set, sim->qDensityKind[set]);
-
 		qDensityKind[set] = sim->qDensityKind[set];
 		qDensity[set] 	  = sim->qDensity[set];
 		qSpread[set] 	  = sim->qSpread[set];
 		qCharge[set]	  = sim->qCharge[set];
 		qNumber[set]	  = sim->qNumber[set];
 
-		// Enhanced debug output
-		// printf("=== DEBUG BEFORE SWITCH ===\n");
-		// printf("set = %d\n", set);
-		// printf("qDensityKind[%d] = %d\n", set, qDensityKind[set]);
-		// printf("VOLUME = %d, SURFACE = %d\n", VOLUME, SURFACE);
-
-		// // Check array bounds and all elements
-		// printf("Full qDensityKind array: ");
-		// for (int i = 0; i < 4; i++) {  // Adjust 4 to your actual array size
-		// 	printf("[%d]=%d ", i, qDensityKind[i]);
-		// }
-		// printf("\n");
-
-		// // Check if set is within valid range
-		// int max_index = 3;  // Adjust to your actual max index
-		// if (set < 0 || set > max_index) {
-		// 	printf("ERROR: set=%d is out of bounds! Valid range: 0 to %d\n", set, max_index);
-		// } else {
-		// 	printf("set index is within bounds\n");
-		// }
-
-		// // Check pointer address (to detect if it's the wrong array)
-		// printf("qDensityKind pointer: %p\n", (void*)qDensityKind);
-
-		// printf("=== END DEBUG ===\n");
 		switch (qDensityKind[set]) {
 			case VOLUME:	qNumber[set] += qDensity[set] * V;
 							break;
@@ -3023,7 +3010,7 @@ typedef struct {
 } Atom;
 
 int readFinalTimestep(const char* filename, Atom atoms[], int max_atoms) {
-	printf("Reading final timestep from file: %s\n", filename);
+	//printf("Reading final timestep from file: %s\n", filename);
     FILE* file = fopen(filename, "r");
     if (file == NULL) {
         printf("Error: Could not open file %s\n", filename);
@@ -3141,7 +3128,7 @@ particleMD *GrowReadKnotChain (simptr sim, int type, int layout, int n, particle
         pNew = AtomInsert (sim, type, layout, 0, CHECK, CHECK);
         if (!pNew) {
 			//tell user atom failed to intsert
-            //printf("Failed to insert atom %d\n", i);
+            printf("Failed to insert atom %d\n", i);
             *status = 0;
             return NULL;
         }

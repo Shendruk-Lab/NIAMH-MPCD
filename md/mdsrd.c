@@ -60,6 +60,7 @@
 simptr launchMD (int argc, char *argv[])
 //================================================================================
 {
+	printf("Setting up simulation\n");
 	// setup simulation
 	return SetupSimulation (argc, argv);
 }

@@ -298,12 +298,14 @@ void ReadParameters (char *inputFile, paramptr param, int nParam, char *label, c
 	i=0;
 	strptr = &lines[i];
 
-	// while (*strptr) {
-	// 	FilterString (strptr, " \t");
-	// 	TranslateMacros (strptr);
-	// 	//printf("After macro translation - Line %d: %s\n", i, *strptr);
-	// 	strptr = &lines[++i];
-	// }
+
+	//I commented this out and it has caused me hours of issues - don't work on code when tired
+	while (*strptr) {
+		FilterString (strptr, " \t");
+		TranslateMacros (strptr);
+		//printf("After macro translation - Line %d: %s\n", i, *strptr);
+		strptr = &lines[++i];
+	}
 
 	// loop over all parameters
 	for (n=0; n<nParam; n++) {
