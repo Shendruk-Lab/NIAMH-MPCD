@@ -2642,7 +2642,7 @@ particleMD *GrowLinearChain (simptr sim, int type, int layout, int n, particleMD
 	// add a monomer in the chain
 	grown = 0;
 	loop  = GROWLOOP_MAX;
-	dr=0.5*(sim->sigma_lj+sim->r0Fene);
+	dr=sim->sigma_lj;
 	while (!grown && loop--) {
 
 		// new monomer location
@@ -2700,7 +2700,7 @@ particleMD *GrowLinearChainTrans (simptr sim, int type, int layout, int n, parti
 	// add a monomer in the chain
 	grown = 0;
 	loop1  = GROWLOOP_MAX;
-	dr=0.5*(sim->sigma_lj+sim->r0Fene);
+	dr=sim->sigma_lj;
 	while (!grown && loop1--) {
 		// new monomer location
 		if (p0) {
@@ -2780,7 +2780,7 @@ particleMD *GrowRodChain (simptr sim, int type, int layout, int n, particleMD *p
 	// add a monomer in the chain
 	grown = 0;
 	loop  = GROWLOOP_MAX;
-	dr = 0.5 * (sim->sigma_lj+sim->r0Fene);
+	dr = sim->sigma_lj;
 	while (!grown && loop--) {
 
 		// new monomer location
@@ -2912,7 +2912,7 @@ particleMD *GrowUChain (simptr sim, int type, int layout, int n, particleMD *p0,
 	// add a monomer in the chain
 	grown = 0;
 	loop  = GROWLOOP_MAX;
-	dr=0.5*(sim->sigma_lj+sim->r0Fene);
+	dr=sim->sigma_lj;
 	//even length monomer
 	if ((sim->polyN[0] % 2) == 0) { // if even length
 		while (!grown && loop--) {
