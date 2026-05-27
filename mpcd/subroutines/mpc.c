@@ -3784,7 +3784,7 @@ void activeMD(simptr simMD, cell ***CL, spec *SP, inputList in) {
 			tangent[j] = nextloc[j]-MDloc[j];
 			}
 		}
-		else if (i==nAtom) {
+		else if (i==nAtom-1) {
 			prevloc[0] = atoms[i-1].rx;
 			prevloc[1] = atoms[i-1].ry;
 			if (DIM>2){
@@ -3894,7 +3894,7 @@ void activeMD(simptr simMD, cell ***CL, spec *SP, inputList in) {
 				// stuff for momentum conservation
 				//for( j=0; j<DIM; j++ ) AV[m][j] = tmpc->V[j];
 				//for( j=0; j<DIM; j++ ) AS[j] += AV[m][j]*(double)(SP+id)->MASS;
-				for( j=0; j<DIM; j++ ) AS[j] += tangent[k]*force*pmOne;
+				for( j=0; j<DIM; j++ ) AS[j] += tangent[j]*force*pmOne;
 				//m++;
 				// Increment link in list
 				tmpc = tmpc->next;
