@@ -3730,17 +3730,18 @@ void localVCM( double vcm[_3D],cell CL,spec *SP,specSwimmer specS ) {
 /// @param simMD A pointer to the entire MD portion of the simulation.
 /// @param CL ALL cells. 
 /// @param SP The species-wide information about MPCD particles.
+/// @param in The input list containing simulation parameters.
 ///
 void activeMD(simptr simMD, cell ***CL, spec *SP, inputList in) {
 	int i, j, k, nAtom, cx, cy, cz, N_cl, id;
 	double pmOne;
 	double MDloc[_3D], prevloc[DIM], nextloc[DIM], vecprev[DIM], vecnext[DIM], tangent[DIM];  // stuff to calc plane and velocity
 	double mpcdCM[DIM];
-	double pW;  //The particle's pW for passing the plane
-	double force; // the dipole 'force'(=dt*d/m) on one mpcd particle, will be a constant for each cell. delta_v = 'force'/mass
+	double pW;  // The particle's pW for passing the plane
+	double force; // The dipole 'force'(=dt*d/m) on one mpcd particle, will be a constant for each cell. delta_v = 'force'/mass
 	double dt, deltaV;
 	float dipole;
-	bc PLANE;  //The plane that cuts the cell in half
+	bc PLANE;  // The plane that cuts the cell in half
 	particleMPC *tmpc;
 	particleMD	*atoms;
 	
@@ -3749,10 +3750,8 @@ void activeMD(simptr simMD, cell ***CL, spec *SP, inputList in) {
 	dt = in.dt;
 
 	for (i=0; i<nAtom; i++) {
-		// zero things
-		for (j=0; j<_3D; j++) {
-			MDloc[j] = 0.;	// this has to be 3D always because CL is 3d always
-		}
+		// Zero things
+		for (j=0; j<_3D; j++) MDloc[j] = 0.;	// This has to be 3D always because CL is 3d always
 
 		for (j=0; j<DIM; j++) {
 			prevloc[j] = 0.;
@@ -3766,33 +3765,24 @@ void activeMD(simptr simMD, cell ***CL, spec *SP, inputList in) {
 		cy = 0.;
 		cz = 0.;
 		force = 0.;
-		// find location of MD particle(s) in question
-		// there is probably a more concise way of doing this
+
+		// Find location of MD particle(s)
 		MDloc[0] = atoms[i].rx;
 		MDloc[1] = atoms[i].ry;
 		MDloc[2] = atoms[i].rz;
 		
-		// get tangent of backbone at MD particle, and normalise it - different if first or last
-		
-		if (i==0) {
+		// Get tangent of backbone at MD particle, and normalise it - different if first or last
+		if (i==0) {		// First monomer
 			nextloc[0] = atoms[i+1].rx;
 			nextloc[1] = atoms[i+1].ry;
-			if (DIM>2){
-				nextloc[2] = atoms[i+1].rz;  // index 2 only exists if 3d
-			}
-			for (j=0; j<DIM; j++) {
-			tangent[j] = nextloc[j]-MDloc[j];
-			}
+			if (DIM>2) nextloc[2] = atoms[i+1].rz;  //Index 2 only exists if 3d
+			for (j=0; j<DIM; j++) tangent[j] = nextloc[j]-MDloc[j];
 		}
-		else if (i==nAtom-1) {
+		else if (i==nAtom-1) {	// Last monomer
 			prevloc[0] = atoms[i-1].rx;
 			prevloc[1] = atoms[i-1].ry;
-			if (DIM>2){
-				prevloc[2] = atoms[i-1].rz;
-			}
-			for (j=0; j<DIM; j++) {
-			tangent[j] = MDloc[j]-prevloc[j];
-			}
+			if (DIM>2) prevloc[2] = atoms[i-1].rz;
+			for (j=0; j<DIM; j++) tangent[j] = MDloc[j]-prevloc[j];
 		}
 		else {
 			prevloc[0] = atoms[i-1].rx;
@@ -3809,49 +3799,27 @@ void activeMD(simptr simMD, cell ***CL, spec *SP, inputList in) {
 			}
 			norm(vecprev, DIM); //normprev = sqrt(pow(vecprev[0],2) + pow(vecprev[1],2)+pow(vecprev[2],2));
 			norm(vecnext, DIM); //normnext = sqrt(pow(vecnext[0],2) + pow(vecnext[1],2)+pow(vecnext[2],2));
-			for (j=0; j<DIM; j++) {
-				//vecprev[j] = vecprev[j]/normprev;
-				//vecnext[j] = vecnext[j]/normnext;
-				tangent[j] = vecprev[j]+vecnext[j];
-			}
+			for (j=0; j<DIM; j++) tangent[j] = vecprev[j]+vecnext[j];
 		}
-		norm(tangent, DIM);//normtan = sqrt(pow(tangent[0],2) + pow(tangent[1],2)+pow(tangent[2],2));
-		//for (j=0; j<_3D; j++) {
-		//	tangent[j] = tangent[j]/normtan;
-		//}
+		norm(tangent, DIM);		//normtan = sqrt(pow(tangent[0],2) + pow(tangent[1],2)+pow(tangent[2],2));
 
-		// check
-		//printf("tangent for atom %d ", i+1);
-		//printf("is %f, ", tangent[0]);
-		//printf("%f, ", tangent[1]);
-		//if (DIM>2){
-		//	printf("%f\n", tangent[2]);
-		//}
-
-		// identify which MPCD cell it's in
+		// Identify which MPCD cell the monomer is in
 		cx = (int)MDloc[0];
 		cy = (int)MDloc[1];
-		cz = (int)MDloc[2];	// gotta be 3d always
-		// then use like CL[cx][cy][cz].pp
+		cz = (int)MDloc[2];	// Must be 3d always
 
-		// find const 'force' on each MPCD particle from the MD in this cell
+		// Find const force on each MPCD particle from the MD in this cell
 		dipole = atoms[i].dipole;
 		N_cl = CL[cx][cy][cz].POPSRD;
 		force = dt*dipole/N_cl;
-
-		// Think these need introduced here rather than at the very start because looking at one cell rather than all
-		//double AV[CL[cx][cy][cz].POP][DIM];	//Active velocities
 		double AS[DIM];			//Sum of active velocities
 		// Zero arrays
-		//for( k=0;k<CL[cx][cy][cz].POP;k++ ) for( j=0;j<_3D;j++ ) {
-		//	AV[k][j] = 0.;
-		//}
 		for( j=0;j<DIM;j++ ) {
 			AS[j]=0.;
 			mpcdCM[j]=0.;
 		}
 
-		// find plane - line 1775 in lc.c
+		// Find plane, like in dipoleAndersenROT_LC() in lc.c
 		// Define the plane normal to the backbone tangent at the MD particle position
 		for( k=0;k<4;k++ ) PLANE.P[k]=1;
 		PLANE.INV=0;
@@ -3861,62 +3829,49 @@ void activeMD(simptr simMD, cell ***CL, spec *SP, inputList in) {
 		PLANE.ROTSYMM[1]=4.0;
 		// Normal is TANGENT
 		for( k=0; k<DIM; k++ ) PLANE.A[k] = tangent[k];
-		// Position is cell COM
-		// ONLY TAKE INTO ACCOUNT MPCD PARTICLES NOT MD AS WELL
-
-		localCM_SRD(CL[cx][cy][cz],SP,mpcdCM); //i think that's how this works??
+		
+		// Position is cell centre of mass (only take into account MPCD particles, not MD or swimmers).
+		localCM_SRD(CL[cx][cy][cz],SP,mpcdCM); 
 		for( k=0; k<DIM; k++ ) PLANE.Q[k] = mpcdCM[k];
 		
 		if(CL[cx][cy][cz].pp!=NULL) {
 			tmpc = CL[cx][cy][cz].pp;
-			// loop through MPCD particles
-			//m = 0;// counter for momentum conservation bits
+			// Loop through MPCD particles
 			while( tmpc!=NULL ) {
-				// zero things
+				// Zero things
 				pW = 0.;
 				id = 0;
 				deltaV = 0.;
-				// give a kick according to which side of plane - dipole AndersenROT_LC
+				// Give a kick according to which side of plane - dipole AndersenROT_LC
 				// Check which side of the plane
 				pW = calcW( PLANE,*tmpc );
 				if( pW<=0 ) pmOne=-1.;
 				else pmOne=1.;
-
-				// change in velocity to be applied according to species mass
+				// Change in velocity to be applied according to species mass
 				id = tmpc->SPID;
-				deltaV = force/(double)(SP+id)->MASS; //think this is correct way of getting mass?
-				//printf("vel kick: %f\n",deltaV);
-				// apply the change (hopefully). In direction of tangent, away from (or towards) plane.
-				for( k=0; k<DIM; k++ ){
-					tmpc->V[k] += tangent[k]*deltaV*pmOne;
-				}
+				deltaV = force/(double)(SP+id)->MASS;
+				// Apply the change in direction of tangent, away from (or towards) plane.
+				for( k=0; k<DIM; k++ ) tmpc->V[k] += tangent[k]*deltaV*pmOne;
 				
-				// stuff for momentum conservation
-				//for( j=0; j<DIM; j++ ) AV[m][j] = tmpc->V[j];
-				//for( j=0; j<DIM; j++ ) AS[j] += AV[m][j]*(double)(SP+id)->MASS;
+				// Momentum conservation
 				for( j=0; j<DIM; j++ ) AS[j] += tangent[j]*force*pmOne;
-				//m++;
 				// Increment link in list
 				tmpc = tmpc->next;
 			}
 		}
-		// find net momentum - divided by N because then shared between all particles
-		for( j=0; j<DIM; j++ ) AS[j] = AS[j]/N_cl; // is this correct?
+		// Find net momentum - divided by N because then shared between all particles
+		for( j=0; j<DIM; j++ ) AS[j] = AS[j]/N_cl; 
 
-		// subtract net momentum from all mpcd if non-zero - new loop
+		// Subtract net momentum from all mpcd if non-zero
 		if(CL[cx][cy][cz].pp!=NULL) {
 			tmpc = CL[cx][cy][cz].pp;
 			while( tmpc!=NULL ) {
-				for (j=0; j<DIM; j++){
-					tmpc->V[j] -= AS[j]/(double)(SP+id)->MASS; // ;
-				}
+				for (j=0; j<DIM; j++) tmpc->V[j] -= AS[j]/(double)(SP+id)->MASS; 
 				// Increment link in list
 				tmpc = tmpc->next;
 			}
-		}	
-			
+		}		
 	}
-
 }
 
 /// 
