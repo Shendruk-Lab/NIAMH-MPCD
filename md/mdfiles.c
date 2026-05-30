@@ -396,6 +396,12 @@ void ReadParameters (char *inputFile, paramptr param, int nParam, char *label, c
 	for (n=0; n<nParam; n++) {
 		ptr = param+n;
 		if (ptr->n != ptr->count) {
+
+			// John added to pass if filename hasn't been entered
+			if (!strcmp(ptr->name, "filename") && ptr->n == 0) {
+        		continue;
+    			}
+
 			fprintf (stderr, "\nError reading parameter: %s\n", ptr->name);
 			fprintf (stderr, "%d value(s) required, but only %d found!\n", ptr->count, ptr->n);
 			ok = 0;

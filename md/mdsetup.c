@@ -3075,6 +3075,7 @@ int readFinalTimestep(const char* filename, Atom atoms[], int max_atoms) {
 }
 
 // growing a polymer from a lammps file input
+//This function doesn't handle unwrapping, so if polymer is loaded in wrapped, it looks funny.
 particleMD *GrowReadKnotChain (simptr sim, int type, int layout, int n, particleMD *p0, int *status, const char* filename)
 {
     int grown = 1;
