@@ -1361,7 +1361,6 @@ real Spring6Pot(particleMD *p1, particleMD *p2, real dx, real dy, real dz,
 	double r2=dx*dx + dy*dy + dz*dz;
 	// r
 	double r = sqrt(r2);
-	double k2 = k*k;
 	
 	real fMag = -(k * r2 * r2 * r);
 
