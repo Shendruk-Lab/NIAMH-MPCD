@@ -164,6 +164,7 @@ int main(int argc, char* argv[]) {
 			&outFlags, &WALL, &specS, &swimmers);
 	} 
 	else if (inMode == 1){ // Legacy .inp input
+		printf("Trying to read input");
 		readin( ip, &inputVar, &SPECIES, &SRDparticles, &CL, &MDmode );
 		readbc( ip, &WALL );
 		readpc( ip, &outFlags );

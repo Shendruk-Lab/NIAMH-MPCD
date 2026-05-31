@@ -297,9 +297,13 @@ void ReadParameters (char *inputFile, paramptr param, int nParam, char *label, c
 	// filter unwanted characters and translate macros
 	i=0;
 	strptr = &lines[i];
+
+
+	//I commented this out and it has caused me hours of issues - don't work on code when tired
 	while (*strptr) {
 		FilterString (strptr, " \t");
 		TranslateMacros (strptr);
+		//printf("After macro translation - Line %d: %s\n", i, *strptr);
 		strptr = &lines[++i];
 	}
 
@@ -308,6 +312,9 @@ void ReadParameters (char *inputFile, paramptr param, int nParam, char *label, c
 
 		// get pointer to parameter
 		ptr = param+n;
+
+		// INTG = 0, HEXA = 1, REAL = 2, CHAR = 3
+		//printf("Reading parameter: %s (type: %d)\n", ptr->name, ptr->type);
 
 		// construct the key string for the current parameter
 		snprintf (key, KEYSIZE, "%s%s=", label, ptr->name);
@@ -329,7 +336,10 @@ void ReadParameters (char *inputFile, paramptr param, int nParam, char *label, c
 				switch (ptr->type) {
 					case INTG:
 						str = strpbrk (str, digits);
-						if (str) ptr->n += sscanf (str, "%d",  (int *) ptr->value + k);
+						//printf("After strpbrk, str = '%s'\n", str);
+						if (str) { 
+							ptr->n += sscanf (str, "%d",  (int *) ptr->value + k);
+						}
 						break;
 					case HEXA:
 						str = strpbrk (str, digits);
@@ -339,11 +349,42 @@ void ReadParameters (char *inputFile, paramptr param, int nParam, char *label, c
 						str = strpbrk (str, digits);
 						if (str) ptr->n += sscanf (str, real_FORMAT_STR, (real *) ptr->value + k);
 						break;
+					// handling string inputs
+					case CHAR:
+						// Skip leading whitespace
+						while (*str && isspace((unsigned char)*str)) str++;
+						
+						if (*str) {
+							char *read_value = (char *)ptr->value + k*PATHMAX;
+							
+							// Find the length until delimiter
+							size_t len = strcspn(str, " \t\n,;");
+							
+							// Copy the string
+							if (len >= PATHMAX) len = PATHMAX - 1;
+							strncpy(read_value, str, len);
+							read_value[len] = '\0';
+							
+							// Remove surrounding quotes
+							if (read_value[0] == '"' && read_value[len-1] == '"' && len >= 2) {
+								memmove(read_value, read_value + 1, len - 2);
+								read_value[len - 2] = '\0';
+							}     
+							
+							// Advance the main pointer
+							str += len;
+							ptr->n++;
+							
+							printf("Read string: '%s'\n", read_value);
+						}
+						break;
 				}
 
 				// advance to next item
 				if (str) str = str + strspn (str, digits);
 				else break;
+
+				//printf("After advancing, str = '%s'\n", str);
 			}
 			break;
 			}
@@ -355,6 +396,12 @@ void ReadParameters (char *inputFile, paramptr param, int nParam, char *label, c
 	for (n=0; n<nParam; n++) {
 		ptr = param+n;
 		if (ptr->n != ptr->count) {
+
+			// John added to pass if filename hasn't been entered
+			if (!strcmp(ptr->name, "filename") && ptr->n == 0) {
+        		continue;
+    			}
+
 			fprintf (stderr, "\nError reading parameter: %s\n", ptr->name);
 			fprintf (stderr, "%d value(s) required, but only %d found!\n", ptr->count, ptr->n);
 			ok = 0;
@@ -363,9 +410,9 @@ void ReadParameters (char *inputFile, paramptr param, int nParam, char *label, c
 	if (!ok) error (EABORT);
 
 	// free memory used to store the input lines
-	i=0;
-	while (lines[i]) free (lines[i++]);
-	free (lines);
+	// i=0;
+	// while (lines[i]) free (lines[i++]);
+	// free (lines);
 }
 
 
@@ -506,6 +553,11 @@ void TranslateMacros (char **stringptr)
 	macro[STRMAX]='\0';
 	value[STRMAX]='\0';
 
+	// passing if we are handling filename, as it is subject to memory corruptions
+	if (strstr(*stringptr, "filename=")) {
+        return;  // Skip all macro processing for filename lines
+    }
+
 	snprintf (macro, STRMAX, "TYPE_WALL");
 	snprintf (value, STRMAX, "%u", TYPE_WALL);
 	ReplaceMacro (stringptr, macro, value);
@@ -566,6 +618,11 @@ void TranslateMacros (char **stringptr)
 	snprintf (macro, STRMAX, "LAYOUT_BANANA");
 	snprintf (value, STRMAX, "%u", LAYOUT_BANANA);
 	ReplaceMacro (stringptr, macro, value);
+
+	// John added for read-in knot function
+	snprintf(macro, STRMAX, "LAYOUT_READKNOT");
+	snprintf(value, STRMAX, "%u", LAYOUT_READKNOT);
+	ReplaceMacro(stringptr, macro, value);
 
 	snprintf (macro, STRMAX, "GROUP_NONE");
 	snprintf (value, STRMAX, "%#010X", GROUP_NONE);
@@ -717,9 +774,9 @@ void ReplaceMacro (char **stringptr, char *macro, char *value)
 
 		// write translated macro value
 		strncpy (ptr1, value, strlen(value));
-	}
-}
 
+}
+}
 
 //================================================================================
 void SetSimLabel (char *label, int pid)

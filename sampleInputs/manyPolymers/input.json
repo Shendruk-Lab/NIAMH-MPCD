@@ -7,7 +7,7 @@
     "collOp":           3,
     "lc":               1,
     "comment":          "Location of the MD input file",
-    "mdIn":             "/Users/johnwhitfield/Desktop/NIAMH-MPCD/sampleInputs/md2D/md.inp",
+    "mdIn":             "/Users/johnwhitfield/Desktop/NIAMH-MPCD/sampleInputs/manyPolymers/md.inp",
     "comment":          "Number of MD steps per MPCD step",
     "stepsMD":          50,
     "comment":          "Periodic boundary conditions",

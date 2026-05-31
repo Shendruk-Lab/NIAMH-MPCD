@@ -5,7 +5,7 @@
     "comment":          "Collision operator 21 is an active nematic collision operator",
     "collOp":           21,
     "lc":               1,
-    "mdIn":             "md.inp",
+    "mdIn":             "/Users/johnwhitfield/Desktop/NIAMH-MPCD/sampleInputs/polymerTranslocation/md.inp",
     "stepsMD":          50,
     "species":
     [

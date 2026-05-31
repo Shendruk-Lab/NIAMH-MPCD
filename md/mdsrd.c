@@ -60,6 +60,7 @@
 simptr launchMD (int argc, char *argv[])
 //================================================================================
 {
+	printf("Setting up simulation\n");
 	// setup simulation
 	return SetupSimulation (argc, argv);
 }
@@ -1341,6 +1342,85 @@ void ComputeAnchorForces (simptr sim)
 	sim->harmE  = harmE;
 }
 
+///
+/// @brief Non-linear spring force to power six. 
+///
+/// Calculate the non-linear spring force from the separation `r`, scaled by `ro` (default value 4, can be changed in
+/// the input file). To get the force vector this must be multiplied by `vec(r)`.
+///
+/// @param dx Scaled distance between x positions of two monomers of a polymer.
+/// @param dy Scaled distance between y positions of two monomers of a polymer.
+/// @param dz Scaled distance between z positions of two monomers of a polymer.
+/// @param k FENE Spring strength.
+/// @return Magnitude of non-linear spring force.
+///
+real Spring6Pot(particleMD *p1, particleMD *p2, real dx, real dy, real dz,
+				  real k, real r0)
+{
+	//calculate r^2
+	double r2=dx*dx + dy*dy + dz*dz;
+	// r
+	double r = sqrt(r2);
+	double k2 = k*k;
+	
+	real fMag = -(k * r2 * r2 * r);
+
+	// get force in each direction
+	real fx = fMag*dx / r; //such that the force is acting along the bond direction
+	real fy = fMag*dy / r;
+	real fz = fMag*dz / r;
+
+	// amend forces
+	p1->ax -= fx;
+	p1->ay -= fy;
+	p1->az -= fz;
+
+	p2->ax += fx;
+	p2->ay += fy;
+	p2->az += fz;
+
+	// return potential energy
+	return (k/6.0)*r2*r2*r2;
+}
+
+///
+/// @brief Harmonic spring force (quadratic potential).
+///
+/// Calculate the harmonic spring force from the separation `r`.
+/// The force is restoring and linear in displacement.
+/// Potential: U(r) = (k/2) r^2
+///
+/// @param dx Scaled distance between x positions of two monomers of a polymer.
+/// @param dy Scaled distance between y positions of two monomers of a polymer.
+/// @param dz Scaled distance between z positions of two monomers of a polymer.
+/// @param k Spring strength.
+/// @return Potential energy of harmonic spring.
+///
+real Spring2Pot(particleMD *p1, particleMD *p2, real dx, real dy, real dz,
+                real k, real r0)
+{
+    // calculate r^2
+    real r2 = dx*dx + dy*dy + dz*dz;
+
+    // force: F = -k * r_vec
+    real fx = -k * dx;
+    real fy = -k * dy;
+    real fz = -k * dz;
+
+    // amend forces
+    p1->ax -= fx;
+    p1->ay -= fy;
+    p1->az -= fz;
+
+    p2->ax += fx;
+    p2->ay += fy;
+    p2->az += fz;
+
+    // return potential energy: (k/2) r^2
+    return 0.5 * k * r2;
+}
+
+
 
 /// Computes all the forces between FENE-bonded atom pairs. We compute the dr from
 /// the WORLD positions, therefore we do not ever have to worry about the PBC
@@ -1359,7 +1439,7 @@ void ComputeFeneForces (simptr sim)
 	int	  		i, nFene;
 	particleMD	*p1, *p2;
 	item2STD	*fene;
-	real		E=0, potE=0, feneE=0, kFene, r0Fene;
+	real		E=0, potE=0, feneE=0, kFene, r0Fene, Lx, Ly, Lz;
 	real		dx, dy, dz;
 
 	// local sim variables
@@ -1367,6 +1447,9 @@ void ComputeFeneForces (simptr sim)
 	nFene   = sim->fene.n;
 	kFene   = sim->kFene;
 	r0Fene  = sim->r0Fene;
+	Lx      = sim->unitCells[0];
+	Ly		= sim->unitCells[1];
+	Lz		= sim->unitCells[2];
 
 	// loop over fene pairs
 	for (i=0; i<nFene; i++) {
@@ -1374,11 +1457,33 @@ void ComputeFeneForces (simptr sim)
 		p1 = fene[i].p1;
 		p2 = fene[i].p2;
 		// compute dr (using WORLD positions)
-		dx = p2->wx - p1->wx;
+		dx = p2->wx - p1->wx; 
+		dx -= Lx * round(dx / Lx);
+
 		dy = p2->wy - p1->wy;
+		dy -= Ly * round(dy / Ly);
+
 		dz = p2->wz - p1->wz;
+		dz -= Lz * round(dz / Lz);
+
+
 		// calculate FENE interaction
-		E = FENE (p1, p2, dx, dy, dz, kFene, r0Fene);
+
+		// get dr
+		double r2 = dx*dx + dy*dy + dz*dz;
+		double r = sqrt(r2);
+
+		//if we are beyond the asymptote of the FENE force, use restoring potential
+		if (r > r0Fene) {
+			printf("Warning, bond has gone beyond asymtote of FENE and non-linear restoring force is being activated to put it back");
+			//use new potential to restore
+			// E = Spring6Pot(p1, p2, dx, dy, dz, kFene, r0Fene);
+			E = Spring2Pot(p1, p2, dx, dy, dz, kFene, r0Fene);
+		} else {
+			// Use FENE potential
+			E = FENE (p1, p2, dx, dy, dz, kFene, r0Fene);
+		}
+
 		feneE += E;
 		potE  += E;
 	}

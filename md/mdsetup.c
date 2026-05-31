@@ -32,6 +32,9 @@
 #include "mdsetup.h"
 #include "../mpcd/headers/definitions.h"
 
+// Add this function prototype before any function that uses GrowReadKnotChain
+particleMD *GrowReadKnotChain(simptr sim, int type, int layout, int n, particleMD *p0, int *status, const char* filename);
+
 #ifdef MPI
 #include <mpi.h>
 #endif
@@ -69,14 +72,20 @@ simptr SetupSimulation (int argc, char *argv[])
 	MPI_Status  status;
 	#endif
 
+	//printf("Allocating space for simulation\n");
+
 	// allocate memory for the simulation information
 	sim = (simptr) mycalloc (1, sizeof(simulation));
 
 	// default options
 	options.setupType = SIMOPT_SETUP_NEW;
 
+
+	//printf("Allocating parse options\n");
 	// parse command-line options
 	ParseOptions (argc, argv, sim, &options);
+
+	//printf("Parseoptions works\n");
 
 
 	// MPI
@@ -98,11 +107,16 @@ simptr SetupSimulation (int argc, char *argv[])
 		printf   ("MPI rank %d: %s\n", rank, sim->inputFile);
 		#endif
 
+		//printf("Setting up the parameters\n");
 		// setup the simulation parameters
 		SetupParameters (sim);
+		//printf("Finished setting up the parameters\n");
 
+
+		//printf("Setting up the new world\n");
 		// setup simulation world
 		SetupNewWorld (sim);
+		//printf("Finsihed setting up the new world\n");
 
 		// report
 		LOG ("START of main simulation loop\n");
@@ -255,14 +269,27 @@ void SetupParameters (simptr sim)
 				HEXA_PARAM (sim, groupThermRescale),
 				INTG_PARAM (sim, stepThermRescale),
 				HEXA_PARAM (sim, groupThermDPD),
-				REAL_PARAM (sim, eta)
+				REAL_PARAM (sim, eta),
+
+				// reading
+				CHAR_PARAM (sim, filename),
 	};
 
 	// compute the number of parameters
 	n = sizeof(param)/sizeof(simparam);
 
+
+	// // In SetupParameters, after parameter definitions but before ReadParameters
+	// printf("Memory layout check:\n");
+	// printf("sim->filename: %p to %p\n", &sim->filename[0], &sim->filename[PATHMAX-1]);
+	// printf("sim->qDensityKind: %p to %p\n", &sim->qDensityKind[0], &sim->qDensityKind[3]);
+	// printf("Distance: %td bytes\n", (char*)&sim->qDensityKind[0] - (char*)&sim->filename[0]);
+
+	//printf("Reading in the parameters\n");
 	// read the n parameters
 	ReadParameters (sim->inputFile, param, n, "#parameter:", "#end-header");
+
+	//printf("Finished reading in the parameters\n");
 
 	// copy parameters to the simulation structure
 	sim->nParam = n;
@@ -374,31 +401,44 @@ void SetupNewWorld (simptr sim)
 	LOG ("  %-20s = %#05X\n", "pbcond",	  	 sim->pbcond);
 
 	// setup step counter lists
+	//printf("Setting up step counters\n");
 	SetupStepCounters (sim);
 	// setup particles
+	//printf("Setting up particles\n");
 	SetupParticles (sim);
 	// setup particle lists
+	//printf("Setting up polymer lists\n");
 	SetupPolymerList  (sim);
+	//printf("Setting up charge lists\n");
 	SetupChargeList   (sim);
 	// SetupNeighborList (sim);
+	//printf("Setting up anchor lists\n");
 	SetupAnchorList   (sim);
+	//printf("Setting up FENE lists\n");
 	SetupFeneList	  (sim);
+	//printf("Setting up bend lists\n");
 	SetupBendList	  (sim);
+	//printf("Setting up dihedral lists\n");
 	SetupDihedralList (sim);
 
 	// setup groups
+	//printf("Setting up groups\n");
 	SetupGroups (sim);
 	// setup measurements
+	//printf("Setting up measurements\n");
 	SetupMeasurements (sim);
 	// jiggle and relax particle positions
 	// JiggleParticles (sim);
+	//printf("Relaxing particles\n");
 	RelaxParticles  (sim);
 	// set simulation time
 	sim->tNow = 0;
 
 	// start simulation phase
+	//printf("Resetting simulation phase\n");
 	SimulationPhaseReset (sim);
 	// print initial scenes
+	//printf("Printing initial scenes\n");
 	VMDPrint (sim, sim->scenes);
 	// report
 	LOG ("Simulation is ready to start\n");
@@ -539,14 +579,20 @@ void SetupParticles (simptr sim)
 	}
 
 	// initialize polymers and charges
+	//printf("\n\n\nInitializing polymers\n");
 	InitPolymers (sim);
+	//printf("Initializing charges\n");
 	InitCharges  (sim);
 
 	// initialize particle velocities
+	//printf("Initializing velocities\n");
 	InitVelocities (sim);
 
 	// initialize dipoles
+	//printf("Initializing dipoles\n");
 	InitDipoles (sim);
+
+	//printf("Dipoles done\n");
 
 	// report
 	LOG ("Particle initialization complete\n");
@@ -881,6 +927,7 @@ void InitPolymers (simptr sim)
 	// polymer set variables
 	polyBulkTot    = 0;
 	polySurfaceTot = 0;
+	//printf("Initializing polymers\n");
 	for (set=0; set<POLY_SETS; set++) {
 
 		polyLayout[set] = sim->polyLayout[set];
@@ -910,9 +957,11 @@ void InitPolymers (simptr sim)
 									break;
 			case LAYOUT_PLATES:		polySurfaceTot+=polyM[set];
 									break;
-			case LAYOUT_FLUID: case LAYOUT_RODX: case LAYOUT_RODY: case LAYOUT_TRANS: case LAYOUT_U: case LAYOUT_BANANA:
-									polyBulkTot+=polyM[set];
+			case LAYOUT_FLUID: case LAYOUT_RODX: case LAYOUT_RODY: case LAYOUT_TRANS: case LAYOUT_U: case LAYOUT_BANANA: case LAYOUT_READKNOT:
+									//printf("Adding to bulk total: set %d, M %d\n", set, polyM[set]);
+									polyBulkTot+=polyM[set]; 
 									break;
+					
 			case LAYOUT_ANCHOR:		polyM[set] = 1;
 									polyBulkTot+=polyM[set];
 									break;
@@ -923,6 +972,8 @@ void InitPolymers (simptr sim)
 		}
 	}
 
+	//printf("Total polymers to insert: %d (bulk %d, surface %d)\n", polyBulkTot+polySurfaceTot, polyBulkTot, polySurfaceTot);
+	//printf("Bulding polymer sets");
 	// build polymer sets
 	for (set=0; set<POLY_SETS; set++) {
 
@@ -944,7 +995,7 @@ void InitPolymers (simptr sim)
 				layout 	   = LAYOUT_FLUID;
 				layoutList = surface;
 				break;
-			case LAYOUT_FLUID: case LAYOUT_RODX: case LAYOUT_RODY: case LAYOUT_TRANS: case LAYOUT_BANANA: case LAYOUT_U:
+			case LAYOUT_FLUID: case LAYOUT_RODX: case LAYOUT_RODY: case LAYOUT_TRANS: case LAYOUT_BANANA: case LAYOUT_U: case LAYOUT_READKNOT:
 				d2Min  	   = pow (polySpread[set]*pow(V/polyBulkTot,1/3.0), 2.0);
 				layout 	   = LAYOUT_FLUID;
 				layoutList = fluid;
@@ -993,6 +1044,7 @@ void InitPolymers (simptr sim)
 				}
 		}
 
+		//printf("Growing polymer set %d (%d polymers of length %d)\n", set, polyM[set], polyN[set]);
 		// grow polymers
 		for (i=0; i<polyM[set]; i++) {
 			// grow polymer
@@ -1000,9 +1052,10 @@ void InitPolymers (simptr sim)
 			loop   = LOOP_MAX;
 			while (!picked && loop--) {
 
-				// no candidates left!
-				if (candidates.n==0 && polyLayout[set]!=LAYOUT_ANCHOR && polyLayout[set]!=LAYOUT_FLUID && polyLayout[set]!=LAYOUT_PLATES && polyLayout[set]!=LAYOUT_CYLINDER && polyLayout[set]!=LAYOUT_RODX && polyLayout[set]!=LAYOUT_RODY && polyLayout[set]!=LAYOUT_U && polyLayout[set]!=LAYOUT_TRANS && polyLayout[set]!=LAYOUT_BANANA) error (EGRAFT);
+				// no candidates left! Throw an error
+				if (candidates.n==0 && polyLayout[set]!=LAYOUT_ANCHOR && polyLayout[set]!=LAYOUT_FLUID && polyLayout[set]!=LAYOUT_PLATES && polyLayout[set]!=LAYOUT_CYLINDER && polyLayout[set]!=LAYOUT_RODX && polyLayout[set]!=LAYOUT_RODY && polyLayout[set]!=LAYOUT_U && polyLayout[set]!=LAYOUT_TRANS && polyLayout[set]!=LAYOUT_BANANA && polyLayout[set]!=LAYOUT_READKNOT) error (EGRAFT);
 
+				//printf("Picking random candidate site");
 				// choose candidate atom randomly
 				c = (int) (RandomReal()*candidates.n);
 				if (c==candidates.n) c--;
@@ -1064,8 +1117,7 @@ void InitPolymers (simptr sim)
 								}
 							}
 							break;
-
-						case LAYOUT_FLUID: case LAYOUT_RODX: case LAYOUT_RODY: case LAYOUT_U: case LAYOUT_TRANS: case LAYOUT_BANANA:
+						case LAYOUT_FLUID: case LAYOUT_RODX: case LAYOUT_RODY: case LAYOUT_U: case LAYOUT_TRANS: case LAYOUT_BANANA: case LAYOUT_READKNOT:
 							// distance with ALL other polymers
 							// this may cause a crash...  I commented it out in another code
 							for (j=0; j<polymer.n; j++) {
@@ -1122,6 +1174,7 @@ void InitPolymers (simptr sim)
 					}
 				}
 
+				//printf("Candidate site picked, growin polymer\n");
 				// grow it
 				if (keep){
 					if (polyLayout[set]==LAYOUT_FLUID ) {
@@ -1158,6 +1211,15 @@ void InitPolymers (simptr sim)
 						p1 = p3;
 						p1->next = GrowUChain (sim, polyAtomType[set], layout, polyN[set],  NULL, &grown);
 					}
+
+					// taken from above
+					else if (polyLayout[set]==LAYOUT_READKNOT ) {
+						//printf("GROWING A READKNOT POLYMER\n");
+						//printf("filename reading from: %s\n", sim->filename);
+						p1 = p3;
+						p1->next = GrowReadKnotChain(sim, polyAtomType[set], layout, polyN[set], NULL, &grown, sim->filename);
+					}
+
 					else p1->next = GrowLinearChain (sim, polyAtomType[set], layout, polyN[set], p1, &grown);
 					if (grown) {
 						// post-growth action depending on layout
@@ -1166,7 +1228,7 @@ void InitPolymers (simptr sim)
 								// just register the polymer
 								AddItemPoly (&polymer, p1, 1);
 								break;
-							case LAYOUT_FLUID: case LAYOUT_RODX: case LAYOUT_RODY: case LAYOUT_U: case LAYOUT_TRANS: case LAYOUT_BANANA:
+							case LAYOUT_FLUID: case LAYOUT_RODX: case LAYOUT_RODY: case LAYOUT_U: case LAYOUT_TRANS: case LAYOUT_BANANA: case LAYOUT_READKNOT:
 								// detach from first fluid atom and register polymer
 								// note this has been modded so we don't need to detach...
 								p1 = p1->next;
@@ -1964,6 +2026,8 @@ void SetupDihedralList (simptr sim)
 	// local sim variables
 	atom  = sim->atom.items;
 	nAtom = sim->atom.n;
+	printf("nPolymer: %d\n", sim->polyM[0]);
+	printf("nMonomer: %d\n", sim->polyN[0]);
 	nPolymer = sim->polyM[0];
 	nMonomer = sim->polyN[0];
 
@@ -1984,6 +2048,44 @@ void SetupDihedralList (simptr sim)
 		}
 	}
 
+	// if (nAtom>=4){
+    //     printf("Processing polymers for dihedrals\n");
+    //     for(i=0 ; i<nPolymer ;i++){
+    //         nn = 2 + i*nMonomer;
+    //         printf("Polymer %d: starting at atom index %d\n", i, nn);
+            
+    //         // Check if we're going beyond atom array bounds
+    //         if (nn + nMonomer - 1 >= nAtom) {
+    //             printf("ERROR: Polymer %d exceeds atom array bounds! nn=%d, nMonomer=%d, nAtom=%d\n", 
+    //                    i, nn, nMonomer, nAtom);
+    //             break;
+    //         }
+            
+    //         for (n=nn; n<nn+nMonomer-3; n++) {
+    //             p = atom+n;
+    //             printf("  Processing atom %d at address %p\n", n, p);
+                
+    //             // Check for NULL pointers in the chain
+    //             if (!p->prev) {
+    //                 printf("  ERROR: atom %d has NULL prev pointer!\n", n);
+    //                 continue;
+    //             }
+    //             if (!p->prev->prev) {
+    //                 printf("  ERROR: atom %d->prev has NULL prev pointer!\n", n);
+    //                 continue;
+    //             }
+    //             if (!p->next) {
+    //                 printf("  ERROR: atom %d has NULL next pointer!\n", n);
+    //                 continue;
+    //             }
+                
+    //             printf("  Adding dihedral: %p->%p->%p->%p\n", 
+    //                    (p->prev)->prev, p->prev, p, p->next);
+    //             AddItem4STD (&sim->dihedral,(p->prev)->prev,p->prev,p, p->next);
+    //         }
+    //     }
+	//}
+
 	// report
 	LOG ("  %-20s = %d\n", "nDihedral", sim->dihedral.n);
 }
@@ -1992,6 +2094,7 @@ void SetupDihedralList (simptr sim)
 void SetupGroups (simptr sim)
 //================================================================================
 {
+	printf("Entering SetupGroups\n");
 	// Assign group numbers to groups of atoms. Groups are defined in the header
 	// file "mdtypes.h". Group numbers consist of a bitfield so that atoms
 	// can concisely be part of many groups simultaneously.
@@ -2075,24 +2178,61 @@ void SetupGroups (simptr sim)
 	}
 
 	// set object types for first monomers (all)
+	// for (n=0; n<nPolymer; n++) {
+	// 	if (polymer[n].p1) polymer[n].p1->object = OBJ_MONOMER_1;
+	// }
+
 	for (n=0; n<nPolymer; n++) {
-		if (polymer[n].p1) polymer[n].p1->object = OBJ_MONOMER_1;
-	}
+        printf("Processing polymer %d\n", n);
+        if (polymer[n].p1) {
+            printf("  Polymer %d has p1 at %p\n", n, polymer[n].p1);
+            polymer[n].p1->object = OBJ_MONOMER_1;
+            printf("  Set object type for polymer %d\n", n);
+        } else {
+            printf("  Polymer %d has NULL p1!\n", n);
+        }
+    }
+
 
 	// change object types for grafted polymers
-	for (n=0; n<nPolymer; n++) {
-		if (polymer[n].grafted) {
-			p = polymer[n].p1;
-			p->object = OBJ_MONOMER_GRAFT_1;
-			p->group |= GROUP_GRAFT;
-			count[GroupToIndex(GROUP_GRAFT)]++;
-			p = p->next;
-			while (p) {
-				p->object = OBJ_MONOMER_GRAFT;
-				p = p->next;
-			}
-		}
-	}
+	// for (n=0; n<nPolymer; n++) {
+	// 	if (polymer[n].grafted) {
+	// 		p = polymer[n].p1;
+	// 		p->object = OBJ_MONOMER_GRAFT_1;
+	// 		p->group |= GROUP_GRAFT;
+	// 		count[GroupToIndex(GROUP_GRAFT)]++;
+	// 		p = p->next;
+	// 		while (p) {
+	// 			p->object = OBJ_MONOMER_GRAFT;
+	// 			p = p->next;
+	// 		}
+	// 	}
+	// }
+
+	// change object types for grafted polymers
+    printf("Checking grafted polymers\n");
+    for (n=0; n<nPolymer; n++) {
+        printf("Checking if polymer %d is grafted\n", n);
+        if (polymer[n].grafted) {
+            printf("  Polymer %d is grafted\n", n);
+            p = polymer[n].p1;
+            if (!p) {
+                printf("  ERROR: Grafted polymer %d has NULL p1!\n", n);
+                continue;
+            }
+            p->object = OBJ_MONOMER_GRAFT_1;
+            p->group |= GROUP_GRAFT;
+            count[GroupToIndex(GROUP_GRAFT)]++;
+            p = p->next;
+            while (p) {
+                p->object = OBJ_MONOMER_GRAFT;
+                p = p->next;
+            }
+            printf("  Finished processing grafted polymer %d\n", n);
+        }
+    }
+
+	printf("SetupGroups completed successfully\n");
 
 	// report
 	for (n=1; n<GROUP_MAX; n++) {
@@ -2858,6 +2998,174 @@ particleMD *GrowBananaChain (simptr sim, int type, int layout, int n, real centr
 
 	// growth success
 	return pNew;
+}
+
+// defining file reading function
+#define MAX_ATOMS 1000
+#define MAX_LINE_LENGTH 256
+
+typedef struct {
+    char atom_type;
+    double x, y, z;
+} Atom;
+
+int readFinalTimestep(const char* filename, Atom atoms[], int max_atoms) {
+	//printf("Reading final timestep from file: %s\n", filename);
+    FILE* file = fopen(filename, "r");
+    if (file == NULL) {
+        printf("Error: Could not open file %s\n", filename);
+        return -1;
+    }
+    
+    char line[MAX_LINE_LENGTH];
+    int atom_count = 0;
+    int found_timestep = 0;
+    
+    // First pass: find where the last timestep starts
+    long last_timestep_pos = 0;
+    long current_pos = 0;
+    
+    while (fgets(line, sizeof(line), file) != NULL) {
+        current_pos = ftell(file);
+        
+        // Look for timestep headers
+        if (strstr(line, "Atoms. Timestep:") != NULL) {
+            last_timestep_pos = current_pos - strlen(line);
+            found_timestep = 1;
+        }
+    }
+    
+    if (!found_timestep) {
+        printf("Error: No timestep found in file\n");
+        fclose(file);
+        return -1;
+    }
+    
+    // Rewind to the last timestep
+    fseek(file, last_timestep_pos, SEEK_SET);
+    
+    // Skip the timestep header line
+    fgets(line, sizeof(line), file);
+    
+    // Read atoms for the last timestep
+    while (fgets(line, sizeof(line), file) != NULL && atom_count < max_atoms) {
+        // Check if we've reached the next timestep (line starting with number)
+        if (strlen(line) > 0 && line[0] >= '0' && line[0] <= '9') {
+            break;
+        }
+        
+        // Skip empty lines
+        if (strlen(line) <= 1) continue;
+        
+        // Parse atom data: format "O/N x y z"
+        char atom_type;
+        double x, y, z;
+        
+        if (sscanf(line, "%c %lf %lf %lf", &atom_type, &x, &y, &z) == 4) {
+            atoms[atom_count].atom_type = atom_type;
+            atoms[atom_count].x = x;
+            atoms[atom_count].y = y;
+            atoms[atom_count].z = z;
+            atom_count++;
+        }
+    }
+    
+    fclose(file);
+    return atom_count;
+}
+
+// growing a polymer from a lammps file input
+//This function doesn't handle unwrapping, so if polymer is loaded in wrapped, it looks funny.
+particleMD *GrowReadKnotChain (simptr sim, int type, int layout, int n, particleMD *p0, int *status, const char* filename)
+{
+    int grown = 1;
+    particleMD *pNew = NULL, *pPrev = p0;
+
+    //printf("Growing knotted chain from file: %s\n", filename);
+
+    Atom atoms[MAX_ATOMS];
+    int atom_count = readFinalTimestep(filename, atoms, MAX_ATOMS);
+    if (atom_count <= 0) {
+		// if no atoms are read from the file, tell the user
+        printf("GrowReadKnotChain: no atoms read from file\n");
+        *status = 0;
+        return NULL;
+    }
+
+    //printf("Number of atoms read: %d\n", atom_count);
+    //printf("\n");
+
+    // Calculate box center
+    double center_x = 0.5 * sim->box[x_];
+    double center_y = 0.5 * sim->box[y_];
+    double center_z = 0.5 * sim->box[z_];
+
+    // Calculate centroid of the polymer from file
+    double centroid_x = 0, centroid_y = 0, centroid_z = 0;
+    for (int i = 0; i < atom_count; i++) {
+        centroid_x += atoms[i].x;
+        centroid_y += atoms[i].y;
+        centroid_z += atoms[i].z;
+    }
+    centroid_x /= atom_count;
+    centroid_y /= atom_count;
+    centroid_z /= atom_count;
+
+    // Calculate shift to move centroid to box center
+    double shift_x = center_x - centroid_x;
+    double shift_y = center_y - centroid_y;
+    double shift_z = center_z - centroid_z;
+
+    for (int i = 0; i < atom_count; i++) {
+		//print the atom coordinates 
+        //printf("Atom %d: type=%c, x=%f, y=%f, z=%f\n", i, atoms[i].atom_type, atoms[i].x, atoms[i].y, atoms[i].z);
+
+        // Shift coordinates to center polymer in box
+        atoms[i].x += shift_x;
+        atoms[i].y += shift_y;
+        atoms[i].z += shift_z;
+        
+        // insert and force location
+        pNew = AtomInsert (sim, type, layout, 0, CHECK, CHECK);
+        if (!pNew) {
+			//tell user atom failed to intsert
+            printf("Failed to insert atom %d\n", i);
+            *status = 0;
+            return NULL;
+        }
+        
+        pNew->rx = atoms[i].x;
+        pNew->ry = atoms[i].y;
+        pNew->rz = atoms[i].z;
+        pNew->wx = atoms[i].x;
+        pNew->wy = atoms[i].y;
+        pNew->wz = atoms[i].z;
+        pNew->x0 = atoms[i].x;
+        pNew->y0 = atoms[i].y;
+        pNew->z0 = atoms[i].z;
+
+		//if successful, tell the user
+        //printf("Inserted atom %d at (%f, %f, %f)\n", i, pNew->rx, pNew->ry, pNew->rz);
+        //printf("\n");
+
+        // Connect the polymer chain
+        if (pPrev) {
+            pPrev->next = pNew;  // Previous atom points to this one
+            pNew->prev = pPrev;  // This atom points back to previous
+        }
+
+        // Update previous pointer
+        pPrev = pNew;
+    }
+
+    // update growth status
+    *status = grown;
+
+    // growth failure
+    if (!grown) return NULL;
+
+    // growth success
+    return pNew;
 }
 
 //================================================================================
