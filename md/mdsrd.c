@@ -1438,7 +1438,7 @@ void ComputeFeneForces (simptr sim)
 	int	  		i, nFene;
 	particleMD	*p1, *p2;
 	item2STD	*fene;
-	real		E=0, potE=0, feneE=0, kFene, r0Fene, Lx, Ly, Lz;
+	real		E=0, potE=0, feneE=0, kFene, r0Fene;
 	real		dx, dy, dz;
 
 	// local sim variables
@@ -1446,9 +1446,6 @@ void ComputeFeneForces (simptr sim)
 	nFene   = sim->fene.n;
 	kFene   = sim->kFene;
 	r0Fene  = sim->r0Fene;
-	Lx      = sim->unitCells[0];
-	Ly		= sim->unitCells[1];
-	Lz		= sim->unitCells[2];
 
 	// loop over fene pairs
 	for (i=0; i<nFene; i++) {
@@ -1456,18 +1453,9 @@ void ComputeFeneForces (simptr sim)
 		p1 = fene[i].p1;
 		p2 = fene[i].p2;
 		// compute dr (using WORLD positions)
-		dx = p2->wx - p1->wx; 
-		if (Lx > 0.0) dx -= Lx * round(dx / Lx);
-
+		dx = p2->wx - p1->wx;
 		dy = p2->wy - p1->wy;
-		if (Ly > 0.0) dy -= Ly * round(dy / Ly);
-
-		if (DIM == _3D) {
-			dz = p2->wz - p1->wz;
-			if (Lz > 0.0) dz -= Lz * round(dz / Lz);
-		} else {
-			dz = 0.0;
-		}
+		dz = (DIM == _3D) ? p2->wz - p1->wz : 0.0;
 
 		// calculate FENE interaction
 
