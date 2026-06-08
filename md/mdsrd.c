@@ -1389,9 +1389,9 @@ real Spring6Pot(particleMD *p1, particleMD *p2, real dx, real dy, real dz,
 /// The force is restoring and linear in displacement.
 /// Potential: U(r) = (k/2) r^2
 ///
-/// @param dx Scaled distance between x positions of two monomers of a polymer.
-/// @param dy Scaled distance between y positions of two monomers of a polymer.
-/// @param dz Scaled distance between z positions of two monomers of a polymer.
+/// @param dx x-component of the displacement vector between two FENE-bonded monomers.
+/// @param dy y-component of the displacement vector between two FENE-bonded monomers.
+/// @param dz z-component of the displacement vector between two FENE-bonded monomers.
 /// @param k Spring strength.
 /// @return Potential energy of harmonic spring.
 ///
@@ -1438,7 +1438,7 @@ void ComputeFeneForces (simptr sim)
 	int	  		i, nFene;
 	particleMD	*p1, *p2;
 	item2STD	*fene;
-	real		E=0, potE=0, feneE=0, kFene, r0Fene, Lx, Ly, Lz;
+	real		E=0, potE=0, feneE=0, kFene, r0Fene;
 	real		dx, dy, dz;
 
 	// local sim variables
@@ -1446,9 +1446,6 @@ void ComputeFeneForces (simptr sim)
 	nFene   = sim->fene.n;
 	kFene   = sim->kFene;
 	r0Fene  = sim->r0Fene;
-	Lx      = sim->unitCells[0];
-	Ly		= sim->unitCells[1];
-	Lz		= sim->unitCells[2];
 
 	// loop over fene pairs
 	for (i=0; i<nFene; i++) {
@@ -1456,15 +1453,9 @@ void ComputeFeneForces (simptr sim)
 		p1 = fene[i].p1;
 		p2 = fene[i].p2;
 		// compute dr (using WORLD positions)
-		dx = p2->wx - p1->wx; 
-		dx -= Lx * round(dx / Lx);
-
+		dx = p2->wx - p1->wx;
 		dy = p2->wy - p1->wy;
-		dy -= Ly * round(dy / Ly);
-
-		dz = p2->wz - p1->wz;
-		dz -= Lz * round(dz / Lz);
-
+		dz = (DIM == _3D) ? p2->wz - p1->wz : 0.0;
 
 		// calculate FENE interaction
 
