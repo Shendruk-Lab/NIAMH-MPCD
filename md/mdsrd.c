@@ -1457,14 +1457,17 @@ void ComputeFeneForces (simptr sim)
 		p2 = fene[i].p2;
 		// compute dr (using WORLD positions)
 		dx = p2->wx - p1->wx; 
-		dx -= Lx * round(dx / Lx);
+		if (Lx > 0.0) dx -= Lx * round(dx / Lx);
 
 		dy = p2->wy - p1->wy;
-		dy -= Ly * round(dy / Ly);
+		if (Ly > 0.0) dy -= Ly * round(dy / Ly);
 
-		dz = p2->wz - p1->wz;
-		dz -= Lz * round(dz / Lz);
-
+		if (DIM == _3D) {
+			dz = p2->wz - p1->wz;
+			if (Lz > 0.0) dz -= Lz * round(dz / Lz);
+		} else {
+			dz = 0.0;
+		}
 
 		// calculate FENE interaction
 
