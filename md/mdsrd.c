@@ -1389,9 +1389,9 @@ real Spring6Pot(particleMD *p1, particleMD *p2, real dx, real dy, real dz,
 /// The force is restoring and linear in displacement.
 /// Potential: U(r) = (k/2) r^2
 ///
-/// @param dx Scaled distance between x positions of two monomers of a polymer.
-/// @param dy Scaled distance between y positions of two monomers of a polymer.
-/// @param dz Scaled distance between z positions of two monomers of a polymer.
+/// @param dx x-component of the displacement vector between two FENE-bonded monomers.
+/// @param dy y-component of the displacement vector between two FENE-bonded monomers.
+/// @param dz z-component of the displacement vector between two FENE-bonded monomers.
 /// @param k Spring strength.
 /// @return Potential energy of harmonic spring.
 ///
