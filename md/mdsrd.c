@@ -1463,9 +1463,9 @@ void ComputeFeneForces (simptr sim)
 		double r2 = dx*dx + dy*dy + dz*dz;
 		double r = sqrt(r2);
 
-		//if we are beyond the asymptote of the FENE force, use restoring potential
+		//If we are beyond the asymptote of the FENE force, use restoring potential
 		if (r > r0Fene) {
-			printf("Warning, bond has gone beyond asymtote of FENE and non-linear restoring force is being activated to put it back");
+			printf("Warning: Bond exceeded FENE asymptote. Restoring force activated\n");
 			//use new potential to restore
 			// E = Spring6Pot(p1, p2, dx, dy, dz, kFene, r0Fene);
 			E = Spring2Pot(p1, p2, dx, dy, dz, kFene, r0Fene);

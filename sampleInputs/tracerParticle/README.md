@@ -1,1 +1,0 @@
-This is a simulation of only a single MPCD particle of species 0 in a fluid of species 1. The species 0 particle acts as a as tracer. The fluid is contained within a no-slip box.

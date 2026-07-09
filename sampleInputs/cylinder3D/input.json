@@ -15,7 +15,8 @@
     ],
     "debugOut":         3,
     "flowOut":          20,
-    "energyOut":        0,
+    "avVelOut":         10,
+    "energyOut":        10,
     "synopsisOut":      1,
     "comment":          "BC for a cylinder with two ends and impermeable, perfect-slip walls",
     "BC":

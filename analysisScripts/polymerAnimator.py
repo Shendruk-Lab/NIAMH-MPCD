@@ -376,7 +376,7 @@ while True:
                 for p, c, o in zip(def_pos, def_cha, def_ori):
                     drawNematicDefect(p, c, o, multiplier=1)
 
-            if cbFlag:
+            if cbFlag and fieldType != "none":
                 cb=fig.colorbar(sc,shrink=shrink_factor,aspect=20*shrink_factor, pad=0.04)
                 cb.ax.set_ylabel(label, fontsize=FS)
             ax.axis('off')

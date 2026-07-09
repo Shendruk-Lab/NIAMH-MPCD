@@ -1,1 +1,1 @@
-Simulates an 3D isotropic fluid inside of a cylinder. 
+Simulates an 3D isotropic fluid inside of a cylinder. This example is non-flowing; see `sampleInputs/pipeFlow` for an example of flowing fluid inside a cylinder.
