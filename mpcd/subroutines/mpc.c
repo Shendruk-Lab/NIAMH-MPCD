@@ -3875,6 +3875,8 @@ void activeMD(simptr simMD, cell ***CL, spec *SP, inputList in) {
 		if(CL[cx][cy][cz].pp!=NULL) {
 			tmpc = CL[cx][cy][cz].pp;
 			while( tmpc!=NULL ) {
+				// Momentum correction to be applied according to species mass
+				id = tmpc->SPID;
 				for (j=0; j<DIM; j++) tmpc->V[j] -= AS[j]/(double)(SP+id)->MASS; 
 				// Increment link in list
 				tmpc = tmpc->next;
