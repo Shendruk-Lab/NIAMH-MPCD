@@ -1285,8 +1285,8 @@ void eigenvectors2x2( double **m,double eigval[],double eigvec[][_2D] ) {
 		else if( feq(m[1][1],eigval[0]) ){
 			eigvec[0][0]=0.0;
 			eigvec[0][1]=1.0;
-			eigvec[0][0]=1.0;
-			eigvec[0][1]=0.0;
+			eigvec[1][0]=1.0;
+			eigvec[1][1]=0.0;
 		}
 		else {
 			printf("Warning: 2D eigensolver failed.\n");
