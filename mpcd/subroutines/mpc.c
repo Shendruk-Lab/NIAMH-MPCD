@@ -3735,7 +3735,9 @@ void localVCM( double vcm[_3D],cell CL,spec *SP,specSwimmer specS ) {
 void activeMD(simptr simMD, cell ***CL, spec *SP, inputList in) {
 	int i, j, k, nAtom, cx, cy, cz, N_cl, id;
 	double pmOne;
-	double MDloc[_3D], prevloc[DIM], nextloc[DIM], vecprev[DIM], vecnext[DIM], tangent[DIM];  // stuff to calc plane and velocity
+	double MDloc[_3D];	 // Wrapped MD position used to identify the MPCD cell, always 3D for indexing CL
+	double MDworld[DIM];   // Unwrapped MD position used to calculate the tangent
+	double prevloc[DIM], nextloc[DIM], vecprev[DIM], vecnext[DIM], tangent[DIM];  // stuff to calc plane and velocity
 	double mpcdCM[DIM];
 	double pW;  // The particle's pW for passing the plane
 	double force; // The dipole 'force'(=dt*d/m) on one mpcd particle, will be a constant for each cell. delta_v = 'force'/mass
@@ -3754,6 +3756,7 @@ void activeMD(simptr simMD, cell ***CL, spec *SP, inputList in) {
 		for (j=0; j<_3D; j++) MDloc[j] = 0.;	// This has to be 3D always because CL is 3d always
 
 		for (j=0; j<DIM; j++) {
+			MDworld[j] = 0.;
 			prevloc[j] = 0.;
 			nextloc[j] = 0.;
 			vecprev[j] = 0.;
@@ -3766,36 +3769,42 @@ void activeMD(simptr simMD, cell ***CL, spec *SP, inputList in) {
 		cz = 0.;
 		force = 0.;
 
-		// Find location of MD particle(s)
+		// Wrapped current MD position used for identifying the MPCD cell
 		MDloc[0] = atoms[i].rx;
 		MDloc[1] = atoms[i].ry;
 		MDloc[2] = atoms[i].rz;
-		
+
+		// Unwrapped current MD position used to calculate the tangent
+		MDworld[0] = atoms[i].wx;
+		MDworld[1] = atoms[i].wy;
+		if (DIM > 2)
+			MDworld[2] = atoms[i].wz;
+
 		// Get tangent of backbone at MD particle, and normalise it - different if first or last
 		if (i==0) {		// First monomer
-			nextloc[0] = atoms[i+1].rx;
-			nextloc[1] = atoms[i+1].ry;
-			if (DIM>2) nextloc[2] = atoms[i+1].rz;  //Index 2 only exists if 3d
-			for (j=0; j<DIM; j++) tangent[j] = nextloc[j]-MDloc[j];
+			nextloc[0] = atoms[i+1].wx;
+			nextloc[1] = atoms[i+1].wy;
+			if (DIM>2) nextloc[2] = atoms[i+1].wz;  //Index 2 only exists if 3d
+			for (j=0; j<DIM; j++) tangent[j] = nextloc[j]-MDworld[j];
 		}
 		else if (i==nAtom-1) {	// Last monomer
-			prevloc[0] = atoms[i-1].rx;
-			prevloc[1] = atoms[i-1].ry;
-			if (DIM>2) prevloc[2] = atoms[i-1].rz;
-			for (j=0; j<DIM; j++) tangent[j] = MDloc[j]-prevloc[j];
+			prevloc[0] = atoms[i-1].wx;
+			prevloc[1] = atoms[i-1].wy;
+			if (DIM>2) prevloc[2] = atoms[i-1].wz;
+			for (j=0; j<DIM; j++) tangent[j] = MDworld[j]-prevloc[j];
 		}
 		else {
-			prevloc[0] = atoms[i-1].rx;
-			prevloc[1] = atoms[i-1].ry;
-			nextloc[0] = atoms[i+1].rx;
-			nextloc[1] = atoms[i+1].ry;
+			prevloc[0] = atoms[i-1].wx;
+			prevloc[1] = atoms[i-1].wy;
+			nextloc[0] = atoms[i+1].wx;
+			nextloc[1] = atoms[i+1].wy;
 			if (DIM>2){
-				prevloc[2] = atoms[i-1].rz;
-				nextloc[2] = atoms[i+1].rz;
+				prevloc[2] = atoms[i-1].wz;
+				nextloc[2] = atoms[i+1].wz;
 			}
 			for (j=0; j<DIM; j++) {
-				vecprev[j] = MDloc[j]-prevloc[j];
-				vecnext[j] = nextloc[j]-MDloc[j];
+				vecprev[j] = MDworld[j]-prevloc[j];
+				vecnext[j] = nextloc[j]-MDworld[j];
 			}
 			norm(vecprev, DIM); //normprev = sqrt(pow(vecprev[0],2) + pow(vecprev[1],2)+pow(vecprev[2],2));
 			norm(vecnext, DIM); //normnext = sqrt(pow(vecnext[0],2) + pow(vecnext[1],2)+pow(vecnext[2],2));
@@ -3866,6 +3875,8 @@ void activeMD(simptr simMD, cell ***CL, spec *SP, inputList in) {
 		if(CL[cx][cy][cz].pp!=NULL) {
 			tmpc = CL[cx][cy][cz].pp;
 			while( tmpc!=NULL ) {
+				// Momentum correction to be applied according to species mass
+				id = tmpc->SPID;
 				for (j=0; j<DIM; j++) tmpc->V[j] -= AS[j]/(double)(SP+id)->MASS; 
 				// Increment link in list
 				tmpc = tmpc->next;
