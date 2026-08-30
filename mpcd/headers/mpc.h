@@ -29,6 +29,7 @@ void rewind_P( particleMPC *p,double T );
 void rewind_BC( bc *WALL,double time );
 
 void acc_BC( bc *WALL,double t,double GRAV[] );
+void acc_Opt_Trap_BC( bc *WALL,double t, int runtime, double t_on, double t_off, double KOPT, double VOPT[], double mass);
 void acc_P( particleMPC *p,double t,double GRAV[] );
 void acc_all( particleMPC *pp,double t,double GRAV[] );
 void gridShift_all( double SHIFT[],int shiftBack,particleMPC *SRDparticles,bc WALL[],simptr simMD,swimmer swimmers[],int MD_mode );

@@ -29,8 +29,10 @@ void rotateBC_MD( bc *WALL,particleMD *atom );
 void rotatebackBC_MD( bc *WALL,particleMD *atom );
 
 //Swimmer BC routines
-void swimmer_BCcollision( smono *atom,bc WALL[],specSwimmer SS,double t_step );
+void swimmer_BCcollision( smono *atom,bc WALL[],specSwimmer SS,double t_step,int  flagSwimmeronBC);
+void BC_Swimmercollision(bc WALL[],int BCcurrent,swimmer swimmers[],specSwimmer SS,double t_step);
 void chooseBC_swimmer( bc WALL[],smono *atom,double *t_min,double *chosenW,int *chosenBC,double time,double t_step );
+void chooseNS( bc WALL[],int BCcurrent,specSwimmer SS,swimmer swimmers[],double *chosenW,int *chosenNS,int *HM);
 void shiftBC_swimmer( double *shift,bc *WALL,smono *atom );
 double calcW_swimmer( bc WALL,smono *atom );
 void stream_swimmer( smono *atom,double t );

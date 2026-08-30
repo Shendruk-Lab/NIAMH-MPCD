@@ -169,7 +169,7 @@ void setswimmers( specSwimmer *SS,swimmer *swimmers,bc WALL[],int stepsMD,double
 
 	int i,j,d,flag;
 	double U[DIM],W;
-    double shift[DIM];
+    double shift[_3D];
 
 	SS->iheadM=1.0/(double)SS->headM;
 	SS->imiddM=1.0/(double)SS->middM;
@@ -560,12 +560,12 @@ void swimmerVerlet_nonInteracting( specSwimmer SS,swimmer *s,double dt,int sprin
 		printf( "\t\tHead bead BCs.\n" );
 	}
 	#endif
-	swimmer_BCcollision( &(s->H),WALL,SS,dt );
+	swimmer_BCcollision( &(s->H),WALL,SS,dt ,1);
 	//Middle
 	#ifdef DBG
 	if( DBUG == DBGSWIMMER || DBUG == DBGSWIMMERDEETS ) printf( "\t\tMiddle bead BCs.\n" );
 	#endif
-	swimmer_BCcollision( &(s->M),WALL,SS,dt );
+	swimmer_BCcollision( &(s->M),WALL,SS,dt ,1);
 	#ifdef DBG
 		if( DBUG == DBGSWIMMERDEETS ) {swcoord(*s);}
 	#endif
@@ -622,12 +622,12 @@ void swimmerVerlet_all( specSwimmer SS,swimmer swimmers[],double dt,int springTy
 			printf( "\t\tHead bead BCs.\n" );
 		}
 		#endif
-		swimmer_BCcollision( &(swimmers[i].H),WALL,SS,dt );
+		swimmer_BCcollision( &(swimmers[i].H),WALL,SS,dt,1);
 		//Middle
 		#ifdef DBG
 		if( DBUG == DBGSWIMMER || DBUG == DBGSWIMMERDEETS ) printf( "\t\tMiddle bead BCs.\n" );
 		#endif
-		swimmer_BCcollision( &(swimmers[i].M),WALL,SS,dt );
+		swimmer_BCcollision( &(swimmers[i].M),WALL,SS,dt,1);
 			#ifdef DBG
 				if( DBUG == DBGSWIMMERDEETS ) for( i=0; i<NS; i++ ) {
 					printf( "\tS%d:\n",i );
